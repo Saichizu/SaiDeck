@@ -1,10 +1,9 @@
 {
-  "build": 14,
+  "build": 15,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: Freedits from SaiDeck show up in the chat with an Install button — one click and it's added.",
-    "Chat: click someone's picture to send them an emoji that pops up on their screen (switch off “Emoji effects” at the bottom of the chat if you don't want them).",
-    "Chat: profile pictures show on official messages and your own messages; the rooms button opens every time now."
+    "Chat: the people list now shows everyone who uses SaiDeck, not just who's online (with when they were last on).",
+    "Chat: SaiDeck now tells the chat which build it is, so it's easy to see who still needs to update."
   ]
 }

@@ -145,6 +145,8 @@
   .chat-who-r{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text);}
   .chat-who-r .chat-av{width:22px;height:22px;font-size:10px;}
   .chat-who-r span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-who-r.off > span:nth-child(2){color:var(--text-dim);}
+  .chat-who-t{flex:none;font-size:10.5px;color:var(--text-faint);}
   .chat-btn.has-online::before{content:'';position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#35d0b8;box-shadow:0 0 0 2px var(--bg-panel, #15161c);}
   .chat-panel{position:fixed;top:64px;right:16px;bottom:16px;width:min(360px, calc(100vw - 32px));z-index:360;display:flex;flex-direction:column;
     background:#17181f;border:1px solid rgba(180,140,255,.35);border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);overflow:hidden;}
@@ -20174,7 +20176,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 14;                 // ← goes up by one with every published version
+  const SD_BUILD = 15;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20582,7 +20584,7 @@
     if(!name){ chatRenderSetup(); return; }
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
-          <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
+          <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now — and everyone else who uses it"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
           <button type="button" class="chat-icon chat-rooms" title="Rooms — Everyone, or a group chat with a code" aria-label="Rooms and group chats" aria-expanded="false">${ICON_ROOMS}</button>
           <button type="button" class="chat-icon chat-set" title="Your name and profile picture" aria-label="Your chat name and picture">${ICON_GEAR}</button>
           <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
@@ -20898,7 +20900,9 @@
       if((prevRooms === false) !== (CHAT.cfg.rooms === false) && CHAT.room && CHAT.room !== chatRoom()){ chatConnect(); chatPanel.innerHTML = ''; }
       if(CHAT.open) chatRender();
     });
-    if(chatName()){ chatPollInbox(); chatRegister(); }
+    if(chatName()) chatPollInbox();
+    setTimeout(chatRegister, 3000);
+    setInterval(() => { if(document.visibilityState === 'visible') chatRegister(); }, 600000);
     setInterval(() => { if(document.visibilityState === 'visible') chatPollInbox(); }, 30000);
     document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') chatPollInbox(); });
     CHAT.pollBans = chatPoll('bans', (b) => { CHAT.bans = b || {}; chatUpdateBadge(); if(CHAT.open) chatRender(); });
@@ -20982,12 +20986,30 @@
     }catch(err){ console.error(err); toast("Couldn't remove it — check your internet connection.", 2600); }
   }
   // the admin's list of everyone who has used the chat (only the admin can read it)
+  // Every SaiDeck checks in here when it opens (and every 10 minutes): its
+  // chat name (if it has one), which build it is, and when it was last open —
+  // the chat's "everyone" list and the admin's version list come from this.
   async function chatRegister(){
-    const name = chatName(); if(!name || chatBadName(name)) return;
+    const name = chatName();
     try{
       const tok = await chatAuth();
-      await fetch(`${CHAT_DB}/people/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
+      const body = { b: SD_BUILD, t: { '.sv': 'timestamp' } };
+      if(name && !chatBadName(name)) body.n = name.slice(0, CHAT_NAME_MAX);
+      await fetch(`${CHAT_DB}/people/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify(body) });
     }catch(e){}
+  }
+  async function chatLoadPeople(){
+    if(CHAT._peopleBusy) return; CHAT._peopleBusy = true;
+    try{ const r = await fetch(`${CHAT_DB}/people.json`, { cache: 'no-store' }); if(r.ok){ CHAT.people = (await r.json()) || {}; CHAT.peopleAt = Date.now(); presRender(); } }
+    catch(e){}
+    finally{ CHAT._peopleBusy = false; }
+  }
+  function chatAgo(t){
+    const s = Math.max(0, (Date.now() + PRES.offset - t) / 1000);
+    if(s < 3600) return Math.max(1, Math.round(s / 60)) + ' min ago';
+    if(s < 86400) return Math.round(s / 3600) + ' h ago';
+    if(s < 86400 * 30) return Math.round(s / 86400) + ' d ago';
+    return new Date(t).toLocaleDateString([], { day: 'numeric', month: 'short' });
   }
   // ----- emoji pokes: click someone's picture, pick an emoji, it pops up on their screen -----
   // pokes/<their chat id>/<id> = { e: which emoji, n: your name, u: you, t }.
@@ -21169,14 +21191,25 @@
     const nEl = chatPanel.querySelector('.chat-online-n'); if(nEl) nEl.textContent = on.length;
     const w = chatPanel.querySelector('.chat-who');
     if(w && !w.hidden){
+      if(!CHAT.peopleAt || Date.now() - CHAT.peopleAt > 60000) chatLoadPeople();
       w.innerHTML = '';
       const h = document.createElement('div'); h.className = 'chat-who-h'; h.textContent = on.length ? `Using SaiDeck now · ${on.length}` : 'Nobody else is on right now'; w.appendChild(h);
-      for(const p of on){
-        const row = document.createElement('div'); row.className = 'chat-who-r';
-        const av = chatAv(p.uid, p.n, false, true);
-        const nm = document.createElement('span'); nm.textContent = p.n + (p.me ? ' (you)' : '');
-        const dot = document.createElement('span'); dot.className = 'chat-dot on';
-        row.append(av, nm, dot); w.appendChild(row);
+      const row1 = (uid, n, me, sub, online) => {
+        const row = document.createElement('div'); row.className = 'chat-who-r' + (online ? '' : ' off');
+        const av = chatAv(uid, n, false, true);
+        const nm = document.createElement('span'); nm.textContent = n + (me ? ' (you)' : '');
+        const tail = document.createElement('span');
+        if(online) tail.className = 'chat-dot on'; else { tail.className = 'chat-who-t'; tail.textContent = sub; }
+        row.append(av, nm, tail); w.appendChild(row);
+      };
+      for(const p of on) row1(p.uid, p.n, p.me, '', true);
+      // everyone else who has a chat name, most recently seen first
+      const onIds = new Set(on.map(p => p.uid));
+      const rest = Object.entries(CHAT.people || {}).filter(([uid, p]) => p && typeof p.n === 'string' && p.n && !onIds.has(uid) && !chatBanned(uid) && !chatBadName(p.n))
+        .map(([uid, p]) => ({ uid, n: p.n, t: p.t || 0, me: chatIsMe(uid) })).sort((a, b) => b.t - a.t).slice(0, 150);
+      if(rest.length){
+        const h2 = document.createElement('div'); h2.className = 'chat-who-h'; h2.style.marginTop = '6px'; h2.textContent = `Everyone else · ${rest.length}`; w.appendChild(h2);
+        for(const p of rest) row1(p.uid, p.n, p.me, 'seen ' + chatAgo(p.t), false);
       }
     }
     const others = on.filter(p => !p.me).length;
