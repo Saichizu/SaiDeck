@@ -112,9 +112,28 @@
   .perf-toggle:has(input:checked){color:#ffd64a;}
   @media (max-width:1500px){ .perf-toggle > span:not(.switch){display:none;} .master-vol input[type=range]{width:60px;} }
   @media (max-width:1400px){ .file-btn .fb-lab{display:none;} .file-btn{padding:5px 7px;} .tutorial-btn{padding-right:6px;} }
-  .sd-update-btn{position:relative;}
-  .sd-update-btn.has-update::after{content:'';position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#35d0b8;box-shadow:0 0 0 2px var(--bg-panel, #15161c), 0 0 8px #35d0b8;}
-  .sd-update-btn.has-update svg{fill:#35d0b8;}
+
+  /* save files outside the Saves folder: a notice with a Move button */
+  .loose-notice{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:12px;max-width:min(640px, calc(100vw - 32px));
+    padding:12px 12px 12px 14px;border-radius:12px;background:#1d1e27;border:1px solid rgba(245,208,74,.55);box-shadow:0 16px 40px rgba(0,0,0,.55);color:var(--text);}
+  .loose-notice > svg{width:22px;height:22px;fill:#f5d04a;flex:none;}
+  .loose-notice .ln-text{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--text-dim);line-height:1.4;}
+  .loose-notice .ln-text b{font-size:13px;color:var(--text);}
+  .loose-notice button{all:unset;flex:none;cursor:pointer;padding:7px 12px;border-radius:8px;font:700 12px 'Inter',sans-serif;}
+  .loose-notice .ln-move{background:#f5d04a;color:#1a1600;}
+  .loose-notice .ln-move:disabled{opacity:.6;cursor:default;}
+  .loose-notice .ln-later{color:var(--text-dim);border:1px solid var(--border);}
+  .loose-notice button:focus-visible{outline:2px solid #f5d04a;outline-offset:2px;}
+  .session-list-loose{margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;color:#f5d04a;border:1px solid rgba(245,208,74,.5);}
+  .sd-update-btn{all:unset;box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:9px;cursor:pointer;flex-shrink:0;
+    font:700 12.5px 'Inter',sans-serif;color:#35d0b8;background:rgba(53,208,184,.12);border:1.5px solid rgba(53,208,184,.75);transition:color .12s, border-color .12s, background .12s;}
+  .sd-update-btn svg{width:17px;height:17px;fill:currentColor;}
+  .sd-update-btn:hover{background:rgba(53,208,184,.22);border-color:#35d0b8;color:#5ff0d6;}
+  .sd-update-btn:focus-visible{outline:2px solid #35d0b8;outline-offset:2px;}
+  .sd-update-btn.has-update{color:#06201b;background:#35d0b8;border-color:#35d0b8;animation:sdPulse 1.6s ease-in-out infinite;}
+  .sd-update-btn.has-update::after{content:'';position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 0 2px var(--bg-panel, #15161c);}
+  @keyframes sdPulse{0%,100%{box-shadow:0 0 0 0 rgba(53,208,184,.55);}50%{box-shadow:0 0 0 7px rgba(53,208,184,0);}}
+  @media (prefers-reduced-motion: reduce){ .sd-update-btn.has-update{animation:none;box-shadow:0 0 14px rgba(53,208,184,.5);} }
   .sd-update-btn.busy svg{animation:sdSpin 1s linear infinite;}
   @keyframes sdSpin{to{transform:rotate(360deg);}}
   .render-top-btn{
@@ -2600,8 +2619,9 @@
       <input type="range" id="masterVol" min="0" max="100" value="85" aria-label="Master volume">
     </div>
 
-    <button type="button" class="icon-btn sd-update-btn" id="sdUpdateBtn" title="Check for a new version of SaiDeck" aria-label="Check for updates">
-      <svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 0 0-7.9 6.7l2 .3A6 6 0 0 1 17.7 9H15v2h6V5h-2v2.3A8 8 0 0 0 12 4zm-7 9v6h2v-2.3A8 8 0 0 0 19.9 13.3l-2-.3A6 6 0 0 1 6.3 15H9v-2H5z"/></svg>
+    <button type="button" class="sd-update-btn" id="sdUpdateBtn" title="Check for a new version of SaiDeck" aria-label="Check for updates">
+      <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+      <span class="sd-update-lbl">Update</span>
     </button>
     <button type="button" class="render-top-btn" id="renderVideoBtn" title="Render — preview, settings and MP4 video export" aria-label="Render video">
       <svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11z"/></svg>
@@ -6646,6 +6666,7 @@
   function updateProjectFolderUI(){
     if(renderPresetsReady) loadUserRenderPresets();
     const connected = !!projectFolderHandle;
+    if(connected) setTimeout(() => { checkLooseSaves().catch(err => console.error(err)); }, 1500);
     connectFolderBtn.classList.toggle('active', connected);
     if(connected){
       connectFolderBtn.title = 'Project folder connected' + (projectFolderHandle.name ? (': ' + projectFolderHandle.name) : '') + ' — click to change';
@@ -6684,6 +6705,8 @@
       pendingProjectFolderHandle = handle;
     }
     updateProjectFolderUI();
+    // the browser needs a click before SaiDeck may open the folder again: offer it straight away
+    if(!projectFolderHandle && pendingProjectFolderHandle) setTimeout(() => { try{ showReconnectNotice(); }catch(e){ console.error(e); } }, 1200);
   }
 
   async function connectProjectFolder(){
@@ -6908,10 +6931,14 @@
     const json = JSON.stringify(serializeSession(), null, 2);
     const fileName = sanitizeFileName(sessionName) + '.trackdeck.json';
     savePicturesSoon(200);
-    const fh = await dir.getFileHandle(fileName, { create: true });
+    // sessions are saved in the project folder's "Saves" folder
+    const saves = await dir.getDirectoryHandle(SAVES_DIR, { create: true });
+    const fh = await saves.getFileHandle(fileName, { create: true });
     const writable = await fh.createWritable();
     await writable.write(json);
     await writable.close();
+    // (an older copy of this same session left at the top of the folder is the one this save replaces)
+    try{ await dir.getFileHandle(fileName); await dir.removeEntry(fileName); setTimeout(checkLooseSaves, 200); }catch(e){}
     return fileName;
   }
 
@@ -6947,7 +6974,7 @@
     if(projectFolderHandle){
       try{
         const fileName = await saveSessionToFolder();
-        toast('Saved "' + fileName + '" to your project folder.');
+        toast('Saved "' + fileName + '" to the Saves folder.');
         return;
       }catch(err){
         console.error('Could not save session to project folder, downloading instead', err);
@@ -7144,18 +7171,91 @@
   // making the person hunt for one with a native file-open dialog every
   // time, this reads that folder itself and lists whatever *.trackdeck.json
   // files are already sitting in it.
+  // Sessions live in the project folder's "Saves" folder; ones still sitting
+  // at the top of the folder (from before) are listed too, and SaiDeck offers
+  // to move them in.
+  const SAVES_DIR = 'Saves';
   async function listSessionFilesInFolder(){
     if(!projectFolderHandle) return [];
     const out = [];
-    for await (const [name, handle] of projectFolderHandle.entries()){
-      if(handle.kind === 'file' && /\.trackdeck\.json$/i.test(name)){
-        let mtime = 0;
-        try{ mtime = (await handle.getFile()).lastModified; }catch(e){}
-        out.push({ name, handle, mtime });
+    const scan = async (dir, loose) => {
+      for await (const [name, handle] of dir.entries()){
+        if(handle.kind === 'file' && /\.trackdeck\.json$/i.test(name)){
+          let mtime = 0;
+          try{ mtime = (await handle.getFile()).lastModified; }catch(e){}
+          out.push({ name, handle, mtime, loose });
+        }
       }
-    }
+    };
+    try{ await scan(await projectFolderHandle.getDirectoryHandle(SAVES_DIR), false); }catch(e){}
+    await scan(projectFolderHandle, true);
     out.sort((a, b) => b.mtime - a.mtime);
     return out;
+  }
+  async function looseSaveFiles(){
+    const out = [];
+    if(!projectFolderHandle) return out;
+    try{ for await (const [name, handle] of projectFolderHandle.entries()) if(handle.kind === 'file' && /\.trackdeck\.json$/i.test(name)) out.push({ name, handle }); }catch(e){}
+    return out;
+  }
+  // a notice (bottom of the screen) when save files are outside "Saves"
+  let looseNoticeEl = null, looseCheckedFor = null;
+  function closeLooseNotice(){ if(looseNoticeEl){ looseNoticeEl.remove(); looseNoticeEl = null; } }
+  async function checkLooseSaves(force){
+    if(!projectFolderHandle) return;
+    if(!force && looseCheckedFor === projectFolderHandle) return;
+    looseCheckedFor = projectFolderHandle;
+    const list = await looseSaveFiles();
+    closeLooseNotice();
+    if(!list.length) return;
+    const el = document.createElement('div');
+    el.className = 'loose-notice'; el.setAttribute('role', 'status');
+    el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+      <div class="ln-text"><b>${list.length} save file${list.length === 1 ? ' is' : 's are'} outside the Saves folder</b><span>SaiDeck now keeps sessions in “${escapeHtml(projectFolderHandle.name || 'your project folder')}/${SAVES_DIR}”. Move ${list.length === 1 ? 'it' : 'them'} there to tidy up — nothing else changes.</span></div>
+      <button type="button" class="ln-move">Move ${list.length === 1 ? 'it' : 'them'}</button><button type="button" class="ln-later">Later</button>`;
+    document.body.appendChild(el); looseNoticeEl = el;
+    el.querySelector('.ln-later').addEventListener('click', closeLooseNotice);
+    el.querySelector('.ln-move').addEventListener('click', async (e) => {
+      const b = e.currentTarget; b.disabled = true; b.textContent = 'Moving…';
+      try{ const n = await moveLooseSaves(); closeLooseNotice(); toast(`Moved ${n} save file${n === 1 ? '' : 's'} into the ${SAVES_DIR} folder.`, 2600); }
+      catch(err){ console.error(err); b.disabled = false; b.textContent = 'Try again'; toast(`Couldn't move them all: ${err.message || err}`, 4000); }
+    });
+  }
+  function showReconnectNotice(){
+    if(projectFolderHandle || !pendingProjectFolderHandle || looseNoticeEl) return;
+    const el = document.createElement('div');
+    el.className = 'loose-notice'; el.setAttribute('role', 'status');
+    el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+      <div class="ln-text"><b>Reconnect “${escapeHtml(pendingProjectFolderHandle.name || 'your project folder')}”</b><span>Your browser asks again each time SaiDeck opens. Reconnect it to save there, load your sessions and Freedits, and check your save files.</span></div>
+      <button type="button" class="ln-move">Reconnect</button><button type="button" class="ln-later">Later</button>`;
+    document.body.appendChild(el); looseNoticeEl = el;
+    el.querySelector('.ln-later').addEventListener('click', closeLooseNotice);
+    el.querySelector('.ln-move').addEventListener('click', async () => {
+      closeLooseNotice();
+      try{ await connectProjectFolder(); }catch(err){ console.error(err); }
+      if(projectFolderHandle){ looseCheckedFor = null; setTimeout(() => { checkLooseSaves(true).catch(err => console.error(err)); }, 300); }
+    });
+  }
+  async function moveLooseSaves(){
+    const dir = projectFolderHandle, saves = await dir.getDirectoryHandle(SAVES_DIR, { create: true });
+    let n = 0;
+    for(const { name, handle } of await looseSaveFiles()){
+      // (a session with the same name already in Saves: this one comes in as "name (2)", nothing is overwritten)
+      let target = name, k = 2;
+      const exists = async (nm) => { try{ await saves.getFileHandle(nm); return true; }catch(e){ return false; } };
+      while(await exists(target)) target = name.replace(/\.trackdeck\.json$/i, ` (${k++}).trackdeck.json`);
+      let moved = false;
+      if(target === name && typeof handle.move === 'function'){ try{ await handle.move(saves); moved = true; }catch(e){} }
+      if(!moved){
+        const src = await handle.getFile(), dst = await saves.getFileHandle(target, { create: true });
+        const w = await dst.createWritable(); await src.stream().pipeTo(w);
+        const check = await dst.getFile();
+        if(check.size !== src.size) throw new Error(`“${name}” didn't copy completely, so it was left where it is`);
+        await dir.removeEntry(name);
+      }
+      n++;
+    }
+    return n;
   }
 
   let openSessionListEl = null;
@@ -7182,7 +7282,7 @@
 
     const label = document.createElement('div');
     label.className = 'section-label';
-    label.textContent = 'Sessions in project folder';
+    label.textContent = 'Sessions in the Saves folder';
     pop.appendChild(label);
 
     if(list.length === 0){
@@ -7197,7 +7297,7 @@
         row.className = 'session-list-item';
         const niceName = item.name.replace(/\.trackdeck\.json$/i, '');
         const when = item.mtime ? fmtRelativeTime(item.mtime) : '';
-        row.innerHTML = `<span class="session-list-name">${escapeHtml(niceName)}</span><span class="session-list-when">${escapeHtml(when)}</span>`;
+        row.innerHTML = `<span class="session-list-name">${escapeHtml(niceName)}${item.loose ? ' <span class="session-list-loose" title="Outside the Saves folder">not in Saves</span>' : ''}</span><span class="session-list-when">${escapeHtml(when)}</span>`;
         row.addEventListener('click', async () => {
           closeSessionListPopover();
           try{
@@ -19545,12 +19645,12 @@
   // version.json in the repo says which build is newest. The update button
   // (and a quiet check when SaiDeck opens) compares it with this file's
   // build; "Update now" downloads the new SaiDeck and saves it over this
-  // file (and its twin copies in the same folder), keeping the old one as
-  // "… (before update).html", then reloads. Saving needs the folder SaiDeck
+  // file (and its twin copies in the same folder), keeping the old one in
+  // "Old versions" as "… (build N).html", then reloads. Saving needs the folder SaiDeck
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 1;                 // ← goes up by one with every published version
+  const SD_BUILD = 2;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -19560,6 +19660,7 @@
     const newer = !!(sdLatest && (sdLatest.build | 0) > SD_BUILD);
     sdBtn.classList.toggle('has-update', newer);
     sdBtn.title = newer ? `SaiDeck ${sdLatest.version || ''} (build ${sdLatest.build}) is ready — click to update` : `SaiDeck ${SD_VERSION_NAME} · build ${SD_BUILD} — check for a new version`;
+    const lb = sdBtn.querySelector('.sd-update-lbl'); if(lb) lb.textContent = newer ? 'Update ready' : 'Update';
   }
   async function sdFetchLatest(){
     const r = await fetch(SD_RAW + 'version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -19594,12 +19695,15 @@
       // this file and its twin copies (any SaiDeck in the folder that can update itself), each backed up first
       const targets = [here];
       for await (const [nm, h] of dir.entries()){
-        if(h.kind !== 'file' || nm === here || !/\.html?$/i.test(nm) || /\(before update\)/i.test(nm)) continue;
+        if(h.kind !== 'file' || nm === here || !/\.html?$/i.test(nm) || /\((before update|build \d+)\)/i.test(nm)) continue;
         try{ const t = await (await h.getFile()).text(); const m = /const SD_BUILD = (\d+);/.exec(t); if(m && (m[1] | 0) < (v.build | 0) && t.includes(`SD_REPO = '${SD_REPO}'`)) targets.push(nm); }catch(e){}
       }
+      // (the old copy goes into an "Old versions" folder next to it, named by its build)
+      const oldDir = await dir.getDirectoryHandle('Old versions', { create: true });
       for(const nm of targets){
         const fh = await dir.getFileHandle(nm), old = await (await fh.getFile()).text();
-        const bak = await dir.getFileHandle(nm.replace(/(\.html?)$/i, ' (before update)$1'), { create: true });
+        const ob = (/const SD_BUILD = (\d+);/.exec(old) || [])[1] || '0';
+        const bak = await oldDir.getFileHandle(nm.replace(/(\.html?)$/i, ` (build ${ob})$1`), { create: true });
         let w = await bak.createWritable(); await w.write(old); await w.close();
         w = await fh.createWritable(); await w.write(src); await w.close();
       }
@@ -19620,7 +19724,7 @@
     sdBtn.classList.remove('busy');
     if(!((v.build | 0) > SD_BUILD)){ toast(`You have the newest SaiDeck (${SD_VERSION_NAME}, build ${SD_BUILD}).`, 2400); return; }
     const notes = v.notes ? (Array.isArray(v.notes) ? v.notes.join(' · ') : String(v.notes)) : 'A newer version is ready.';
-    if(!(await lyrConfirm(`Update to SaiDeck ${v.version || ''} (build ${v.build})?`, `${notes}\n\nYour current file is kept as “… (before update).html”. Save your project first — SaiDeck reloads after updating.`, 'Update now'))) return;
+    if(!(await lyrConfirm(`Update to SaiDeck ${v.version || ''} (build ${v.build})?`, `${notes}\n\nYour current file is kept in the “Old versions” folder. Save your project first — SaiDeck reloads after updating.`, 'Update now'))) return;
     sdUpdate(v);
   });
   sdMarkBtn();

@@ -1,6 +1,10 @@
 {
-  "build": 1,
+  "build": 2,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": ["First version on GitHub, with the update button."]
+  "notes": [
+    "The update button is easier to spot: a teal Update button that pulses and says Update ready when a new version is waiting.",
+    "Sessions are now saved in a Saves folder inside your project folder. Older save files left at the top are still listed, and SaiDeck offers to move them in.",
+    "Old copies from updates go into an Old versions folder."
+  ]
 }

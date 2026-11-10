@@ -8,7 +8,7 @@ Download `SaiDeck.html` and open it in Chrome or Edge. Everything runs on your o
 
 ## Updates
 
-SaiDeck checks this repository for a newer version. When one is ready, the update button at the top lights up. Click it and choose **Update now**. The new version is saved over your file, and the old one is kept as `… (before update).html`.
+SaiDeck checks this repository for a newer version. When one is ready, the **Update** button at the top turns teal and says **Update ready**. Click it and choose **Update now**. The new version is saved over your file, and the old one is kept in an `Old versions` folder next to it.
 
 `version.json` holds the newest build number. Each published version raises `build` by one, matching `SD_BUILD` inside `SaiDeck.html`.
 
