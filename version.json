@@ -1,9 +1,8 @@
 {
-  "build": 6,
+  "build": 7,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "See who's using SaiDeck right now: the chat shows how many people are online, and pressing it lists their names.",
-    "A green dot on the Chat button means someone else is on. Turn off \"Show me online\" in the chat if you'd rather not appear."
+    "Lyric cut points: right-click the lyric strip under the preview and choose \"Lyrics gone by here\". The line on screen fades out quickly so it's gone at that moment. Right-click the dashed line to remove it."
   ]
 }

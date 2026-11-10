@@ -1991,6 +1991,8 @@
   .lyr-ctx-pick{width:22px;height:22px;border-radius:50%;overflow:hidden;cursor:pointer;background:conic-gradient(#f33,#ff3,#3f3,#3ff,#33f,#f3f,#f33);}
   .lyr-ctx-pick input{opacity:0;width:100%;height:100%;cursor:pointer;}
   .lyr-ctx-foot{display:flex;justify-content:flex-end;gap:6px;margin-top:2px;}
+  .lyr-ctx .lyr-ctx-cut, .lyr-cut-menu .rec-small-btn{width:100%;justify-content:center;}
+  .lyr-cut-menu{display:flex;flex-direction:column;gap:7px;max-width:260px;}
   .lyr-tap-hud{
     position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:5;
     width:min(940px, calc(100% - 36px));box-sizing:border-box;
@@ -2973,7 +2975,7 @@
       <div class="lyr-tape-win"><div class="lyr-tape-mark"></div><div class="lyr-tape" id="lyrTape"></div></div>
       <div class="keys"><span><kbd>P</kbd> tap the highlighted syllable / word</span><span><kbd>Enter</kbd> end word (a pause)</span><span><kbd>Space</kbd> play / pause</span><span>hold <kbd>←</kbd> <kbd>→</kbd> rewind / skip</span><span><kbd>Backspace</kbd> undo</span><span><kbd>Esc</kbd> stop</span></div>
     </div>
-    <div class="lyr-strip" id="lyrStrip" hidden title="Lyric timing — drag the empty space to move through the song finely (it snaps to the start of a word; hold Alt to move freely), click it to jump there. Click a word to select it (Delete removes it), drag it to move it, drag its edges to stretch it. Shift+drag (or drag the Line bar) moves the whole line. Scroll to zoom.">
+    <div class="lyr-strip" id="lyrStrip" hidden title="Lyric timing — drag the empty space to move through the song finely (it snaps to the start of a word; hold Alt to move freely), click it to jump there. Right-click anywhere to make the lyrics gone by that point. Click a word to select it (Delete removes it), drag it to move it, drag its edges to stretch it. Shift+drag (or drag the Line bar) moves the whole line. Scroll to zoom.">
       <canvas id="lyrStripCanvas"></canvas>
     </div>
     </div>
@@ -6925,6 +6927,7 @@
   function lyrSerialize(lyr){
     return (lyr.text || lyr.lines) ? {
       text: lyr.text, textAtDetect: lyr.textAtDetect, edited: lyr.edited, mode: lyr.mode, tapSyl: lyr.tapSyl !== false, showSyl: !!lyr.showSyl,
+      cuts: lyr.cuts && lyr.cuts.length ? lyr.cuts.slice() : undefined,
       lines: lyr.lines ? lyr.lines.map(L => ({ t0: L.t0, t1: L.t1, section: L.section,
         tag: L.tag != null ? tracks.findIndex(t => t.id === L.tag) : null,
         qs: Array.isArray(L.qs) ? L.qs.map(id => tracks.findIndex(t => t.id === id)).filter(i => i >= 0) : undefined,
@@ -6938,6 +6941,7 @@
     lyr.mode = Ld.mode === 'manual' ? 'manual' : 'auto';
     lyr.tapSyl = Ld.tapSyl !== false;
     lyr.showSyl = !!Ld.showSyl;
+    lyr.cuts = Array.isArray(Ld.cuts) ? Ld.cuts.map(Number).filter(x => isFinite(x) && x >= 0).sort((a, b) => a - b) : [];
     const idOf = (i) => tracks[i] ? tracks[i].id : null;
     lyr.lines = Array.isArray(Ld.lines) && Ld.lines.length ? Ld.lines.map(L => ({
       t0: L.t0 == null ? null : (+L.t0 || 0), t1: L.t1 == null ? null : (+L.t1 || 0), section: !!L.section, tag: L.tag != null ? idOf(L.tag) : null,
@@ -10599,7 +10603,7 @@
       trailEffect, markIn, markOut, sessionName,
       // render settings and every lyric track's words + timing (so Undo / Redo work in the Render panel too)
       rec: JSON.stringify(recSettings),
-      lyrics: (typeof lyrTracks !== 'undefined' && lyrTracks) ? lyrTracks.map(LT => { const D = LT.lyr || {}; return { LT, text: D.text || '', textAtDetect: D.textAtDetect || '', edited: !!D.edited, lines: D.lines ? JSON.stringify(D.lines) : null }; }) : []
+      lyrics: (typeof lyrTracks !== 'undefined' && lyrTracks) ? lyrTracks.map(LT => { const D = LT.lyr || {}; return { LT, text: D.text || '', textAtDetect: D.textAtDetect || '', edited: !!D.edited, lines: D.lines ? JSON.stringify(D.lines) : null, cuts: JSON.stringify(D.cuts || []) }; }) : []
     };
     // Comparison key: everything above, with tracks by id and images by a
     // short id (so a big image isn't re-serialised on every check).
@@ -10607,7 +10611,7 @@
       tracks: snap.tracks.map(x => [x.ref.id, x.name, x.color, x.icon, x.volume, x.muted, x.solo, x.trailEffect,
         historyAvatarId(x.avatarDataUrl), x.avatarShape, x.offset, x.segs, x.takesShow, x.cuts, x.harmMarks, x.power, x.keys, x.linkTo]),
       trailEffect: snap.trailEffect, markIn: snap.markIn, markOut: snap.markOut,
-      sessionName: snap.sessionName, rec: snap.rec, lyrics: snap.lyrics.map(x => [x.text, x.lines])
+      sessionName: snap.sessionName, rec: snap.rec, lyrics: snap.lyrics.map(x => [x.text, x.lines, x.cuts])
     });
     return snap;
   }
@@ -10744,8 +10748,9 @@
         for(const x of snap.lyrics){
           if(!lyrTracks.includes(x.LT) || !x.LT.lyr) continue;
           const D = x.LT.lyr, cur = D.lines ? JSON.stringify(D.lines) : null;
-          if(D.text === x.text && cur === x.lines) continue;
+          if(D.text === x.text && cur === x.lines && JSON.stringify(D.cuts || []) === (x.cuts || '[]')) continue;
           D.text = x.text; D.textAtDetect = x.textAtDetect; D.edited = x.edited; D.lines = x.lines ? JSON.parse(x.lines) : null;
+          try{ D.cuts = JSON.parse(x.cuts || '[]'); }catch(_){ D.cuts = []; }
           lyrChanged = true;
         }
         if(lyrChanged){ try{ clearTimeout(lyrEditTimer); lyrTextEl.value = lyr.text; LS.sel = null; LS.drag = null; updateLyricsUI(); }catch(e){ console.error(e); } }
@@ -19739,7 +19744,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 6;                 // ← goes up by one with every published version
+  const SD_BUILD = 7;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20230,7 +20235,7 @@
   // two singers' overlapping lines can show at the same time.
   var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricX', 'lyricY', 'lyricBySinger', 'lyricAllTracks',
     'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper'];
-  function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
+  function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], cuts: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
   function lyrStyleNow(){ const o = {}; for(const k of LYR_STYLE_KEYS) o[k] = recSettings[k]; return o; }
   var lyrTracks = [{ name: 'Lyrics 1', on: true, lyr, style: null }];
   var lyrActive = 0;
@@ -21981,10 +21986,25 @@
     'overlay', 'soft-light', 'hard-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
   let lyrLayer = null;
   function drawLyricsBlended(ctx, L, T){ forEachLyrTrack(() => drawLyricsBlended1(ctx, L, T)); }
+  // A cut point (right-click on the lyric strip): the line on screen fades out
+  // quickly so it's completely gone by that moment (until the next line starts).
+  function lyrCutFade(T){
+    const cuts = lyr.cuts; if(!cuts || !cuts.length || !lyr.lines) return 1;
+    const idx = lyricLineAt(T); if(idx < 0) return 1;
+    const t0 = lyr.lines[idx].t0;
+    let c = null; for(const x of cuts) if(x > t0 + 0.05){ c = x; break; }
+    if(c == null) return 1;
+    if(T >= c) return 0;
+    const fade = Math.min(0.3, (c - t0) / 2);
+    return T > c - fade ? (c - T) / fade : 1;
+  }
   function drawLyricsBlended1(ctx, L, T){
     const S = recSettings;
     const mode = LYR_BLENDS.includes(S.lyricBlend) ? S.lyricBlend : 'source-over';
-    const op = Math.max(0.05, Math.min(1, (S.lyricOpacity == null ? 100 : S.lyricOpacity) / 100));
+    let op = Math.max(0.05, Math.min(1, (S.lyricOpacity == null ? 100 : S.lyricOpacity) / 100));
+    const cutA = lyrCutFade(T);
+    if(cutA <= 0.001) return;
+    op *= cutA;
     if(mode === 'source-over' && op >= 0.999){ drawLyrics(ctx, L, T); return; }
     const W = ctx.canvas.width, H = ctx.canvas.height;
     if(!lyrLayer){
@@ -22555,7 +22575,8 @@
     e.preventDefault();
     if(!lyr.lines) return;
     const G = lyrStripGeom(), h = lyrHit(e.clientX - G.r.left, e.clientY - G.r.top, G);
-    if(!h || h.kind === 'empty') return;
+    const tAt = G.t0 + (e.clientX - G.r.left) / G.pps;
+    if(!h || h.kind === 'empty'){ lyrCutMenu(e, tAt, G); return; }
     closeLyrCtx();
     const L = lyr.lines[h.li];
     const targets = () => scope === 'line' ? L.words : [L.words[h.wi != null ? h.wi : 0]];
@@ -22573,6 +22594,7 @@
       <div class="lyr-ctx-fonts"><button type="button" data-f="">Style default</button>${fonts.map(f => `<button type="button" data-f="${f}" style="font-family:'${f}';font-weight:${fontWeightOf(f)}">${f}</button>`).join('')}</div>
       <div class="lyr-ctx-label">Colour</div>
       <div class="lyr-ctx-sw"><button type="button" class="def" data-c="" title="Singer / style colour">Auto</button>${swatches.map(c => `<button type="button" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('')}<label class="lyr-ctx-pick" title="Any colour"><input type="color"></label></div>
+      <button type="button" class="rec-small-btn lyr-ctx-cut" title="The lyrics fade out quickly so they're gone by this point"></button>
       <div class="lyr-ctx-foot"><button type="button" class="rec-small-btn lyr-ctx-reset">Reset</button><button type="button" class="rec-small-btn lit lyr-ctx-done">Done</button></div>`;
     document.body.appendChild(el);
     lyrCtxEl = el;
@@ -22594,6 +22616,7 @@
     el.querySelector('.lyr-ctx-pick input').addEventListener('input', (ev) => apply(x => { x.color = ev.target.value; }));
     el.querySelector('.lyr-ctx-reset').addEventListener('click', () => apply(x => { delete x.font; delete x.color; }));
     el.querySelector('.lyr-ctx-done').addEventListener('click', closeLyrCtx);
+    { const cb = el.querySelector('.lyr-ctx-cut'); cb.textContent = `✂ Lyrics gone by ${fmtTime(Math.max(0, tAt))}`; cb.addEventListener('click', () => { lyrSetCut(tAt); closeLyrCtx(); }); }
     sync();
     // place it by the pointer, kept on screen
     const W = el.offsetWidth, H = el.offsetHeight;
@@ -22601,6 +22624,32 @@
     el.style.top = Math.max(8, e.clientY - H - 10) + 'px';
     setTimeout(() => { document.addEventListener('pointerdown', onLyrCtxOutside, true); window.addEventListener('keydown', onLyrCtxKey, true); }, 0);
   });
+  // cut points: add / remove
+  function lyrSetCut(t){
+    t = Math.round(Math.max(0, t) * 100) / 100;
+    lyr.cuts = (lyr.cuts || []).filter(x => Math.abs(x - t) > 0.05); lyr.cuts.push(t); lyr.cuts.sort((a, b) => a - b);
+    lyr.edited = true; updateLyricsUI();
+    toast(`The lyrics are now gone by ${fmtTime(t)} (they fade out just before). Right-click the dashed line to remove it.`, 3200);
+  }
+  function lyrCutMenu(e, t, G){
+    closeLyrCtx();
+    const near = (lyr.cuts || []).find(x => Math.abs(x - t) * G.pps < 9);
+    const el = document.createElement('div');
+    el.className = 'lyr-ctx lyr-cut-menu';
+    el.innerHTML = near != null
+      ? `<div class="lyr-ctx-title">Cut point at ${fmtTime(near)}</div><button type="button" class="rec-small-btn lyr-cut-del">Remove this cut point</button>`
+      : `<div class="lyr-ctx-title">${fmtTime(Math.max(0, t))}</div><button type="button" class="rec-small-btn lit lyr-cut-add">✂ Lyrics gone by here</button><div class="lyr-ctx-label" style="text-transform:none;letter-spacing:0">The line on screen fades out quickly so it's completely gone at this point.</div>`;
+    if((lyr.cuts || []).length > 1) el.innerHTML += `<button type="button" class="rec-small-btn lyr-cut-all">Remove all ${lyr.cuts.length} cut points</button>`;
+    document.body.appendChild(el); lyrCtxEl = el;
+    const add = el.querySelector('.lyr-cut-add'), del = el.querySelector('.lyr-cut-del'), all = el.querySelector('.lyr-cut-all');
+    if(add) add.addEventListener('click', () => { lyrSetCut(t); closeLyrCtx(); });
+    if(del) del.addEventListener('click', () => { lyr.cuts = lyr.cuts.filter(x => x !== near); updateLyricsUI(); closeLyrCtx(); toast('Cut point removed.', 1500); });
+    if(all) all.addEventListener('click', () => { lyr.cuts = []; updateLyricsUI(); closeLyrCtx(); toast('All cut points removed.', 1500); });
+    const W = el.offsetWidth, H = el.offsetHeight;
+    el.style.left = Math.max(8, Math.min(window.innerWidth - W - 8, e.clientX - W / 2)) + 'px';
+    el.style.top = Math.max(8, e.clientY - H - 10) + 'px';
+    setTimeout(() => { document.addEventListener('pointerdown', onLyrCtxOutside, true); window.addEventListener('keydown', onLyrCtxKey, true); }, 0);
+  }
   lyrCanvas.addEventListener('pointercancel', lyrDragEnd);
   lyrCanvas.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -22672,6 +22721,15 @@
         c.restore();
       });
     });
+    // cut points: the lyrics fade out (orange band) and are gone by the dashed line
+    for(const cx of (lyr.cuts || [])){
+      const x = X(cx); if(x < -40 || x > G.W + 40) continue;
+      const g = c.createLinearGradient(x - 0.3 * G.pps, 0, x, 0); g.addColorStop(0, 'rgba(255,150,60,0)'); g.addColorStop(1, 'rgba(255,150,60,.28)');
+      c.fillStyle = g; c.fillRect(x - 0.3 * G.pps, 19, 0.3 * G.pps, 34);
+      c.strokeStyle = '#ff9a3c'; c.lineWidth = 2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(Math.round(x) + 0.5, 2); c.lineTo(Math.round(x) + 0.5, G.H - 2); c.stroke(); c.setLineDash([]);
+      c.fillStyle = '#ff9a3c'; roundRectPath(c, x + 3, 2, 30, 13, 3); c.fill();
+      c.fillStyle = '#1a1000'; c.font = '800 8.5px Inter, sans-serif'; c.textBaseline = 'middle'; c.fillText('GONE', x + 6, 8.5);
+    }
     // time under the mouse (on empty space)
     if(LS.hoverX != null && !LS.scrub && !LS.drag && LS.hover && LS.hover.kind === 'empty'){
       const hx = LS.hoverX, lbl = fmtTime(G.t0 + hx / G.pps);
