@@ -1,8 +1,10 @@
 {
-  "build": 8,
+  "build": 10,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Fix: a video at the top (or bottom) of the frame is no longer cut off by the safe margin when the camera zooms or tilts."
+    "Keys: pick several keys across tracks and drag them left / right together.",
+    "Ctrl/Shift+click adds a key, Alt+click picks every key at that moment, Alt+drag draws a box around keys.",
+    "While dragging: snaps to the playhead and other keys (Ctrl = free), Shift lines them all up. Delete removes picked keys, Esc lets go."
   ]
 }

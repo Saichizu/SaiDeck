@@ -199,6 +199,52 @@
   .chat-pbtn:focus-visible, .chat-sbtn:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
   .chat-code{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(180,140,255,.1);border:1px dashed rgba(180,140,255,.5);font:600 12.5px 'JetBrains Mono',monospace;color:#d2bcff;}
   .chat-code code{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .chat-roombar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text-faint);min-width:0;}
+  .chat-roombar > span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-room-tag{flex:none;padding:2px 8px;border-radius:999px;font:700 11px 'Inter',sans-serif;color:#d2bcff;background:rgba(180,140,255,.14);border:1px solid rgba(180,140,255,.4);}
+  .chat-room-tag.grp{color:#ffd27a;background:rgba(255,181,71,.12);border-color:rgba(255,181,71,.45);}
+  .chat-link{all:unset;flex:none;cursor:pointer;font:600 11px 'Inter',sans-serif;color:#b48cff;}
+  .chat-link:hover{text-decoration:underline;}
+  .chat-link:focus-visible{outline:2px solid #b48cff;outline-offset:2px;border-radius:3px;}
+  .chat-side{border-bottom:1px solid var(--border);padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;max-height:55%;overflow-y:auto;background:rgba(180,140,255,.04);}
+  .chat-side[hidden]{display:none;}
+  .chat-side .chat-who-h{color:#d2bcff;}
+  .chat-side-p{margin:0;font-size:11px;line-height:1.45;color:var(--text-faint);}
+  .chat-rlist{display:flex;flex-direction:column;gap:4px;}
+  .chat-rrow{display:flex;align-items:center;gap:4px;border-radius:9px;border:1px solid transparent;}
+  .chat-rrow.cur{border-color:rgba(180,140,255,.45);background:rgba(180,140,255,.1);}
+  .chat-rgo{all:unset;flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;padding:6px 9px;border-radius:9px;cursor:pointer;}
+  .chat-rgo:hover{background:rgba(255,255,255,.05);}
+  .chat-rgo:focus-visible{outline:2px solid #b48cff;}
+  .chat-rgo b{font:700 12.5px 'Inter',sans-serif;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-rgo span{font-size:11px;color:var(--text-faint);}
+  .chat-rx{width:24px;height:24px;}
+  .chat-rx svg{width:14px;height:14px;}
+  .chat-join{display:flex;gap:6px;}
+  .chat-join input{flex:1;min-width:0;box-sizing:border-box;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:600 12.5px 'JetBrains Mono',monospace;outline:none;}
+  .chat-join input:focus{border-color:#b48cff;box-shadow:0 0 0 3px rgba(180,140,255,.25);}
+  .chat-join .chat-pbtn{padding:8px 14px;}
+  .chat-pin{display:flex;gap:9px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid rgba(245,208,74,.35);background:rgba(245,208,74,.09);}
+  .chat-pin[hidden]{display:none;}
+  .chat-pin svg{flex:none;width:16px;height:16px;fill:#f5d04a;margin-top:1px;}
+  .chat-pin div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+  .chat-pin b{font:800 11px 'Inter',sans-serif;color:#f5d04a;letter-spacing:.02em;}
+  .chat-pin span{font-size:12.5px;line-height:1.4;color:var(--text);overflow-wrap:break-word;white-space:pre-wrap;}
+  .chat-note{font-size:11.5px;line-height:1.4;color:#ffb3ba;background:rgba(255,77,94,.1);border:1px solid rgba(255,77,94,.35);border-radius:8px;padding:6px 9px;}
+  .chat-note[hidden]{display:none;}
+  .chat-compose textarea:disabled{opacity:.5;}
+  .chat-av.pic{background-size:cover;background-position:center;background-color:#23242e;}
+  .chat-av.official{background:linear-gradient(135deg,#b48cff,#35d0b8);color:#111;}
+  .chat-msg.official .chat-bub{background:rgba(53,208,184,.1);border:1px solid rgba(53,208,184,.45);}
+  .chat-msg.official .chat-meta b{color:#7ee8d6;}
+  .chat-offtag{font:700 9.5px 'Inter',sans-serif;font-style:normal;letter-spacing:.05em;text-transform:uppercase;color:#111;background:#35d0b8;border-radius:4px;padding:1px 5px;}
+  .chat-pop.official{border-color:rgba(53,208,184,.6) !important;}
+  .chat-pop.official .chat-pop-t b{color:#7ee8d6;}
+  .chat-pop-t small{font-weight:500;color:var(--text-faint);}
+  .chat-me{display:flex;gap:12px;align-items:center;}
+  .chat-me-av{flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 24px 'Inter',sans-serif;color:#111;background-size:cover;background-position:center;box-shadow:0 0 0 2px rgba(180,140,255,.45);}
+  .chat-me-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .chat-sbtn:disabled{opacity:.45;cursor:default;}
   .chat-pops{position:fixed;right:18px;bottom:18px;z-index:370;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
   .chat-pop{pointer-events:auto;width:min(320px, calc(100vw - 36px));display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;
     background:#1d1e28;border:1px solid rgba(180,140,255,.45);box-shadow:0 14px 36px rgba(0,0,0,.55);animation:chatPopIn .22s ease-out;}
@@ -1446,6 +1492,10 @@
   .key-marker.selected .key-handle:hover::after{
     transform:translateX(-50%) scale(1.35);
   }
+  .key-marker.multi .key-handle::after{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px rgba(255,255,255,.7));}
+  body.key-dragging, body.key-dragging *{cursor:ew-resize !important;}
+  .key-marker .key-handle{touch-action:none;}
+  .key-box{position:fixed;display:none;z-index:400;border:1px dashed #fff;background:rgba(180,140,255,.14);border-radius:3px;pointer-events:none;}
   .key-hover-line{
     position:absolute;
     top:0;bottom:0;
@@ -3536,6 +3586,8 @@
   let tracks = [];        // {id,name,buffer,color,gainNode,muted,solo,volume,headerEl,laneEl,clipEl,canvas,peaks}
   let trackIdSeq = 1;
   let trackKeyIdSeq = 1;
+  const keySel = new Set();                 // picked keys' ids (unique across all tracks) — see 'Selecting and moving several keys'
+  const keyMarkerEls = new WeakMap();       // key -> its marker element
   // How long (ms) a track's color eases into a key's color once the
   // playhead crosses it during playback, instead of swapping instantly.
   // Only applies to natural playback crossings — seeking/scrubbing past a
@@ -8797,6 +8849,7 @@
   // state: this key highlighted, playhead aligned with it.
   function selectKey(t, key){
     t.selectedKeyId = key ? key.id : null;
+    if(keySel.size){ keySel.clear(); if(key) keySel.add(key.id); keySelRefresh(); }
     renderKeyMarkers(t);
     if(key) seekTo(key.time + (t.offset || 0));
   }
@@ -8826,17 +8879,16 @@
     t.keyLayerEl.innerHTML = '';
     for(const key of t.keys){
       const marker = document.createElement('div');
-      marker.className = 'key-marker' + (t.selectedKeyId === key.id ? ' selected' : '');
+      const sel = keySel.size ? keySel.has(key.id) : t.selectedKeyId === key.id;
+      marker.className = 'key-marker' + (sel ? ' selected' : '') + (keySel.size > 1 && keySel.has(key.id) ? ' multi' : '');
       marker.style.left = (key.time * pxPerSecond) + 'px';
       marker.style.color = key.color;
+      keyMarkerEls.set(key, marker);
       const handle = document.createElement('div');
       handle.className = 'key-handle';
-      handle.title = formatKeyTime(key.time + (t.offset || 0)) + ' — click to select, right-click to edit';
-      handle.addEventListener('pointerdown', (e) => e.stopPropagation());
-      handle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectKey(t, key);
-      });
+      handle.title = formatKeyTime(key.time + (t.offset || 0)) + ' — click to select · drag to move · Ctrl/Shift+click to pick several · Alt+click picks every key at this moment · right-click to edit';
+      handle.addEventListener('pointerdown', (e) => { e.stopPropagation(); keyPointerDown(t, key, e); });
+      handle.addEventListener('click', (e) => e.stopPropagation());
       handle.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -8846,6 +8898,147 @@
       t.keyLayerEl.appendChild(marker);
     }
   }
+  // ---------- Selecting and moving several keys at once ----------
+  // Keys on any tracks can be picked together (Ctrl/Shift+click adds or
+  // removes one; Alt+click picks every key at about the same moment on all
+  // tracks; Alt+drag on the timeline draws a box around keys) and then
+  // dragged left / right together — each keeps its distance from the
+  // others, or with Shift held they all line up on the grabbed key's moment. While dragging, the grabbed key snaps to the playhead and to
+  // other keys (hold Ctrl to place freely). Delete removes the picked keys,
+  // Esc lets go of them.
+  let keyDrag = null;
+  const KEY_SAME_MOMENT = 0.25;              // s — "at the same position" for Alt+click
+  function keySelItems(){ const out = []; for(const t of tracks) for(const k of t.keys) if(keySel.has(k.id)) out.push({ t, k }); return out; }
+  function keySelRefresh(){ for(const t of tracks) renderKeyMarkers(t); }
+  function keySelClear(){
+    if(!keySel.size) return false;
+    keySel.clear();
+    for(const t of tracks) t.selectedKeyId = null;
+    keySelRefresh();
+    return true;
+  }
+  function keySelSameMoment(t, key){
+    const T = key.time + (t.offset || 0);
+    keySel.clear();
+    for(const g of tracks) for(const k of g.keys) if(Math.abs(k.time + (g.offset || 0) - T) <= KEY_SAME_MOMENT) keySel.add(k.id);
+    t.selectedKeyId = key.id;
+    keySelRefresh();
+    const n = keySel.size;
+    toast(n > 1 ? `${n} keys picked at ${formatKeyTime(T)} — drag one to move them all.` : 'Only this key is at that moment.', 2200);
+  }
+  function keyPointerDown(t, key, e){
+    if(e.button !== 0) return;
+    if(e.ctrlKey || e.metaKey || e.shiftKey){
+      // add / remove this one (no seeking)
+      if(!keySel.size){ for(const g of tracks) if(g.selectedKeyId != null && g.keys.some(k => k.id === g.selectedKeyId)) keySel.add(g.selectedKeyId); }
+      if(keySel.has(key.id)) keySel.delete(key.id); else { keySel.add(key.id); t.selectedKeyId = key.id; }
+      keySelRefresh();
+      return;
+    }
+    if(e.altKey) keySelSameMoment(t, key);
+    else if(!keySel.has(key.id)){ keySel.clear(); keySel.add(key.id); for(const g of tracks) if(g !== t) g.selectedKeyId = null; t.selectedKeyId = key.id; keySelRefresh(); }
+    const items = keySelItems().map(it => ({ t: it.t, k: it.k, t0: it.k.time }));
+    keyDrag = { t, key, items, alt: e.altKey, moved: false, x0: e.clientX, y0: e.clientY, k0: key.time, dt: 0 };
+    window.addEventListener('pointermove', keyDragMove);
+    window.addEventListener('pointerup', keyDragEnd);
+    window.addEventListener('pointercancel', keyDragEnd);
+  }
+  function keyDragMove(e){
+    const D = keyDrag; if(!D) return;
+    const dPx = phoneMode === 'rotated' ? (D.y0 - e.clientY) : (e.clientX - D.x0);
+    if(!D.moved && Math.abs(dPx) < 4) return;
+    if(!D.moved){ D.moved = true; document.body.classList.add('key-dragging'); }
+    let dt = dPx / pxPerSecond;
+    // snap the grabbed key to the playhead or another (unpicked) key
+    let snapped = '';
+    if(!(e.ctrlKey || e.metaKey)){
+      const off = D.t.offset || 0, at = D.k0 + dt + off, lim = 8 / pxPerSecond;
+      let best = lim, to = null;
+      const tryT = (T, what) => { const d = Math.abs(T - at); if(d < best){ best = d; to = T; snapped = what; } };
+      tryT(nowTime(), 'playhead');
+      for(const g of tracks) for(const k of g.keys) if(!keySel.has(k.id)) tryT(k.time + (g.offset || 0), `${g.name}'s key`);
+      if(to != null) dt = to - off - D.k0; else snapped = '';
+    }
+    // keep every picked key inside its own track
+    let lo = -Infinity, hi = Infinity;
+    for(const it of D.items){ lo = Math.max(lo, -it.t0); hi = Math.min(hi, trackSpan(it.t) - it.t0); }
+    dt = Math.max(lo, Math.min(hi, dt));
+    D.dt = dt;
+    // holding Shift lines them all up exactly on the grabbed key's moment
+    const lineUp = e.shiftKey && D.items.length > 1;
+    if(lineUp){ dt = (Math.max(0, Math.min(trackSpan(D.t), D.k0 + dt))) - D.k0; }
+    const T = D.k0 + dt + (D.t.offset || 0);
+    for(const it of D.items){
+      const v = lineUp ? Math.max(0, Math.min(trackSpan(it.t), T - (it.t.offset || 0))) : it.t0 + dt;
+      it.k.time = Math.round(v * 1000) / 1000;
+      const mk = keyMarkerEls.get(it.k); if(mk) mk.style.left = (it.k.time * pxPerSecond) + 'px';
+    }
+    D.lined = lineUp;
+    const n = D.items.length, sign = dt >= 0 ? '+' : '−';
+    showDragBadge(e, `${n > 1 ? n + ' keys' : 'Key'} ${lineUp ? 'lined up at' : sign + Math.abs(dt).toFixed(2) + 's →'} ${formatKeyTime(D.key.time + (D.t.offset || 0))}`,
+      (snapped ? `on ${escapeHtml(snapped)} · ` : '') + (n > 1 ? (lineUp ? 'let go of Shift to keep their spacing' : 'Shift = line them up') + ' · ' : '') + 'Ctrl = no snapping');
+  }
+  function keyDragEnd(){
+    const D = keyDrag; keyDrag = null;
+    window.removeEventListener('pointermove', keyDragMove);
+    window.removeEventListener('pointerup', keyDragEnd);
+    window.removeEventListener('pointercancel', keyDragEnd);
+    document.body.classList.remove('key-dragging');
+    hideDragBadge();
+    if(!D) return;
+    if(!D.moved){
+      // a plain click: select it and put the playhead on it (as before)
+      if(!D.alt){ keySel.clear(); keySel.add(D.key.id); selectKey(D.t, D.key); }
+      return;
+    }
+    const touched = new Set(D.items.map(it => it.t));
+    for(const g of touched){ sortKeys(g); g._activeKeyId = undefined; }
+    updateTrackKeyStates();
+    keySelRefresh();
+    scheduleHistoryCheck(0);
+  }
+  function keySelDelete(){
+    const items = keySelItems(); if(!items.length) return false;
+    const touched = new Set();
+    for(const { t, k } of items){ const i = t.keys.indexOf(k); if(i >= 0){ t.keys.splice(i, 1); touched.add(t); } if(t.selectedKeyId === k.id) t.selectedKeyId = null; }
+    keySel.clear();
+    for(const g of touched) g._activeKeyId = undefined;
+    updateTrackKeyStates();
+    keySelRefresh();
+    scheduleHistoryCheck(0);
+    toast(`${items.length} key${items.length === 1 ? '' : 's'} removed (Ctrl+Z brings ${items.length === 1 ? 'it' : 'them'} back).`, 2400);
+    return true;
+  }
+  // Alt+drag on the timeline: draw a box around keys to pick them
+  // (with Ctrl/Shift held as well, adds to what's already picked)
+  let keyBox = null;
+  lanes.addEventListener('pointerdown', (e) => {
+    if(e.button !== 0 || !e.altKey || e.target.closest('.key-handle')) return;
+    e.preventDefault(); e.stopPropagation();
+    const el = document.createElement('div'); el.className = 'key-box'; document.body.appendChild(el);
+    keyBox = { x0: e.clientX, y0: e.clientY, el, add: e.ctrlKey || e.metaKey || e.shiftKey, base: new Set(keySel), moved: false };
+    const move = (ev) => {
+      const B = keyBox; if(!B) return;
+      const x1 = Math.min(B.x0, ev.clientX), x2 = Math.max(B.x0, ev.clientX), y1 = Math.min(B.y0, ev.clientY), y2 = Math.max(B.y0, ev.clientY);
+      if(!B.moved && x2 - x1 < 4 && y2 - y1 < 4) return;
+      B.moved = true;
+      Object.assign(B.el.style, { left: x1 + 'px', top: y1 + 'px', width: (x2 - x1) + 'px', height: (y2 - y1) + 'px', display: 'block' });
+      keySel.clear(); if(B.add) for(const id of B.base) keySel.add(id);
+      for(const g of tracks) for(const k of g.keys){
+        const mk = keyMarkerEls.get(k), h = mk && mk.firstChild; if(!h || !h.isConnected) continue;
+        const r = h.getBoundingClientRect();
+        if(r.right >= x1 && r.left <= x2 && r.bottom >= y1 && r.top <= y2) keySel.add(k.id);
+      }
+      keySelRefresh();
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+      const B = keyBox; keyBox = null; if(!B) return; B.el.remove();
+      if(B.moved && keySel.size) toast(`${keySel.size} key${keySel.size === 1 ? '' : 's'} picked — drag one to move them all, Delete removes them.`, 2600);
+      else if(!B.moved && !B.add) keySelClear();
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  }, true);
   function syncTrackPowerUI(t){
     if(!t.ownPowerToggle) return;
     t.ownPowerToggle.checked = !!t.ownPower;
@@ -11199,6 +11392,12 @@
       e.preventDefault();
     } else if(e.code === 'Escape' && recPanel.classList.contains('open') && LS.sel && tag !== 'INPUT' && tag !== 'TEXTAREA'){
       LS.sel = null;                          // (Esc first lets go of the selected lyric word)
+    } else if((e.code === 'Delete' || e.code === 'Backspace') && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT'
+              && keySel.size > 1){
+      e.preventDefault();
+      keySelDelete();
+    } else if(e.code === 'Escape' && tag !== 'INPUT' && tag !== 'TEXTAREA' && keySel.size > 1){
+      keySelClear();
     } else if((e.code === 'Delete' || e.code === 'Backspace') && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT'
               && tracks.some(x => x.selSeg)){
       e.preventDefault();
@@ -19753,7 +19952,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 8;                 // ← goes up by one with every published version
+  const SD_BUILD = 10;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -19871,31 +20070,43 @@
 
 
   // =====================================================================
-  // Chat — one room for everyone who uses SaiDeck (Firebase Realtime
-  // Database, project "saideck-chat", over plain HTTPS: messages come in
-  // through a live stream, sending is one request). Messages are at most 50
-  // characters and names 20; explicit words are blocked here (with tricks
-  // like f.u.c.k / fuuuck / fvck caught) and the worst ones again by the
-  // database rules, so they can't be sent around SaiDeck either. Messages
-  // can't be edited or deleted.
-  // Pop-ups at the bottom right show who wrote what (switchable), with an
-  // optional sound. Name, room and switches are kept in this browser.
+  // Chat — Firebase Realtime Database (project "saideck-chat") over plain
+  // HTTPS: messages come in through a live stream, sending is one request.
+  // Everyone is in the main room ("Everyone"); people can also make a group
+  // chat with their own room code (anyone with the code can join).
+  // Each SaiDeck signs in to the chat anonymously (no account, no email):
+  // that gives it an ID nobody else can use, so names, profile pictures and
+  // bans can't be faked. The admin (SaiDeck Chat Admin.html) can delete
+  // messages, ban people, pin an announcement and change the chat settings
+  // (on/off, group chats, slow mode, max length, extra blocked words); those
+  // settings stream in here live.
+  // Messages are at most 50 characters and names 20; explicit words are
+  // blocked here (with tricks like f.u.c.k / fuuuck / fvck caught) and the
+  // worst ones again by the database rules.
   // =====================================================================
   const CHAT_DB = 'https://saideck-chat-default-rtdb.asia-southeast1.firebasedatabase.app';
+  const CHAT_KEY = 'AIzaSyB70Dgbvg4LNOIIj1Cxszb_qUZLZLJ_XkA';     // (the project's public web key: only identifies the project)
   const CHAT_ROOM = 'saideck-lobby', CHAT_MAX = 50, CHAT_NAME_MAX = 20;
   // ----- the word guard -----
   // (whole words; and for the strongest ones, anywhere inside a word or across spaced-out letters)
   const BAD_ANY = ['fuck','fuk','fck','cunt','nigg','fagg','bitch','whore','porn','pussy','dildo','blowjob','handjob','hentai','jizz','motherf','kontol','memek','ngentot','jembut','bangsat','bokep','pepek','colmek','lonte','pelacur','jancok','jancuk','masturb','orgasm','onlyfans'];
   const BAD_WORD = ['shit','shitty','bullshit','dick','dicks','cock','cocks','cum','sex','sexy','anal','tits','titties','boob','boobs','penis','vagina','nude','nudes','naked','slut','sluts','twat','prick','wank','wanker','horny','milf','xxx','rape','raped','retard','retarded','rapist','fag','fags','kys','asshole','arsehole','bastard','nigga','niger','anjing','anjeng','anjg','ajg','asu','entot','ngewe','sange','coli','peler','titit','taik'];
   function chatNorm(t){
-    return String(t || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    return String(t || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
       .replace(/[0@4]/g, m => m === '0' ? 'o' : 'a').replace(/[1!|]/g, 'i').replace(/3/g, 'e').replace(/[5$]/g, 's').replace(/7/g, 't').replace(/8/g, 'b').replace(/v/g, 'u');
+  }
+  // the admin's extra blocked words (Chat settings): 4+ letters anywhere, shorter ones as whole words
+  function chatExtraWords(){
+    const out = { any: [], word: [] };
+    for(const w of String((CHAT.cfg && CHAT.cfg.words) || '').split(/[,\n]+/)){ const x = chatNorm(w).replace(/[^a-z]/g, ''); if(x) (x.length >= 4 ? out.any : out.word).push(x); }
+    return out;
   }
   function chatBad(text, isName){
     const raw = String(text || '');
     const n = chatNorm(raw), nv = n.replace(/u/g, 'v');                  // ("v" read both ways: fvck / vagina)
     const words = (x) => x.split(/[^a-z]+/).filter(Boolean);
     const squash = (w) => w.replace(/(.)\1+/g, '$1');                     // (fuuuuck -> fuck)
+    const ex = chatExtraWords(), ANY = BAD_ANY.concat(ex.any), WORD = BAD_WORD.concat(ex.word);
     const forms = new Set();
     for(const x of [n, nv]) for(const w of words(x)){ forms.add(w); forms.add(squash(w)); }
     // spelled out letter by letter (f.u.c.k, f u c k): runs of 1–2 letter pieces, joined up
@@ -19905,23 +20116,65 @@
       for(const w of [...words(x), '__end__']){ if(w.length <= 2) run.push(w); else { if(run.length >= 3){ const j = run.join(''); joined.push(j, squash(j)); } run = []; } }
     }
     for(const w of forms){
-      if(BAD_WORD.includes(w) || BAD_WORD.includes(squash(w))) return true;
-      for(const b of BAD_ANY) if(w.includes(b)) return true;
+      if(WORD.includes(w) || WORD.includes(squash(w))) return true;
+      for(const b of ANY) if(w.includes(b)) return true;
     }
-    for(const j of joined){ if(BAD_WORD.includes(j)) return true; for(const b of BAD_ANY) if(b.length >= 4 && j.includes(b)) return true; }
+    for(const j of joined){ if(WORD.includes(j)) return true; for(const b of ANY) if(b.length >= 4 && j.includes(b)) return true; }
     return false;
   }
-  function chatBadName(name){ return chatBad(name, true); }
+  // ("SaiDeck" is kept for the admin's official messages)
+  function chatBadName(name){ return chatBad(name, true) || /^\s*sai\s*deck/i.test(String(name || '')); }
   // messages that somehow got through still show with the word hidden
   function chatMask(text){
     return String(text || '').replace(/[^\s]+/g, (tok) => chatBad(tok) ? '•'.repeat(Math.min(6, tok.length)) : tok);
   }
-  const CHAT = { es: null, msgs: new Map(), order: [], ready: false, open: false, unread: 0, status: 'off', retry: 0 };
+  const CHAT = { es: null, msgs: new Map(), order: [], ready: false, open: false, unread: 0, status: 'off', retry: 0, cfg: {}, bans: {}, prof: new Map(), side: null };
   const chatLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem('sd.chat.' + k); if(v === null) localStorage.removeItem('sd.chat.' + k); else localStorage.setItem('sd.chat.' + k, String(v)); }catch(e){ return null; } };
-  function chatUid(){ let u = chatLS('uid'); if(!u){ u = 'u' + Math.random().toString(36).slice(2, 12); chatLS('uid', u); } return u; }
-  function chatColor(name){ let h = 0; for(const ch of String(name || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `hsl(${h % 360} 70% 70%)`; }
+  // ----- the anonymous chat sign-in -----
+  // A refresh token kept in this browser gives a fresh 1-hour pass whenever
+  // one is needed (only for sending: reading is open).
+  const CHAT_AUTH = { tok: '', exp: 0, uid: chatLS('auid') || '', p: null };
+  async function chatAuth(){
+    if(CHAT_AUTH.tok && Date.now() < CHAT_AUTH.exp - 60000) return CHAT_AUTH.tok;
+    if(CHAT_AUTH.p) return CHAT_AUTH.p;
+    CHAT_AUTH.p = (async () => {
+      try{
+        let d = null;
+        const rt = chatLS('rt');
+        if(rt){
+          const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${CHAT_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(rt) });
+          if(r.ok){ const j = await r.json(); d = { tok: j.id_token, rt: j.refresh_token, uid: j.user_id, exp: +j.expires_in }; }
+          else if(r.status === 400){ chatLS('rt', null); }                // (that chat ID is gone: make a new one)
+          else throw new Error('chat sign-in answered ' + r.status);
+        }
+        if(!d){
+          const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${CHAT_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"returnSecureToken":true}' });
+          if(!r.ok) throw new Error('chat sign-in answered ' + r.status);
+          const j = await r.json(); d = { tok: j.idToken, rt: j.refreshToken, uid: j.localId, exp: +j.expiresIn };
+        }
+        chatLS('rt', d.rt); chatLS('auid', d.uid);
+        Object.assign(CHAT_AUTH, { tok: d.tok, uid: d.uid, exp: Date.now() + (d.exp || 3600) * 1000 });
+        return d.tok;
+      } finally { CHAT_AUTH.p = null; }
+    })();
+    return CHAT_AUTH.p;
+  }
+  const chatUid = () => CHAT_AUTH.uid;
+  const chatIsMe = (u) => !!u && (u === CHAT_AUTH.uid || u === chatLS('uid'));   // (also the older per-browser ID)
+  const chatBanned = (u) => !!(u && CHAT.bans && CHAT.bans[u]);
+  const chatColor = (name) => { let h = 0; for(const ch of String(name || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `hsl(${h % 360} 70% 70%)`; };
   const chatName = () => (chatLS('name') || '').trim();
-  const chatRoom = () => CHAT_ROOM;
+  // ----- rooms: "Everyone", or a group chat "g-<code>" -----
+  const chatRoom = () => { const r = chatLS('room'); return r && /^g-[a-z0-9-]{3,24}$/.test(r) && CHAT.cfg.rooms !== false ? r : CHAT_ROOM; };
+  const chatRoomLabel = (r) => r === CHAT_ROOM ? 'Everyone' : '#' + r.slice(2);
+  function chatGroups(){ try{ const a = JSON.parse(chatLS('groups') || '[]'); return Array.isArray(a) ? a.filter(x => /^g-[a-z0-9-]{3,24}$/.test(x)) : []; }catch(e){ return []; } }
+  function chatCodeClean(s){ return String(s || '').trim().toLowerCase().replace(/^#/, '').replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 24); }
+  function chatGoRoom(r){
+    if(r !== CHAT_ROOM){ const g = chatGroups().filter(x => x !== r); g.unshift(r); chatLS('groups', JSON.stringify(g.slice(0, 20))); }
+    chatLS('room', r === CHAT_ROOM ? null : r);
+    CHAT.side = null; CHAT._scrollDown = true;
+    chatConnect(); chatPanel.innerHTML = ''; chatRender();
+  }
   const chatPopsOn = () => chatLS('popups') !== '0';
   const chatSoundOn = () => chatLS('sound') === '1';
   const chatBtn = $('chatBtn'), chatBadge = $('chatBadge');
@@ -19930,25 +20183,84 @@
   document.body.appendChild(chatPanel); document.body.appendChild(chatPops);
   const ICON_X = '<svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg>';
   const ICON_GEAR = '<svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>';
+  const ICON_ROOMS = '<svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1a4.2 4.2 0 0 1 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>';
+  const ICON_PIN = '<svg viewBox="0 0 24 24"><path d="M16 3H8v2l1.5 1.5V11L6 14v2h5.2v5h1.6v-5H18v-2l-3.5-3V6.5L16 5z"/></svg>';
   function chatUpdateBadge(){
     chatBadge.hidden = !CHAT.unread; chatBadge.textContent = CHAT.unread > 99 ? '99+' : CHAT.unread;
     chatBtn.classList.toggle('open', CHAT.open);
-    chatBtn.title = CHAT.unread ? `${CHAT.unread} new message${CHAT.unread === 1 ? '' : 's'} — open the chat` : 'Chat with the people in your room';
+    chatBtn.title = CHAT.unread ? `${CHAT.unread} new message${CHAT.unread === 1 ? '' : 's'} — open the chat` : 'Chat with everyone who uses SaiDeck';
   }
   function chatFmtTime(t){ const d = new Date(t); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
   function chatFmtDay(t){ const d = new Date(t), now = new Date(); const same = (a, b) => a.toDateString() === b.toDateString(); const y = new Date(now); y.setDate(now.getDate() - 1); return same(d, now) ? 'Today' : same(d, y) ? 'Yesterday' : d.toLocaleDateString([], { day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' }); }
+  // ----- profile pictures (profiles/<chat id> = a small square JPEG) -----
+  function chatProfile(uid){
+    if(!uid) return null;
+    const c = CHAT.prof.get(uid);
+    if(c && (c.loading || Date.now() - c.at < 300000)) return c.p || null;
+    CHAT.prof.set(uid, { loading: true, p: c && c.p, at: 0 });
+    fetch(`${CHAT_DB}/profiles/${encodeURIComponent(uid)}/p.json`).then(r => r.ok ? r.json() : null).catch(() => undefined).then(p => {
+      const old = CHAT.prof.get(uid);
+      const val = p === undefined ? (old && old.p) : (typeof p === 'string' && /^data:image\//.test(p) ? p : null);
+      CHAT.prof.set(uid, { p: val, at: Date.now() });
+      if(val !== (old && old.p)) chatRerenderSoon();
+    });
+    return c && c.p || null;
+  }
+  function chatRerenderSoon(){ clearTimeout(CHAT._rrT); CHAT._rrT = setTimeout(() => { if(CHAT.open) chatRender(); }, 120); }
+  const chatInSetup = () => !!chatPanel.querySelector('.chat-setup');
+  function chatAv(uid, name, official){
+    const av = document.createElement('div'); av.className = 'chat-av';
+    if(official){ av.classList.add('official'); av.textContent = 'S'; return av; }
+    const p = chatProfile(uid);
+    if(p){ av.classList.add('pic'); av.style.backgroundImage = `url("${p}")`; }
+    else { av.style.background = chatColor(name); av.textContent = (name || '?').trim().charAt(0).toUpperCase(); }
+    return av;
+  }
+  // a picked image -> 96×96 centre-cropped JPEG data URL (small enough for the database: < 20 KB)
+  function chatMakeAvatar(file){
+    return new Promise((res, rej) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const S = 96, c = document.createElement('canvas'); c.width = c.height = S;
+        const g = c.getContext('2d'), s = Math.min(img.naturalWidth, img.naturalHeight);
+        g.fillStyle = '#23242e'; g.fillRect(0, 0, S, S);
+        g.imageSmoothingQuality = 'high';
+        g.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, S, S);
+        let q = 0.85, out = c.toDataURL('image/jpeg', q);
+        while(out.length > 19000 && q > 0.3){ q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+        out.length > 19500 ? rej(new Error('too big')) : res(out);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That file isn't a picture SaiDeck can read.")); };
+      img.src = url;
+    });
+  }
+  async function chatSetPicture(dataUrl){
+    const tok = await chatAuth(), uid = chatUid();
+    const r = await fetch(`${CHAT_DB}/profiles/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, dataUrl
+      ? { method: 'PUT', body: JSON.stringify({ p: dataUrl, t: { '.sv': 'timestamp' } }) }
+      : { method: 'DELETE' });
+    if(!r.ok) throw new Error('the chat server answered ' + r.status);
+    CHAT.prof.set(uid, { p: dataUrl || null, at: Date.now() });
+  }
   // ----- the panel -----
   function chatRender(){
     const name = chatName(), room = chatRoom();
+    if(chatInSetup()){ if(CHAT._setupAv) CHAT._setupAv(); return; }      // (don't wipe what's being typed)
     if(!name){ chatRenderSetup(); return; }
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
           <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
-          <button type="button" class="chat-icon chat-set" title="Change your name" aria-label="Change your chat name">${ICON_GEAR}</button>
+          <button type="button" class="chat-icon chat-rooms" title="Rooms — Everyone, or a group chat with a code" aria-label="Rooms and group chats" aria-expanded="false">${ICON_ROOMS}</button>
+          <button type="button" class="chat-icon chat-set" title="Your name and profile picture" aria-label="Your chat name and picture">${ICON_GEAR}</button>
           <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+        <div class="chat-roombar"></div>
         <div class="chat-who" hidden></div>
+        <div class="chat-side" hidden></div>
+        <div class="chat-pin" hidden></div>
         <div class="chat-body" role="log" aria-live="polite"></div>
         <div class="chat-foot">
+          <div class="chat-note" hidden></div>
           <div class="chat-compose"><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
@@ -19957,9 +20269,12 @@
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
+      const rb = chatPanel.querySelector('.chat-rooms');
+      rb.addEventListener('click', () => { CHAT.side = CHAT.side === 'rooms' ? null : 'rooms'; chatRenderSide(); });
       const ta = chatPanel.querySelector('textarea'), send = chatPanel.querySelector('.chat-send');
       const cnt = chatPanel.querySelector('.chat-count');
-      const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; send.disabled = !ta.value.trim(); cnt.textContent = `${ta.value.length} / ${CHAT_MAX}`; cnt.classList.toggle('full', ta.value.length >= CHAT_MAX); };
+      const grow = () => { const mx = chatMaxLen(); ta.maxLength = mx; ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; send.disabled = !ta.value.trim() || !chatCanSend(); cnt.textContent = `${ta.value.length} / ${mx}`; cnt.classList.toggle('full', ta.value.length >= mx); };
+      CHAT._grow = grow;
       ta.addEventListener('input', grow);
       ta.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); if(!e.shiftKey) chatSend(ta, grow); } else if(e.key === 'Escape'){ e.preventDefault(); chatToggle(false); } });
       ta.addEventListener('keyup', (e) => e.stopPropagation());
@@ -19976,64 +20291,170 @@
       grow();
     }
     chatRenderStatus();
+    chatRenderSide();
+    chatRenderPin();
     chatRenderMessages();
     presRender();
   }
+  function chatMaxLen(){ const m = CHAT.cfg && CHAT.cfg.max; return (typeof m === 'number' && m >= 5 && m <= CHAT_MAX) ? m : CHAT_MAX; }
+  // why sending is off right now ('' = it's on)
+  function chatBlock(){
+    if(chatBanned(chatUid())) return "You can't send messages in the chat right now.";
+    if(CHAT.cfg && CHAT.cfg.on === false) return 'The chat is paused by the admin for now — you can still read it.';
+    return '';
+  }
+  const chatCanSend = () => !chatBlock();
   function chatRenderStatus(){
     const sub = chatPanel.querySelector('.chat-sub'); if(!sub) return;
     const st = CHAT.status, lbl = st === 'on' ? 'Connected' : st === 'err' ? 'Offline — retrying…' : 'Connecting…';
-    sub.innerHTML = `<span class="chat-dot ${st === 'on' ? 'on' : st === 'err' ? 'err' : ''}"></span>${escapeHtml(lbl)} · everyone on SaiDeck · you're ${escapeHtml(chatName())}`;
+    const room = chatRoom();
+    sub.innerHTML = `<span class="chat-dot ${st === 'on' ? 'on' : st === 'err' ? 'err' : ''}"></span>${escapeHtml(lbl)} · you're ${escapeHtml(chatName())}`;
+    const bar = chatPanel.querySelector('.chat-roombar');
+    if(bar){
+      bar.innerHTML = room === CHAT_ROOM
+        ? `<span class="chat-room-tag">Everyone</span><span>everyone on SaiDeck sees this</span>`
+        : `<span class="chat-room-tag grp">${escapeHtml(chatRoomLabel(room))}</span><span>group chat · share the code to invite</span><button type="button" class="chat-link chat-back">Back to Everyone</button>`;
+      const back = bar.querySelector('.chat-back'); if(back) back.addEventListener('click', () => chatGoRoom(CHAT_ROOM));
+    }
+    const ta = chatPanel.querySelector('textarea');
+    if(ta) ta.placeholder = room === CHAT_ROOM ? 'Message everyone…  (Enter to send)' : `Message ${chatRoomLabel(room)}…  (Enter to send)`;
+    const why = chatBlock(), note = chatPanel.querySelector('.chat-note');
+    if(note){ note.hidden = !why; note.textContent = why; }
+    if(ta){ ta.disabled = !!why; if(CHAT._grow) CHAT._grow(); }
+  }
+  function chatRenderPin(){
+    const el = chatPanel.querySelector('.chat-pin'); if(!el) return;
+    const p = CHAT.cfg && CHAT.cfg.pinned;
+    el.hidden = !(p && p.m);
+    if(p && p.m) el.innerHTML = `${ICON_PIN}<div><b>SaiDeck</b><span>${escapeHtml(p.m)}</span></div>`;
+  }
+  // the rooms list (Everyone + your group chats + join / make one)
+  function chatRenderSide(){
+    const side = chatPanel.querySelector('.chat-side'); if(!side) return;
+    const rb = chatPanel.querySelector('.chat-rooms'); if(rb) rb.setAttribute('aria-expanded', String(CHAT.side === 'rooms'));
+    side.hidden = CHAT.side !== 'rooms';
+    if(side.hidden){ side.innerHTML = ''; return; }
+    if(side.dataset.built === chatRoom() + '|' + (CHAT.cfg.rooms !== false)) return;
+    side.dataset.built = chatRoom() + '|' + (CHAT.cfg.rooms !== false);
+    const cur = chatRoom(), groupsOn = CHAT.cfg.rooms !== false;
+    side.innerHTML = `<div class="chat-who-h">Rooms</div><div class="chat-rlist"></div>
+      ${groupsOn ? `<div class="chat-who-h" style="margin-top:6px">Join or make a group chat</div>
+      <div class="chat-join"><input type="text" class="chat-join-in" maxlength="24" placeholder="room code, e.g. sai-crew" aria-label="Group chat room code" spellcheck="false"><button type="button" class="chat-pbtn chat-join-go">Go</button></div>
+      <p class="chat-side-p">Type any code (3–24 letters, numbers or dashes). If nobody has used it yet, it's your new group — tell your friends the code so they can join. Anyone with the code can read it.</p>`
+      : `<p class="chat-side-p">Group chats are turned off by the admin right now.</p>`}`;
+    const list = side.querySelector('.chat-rlist');
+    const rooms = [CHAT_ROOM].concat(groupsOn ? chatGroups() : []);
+    for(const r of rooms){
+      const row = document.createElement('div'); row.className = 'chat-rrow' + (r === cur ? ' cur' : '');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chat-rgo';
+      b.innerHTML = `<b>${escapeHtml(chatRoomLabel(r))}</b><span>${r === CHAT_ROOM ? 'everyone on SaiDeck' : 'group chat'}${r === cur ? ' · you\'re here' : ''}</span>`;
+      b.addEventListener('click', () => { if(r !== cur) chatGoRoom(r); else { CHAT.side = null; chatRenderSide(); } });
+      row.appendChild(b);
+      if(r !== CHAT_ROOM){
+        const x = document.createElement('button'); x.type = 'button'; x.className = 'chat-icon chat-rx'; x.title = 'Remove from your list'; x.setAttribute('aria-label', `Remove ${chatRoomLabel(r)} from your list`); x.innerHTML = ICON_X;
+        x.addEventListener('click', () => { chatLS('groups', JSON.stringify(chatGroups().filter(g => g !== r))); side.dataset.built = ''; if(r === cur) chatGoRoom(CHAT_ROOM); else chatRenderSide(); });
+        row.appendChild(x);
+      }
+      list.appendChild(row);
+    }
+    const inp = side.querySelector('.chat-join-in');
+    if(inp){
+      const go = () => {
+        const code = chatCodeClean(inp.value);
+        if(code.length < 3){ toast('Room codes need at least 3 letters or numbers.', 2200); inp.focus(); return; }
+        if(chatBad(code.replace(/-/g, ' ')) || chatBad(code)){ toast("That room code isn't allowed — pick a friendly one.", 2400); inp.focus(); return; }
+        chatGoRoom('g-' + code);
+        toast(`You're in ${chatRoomLabel('g-' + code)} — share the code “${code}” to invite people.`, 3600);
+      };
+      inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ e.preventDefault(); go(); } else if(e.key === 'Escape'){ e.preventDefault(); CHAT.side = null; chatRenderSide(); } });
+      inp.addEventListener('keyup', (e) => e.stopPropagation());
+      inp.addEventListener('input', () => { const c = chatCodeClean(inp.value); if(inp.value !== c && !/[\s_]$/.test(inp.value)) inp.value = c; });
+      side.querySelector('.chat-join-go').addEventListener('click', go);
+    }
   }
   function chatRenderMessages(){
     const body = chatPanel.querySelector('.chat-body'); if(!body) return;
     const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
     body.innerHTML = '';
-    if(!CHAT.order.length){
-      body.innerHTML = `<div class="chat-empty">${CHAT.ready ? 'No messages yet. Say hi — everyone using SaiDeck sees it.' : 'Loading messages…'}</div>`;
+    const shown = CHAT.order.filter(k => { const m = CHAT.msgs.get(k); return m && !(chatBanned(m.u) && !m.a); });
+    if(!shown.length){
+      body.innerHTML = `<div class="chat-empty">${!CHAT.ready ? 'Loading messages…' : chatRoom() === CHAT_ROOM ? 'No messages yet. Say hi — everyone using SaiDeck sees it.' : `No messages in ${escapeHtml(chatRoomLabel(chatRoom()))} yet. Share the code “${escapeHtml(chatRoom().slice(2))}” so friends can join.`}</div>`;
       return;
     }
-    let lastDay = '', me = chatUid();
-    for(const k of CHAT.order){
-      const m = CHAT.msgs.get(k), day = chatFmtDay(m.t);
+    let lastDay = '';
+    for(const k of shown){
+      const m = CHAT.msgs.get(k), day = chatFmtDay(m.t), off = m.a === true;
       if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
-      const row = document.createElement('div'); row.className = 'chat-msg' + (m.u === me ? ' me' : '');
-      const av = document.createElement('div'); av.className = 'chat-av'; av.style.background = chatColor(m.n); av.textContent = (m.n || '?').trim().charAt(0).toUpperCase();
+      const mine = chatIsMe(m.u) && !off;
+      const row = document.createElement('div'); row.className = 'chat-msg' + (mine ? ' me' : '') + (off ? ' official' : '');
+      const av = chatAv(m.u, m.n, off);
       const bub = document.createElement('div'); bub.className = 'chat-bub';
       const meta = document.createElement('div'); meta.className = 'chat-meta';
-      const nb = document.createElement('b'); nb.textContent = chatBadName(m.n) ? 'someone' : m.n; nb.style.color = chatColor(m.n);
+      const nb = document.createElement('b'); nb.textContent = off ? 'SaiDeck' : chatBadName(m.n) ? 'someone' : m.n; if(!off) nb.style.color = chatColor(m.n);
+      meta.appendChild(nb);
+      if(off){ const tag = document.createElement('i'); tag.className = 'chat-offtag'; tag.textContent = 'official'; meta.appendChild(tag); }
       const tm = document.createElement('span'); tm.textContent = chatFmtTime(m.t);
-      meta.append(nb, tm);
-      const tx = document.createElement('div'); tx.textContent = chatMask(m.m);
+      meta.appendChild(tm);
+      const tx = document.createElement('div'); tx.textContent = off ? m.m : chatMask(m.m);
       bub.append(meta, tx); row.append(av, bub); body.appendChild(row);
     }
     if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
   }
   function chatRenderSetup(fromSettings){
     const name = chatName();
-    chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>${fromSettings ? 'Your chat name' : 'Join the SaiDeck chat'}</b><span>One chat for everyone who uses SaiDeck</span></div>
+    chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>${fromSettings ? 'Your chat profile' : 'Join the SaiDeck chat'}</b><span>One chat for everyone who uses SaiDeck, plus group chats</span></div>
         <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
       <div class="chat-setup">
+        <div class="chat-me"><div class="chat-me-av"></div><div class="chat-me-b">
+          <div style="font:600 11.5px 'Inter',sans-serif;color:var(--text-dim)">Profile picture</div>
+          <div class="chat-row"><button type="button" class="chat-sbtn cs-pic">Choose picture…</button><button type="button" class="chat-sbtn cs-nopic">Remove</button></div>
+          <input type="file" class="cs-file" accept="image/*" hidden></div></div>
         <label>Your name<input type="text" class="cs-name" maxlength="${CHAT_NAME_MAX}" placeholder="e.g. Sai" autocomplete="nickname"></label>
-        <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters).</p>
+        <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters). Your picture is optional — it's cropped to a square and shown small.</p>
         <button type="button" class="chat-pbtn cs-go">${fromSettings ? 'Save' : 'Start chatting'}</button>
-        <p style="font-size:11px;color:var(--text-faint)">Keep it friendly: explicit words aren't allowed in names or messages, and messages are up to ${CHAT_MAX} characters. Messages stay online so people can read what they missed, and they can't be edited or deleted.</p>
+        <p style="font-size:11px;color:var(--text-faint)">Keep it friendly: explicit words and pictures aren't allowed, and messages are up to ${chatMaxLen()} characters. The admin can remove messages and pictures. Messages stay online so people can read what they missed.</p>
       </div>`;
     const ni = chatPanel.querySelector('.cs-name');
     ni.value = name;
     ni.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ e.preventDefault(); go(); } else if(e.key === 'Escape'){ e.preventDefault(); chatToggle(false); } });
     ni.addEventListener('keyup', (e) => e.stopPropagation());
     chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
-    function go(){
+    // the picture
+    const avBox = chatPanel.querySelector('.chat-me-av'), file = chatPanel.querySelector('.cs-file'), noPic = chatPanel.querySelector('.cs-nopic');
+    let pending;                                          // (undefined = unchanged, null = remove, string = new)
+    const showAv = () => {
+      const p = pending !== undefined ? pending : (chatUid() ? chatProfile(chatUid()) : null);
+      avBox.style.background = p ? '' : chatColor(ni.value || name);
+      if(p) avBox.style.backgroundImage = `url("${p}")`;
+      avBox.textContent = p ? '' : ((ni.value || name || '?').trim().charAt(0).toUpperCase() || '?');
+      noPic.disabled = !p;
+    };
+    if(chatUid()) chatProfile(chatUid());
+    CHAT._setupAv = showAv; showAv();
+    ni.addEventListener('input', showAv);
+    chatPanel.querySelector('.cs-pic').addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+      const f = file.files && file.files[0]; file.value = ''; if(!f) return;
+      try{ pending = await chatMakeAvatar(f); showAv(); }
+      catch(err){ toast(err.message === 'too big' ? "Couldn't make that picture small enough — try another one." : err.message, 3000); }
+    });
+    noPic.addEventListener('click', () => { pending = null; showAv(); });
+    async function go(){
       const n = ni.value.trim().replace(/\s+/g, ' ').slice(0, CHAT_NAME_MAX);
       if(!n){ ni.focus(); toast('Type your name first.', 1600); return; }
       if(chatBadName(n)){ ni.focus(); ni.select(); toast("That name isn't allowed — please pick a friendly one.", 2600); return; }
       chatLS('name', n);
+      if(pending !== undefined){
+        try{ await chatSetPicture(pending); toast(pending ? 'Profile picture saved.' : 'Profile picture removed.', 2000); }
+        catch(err){ console.error(err); toast(chatBanned(chatUid()) ? "You can't change your picture right now." : "Couldn't save your picture — check your internet connection.", 3200); }
+      }
+      CHAT._setupAv = null;
       presStart(); presBeat();
       chatPanel.innerHTML = '';
       if(!CHAT.es) chatConnect();
       CHAT._scrollDown = true;
       chatRender();
-      const ta = chatPanel.querySelector('textarea'); if(ta) ta.focus();
+      const ta = chatPanel.querySelector('textarea'); if(ta && !ta.disabled) ta.focus();
     }
     chatPanel.querySelector('.cs-go').addEventListener('click', go);
     setTimeout(() => ni.focus(), 0);
@@ -20045,7 +20466,7 @@
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
-      const f = chatPanel.querySelector('textarea') || chatPanel.querySelector('input'); if(f) setTimeout(() => f.focus(), 0);
+      const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
     chatUpdateBadge();
   }
@@ -20057,28 +20478,41 @@
   function chatConnect(){
     chatDisconnect();
     const room = chatRoom(); if(!room || !chatName()) return;
+    CHAT.room = room;
     CHAT.status = 'connecting'; chatRenderStatus();
     const seen = Number(chatLS('seen:' + room)) || 0;
     const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22$key%22&limitToLast=100`);
     CHAT.es = es;
     es.addEventListener('open', () => { CHAT.status = 'on'; CHAT.retry = 0; chatRenderStatus(); });
+    const apply = (key, m, fresh) => {
+      if(m == null){ CHAT.msgs.delete(key); return; }                                 // (deleted by the admin)
+      if(chatValid(m) && !CHAT.msgs.has(key)){ CHAT.msgs.set(key, m); if(fresh) fresh.push(m); }
+    };
     es.addEventListener('put', (e) => {
       let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
       const fresh = [];
       if(d.path === '/'){
-        // the whole recent history (on connect / reconnect)
-        const had = CHAT.ready;
-        if(d.data) for(const [k, m] of Object.entries(d.data)) if(chatValid(m) && !CHAT.msgs.has(k)){ CHAT.msgs.set(k, m); if(had) fresh.push(m); }
-        if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && m.u !== chatUid()).length; }
+        // the whole recent history (on connect / reconnect / after the room was cleared)
+        const had = CHAT.ready, keep = new Set(Object.keys(d.data || {}));
+        for(const k of [...CHAT.msgs.keys()]) if(!keep.has(k)) CHAT.msgs.delete(k);
+        if(d.data) for(const [k, m] of Object.entries(d.data)) apply(k, m, had ? fresh : null);
+        if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && !chatIsMe(m.u) && !chatBanned(m.u)).length; }
         CHAT.ready = true;
       } else {
-        const k = d.path.replace(/^\//, '').split('/')[0];
-        if(k && chatValid(d.data) && !CHAT.msgs.has(k)){ CHAT.msgs.set(k, d.data); fresh.push(d.data); }
+        const parts = d.path.replace(/^\//, '').split('/'), k = parts[0];
+        if(k && parts.length === 1) apply(k, d.data, fresh);
       }
       chatSort();
       for(const m of fresh) chatIncoming(m);
       chatUpdateBadge();
       if(CHAT.open) chatRender();
+    });
+    es.addEventListener('patch', (e) => {
+      let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+      if(d.path !== '/') return;
+      const fresh = [];
+      for(const [k, m] of Object.entries(d.data || {})) apply(k, m, fresh);
+      chatSort(); for(const m of fresh) chatIncoming(m); chatUpdateBadge(); if(CHAT.open) chatRender();
     });
     es.addEventListener('cancel', () => { CHAT.status = 'err'; chatRenderStatus(); });
     es.addEventListener('error', () => {
@@ -20089,26 +20523,60 @@
       }
     });
   }
+  // the admin's settings, pinned announcement and ban list, live
+  function chatWatch(path, onData){
+    const open = () => {
+      const es = new EventSource(`${CHAT_DB}/${path}.json`);
+      let val = {};
+      const set = (p, v) => {
+        if(p === '/'){ val = (v && typeof v === 'object') ? v : {}; return; }
+        const ks = p.replace(/^\//, '').split('/'); let o = val;
+        for(let i = 0; i < ks.length - 1; i++){ if(typeof o[ks[i]] !== 'object' || !o[ks[i]]) o[ks[i]] = {}; o = o[ks[i]]; }
+        if(v == null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
+      };
+      es.addEventListener('put', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } set(d.path, d.data); onData(val); });
+      es.addEventListener('patch', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } for(const [k, v] of Object.entries(d.data || {})) set((d.path === '/' ? '' : d.path) + '/' + k, v); onData(val); });
+      es.addEventListener('error', () => { if(es.readyState === 2) setTimeout(open, 8000); });
+    };
+    open();
+  }
+  function chatStartWatching(){
+    if(CHAT.watching) return; CHAT.watching = true;
+    chatWatch('config', (cfg) => {
+      const prevPin = CHAT.cfg.pinned && CHAT.cfg.pinned.t, prevRooms = CHAT.cfg.rooms;
+      CHAT.cfg = cfg || {};
+      // a new pinned announcement pops up once (even with the chat closed)
+      const pin = CHAT.cfg.pinned;
+      if(pin && pin.m && pin.t && pin.t !== prevPin && String(pin.t) !== chatLS('pinseen')){
+        chatLS('pinseen', pin.t);
+        if(!CHAT.open && chatPopsOn()) chatPopup({ n: 'SaiDeck', m: pin.m, a: true, pinned: true });
+      }
+      if((prevRooms === false) !== (CHAT.cfg.rooms === false) && CHAT.room && CHAT.room !== chatRoom()){ chatConnect(); chatPanel.innerHTML = ''; }
+      if(CHAT.open) chatRender();
+    });
+    chatWatch('bans', (b) => { CHAT.bans = b || {}; chatUpdateBadge(); if(CHAT.open) chatRender(); });
+  }
   function chatIncoming(m){
-    if(m.u === chatUid()) return;                     // (my own message coming back)
+    if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a)) return;   // (my own message coming back / someone banned)
     if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
     CHAT.unread++;
     if(chatSoundOn()) chatPing();
     if(chatPopsOn()) chatPopup(m);
   }
   function chatPopup(m){
-    const pop = document.createElement('div'); pop.className = 'chat-pop'; pop.setAttribute('role', 'status');
-    const av = document.createElement('div'); av.className = 'chat-av'; av.style.background = chatColor(m.n); av.textContent = (m.n || '?').trim().charAt(0).toUpperCase();
+    const pop = document.createElement('div'); pop.className = 'chat-pop' + (m.a ? ' official' : ''); pop.setAttribute('role', 'status');
+    const av = chatAv(m.u, m.n, m.a === true);
     const t = document.createElement('div'); t.className = 'chat-pop-t';
-    const b = document.createElement('b'); b.textContent = chatBadName(m.n) ? 'someone' : m.n; b.style.color = chatColor(m.n);
-    const sp = document.createElement('span'); sp.textContent = chatMask(m.m);
+    const b = document.createElement('b'); b.textContent = m.a ? (m.pinned ? 'SaiDeck · pinned' : 'SaiDeck') : chatBadName(m.n) ? 'someone' : m.n; if(!m.a) b.style.color = chatColor(m.n);
+    if(!m.a && chatRoom() !== CHAT_ROOM){ const r = document.createElement('small'); r.textContent = ' in ' + chatRoomLabel(chatRoom()); b.appendChild(r); }
+    const sp = document.createElement('span'); sp.textContent = m.a ? m.m : chatMask(m.m);
     t.append(b, sp); pop.append(av, t);
     pop.title = 'Open the chat';
     pop.addEventListener('click', () => { pop.remove(); chatToggle(true); });
     chatPops.appendChild(pop);
     while(chatPops.children.length > 3) chatPops.firstElementChild.remove();
     const bye = () => { pop.classList.add('out'); setTimeout(() => pop.remove(), 220); };
-    let tm = setTimeout(bye, 6500);
+    let tm = setTimeout(bye, m.pinned ? 12000 : 6500);
     pop.addEventListener('mouseenter', () => clearTimeout(tm));
     pop.addEventListener('mouseleave', () => { tm = setTimeout(bye, 2500); });
   }
@@ -20123,42 +20591,50 @@
   }
   async function chatSend(ta, grow){
     const text = ta.value.trim().replace(/\s+/g, ' '); if(!text) return;
-    if(text.length > CHAT_MAX){ toast(`Messages can be up to ${CHAT_MAX} characters.`, 2000); return; }
+    const why = chatBlock(); if(why){ toast(why, 2800); return; }
+    const mx = chatMaxLen();
+    if(text.length > mx){ toast(`Messages can be up to ${mx} characters.`, 2000); return; }
     if(chatBad(text)){ toast("That message has a word that isn't allowed — please keep it friendly.", 2800); ta.focus(); return; }
     if(chatBadName(chatName())){ toast('Please change your chat name first (the gear button).', 2800); return; }
-    if(Date.now() - (CHAT.lastSend || 0) < 1500){ toast('Slow down a little — one message at a time.', 1600); return; }
+    const slow = Math.max(1.5, Number(CHAT.cfg.slow) || 0) * 1000, wait = slow - (Date.now() - (CHAT.lastSend || 0));
+    if(wait > 0){ toast(slow > 1500 ? `Slow mode is on — you can send again in ${Math.ceil(wait / 1000)} s.` : 'Slow down a little — one message at a time.', 1800); return; }
     CHAT.lastSend = Date.now();
     const send = chatPanel.querySelector('.chat-send'); if(send) send.disabled = true;
     try{
-      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: { '.sv': 'timestamp' }, u: chatUid() }) });
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: { '.sv': 'timestamp' }, u: chatUid() }) });
+      if(r.status === 401 || r.status === 403){ toast(chatBlock() || "The chat didn't accept that message.", 3000); CHAT.lastSend = 0; return; }
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
       ta.value = ''; CHAT._scrollDown = true; grow();
-    }catch(err){ console.error(err); toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
-    finally{ if(send) send.disabled = !ta.value.trim(); ta.focus(); }
+    }catch(err){ console.error(err); CHAT.lastSend = 0; toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
+    finally{ if(send) send.disabled = !ta.value.trim() || !chatCanSend(); if(!ta.disabled) ta.focus(); }
   }
   // ----- who's using SaiDeck now -----
   // Everyone who has a chat name says "I'm here" every 45 s while SaiDeck is
-  // open (presence/<their id> = name + server time), and says goodbye when
-  // the page closes; whoever was heard from in the last 2½ minutes counts as
-  // online. "Show me online" (on by default) can turn yourself off.
+  // open (presence/<their chat id> = name + server time), and says goodbye
+  // when the page closes; whoever was heard from in the last 2½ minutes
+  // counts as online. "Show me online" (on by default) can turn yourself off.
   const PRES = { es: null, list: {}, offset: 0, timer: 0, started: false };
   const chatVisible = () => chatLS('visible') !== '0';
-  function presUrl(uid){ return uid ? `${CHAT_DB}/presence/${encodeURIComponent(uid)}.json` : `${CHAT_DB}/presence.json`; }
+  function presUrl(uid, tok){ return (uid ? `${CHAT_DB}/presence/${encodeURIComponent(uid)}.json` : `${CHAT_DB}/presence.json`) + (tok ? '?auth=' + encodeURIComponent(tok) : ''); }
   async function presBeat(){
     const name = chatName();
     if(!name) return;
     try{
-      if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(chatUid()), { method: 'DELETE' }); return; }
-      const r = await fetch(presUrl(chatUid()), { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
+      const tok = await chatAuth(), uid = chatUid();
+      if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
+      const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
+      if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
     }catch(e){}
   }
   function presOnline(){
     const now = Date.now() + PRES.offset, out = [];
     for(const [uid, p] of Object.entries(PRES.list || {})){
       if(!p || typeof p.n !== 'string' || typeof p.t !== 'number' || now - p.t > 150000) continue;
-      if(uid === chatUid() && !chatVisible()) continue;
-      out.push({ uid, n: chatBadName(p.n) ? 'someone' : p.n, me: uid === chatUid() });
+      if(chatIsMe(uid) && !chatVisible()) continue;
+      if(chatBanned(uid)) continue;
+      out.push({ uid, n: chatBadName(p.n) ? 'someone' : p.n, me: chatIsMe(uid) });
     }
     out.sort((a, b) => (b.me - a.me) || a.n.localeCompare(b.n));
     return out;
@@ -20172,7 +20648,7 @@
       const h = document.createElement('div'); h.className = 'chat-who-h'; h.textContent = on.length ? `Using SaiDeck now · ${on.length}` : 'Nobody else is on right now'; w.appendChild(h);
       for(const p of on){
         const row = document.createElement('div'); row.className = 'chat-who-r';
-        const av = document.createElement('span'); av.className = 'chat-av'; av.style.background = chatColor(p.n); av.textContent = p.n.trim().charAt(0).toUpperCase();
+        const av = chatAv(p.uid, p.n);
         const nm = document.createElement('span'); nm.textContent = p.n + (p.me ? ' (you)' : '');
         const dot = document.createElement('span'); dot.className = 'chat-dot on';
         row.append(av, nm, dot); w.appendChild(row);
@@ -20203,14 +20679,14 @@
     };
     open();
     // say goodbye when SaiDeck closes (so you drop off the list straight away)
-    window.addEventListener('pagehide', () => { try{ fetch(presUrl(chatUid()), { method: 'DELETE', keepalive: true }); }catch(e){} });
+    window.addEventListener('pagehide', () => { try{ if(CHAT_AUTH.uid && CHAT_AUTH.tok) fetch(presUrl(CHAT_AUTH.uid, CHAT_AUTH.tok), { method: 'DELETE', keepalive: true }); }catch(e){} });
     document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') presBeat(); });
   }
 
   // Esc closes the panel (when the focus isn't in a box that handles it)
   window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.open && !e.defaultPrevented && chatPanel.contains(document.activeElement)){ e.preventDefault(); chatToggle(false); } }, true);
   chatUpdateBadge();
-  if(chatName()) setTimeout(() => { chatConnect(); presStart(); }, 1500);
+  setTimeout(() => { chatStartWatching(); if(chatName()){ chatConnect(); presStart(); } }, 1500);
 
   // Ask before the tab is closed / reloaded while there's work on screen
   // (tracks loaded, a video added, or a render running). Browsers show
