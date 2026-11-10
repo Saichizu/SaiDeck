@@ -15781,8 +15781,13 @@
       const y0 = vidY - 2, y1 = vidY + vidH + 2;
       return [[X(y0, j0), y0], [X(y0, j1), y0], [X(y1, j1), y1], [X(y1, j0), y1]];
     };
+    let vidFrameQuad = null;     // (where the video box ended up on the frame, after the camera: the margins leave it showing)
     const drawVidBody = () => {
       const exporting = !!(renderState && renderState.active), bx = vidBx;
+      try{
+        const F = M0.inverse().multiply(ctx.getTransform());
+        vidFrameQuad = [[bx, vidY], [bx + vidW, vidY], [bx + vidW, vidY + vidH], [bx, vidY + vidH]].map(([x, y]) => { const q = F.transformPoint(new DOMPoint(x, y)); return [q.x, q.y]; });
+      }catch(e){ vidFrameQuad = null; }
       if(!exporting && renderOfflineTime == null) vidBoxCur = { m: ctx.getTransform(), x: bx, y: vidY, w: vidW, h: vidH };
       // The band is plain background in the real render (that's where the
       // video goes in the editor); the preview marks it with a white
@@ -16102,12 +16107,16 @@
     // Safe margins stay plain background (nothing spills in). The preview
     // also shades them so they're easy to see; the video doesn't.
     if(mT > 0 || mB > 0){
+      // (a video box that the camera has pushed into a margin stays visible: the margins are painted around it)
+      const vq = (S.videoSpace && vidH > 0 && vidFrameQuad && vidFrameQuad.some(([, y]) => y < mT || y > contentBottom)) ? vidFrameQuad : null;
+      if(vq){ ctx.save(); ctx.beginPath(); ctx.rect(-10, -10, RENDER_W + 20, RENDER_H + 20); vq.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.clip('evenodd'); }
       if(fdMarg) fdMarginPut(ctx);
       else {
         ctx.fillStyle = bgPaint();
         if(mT > 0) ctx.fillRect(0, 0, RENDER_W, mT);
         if(mB > 0) ctx.fillRect(0, contentBottom, RENDER_W, mB);
       }
+      if(vq) ctx.restore();
       // the left icon panel carries on through the margins (see stripSpans)
       const dvH = davidActive() ? dvClimaxEnv(pt) : 0;
       if(S.showIcons && dvH < 0.99 && (stickOn || !camOn)){
@@ -19744,7 +19753,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 7;                 // ← goes up by one with every published version
+  const SD_BUILD = 8;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

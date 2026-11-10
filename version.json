@@ -1,8 +1,8 @@
 {
-  "build": 7,
+  "build": 8,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Lyric cut points: right-click the lyric strip under the preview and choose \"Lyrics gone by here\". The line on screen fades out quickly so it's gone at that moment. Right-click the dashed line to remove it."
+    "Fix: a video at the top (or bottom) of the frame is no longer cut off by the safe margin when the camera zooms or tilts."
   ]
 }
