@@ -245,6 +245,17 @@
   .chat-me-av{flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 24px 'Inter',sans-serif;color:#111;background-size:cover;background-position:center;box-shadow:0 0 0 2px rgba(180,140,255,.45);}
   .chat-me-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
   .chat-sbtn:disabled{opacity:.45;cursor:default;}
+  .chat-crop{position:absolute;inset:0;z-index:5;background:#17181f;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px;overflow-y:auto;}
+  .chat-crop-h{align-self:stretch;display:flex;flex-direction:column;gap:2px;}
+  .chat-crop-h b{font:800 14px 'Manrope',sans-serif;color:var(--text);}
+  .chat-crop-h span{font-size:11.5px;color:var(--text-faint);}
+  .chat-crop-box{border-radius:12px;overflow:hidden;background:#0d0e13;line-height:0;}
+  .chat-crop canvas{cursor:grab;touch-action:none;display:block;}
+  .chat-crop canvas.grab{cursor:grabbing;}
+  .chat-crop canvas:focus-visible{outline:2px solid #b48cff;outline-offset:-2px;}
+  .chat-crop-z{align-self:stretch;display:flex;align-items:center;gap:10px;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);}
+  .chat-crop-z input{flex:1;accent-color:#b48cff;}
+  .chat-crop .chat-row{align-self:stretch;}
   .chat-pops{position:fixed;right:18px;bottom:18px;z-index:370;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
   .chat-pop{pointer-events:auto;width:min(320px, calc(100vw - 36px));display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;
     background:#1d1e28;border:1px solid rgba(180,140,255,.45);box-shadow:0 14px 36px rgba(0,0,0,.55);animation:chatPopIn .22s ease-out;}
@@ -19952,7 +19963,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 10;                 // ← goes up by one with every published version
+  const SD_BUILD = 11;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20217,22 +20228,77 @@
     return av;
   }
   // a picked image -> 96×96 centre-cropped JPEG data URL (small enough for the database: < 20 KB)
-  function chatMakeAvatar(file){
+  // a picked image -> the crop screen (drag to move, zoom slider / wheel),
+  // then a 96×96 JPEG data URL (small enough for the database: < 20 KB);
+  // null = cancelled
+  function chatLoadImage(file){
     return new Promise((res, rej) => {
       const url = URL.createObjectURL(file), img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const S = 96, c = document.createElement('canvas'); c.width = c.height = S;
-        const g = c.getContext('2d'), s = Math.min(img.naturalWidth, img.naturalHeight);
-        g.fillStyle = '#23242e'; g.fillRect(0, 0, S, S);
+      img.onload = () => { URL.revokeObjectURL(url); res(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That file isn't a picture SaiDeck can read.")); };
+      img.src = url;
+    });
+  }
+  async function chatMakeAvatar(file){
+    const img = await chatLoadImage(file);
+    const W = img.naturalWidth, H = img.naturalHeight;
+    if(!W || !H) throw new Error("That file isn't a picture SaiDeck can read.");
+    return new Promise((res, rej) => {
+      const B = 240;                                         // crop box size (CSS px)
+      const ov = document.createElement('div'); ov.className = 'chat-crop';
+      ov.innerHTML = `<div class="chat-crop-h"><b>Crop your picture</b><span>Drag to move · zoom with the slider or mouse wheel</span></div>
+        <div class="chat-crop-box"><canvas width="${B * 2}" height="${B * 2}" aria-label="Picture crop area" tabindex="0"></canvas></div>
+        <label class="chat-crop-z"><span>Zoom</span><input type="range" min="1" max="5" step="0.01" value="1" aria-label="Zoom"></label>
+        <div class="chat-row"><button type="button" class="chat-sbtn cc-no">Cancel</button><button type="button" class="chat-pbtn cc-ok">Use this</button></div>`;
+      chatPanel.appendChild(ov);
+      const cv = ov.querySelector('canvas'), g = cv.getContext('2d'), zIn = ov.querySelector('input');
+      cv.style.width = cv.style.height = B + 'px';
+      const s0 = B / Math.min(W, H);                       // zoom 1 = the picture just covers the box
+      let z = 1, cx = W / 2, cy = H / 2;                    // the picture point at the box centre
+      const sc = () => s0 * z;
+      const clamp = () => { const h = B / sc() / 2; cx = Math.max(h, Math.min(W - h, cx)); cy = Math.max(h, Math.min(H - h, cy)); };
+      const draw = () => {
+        clamp();
+        const k = sc() * 2, ox = B - cx * k, oy = B - cy * k;     // (canvas is 2× for sharpness)
+        g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, B * 2, B * 2);
         g.imageSmoothingQuality = 'high';
-        g.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, S, S);
+        g.drawImage(img, ox, oy, W * k, H * k);
+        // dim outside the circle that will show in the chat
+        g.fillStyle = 'rgba(10,10,16,.6)';
+        g.beginPath(); g.rect(0, 0, B * 2, B * 2); g.arc(B, B, B - 2, 0, Math.PI * 2, true); g.fill('evenodd');
+        g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 2; g.beginPath(); g.arc(B, B, B - 2, 0, Math.PI * 2); g.stroke();
+      };
+      const setZ = (nz) => { z = Math.max(1, Math.min(5, nz)); zIn.value = z; draw(); };
+      zIn.addEventListener('input', () => setZ(+zIn.value));
+      cv.addEventListener('wheel', (e) => { e.preventDefault(); setZ(z * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+      let drag = null;
+      cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, cx, cy }; try{ cv.setPointerCapture(e.pointerId); }catch(err){} cv.classList.add('grab'); });
+      cv.addEventListener('pointermove', (e) => { if(!drag) return; cx = drag.cx - (e.clientX - drag.x) / sc(); cy = drag.cy - (e.clientY - drag.y) / sc(); draw(); });
+      const up = () => { drag = null; cv.classList.remove('grab'); };
+      cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+      cv.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        const st = 10 / sc();
+        if(e.key === 'ArrowLeft'){ cx -= st; } else if(e.key === 'ArrowRight'){ cx += st; } else if(e.key === 'ArrowUp'){ cy -= st; } else if(e.key === 'ArrowDown'){ cy += st; }
+        else if(e.key === '+' || e.key === '='){ setZ(z * 1.1); return; } else if(e.key === '-'){ setZ(z / 1.1); return; }
+        else if(e.key === 'Enter'){ finish(true); return; } else if(e.key === 'Escape'){ e.preventDefault(); finish(false); return; } else return;
+        e.preventDefault(); draw();
+      });
+      const finish = (ok) => {
+        ov.remove();
+        if(!ok){ res(null); return; }
+        const S = 96, c = document.createElement('canvas'); c.width = c.height = S;
+        const cg = c.getContext('2d'), side = B / sc();
+        cg.fillStyle = '#23242e'; cg.fillRect(0, 0, S, S);
+        cg.imageSmoothingQuality = 'high';
+        cg.drawImage(img, cx - side / 2, cy - side / 2, side, side, 0, 0, S, S);
         let q = 0.85, out = c.toDataURL('image/jpeg', q);
         while(out.length > 19000 && q > 0.3){ q -= 0.1; out = c.toDataURL('image/jpeg', q); }
         out.length > 19500 ? rej(new Error('too big')) : res(out);
       };
-      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That file isn't a picture SaiDeck can read.")); };
-      img.src = url;
+      ov.querySelector('.cc-no').addEventListener('click', () => finish(false));
+      ov.querySelector('.cc-ok').addEventListener('click', () => finish(true));
+      draw(); setTimeout(() => cv.focus(), 0);
     });
   }
   async function chatSetPicture(dataUrl){
@@ -20410,7 +20476,7 @@
           <div class="chat-row"><button type="button" class="chat-sbtn cs-pic">Choose picture…</button><button type="button" class="chat-sbtn cs-nopic">Remove</button></div>
           <input type="file" class="cs-file" accept="image/*" hidden></div></div>
         <label>Your name<input type="text" class="cs-name" maxlength="${CHAT_NAME_MAX}" placeholder="e.g. Sai" autocomplete="nickname"></label>
-        <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters). Your picture is optional — it's cropped to a square and shown small.</p>
+        <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters). Your picture is optional — you can zoom and crop it after picking one.</p>
         <button type="button" class="chat-pbtn cs-go">${fromSettings ? 'Save' : 'Start chatting'}</button>
         <p style="font-size:11px;color:var(--text-faint)">Keep it friendly: explicit words and pictures aren't allowed, and messages are up to ${chatMaxLen()} characters. The admin can remove messages and pictures. Messages stay online so people can read what they missed.</p>
       </div>`;
@@ -20435,7 +20501,7 @@
     chatPanel.querySelector('.cs-pic').addEventListener('click', () => file.click());
     file.addEventListener('change', async () => {
       const f = file.files && file.files[0]; file.value = ''; if(!f) return;
-      try{ pending = await chatMakeAvatar(f); showAv(); }
+      try{ const out = await chatMakeAvatar(f); if(out){ pending = out; showAv(); } }
       catch(err){ toast(err.message === 'too big' ? "Couldn't make that picture small enough — try another one." : err.message, 3000); }
     });
     noPic.addEventListener('click', () => { pending = null; showAv(); });
@@ -20463,6 +20529,7 @@
     CHAT.open = open == null ? !CHAT.open : !!open;
     chatPanel.hidden = !CHAT.open;
     if(CHAT.open){
+      if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans();
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
@@ -20523,26 +20590,28 @@
       }
     });
   }
-  // the admin's settings, pinned announcement and ban list, live
-  function chatWatch(path, onData){
-    const open = () => {
-      const es = new EventSource(`${CHAT_DB}/${path}.json`);
-      let val = {};
-      const set = (p, v) => {
-        if(p === '/'){ val = (v && typeof v === 'object') ? v : {}; return; }
-        const ks = p.replace(/^\//, '').split('/'); let o = val;
-        for(let i = 0; i < ks.length - 1; i++){ if(typeof o[ks[i]] !== 'object' || !o[ks[i]]) o[ks[i]] = {}; o = o[ks[i]]; }
-        if(v == null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
-      };
-      es.addEventListener('put', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } set(d.path, d.data); onData(val); });
-      es.addEventListener('patch', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } for(const [k, v] of Object.entries(d.data || {})) set((d.path === '/' ? '' : d.path) + '/' + k, v); onData(val); });
-      es.addEventListener('error', () => { if(es.readyState === 2) setTimeout(open, 8000); });
+  // the admin's settings, pinned announcement and ban list: checked every
+  // 30 s (and when SaiDeck comes back to the front / the chat opens) with a
+  // quick request rather than a live stream — browsers only keep 6
+  // connections to one server open, and live streams hold one each.
+  function chatPoll(path, onData){
+    let last = null, busy = false;
+    const go = async () => {
+      if(busy) return; busy = true;
+      try{
+        const r = await fetch(`${CHAT_DB}/${path}.json`, { cache: 'no-store' });
+        if(r.ok){ const txt = await r.text(); if(txt !== last){ last = txt; let v = null; try{ v = JSON.parse(txt); }catch(e){} onData(v && typeof v === 'object' ? v : {}); } }
+      }catch(e){}
+      finally{ busy = false; }
     };
-    open();
+    go();
+    setInterval(() => { if(document.visibilityState === 'visible') go(); }, 30000);
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') go(); });
+    return go;
   }
   function chatStartWatching(){
     if(CHAT.watching) return; CHAT.watching = true;
-    chatWatch('config', (cfg) => {
+    CHAT.pollCfg = chatPoll('config', (cfg) => {
       const prevPin = CHAT.cfg.pinned && CHAT.cfg.pinned.t, prevRooms = CHAT.cfg.rooms;
       CHAT.cfg = cfg || {};
       // a new pinned announcement pops up once (even with the chat closed)
@@ -20554,7 +20623,7 @@
       if((prevRooms === false) !== (CHAT.cfg.rooms === false) && CHAT.room && CHAT.room !== chatRoom()){ chatConnect(); chatPanel.innerHTML = ''; }
       if(CHAT.open) chatRender();
     });
-    chatWatch('bans', (b) => { CHAT.bans = b || {}; chatUpdateBadge(); if(CHAT.open) chatRender(); });
+    CHAT.pollBans = chatPoll('bans', (b) => { CHAT.bans = b || {}; chatUpdateBadge(); if(CHAT.open) chatRender(); });
   }
   function chatIncoming(m){
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a)) return;   // (my own message coming back / someone banned)
