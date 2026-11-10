@@ -19650,7 +19650,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 2;                 // ← goes up by one with every published version
+  const SD_BUILD = 3;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -19707,12 +19707,47 @@
         let w = await bak.createWritable(); await w.write(old); await w.close();
         w = await fh.createWritable(); await w.write(src); await w.close();
       }
-      toast(`Updated ${targets.map(n => '“' + n + '”').join(' and ')} to SaiDeck ${v.version || ''} — reloading…`, 3000);
-      setTimeout(() => location.reload(), 1200);
+      sdAfterUpdate(v);
     }catch(err){
       if(err && err.name === 'AbortError') toast('Update cancelled.', 1600);
       else { console.error(err); toast(`Couldn't update: ${err.message || err}`, 4200); }
     }finally{ sdBusy = false; sdBtn.classList.remove('busy'); }
+  }
+  // After an update: offer to save, then reload into the new version straight away
+  // (without the browser's own "Leave site?" box, since SaiDeck just asked).
+  let sdReloading = false;
+  function sdReload(){ sdReloading = true; location.reload(); }
+  function sdAskSave(v){
+    return new Promise(resolve => {
+      const ov = document.createElement('div');
+      ov.className = 'confirm-overlay';
+      ov.innerHTML = `<div class="confirm-card" role="dialog" aria-modal="true" style="width:min(520px, 92vw);max-width:none"><div class="confirm-title">SaiDeck ${escapeHtml(String(v.version || ''))} (build ${escapeHtml(String(v.build))}) is installed</div>
+        <div class="confirm-text">SaiDeck reloads now to start the new version. Save your project first?</div>
+        <div class="confirm-actions"><button type="button" class="cf-cancel" data-v="later">Not now</button><button type="button" data-v="nosave">Reload without saving</button><button type="button" class="cf-primary" data-v="save">Save and reload</button></div></div>`;
+      const done = (val) => { window.removeEventListener('keydown', onKey, true); ov.remove(); resolve(val); };
+      const onKey = (ev) => { ev.stopImmediatePropagation(); if(ev.key === 'Escape'){ ev.preventDefault(); done('later'); } else if(ev.key === 'Enter'){ ev.preventDefault(); done('save'); } };
+      ov.addEventListener('click', (ev) => { const b = ev.target.closest('button[data-v]'); if(b) done(b.dataset.v); });
+      window.addEventListener('keydown', onKey, true);
+      document.body.appendChild(ov);
+      ov.querySelector('.cf-primary').focus();
+    });
+  }
+  async function sdAfterUpdate(v){
+    const work = tracks.length || projVideo;
+    if(!work){ toast(`Updated to SaiDeck ${v.version || ''} (build ${v.build}) — reloading…`, 2000); setTimeout(sdReload, 900); return; }
+    const choice = await sdAskSave(v);
+    if(choice === 'later'){ toast('Updated. SaiDeck starts the new version the next time it opens or reloads.', 4000); return; }
+    if(choice === 'save'){
+      try{
+        if(!projectFolderHandle && pendingProjectFolderHandle) await connectProjectFolder();   // (this click lets the browser reconnect the folder)
+        const toFolder = !!projectFolderHandle;
+        await saveSession();
+        toast('Saved — reloading into the new version…', 2000);
+        setTimeout(sdReload, toFolder ? 900 : 2000);              // (a downloaded save gets a moment to finish)
+      }catch(err){ console.error(err); toast("Couldn't save, so SaiDeck didn't reload. Save your project, then reload the page.", 4500); }
+      return;
+    }
+    sdReload();
   }
   sdBtn.addEventListener('click', async (e) => {
     e.currentTarget.blur();
@@ -19724,7 +19759,7 @@
     sdBtn.classList.remove('busy');
     if(!((v.build | 0) > SD_BUILD)){ toast(`You have the newest SaiDeck (${SD_VERSION_NAME}, build ${SD_BUILD}).`, 2400); return; }
     const notes = v.notes ? (Array.isArray(v.notes) ? v.notes.join(' · ') : String(v.notes)) : 'A newer version is ready.';
-    if(!(await lyrConfirm(`Update to SaiDeck ${v.version || ''} (build ${v.build})?`, `${notes}\n\nYour current file is kept in the “Old versions” folder. Save your project first — SaiDeck reloads after updating.`, 'Update now'))) return;
+    if(!(await lyrConfirm(`Update to SaiDeck ${v.version || ''} (build ${v.build})?`, `${notes}\n\nYour current file is kept in the “Old versions” folder. Afterwards SaiDeck offers to save your project, then reloads into the new version.`, 'Update now'))) return;
     sdUpdate(v);
   });
   sdMarkBtn();
@@ -19735,6 +19770,7 @@
   // (tracks loaded, a video added, or a render running). Browsers show
   // their own wording for this prompt; a page can only switch it on.
   window.addEventListener('beforeunload', (e) => {
+    if(sdReloading) return;                  // (reloading after an update: SaiDeck already offered to save)
     const rendering = !!(renderState && renderState.active);
     if(!tracks.length && !projVideo && !rendering) return;
     e.preventDefault();
