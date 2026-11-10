@@ -134,6 +134,18 @@
   .chat-btn:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
   .chat-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:#ff4d5e;color:#fff;font:800 10.5px/18px 'Inter',sans-serif;text-align:center;box-shadow:0 0 0 2px var(--bg-panel, #15161c);}
   .chat-badge[hidden]{display:none;}
+
+  .chat-online{all:unset;flex:none;display:inline-flex;align-items:center;gap:2px;padding:4px 9px;border-radius:999px;cursor:pointer;font:700 11px 'Inter',sans-serif;color:#7ee8d6;background:rgba(53,208,184,.1);border:1px solid rgba(53,208,184,.4);}
+  .chat-online:hover, .chat-online[aria-expanded="true"]{background:rgba(53,208,184,.2);}
+  .chat-online:focus-visible{outline:2px solid #35d0b8;outline-offset:2px;}
+  .chat-online .chat-dot{margin-right:4px;}
+  .chat-who{border-bottom:1px solid var(--border);padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;max-height:40%;overflow-y:auto;background:rgba(53,208,184,.04);}
+  .chat-who[hidden]{display:none;}
+  .chat-who-h{font:700 10px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#7ee8d6;}
+  .chat-who-r{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text);}
+  .chat-who-r .chat-av{width:22px;height:22px;font-size:10px;}
+  .chat-who-r span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-btn.has-online::before{content:'';position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#35d0b8;box-shadow:0 0 0 2px var(--bg-panel, #15161c);}
   .chat-panel{position:fixed;top:64px;right:16px;bottom:16px;width:min(360px, calc(100vw - 32px));z-index:360;display:flex;flex-direction:column;
     background:#17181f;border:1px solid rgba(180,140,255,.35);border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);overflow:hidden;}
   .chat-panel[hidden]{display:none;}
@@ -19727,7 +19739,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 5;                 // ← goes up by one with every published version
+  const SD_BUILD = 6;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -19917,14 +19929,17 @@
     if(!name){ chatRenderSetup(); return; }
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
+          <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
           <button type="button" class="chat-icon chat-set" title="Change your name" aria-label="Change your chat name">${ICON_GEAR}</button>
           <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+        <div class="chat-who" hidden></div>
         <div class="chat-body" role="log" aria-live="polite"></div>
         <div class="chat-foot">
           <div class="chat-compose"><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
-            <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label></div>
+            <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
+            <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label></div>
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
@@ -19939,10 +19954,16 @@
       op.checked = chatPopsOn(); os.checked = chatSoundOn();
       op.addEventListener('change', () => { chatLS('popups', op.checked ? '1' : '0'); op.blur(); toast(op.checked ? 'Chat pop-ups on.' : 'Chat pop-ups off — new messages still show on the Chat button.', 2200); });
       os.addEventListener('change', () => { chatLS('sound', os.checked ? '1' : '0'); os.blur(); if(os.checked) chatPing(); });
+      const ov = chatPanel.querySelector('.chat-o-vis');
+      ov.checked = chatVisible();
+      ov.addEventListener('change', () => { chatLS('visible', ov.checked ? '1' : '0'); ov.blur(); presBeat(); toast(ov.checked ? 'Others can see you\'re online.' : 'You now appear offline to others.', 2200); });
+      const oc = chatPanel.querySelector('.chat-online');
+      oc.addEventListener('click', () => { const w = chatPanel.querySelector('.chat-who'); w.hidden = !w.hidden; oc.setAttribute('aria-expanded', String(!w.hidden)); presRender(); });
       grow();
     }
     chatRenderStatus();
     chatRenderMessages();
+    presRender();
   }
   function chatRenderStatus(){
     const sub = chatPanel.querySelector('.chat-sub'); if(!sub) return;
@@ -19993,6 +20014,7 @@
       if(!n){ ni.focus(); toast('Type your name first.', 1600); return; }
       if(chatBadName(n)){ ni.focus(); ni.select(); toast("That name isn't allowed — please pick a friendly one.", 2600); return; }
       chatLS('name', n);
+      presStart(); presBeat();
       chatPanel.innerHTML = '';
       if(!CHAT.es) chatConnect();
       CHAT._scrollDown = true;
@@ -20100,10 +20122,81 @@
     }catch(err){ console.error(err); toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
     finally{ if(send) send.disabled = !ta.value.trim(); ta.focus(); }
   }
+  // ----- who's using SaiDeck now -----
+  // Everyone who has a chat name says "I'm here" every 45 s while SaiDeck is
+  // open (presence/<their id> = name + server time), and says goodbye when
+  // the page closes; whoever was heard from in the last 2½ minutes counts as
+  // online. "Show me online" (on by default) can turn yourself off.
+  const PRES = { es: null, list: {}, offset: 0, timer: 0, started: false };
+  const chatVisible = () => chatLS('visible') !== '0';
+  function presUrl(uid){ return uid ? `${CHAT_DB}/presence/${encodeURIComponent(uid)}.json` : `${CHAT_DB}/presence.json`; }
+  async function presBeat(){
+    const name = chatName();
+    if(!name) return;
+    try{
+      if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(chatUid()), { method: 'DELETE' }); return; }
+      const r = await fetch(presUrl(chatUid()), { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
+      if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
+    }catch(e){}
+  }
+  function presOnline(){
+    const now = Date.now() + PRES.offset, out = [];
+    for(const [uid, p] of Object.entries(PRES.list || {})){
+      if(!p || typeof p.n !== 'string' || typeof p.t !== 'number' || now - p.t > 150000) continue;
+      if(uid === chatUid() && !chatVisible()) continue;
+      out.push({ uid, n: chatBadName(p.n) ? 'someone' : p.n, me: uid === chatUid() });
+    }
+    out.sort((a, b) => (b.me - a.me) || a.n.localeCompare(b.n));
+    return out;
+  }
+  function presRender(){
+    const on = presOnline();
+    const nEl = chatPanel.querySelector('.chat-online-n'); if(nEl) nEl.textContent = on.length;
+    const w = chatPanel.querySelector('.chat-who');
+    if(w && !w.hidden){
+      w.innerHTML = '';
+      const h = document.createElement('div'); h.className = 'chat-who-h'; h.textContent = on.length ? `Using SaiDeck now · ${on.length}` : 'Nobody else is on right now'; w.appendChild(h);
+      for(const p of on){
+        const row = document.createElement('div'); row.className = 'chat-who-r';
+        const av = document.createElement('span'); av.className = 'chat-av'; av.style.background = chatColor(p.n); av.textContent = p.n.trim().charAt(0).toUpperCase();
+        const nm = document.createElement('span'); nm.textContent = p.n + (p.me ? ' (you)' : '');
+        const dot = document.createElement('span'); dot.className = 'chat-dot on';
+        row.append(av, nm, dot); w.appendChild(row);
+      }
+    }
+    const others = on.filter(p => !p.me).length;
+    chatBtn.dataset.online = others;
+    chatBtn.classList.toggle('has-online', others > 0);
+    if(!CHAT.unread) chatBtn.title = others ? `${others} other${others === 1 ? '' : 's'} using SaiDeck now — open the chat` : 'Chat with everyone who uses SaiDeck';
+  }
+  function presStart(){
+    if(PRES.started || !chatName()) return;
+    PRES.started = true;
+    presBeat();
+    PRES.timer = setInterval(presBeat, 45000);
+    setInterval(presRender, 20000);                              // (people drop off when they stop checking in)
+    const open = () => {
+      const es = new EventSource(presUrl());
+      PRES.es = es;
+      es.addEventListener('put', (e) => {
+        let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+        if(d.path === '/') PRES.list = d.data || {};
+        else { const k = d.path.replace(/^\//, '').split('/')[0]; if(d.data == null) delete PRES.list[k]; else PRES.list[k] = Object.assign({}, PRES.list[k], d.data); }
+        presRender();
+      });
+      es.addEventListener('patch', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } for(const [k, v] of Object.entries(d.data || {})){ if(v == null) delete PRES.list[k]; else PRES.list[k] = v; } presRender(); });
+      es.addEventListener('error', () => { if(es.readyState === 2) setTimeout(() => { if(PRES.es === es) open(); }, 5000); });
+    };
+    open();
+    // say goodbye when SaiDeck closes (so you drop off the list straight away)
+    window.addEventListener('pagehide', () => { try{ fetch(presUrl(chatUid()), { method: 'DELETE', keepalive: true }); }catch(e){} });
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') presBeat(); });
+  }
+
   // Esc closes the panel (when the focus isn't in a box that handles it)
   window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.open && !e.defaultPrevented && chatPanel.contains(document.activeElement)){ e.preventDefault(); chatToggle(false); } }, true);
   chatUpdateBadge();
-  if(chatName()) setTimeout(chatConnect, 1500);
+  if(chatName()) setTimeout(() => { chatConnect(); presStart(); }, 1500);
 
   // Ask before the tab is closed / reloaded while there's work on screen
   // (tracks loaded, a video added, or a render running). Browsers show

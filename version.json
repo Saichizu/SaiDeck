@@ -1,9 +1,9 @@
 {
-  "build": 5,
+  "build": 6,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat is now one room for everyone who uses SaiDeck: just pick a name and start chatting.",
-    "Messages are up to 50 characters, and explicit words aren't allowed in names or messages."
+    "See who's using SaiDeck right now: the chat shows how many people are online, and pressing it lists their names.",
+    "A green dot on the Chat button means someone else is on. Turn off \"Show me online\" in the chat if you'd rather not appear."
   ]
 }
