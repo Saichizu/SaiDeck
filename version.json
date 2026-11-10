@@ -1,8 +1,9 @@
 {
-  "build": 3,
+  "build": 5,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "After an update, SaiDeck asks whether to save your project, then reloads into the new version by itself."
+    "Chat is now one room for everyone who uses SaiDeck: just pick a name and start chatting.",
+    "Messages are up to 50 characters, and explicit words aren't allowed in names or messages."
   ]
 }

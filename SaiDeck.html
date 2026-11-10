@@ -125,6 +125,79 @@
   .loose-notice .ln-later{color:var(--text-dim);border:1px solid var(--border);}
   .loose-notice button:focus-visible{outline:2px solid #f5d04a;outline-offset:2px;}
   .session-list-loose{margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;color:#f5d04a;border:1px solid rgba(245,208,74,.5);}
+
+  /* ===== Chat ===== */
+  .chat-btn{all:unset;box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:9px;cursor:pointer;flex-shrink:0;
+    font:700 12.5px 'Inter',sans-serif;color:#b48cff;background:rgba(180,140,255,.12);border:1.5px solid rgba(180,140,255,.7);transition:background .12s, border-color .12s, color .12s;}
+  .chat-btn svg{width:17px;height:17px;fill:currentColor;}
+  .chat-btn:hover, .chat-btn.open{background:rgba(180,140,255,.24);border-color:#b48cff;color:#d2bcff;}
+  .chat-btn:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
+  .chat-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:#ff4d5e;color:#fff;font:800 10.5px/18px 'Inter',sans-serif;text-align:center;box-shadow:0 0 0 2px var(--bg-panel, #15161c);}
+  .chat-badge[hidden]{display:none;}
+  .chat-panel{position:fixed;top:64px;right:16px;bottom:16px;width:min(360px, calc(100vw - 32px));z-index:360;display:flex;flex-direction:column;
+    background:#17181f;border:1px solid rgba(180,140,255,.35);border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);overflow:hidden;}
+  .chat-panel[hidden]{display:none;}
+  .chat-head{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(180,140,255,.10), transparent);}
+  .chat-head-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+  .chat-head-t b{font:800 14px 'Manrope',sans-serif;color:var(--text);}
+  .chat-head-t span{font-size:11px;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7a7f93;margin-right:5px;vertical-align:1px;}
+  .chat-dot.on{background:#35d0b8;box-shadow:0 0 6px #35d0b8;}
+  .chat-dot.err{background:#ff4d5e;}
+  .chat-icon{all:unset;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+  .chat-icon svg{width:18px;height:18px;fill:currentColor;}
+  .chat-icon:hover{background:rgba(255,255,255,.07);color:var(--text);}
+  .chat-icon:focus-visible{outline:2px solid #b48cff;}
+  .chat-body{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;scrollbar-gutter:stable;}
+  .chat-empty{margin:auto;text-align:center;color:var(--text-faint);font-size:12.5px;line-height:1.5;max-width:240px;}
+  .chat-day{align-self:center;font:700 10px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);padding:4px 0;}
+  .chat-msg{display:flex;gap:8px;align-items:flex-end;max-width:92%;}
+  .chat-msg.me{align-self:flex-end;flex-direction:row-reverse;}
+  .chat-av{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 11px 'Inter',sans-serif;color:#111;}
+  .chat-msg.me .chat-av{display:none;}
+  .chat-bub{min-width:0;padding:7px 10px 6px;border-radius:12px 12px 12px 4px;background:#23242e;color:var(--text);font-size:13px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;}
+  .chat-msg.me .chat-bub{border-radius:12px 12px 4px 12px;background:rgba(180,140,255,.22);border:1px solid rgba(180,140,255,.35);}
+  .chat-meta{display:flex;gap:6px;align-items:baseline;margin-bottom:2px;font-size:11px;}
+  .chat-meta b{font-weight:700;}
+  .chat-meta span{color:var(--text-faint);}
+  .chat-msg.me .chat-meta b{display:none;}
+  .chat-foot{border-top:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px;}
+  .chat-compose{display:flex;gap:8px;align-items:flex-end;}
+  .chat-compose textarea{flex:1;min-width:0;resize:none;max-height:120px;min-height:38px;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:13px/1.35 'Inter',sans-serif;outline:none;}
+  .chat-compose textarea:focus{border-color:#b48cff;}
+  .chat-send{all:unset;flex:none;width:38px;height:38px;border-radius:10px;background:#b48cff;color:#16102a;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .chat-send svg{width:18px;height:18px;fill:currentColor;}
+  .chat-send:disabled{opacity:.4;cursor:default;}
+  .chat-send:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .chat-opts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text-dim);}
+  .chat-opts label{display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .chat-count{margin-right:auto;font:600 11px 'JetBrains Mono',monospace;color:var(--text-faint);font-variant-numeric:tabular-nums;}
+  .chat-count.full{color:#f5d04a;}
+  .chat-setup{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+  .chat-setup p{margin:0;font-size:12.5px;line-height:1.5;color:var(--text-dim);}
+  .chat-setup label{display:flex;flex-direction:column;gap:5px;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);}
+  .chat-setup input{box-sizing:border-box;width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:13px 'Inter',sans-serif;outline:none;}
+  .chat-setup input:focus{border-color:#b48cff;outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.25);}
+  .chat-compose textarea:focus{outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.2);}
+  .chat-opts .switch input:checked ~ .track{background:rgba(180,140,255,.55);border-color:#b48cff;}
+  .chat-row{display:flex;gap:8px;}
+  .chat-row > *{flex:1;}
+  .chat-pbtn{all:unset;box-sizing:border-box;text-align:center;padding:9px 12px;border-radius:9px;cursor:pointer;font:700 12.5px 'Inter',sans-serif;background:#b48cff;color:#16102a;}
+  .chat-sbtn{all:unset;box-sizing:border-box;text-align:center;padding:9px 12px;border-radius:9px;cursor:pointer;font:700 12.5px 'Inter',sans-serif;border:1px solid var(--border);color:var(--text);background:var(--bg-control);}
+  .chat-pbtn:focus-visible, .chat-sbtn:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
+  .chat-code{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(180,140,255,.1);border:1px dashed rgba(180,140,255,.5);font:600 12.5px 'JetBrains Mono',monospace;color:#d2bcff;}
+  .chat-code code{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .chat-pops{position:fixed;right:18px;bottom:18px;z-index:370;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
+  .chat-pop{pointer-events:auto;width:min(320px, calc(100vw - 36px));display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;
+    background:#1d1e28;border:1px solid rgba(180,140,255,.45);box-shadow:0 14px 36px rgba(0,0,0,.55);animation:chatPopIn .22s ease-out;}
+  .chat-pop.out{animation:chatPopOut .2s ease-in forwards;}
+  .chat-pop .chat-av{width:30px;height:30px;font-size:12px;}
+  .chat-pop-t{flex:1;min-width:0;}
+  .chat-pop-t b{display:block;font:700 12.5px 'Inter',sans-serif;}
+  .chat-pop-t span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;line-height:1.4;color:var(--text);margin-top:2px;}
+  @keyframes chatPopIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}
+  @keyframes chatPopOut{to{opacity:0;transform:translateX(16px);}}
+  @media (prefers-reduced-motion: reduce){ .chat-pop, .chat-pop.out{animation:none;} }
   .sd-update-btn{all:unset;box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:9px;cursor:pointer;flex-shrink:0;
     font:700 12.5px 'Inter',sans-serif;color:#35d0b8;background:rgba(53,208,184,.12);border:1.5px solid rgba(53,208,184,.75);transition:color .12s, border-color .12s, background .12s;}
   .sd-update-btn svg{width:17px;height:17px;fill:currentColor;}
@@ -2619,6 +2692,10 @@
       <input type="range" id="masterVol" min="0" max="100" value="85" aria-label="Master volume">
     </div>
 
+    <button type="button" class="chat-btn" id="chatBtn" title="Chat with the people in your room" aria-label="Open chat">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2zm3 5v2h10V9H7zm0 4v2h7v-2H7z" transform="translate(-1 0)"/></svg>
+      <span>Chat</span><span class="chat-badge" id="chatBadge" hidden>0</span>
+    </button>
     <button type="button" class="sd-update-btn" id="sdUpdateBtn" title="Check for a new version of SaiDeck" aria-label="Check for updates">
       <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
       <span class="sd-update-lbl">Update</span>
@@ -19650,7 +19727,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 3;                 // ← goes up by one with every published version
+  const SD_BUILD = 5;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -19765,6 +19842,268 @@
   sdMarkBtn();
   // a quiet check a few seconds after opening: the button lights up if there's a new one
   setTimeout(() => { sdFetchLatest().then(v => { if((v.build | 0) > SD_BUILD) toast(`A new SaiDeck is ready (${v.version || 'build ' + v.build}) — click the glowing update button at the top to get it.`, 5000); }).catch(() => {}); }, 4000);
+
+
+  // =====================================================================
+  // Chat — one room for everyone who uses SaiDeck (Firebase Realtime
+  // Database, project "saideck-chat", over plain HTTPS: messages come in
+  // through a live stream, sending is one request). Messages are at most 50
+  // characters and names 20; explicit words are blocked here (with tricks
+  // like f.u.c.k / fuuuck / fvck caught) and the worst ones again by the
+  // database rules, so they can't be sent around SaiDeck either. Messages
+  // can't be edited or deleted.
+  // Pop-ups at the bottom right show who wrote what (switchable), with an
+  // optional sound. Name, room and switches are kept in this browser.
+  // =====================================================================
+  const CHAT_DB = 'https://saideck-chat-default-rtdb.asia-southeast1.firebasedatabase.app';
+  const CHAT_ROOM = 'saideck-lobby', CHAT_MAX = 50, CHAT_NAME_MAX = 20;
+  // ----- the word guard -----
+  // (whole words; and for the strongest ones, anywhere inside a word or across spaced-out letters)
+  const BAD_ANY = ['fuck','fuk','fck','cunt','nigg','fagg','bitch','whore','porn','pussy','dildo','blowjob','handjob','hentai','jizz','motherf','kontol','memek','ngentot','jembut','bangsat','bokep','pepek','colmek','lonte','pelacur','jancok','jancuk','masturb','orgasm','onlyfans'];
+  const BAD_WORD = ['shit','shitty','bullshit','dick','dicks','cock','cocks','cum','sex','sexy','anal','tits','titties','boob','boobs','penis','vagina','nude','nudes','naked','slut','sluts','twat','prick','wank','wanker','horny','milf','xxx','rape','raped','retard','retarded','rapist','fag','fags','kys','asshole','arsehole','bastard','nigga','niger','anjing','anjeng','anjg','ajg','asu','entot','ngewe','sange','coli','peler','titit','taik'];
+  function chatNorm(t){
+    return String(t || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/[0@4]/g, m => m === '0' ? 'o' : 'a').replace(/[1!|]/g, 'i').replace(/3/g, 'e').replace(/[5$]/g, 's').replace(/7/g, 't').replace(/8/g, 'b').replace(/v/g, 'u');
+  }
+  function chatBad(text, isName){
+    const raw = String(text || '');
+    const n = chatNorm(raw), nv = n.replace(/u/g, 'v');                  // ("v" read both ways: fvck / vagina)
+    const words = (x) => x.split(/[^a-z]+/).filter(Boolean);
+    const squash = (w) => w.replace(/(.)\1+/g, '$1');                     // (fuuuuck -> fuck)
+    const forms = new Set();
+    for(const x of [n, nv]) for(const w of words(x)){ forms.add(w); forms.add(squash(w)); }
+    // spelled out letter by letter (f.u.c.k, f u c k): runs of 1–2 letter pieces, joined up
+    const joined = [];
+    for(const x of [n, nv]){
+      let run = [];
+      for(const w of [...words(x), '__end__']){ if(w.length <= 2) run.push(w); else { if(run.length >= 3){ const j = run.join(''); joined.push(j, squash(j)); } run = []; } }
+    }
+    for(const w of forms){
+      if(BAD_WORD.includes(w) || BAD_WORD.includes(squash(w))) return true;
+      for(const b of BAD_ANY) if(w.includes(b)) return true;
+    }
+    for(const j of joined){ if(BAD_WORD.includes(j)) return true; for(const b of BAD_ANY) if(b.length >= 4 && j.includes(b)) return true; }
+    return false;
+  }
+  function chatBadName(name){ return chatBad(name, true); }
+  // messages that somehow got through still show with the word hidden
+  function chatMask(text){
+    return String(text || '').replace(/[^\s]+/g, (tok) => chatBad(tok) ? '•'.repeat(Math.min(6, tok.length)) : tok);
+  }
+  const CHAT = { es: null, msgs: new Map(), order: [], ready: false, open: false, unread: 0, status: 'off', retry: 0 };
+  const chatLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem('sd.chat.' + k); if(v === null) localStorage.removeItem('sd.chat.' + k); else localStorage.setItem('sd.chat.' + k, String(v)); }catch(e){ return null; } };
+  function chatUid(){ let u = chatLS('uid'); if(!u){ u = 'u' + Math.random().toString(36).slice(2, 12); chatLS('uid', u); } return u; }
+  function chatColor(name){ let h = 0; for(const ch of String(name || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `hsl(${h % 360} 70% 70%)`; }
+  const chatName = () => (chatLS('name') || '').trim();
+  const chatRoom = () => CHAT_ROOM;
+  const chatPopsOn = () => chatLS('popups') !== '0';
+  const chatSoundOn = () => chatLS('sound') === '1';
+  const chatBtn = $('chatBtn'), chatBadge = $('chatBadge');
+  const chatPanel = document.createElement('div'); chatPanel.className = 'chat-panel'; chatPanel.hidden = true; chatPanel.setAttribute('role', 'dialog'); chatPanel.setAttribute('aria-label', 'Chat');
+  const chatPops = document.createElement('div'); chatPops.className = 'chat-pops'; chatPops.setAttribute('aria-live', 'polite');
+  document.body.appendChild(chatPanel); document.body.appendChild(chatPops);
+  const ICON_X = '<svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg>';
+  const ICON_GEAR = '<svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>';
+  function chatUpdateBadge(){
+    chatBadge.hidden = !CHAT.unread; chatBadge.textContent = CHAT.unread > 99 ? '99+' : CHAT.unread;
+    chatBtn.classList.toggle('open', CHAT.open);
+    chatBtn.title = CHAT.unread ? `${CHAT.unread} new message${CHAT.unread === 1 ? '' : 's'} — open the chat` : 'Chat with the people in your room';
+  }
+  function chatFmtTime(t){ const d = new Date(t); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+  function chatFmtDay(t){ const d = new Date(t), now = new Date(); const same = (a, b) => a.toDateString() === b.toDateString(); const y = new Date(now); y.setDate(now.getDate() - 1); return same(d, now) ? 'Today' : same(d, y) ? 'Yesterday' : d.toLocaleDateString([], { day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' }); }
+  // ----- the panel -----
+  function chatRender(){
+    const name = chatName(), room = chatRoom();
+    if(!name){ chatRenderSetup(); return; }
+    if(!chatPanel.querySelector('.chat-body')){
+      chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
+          <button type="button" class="chat-icon chat-set" title="Change your name" aria-label="Change your chat name">${ICON_GEAR}</button>
+          <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+        <div class="chat-body" role="log" aria-live="polite"></div>
+        <div class="chat-foot">
+          <div class="chat-compose"><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
+            <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
+          <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
+            <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label></div>
+        </div>`;
+      chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
+      chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
+      const ta = chatPanel.querySelector('textarea'), send = chatPanel.querySelector('.chat-send');
+      const cnt = chatPanel.querySelector('.chat-count');
+      const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; send.disabled = !ta.value.trim(); cnt.textContent = `${ta.value.length} / ${CHAT_MAX}`; cnt.classList.toggle('full', ta.value.length >= CHAT_MAX); };
+      ta.addEventListener('input', grow);
+      ta.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); if(!e.shiftKey) chatSend(ta, grow); } else if(e.key === 'Escape'){ e.preventDefault(); chatToggle(false); } });
+      ta.addEventListener('keyup', (e) => e.stopPropagation());
+      send.addEventListener('click', () => chatSend(ta, grow));
+      const op = chatPanel.querySelector('.chat-o-pop'), os = chatPanel.querySelector('.chat-o-snd');
+      op.checked = chatPopsOn(); os.checked = chatSoundOn();
+      op.addEventListener('change', () => { chatLS('popups', op.checked ? '1' : '0'); op.blur(); toast(op.checked ? 'Chat pop-ups on.' : 'Chat pop-ups off — new messages still show on the Chat button.', 2200); });
+      os.addEventListener('change', () => { chatLS('sound', os.checked ? '1' : '0'); os.blur(); if(os.checked) chatPing(); });
+      grow();
+    }
+    chatRenderStatus();
+    chatRenderMessages();
+  }
+  function chatRenderStatus(){
+    const sub = chatPanel.querySelector('.chat-sub'); if(!sub) return;
+    const st = CHAT.status, lbl = st === 'on' ? 'Connected' : st === 'err' ? 'Offline — retrying…' : 'Connecting…';
+    sub.innerHTML = `<span class="chat-dot ${st === 'on' ? 'on' : st === 'err' ? 'err' : ''}"></span>${escapeHtml(lbl)} · everyone on SaiDeck · you're ${escapeHtml(chatName())}`;
+  }
+  function chatRenderMessages(){
+    const body = chatPanel.querySelector('.chat-body'); if(!body) return;
+    const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+    body.innerHTML = '';
+    if(!CHAT.order.length){
+      body.innerHTML = `<div class="chat-empty">${CHAT.ready ? 'No messages yet. Say hi — everyone using SaiDeck sees it.' : 'Loading messages…'}</div>`;
+      return;
+    }
+    let lastDay = '', me = chatUid();
+    for(const k of CHAT.order){
+      const m = CHAT.msgs.get(k), day = chatFmtDay(m.t);
+      if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+      const row = document.createElement('div'); row.className = 'chat-msg' + (m.u === me ? ' me' : '');
+      const av = document.createElement('div'); av.className = 'chat-av'; av.style.background = chatColor(m.n); av.textContent = (m.n || '?').trim().charAt(0).toUpperCase();
+      const bub = document.createElement('div'); bub.className = 'chat-bub';
+      const meta = document.createElement('div'); meta.className = 'chat-meta';
+      const nb = document.createElement('b'); nb.textContent = chatBadName(m.n) ? 'someone' : m.n; nb.style.color = chatColor(m.n);
+      const tm = document.createElement('span'); tm.textContent = chatFmtTime(m.t);
+      meta.append(nb, tm);
+      const tx = document.createElement('div'); tx.textContent = chatMask(m.m);
+      bub.append(meta, tx); row.append(av, bub); body.appendChild(row);
+    }
+    if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
+  }
+  function chatRenderSetup(fromSettings){
+    const name = chatName();
+    chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>${fromSettings ? 'Your chat name' : 'Join the SaiDeck chat'}</b><span>One chat for everyone who uses SaiDeck</span></div>
+        <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+      <div class="chat-setup">
+        <label>Your name<input type="text" class="cs-name" maxlength="${CHAT_NAME_MAX}" placeholder="e.g. Sai" autocomplete="nickname"></label>
+        <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters).</p>
+        <button type="button" class="chat-pbtn cs-go">${fromSettings ? 'Save' : 'Start chatting'}</button>
+        <p style="font-size:11px;color:var(--text-faint)">Keep it friendly: explicit words aren't allowed in names or messages, and messages are up to ${CHAT_MAX} characters. Messages stay online so people can read what they missed, and they can't be edited or deleted.</p>
+      </div>`;
+    const ni = chatPanel.querySelector('.cs-name');
+    ni.value = name;
+    ni.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ e.preventDefault(); go(); } else if(e.key === 'Escape'){ e.preventDefault(); chatToggle(false); } });
+    ni.addEventListener('keyup', (e) => e.stopPropagation());
+    chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
+    function go(){
+      const n = ni.value.trim().replace(/\s+/g, ' ').slice(0, CHAT_NAME_MAX);
+      if(!n){ ni.focus(); toast('Type your name first.', 1600); return; }
+      if(chatBadName(n)){ ni.focus(); ni.select(); toast("That name isn't allowed — please pick a friendly one.", 2600); return; }
+      chatLS('name', n);
+      chatPanel.innerHTML = '';
+      if(!CHAT.es) chatConnect();
+      CHAT._scrollDown = true;
+      chatRender();
+      const ta = chatPanel.querySelector('textarea'); if(ta) ta.focus();
+    }
+    chatPanel.querySelector('.cs-go').addEventListener('click', go);
+    setTimeout(() => ni.focus(), 0);
+  }
+  function chatToggle(open){
+    CHAT.open = open == null ? !CHAT.open : !!open;
+    chatPanel.hidden = !CHAT.open;
+    if(CHAT.open){
+      CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
+      chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
+      CHAT._scrollDown = true; chatRender();
+      const f = chatPanel.querySelector('textarea') || chatPanel.querySelector('input'); if(f) setTimeout(() => f.focus(), 0);
+    } else { chatBtn.focus(); }
+    chatUpdateBadge();
+  }
+  chatBtn.addEventListener('click', () => chatToggle());
+  // ----- live connection -----
+  function chatDisconnect(){ if(CHAT.es){ CHAT.es.close(); CHAT.es = null; } clearTimeout(CHAT.retryT); CHAT.msgs.clear(); CHAT.order = []; CHAT.ready = false; CHAT.status = 'off'; CHAT.unread = 0; chatUpdateBadge(); }
+  function chatSort(){ CHAT.order = [...CHAT.msgs.keys()].sort((a, b) => (CHAT.msgs.get(a).t - CHAT.msgs.get(b).t) || (a < b ? -1 : 1)); if(CHAT.order.length > 200){ for(const k of CHAT.order.slice(0, CHAT.order.length - 200)) CHAT.msgs.delete(k); CHAT.order = CHAT.order.slice(-200); } }
+  function chatValid(m){ return m && typeof m.n === 'string' && typeof m.m === 'string' && typeof m.t === 'number'; }
+  function chatConnect(){
+    chatDisconnect();
+    const room = chatRoom(); if(!room || !chatName()) return;
+    CHAT.status = 'connecting'; chatRenderStatus();
+    const seen = Number(chatLS('seen:' + room)) || 0;
+    const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22$key%22&limitToLast=100`);
+    CHAT.es = es;
+    es.addEventListener('open', () => { CHAT.status = 'on'; CHAT.retry = 0; chatRenderStatus(); });
+    es.addEventListener('put', (e) => {
+      let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+      const fresh = [];
+      if(d.path === '/'){
+        // the whole recent history (on connect / reconnect)
+        const had = CHAT.ready;
+        if(d.data) for(const [k, m] of Object.entries(d.data)) if(chatValid(m) && !CHAT.msgs.has(k)){ CHAT.msgs.set(k, m); if(had) fresh.push(m); }
+        if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && m.u !== chatUid()).length; }
+        CHAT.ready = true;
+      } else {
+        const k = d.path.replace(/^\//, '').split('/')[0];
+        if(k && chatValid(d.data) && !CHAT.msgs.has(k)){ CHAT.msgs.set(k, d.data); fresh.push(d.data); }
+      }
+      chatSort();
+      for(const m of fresh) chatIncoming(m);
+      chatUpdateBadge();
+      if(CHAT.open) chatRender();
+    });
+    es.addEventListener('cancel', () => { CHAT.status = 'err'; chatRenderStatus(); });
+    es.addEventListener('error', () => {
+      CHAT.status = 'err'; chatRenderStatus();
+      if(es.readyState === 2){            // (closed for good: try again a bit later)
+        clearTimeout(CHAT.retryT); CHAT.retry = Math.min(6, CHAT.retry + 1);
+        CHAT.retryT = setTimeout(() => { if(CHAT.es === es) chatConnect(); }, 2000 * CHAT.retry);
+      }
+    });
+  }
+  function chatIncoming(m){
+    if(m.u === chatUid()) return;                     // (my own message coming back)
+    if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
+    CHAT.unread++;
+    if(chatSoundOn()) chatPing();
+    if(chatPopsOn()) chatPopup(m);
+  }
+  function chatPopup(m){
+    const pop = document.createElement('div'); pop.className = 'chat-pop'; pop.setAttribute('role', 'status');
+    const av = document.createElement('div'); av.className = 'chat-av'; av.style.background = chatColor(m.n); av.textContent = (m.n || '?').trim().charAt(0).toUpperCase();
+    const t = document.createElement('div'); t.className = 'chat-pop-t';
+    const b = document.createElement('b'); b.textContent = chatBadName(m.n) ? 'someone' : m.n; b.style.color = chatColor(m.n);
+    const sp = document.createElement('span'); sp.textContent = chatMask(m.m);
+    t.append(b, sp); pop.append(av, t);
+    pop.title = 'Open the chat';
+    pop.addEventListener('click', () => { pop.remove(); chatToggle(true); });
+    chatPops.appendChild(pop);
+    while(chatPops.children.length > 3) chatPops.firstElementChild.remove();
+    const bye = () => { pop.classList.add('out'); setTimeout(() => pop.remove(), 220); };
+    let tm = setTimeout(bye, 6500);
+    pop.addEventListener('mouseenter', () => clearTimeout(tm));
+    pop.addEventListener('mouseleave', () => { tm = setTimeout(bye, 2500); });
+  }
+  let chatAc = null;
+  function chatPing(){
+    try{
+      chatAc = chatAc || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = chatAc.currentTime, g = chatAc.createGain(); g.connect(chatAc.destination);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
+      [880, 1320].forEach((f, i) => { const o = chatAc.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.connect(g); o.start(t0 + i * 0.09); o.stop(t0 + 0.36); });
+    }catch(e){}
+  }
+  async function chatSend(ta, grow){
+    const text = ta.value.trim().replace(/\s+/g, ' '); if(!text) return;
+    if(text.length > CHAT_MAX){ toast(`Messages can be up to ${CHAT_MAX} characters.`, 2000); return; }
+    if(chatBad(text)){ toast("That message has a word that isn't allowed — please keep it friendly.", 2800); ta.focus(); return; }
+    if(chatBadName(chatName())){ toast('Please change your chat name first (the gear button).', 2800); return; }
+    if(Date.now() - (CHAT.lastSend || 0) < 1500){ toast('Slow down a little — one message at a time.', 1600); return; }
+    CHAT.lastSend = Date.now();
+    const send = chatPanel.querySelector('.chat-send'); if(send) send.disabled = true;
+    try{
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: { '.sv': 'timestamp' }, u: chatUid() }) });
+      if(!r.ok) throw new Error('the chat server answered ' + r.status);
+      ta.value = ''; CHAT._scrollDown = true; grow();
+    }catch(err){ console.error(err); toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
+    finally{ if(send) send.disabled = !ta.value.trim(); ta.focus(); }
+  }
+  // Esc closes the panel (when the focus isn't in a box that handles it)
+  window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.open && !e.defaultPrevented && chatPanel.contains(document.activeElement)){ e.preventDefault(); chatToggle(false); } }, true);
+  chatUpdateBadge();
+  if(chatName()) setTimeout(chatConnect, 1500);
 
   // Ask before the tab is closed / reloaded while there's work on screen
   // (tracks loaded, a video added, or a render running). Browsers show
