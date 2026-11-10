@@ -20144,7 +20144,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 12;                 // ← goes up by one with every published version
+  const SD_BUILD = 13;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20156,22 +20156,47 @@
     sdBtn.title = newer ? `SaiDeck ${sdLatest.version || ''} (build ${sdLatest.build}) is ready — click to update` : `SaiDeck ${SD_VERSION_NAME} · build ${SD_BUILD} — check for a new version`;
     const lb = sdBtn.querySelector('.sd-update-lbl'); if(lb) lb.textContent = newer ? 'Update ready' : 'Update';
   }
+  // GitHub's raw file server keeps copies for a few minutes, so "main" can
+  // still hand out the old file right after a publish. The newest commit's
+  // id comes from GitHub's API (never cached), and files fetched by that id
+  // are always exactly that version.
+  async function sdLatestSha(){
+    try{
+      const r = await fetch(`https://api.github.com/repos/${SD_REPO}/commits/main`, { cache: 'no-store', headers: { Accept: 'application/vnd.github.sha' } });
+      if(!r.ok) return null;
+      const t = (await r.text()).trim();
+      return /^[0-9a-f]{40}$/.test(t) ? t : null;
+    }catch(e){ return null; }
+  }
   async function sdFetchLatest(){
-    const r = await fetch(SD_RAW + 'version.json?t=' + Date.now(), { cache: 'no-store' });
+    const sha = await sdLatestSha();
+    const r = await fetch(`https://raw.githubusercontent.com/${SD_REPO}/${sha || 'main'}/version.json` + (sha ? '' : '?t=' + Date.now()), { cache: 'no-store' });
     if(!r.ok) throw new Error('GitHub answered ' + r.status);
-    sdLatest = await r.json(); sdMarkBtn();
+    sdLatest = await r.json(); sdLatest._sha = sha; sdMarkBtn();
     return sdLatest;
   }
-  // the folder this SaiDeck file is in, with permission to write
-  async function sdAppFolder(name){
-    const has = async (d) => { try{ await d.getFileHandle(name); return true; }catch(e){ return false; } };
+  const sdBuildOf = (txt) => ((/const SD_BUILD = (\d+);/.exec(txt) || [])[1] | 0);
+  // the folder this SaiDeck file is in, with permission to write — and it has
+  // to be *this* copy (same build as the one running), not another SaiDeck
+  // with the same name somewhere else
+  async function sdAppFolder(name, newBuild){
+    const fileBuild = async (d) => { try{ return sdBuildOf(await (await (await d.getFileHandle(name)).getFile()).text()); }catch(e){ return -1; } };
+    const mine = async (d) => { const b = await fileBuild(d); return b === SD_BUILD || (newBuild && b >= newBuild) ? b : -1; };
     const ok = async (d) => { try{ let p = await d.queryPermission({ mode: 'readwrite' }); if(p !== 'granted') p = await d.requestPermission({ mode: 'readwrite' }); return p === 'granted'; }catch(e){ return false; } };
-    for(const d of [projectFolderHandle, pendingProjectFolderHandle]){ if(d && await ok(d) && await has(d)) return d; }
-    try{ const d = await idbGet('saideckAppFolder'); if(d && await ok(d) && await has(d)) return d; }catch(e){}
+    const tried = [];
+    const cand = [projectFolderHandle, pendingProjectFolderHandle];
+    try{ cand.push(await idbGet('saideckAppFolder')); }catch(e){}
+    for(const d of cand){
+      if(!d || tried.some(x => { try{ return x === d; }catch(e){ return false; } })) continue;
+      tried.push(d);
+      if(await ok(d) && (await mine(d)) >= 0) return d;
+    }
     if(!window.showDirectoryPicker) throw new Error("This browser can't save files — use Chrome or Edge.");
-    toast(`Pick the folder that has “${name}” in it — SaiDeck saves the new version there.`, 4200);
+    toast(`Pick the folder that has this “${name}” in it (the one you opened) — SaiDeck saves the new version there.`, 5000);
     const d = await window.showDirectoryPicker({ id: 'saideck-app', mode: 'readwrite' });
-    if(!(await has(d))) throw new Error(`That folder doesn't have “${name}” in it.`);
+    const b = await fileBuild(d);
+    if(b < 0) throw new Error(`That folder doesn't have “${name}” in it.`);
+    if(b !== SD_BUILD && !(newBuild && b >= newBuild)) throw new Error(`The “${name}” in that folder is a different copy (build ${b}, but the one open is build ${SD_BUILD}). Pick the folder of the file you opened.`);
     try{ await idbSet('saideckAppFolder', d); }catch(e){}
     return d;
   }
@@ -20180,37 +20205,60 @@
     if(!here){ location.reload(); return; }                      // (not a file on this computer: a reload gets the new one)
     sdBusy = true; sdBtn.classList.add('busy');
     try{
-      const dir = await sdAppFolder(here);
+      const want = v.build | 0;
+      const dir = await sdAppFolder(here, want);
+      // already written by an earlier try (but this page wasn't reloaded)?
+      const cur = sdBuildOf(await (await (await dir.getFileHandle(here)).getFile()).text());
+      if(cur >= want){ sdPending = { build: cur, file: here, folder: dir.name }; sdAfterUpdate(v); return; }
       toast('Downloading the new SaiDeck…', 2500);
-      const r = await fetch(SD_RAW + (v.file || 'SaiDeck.html') + '?t=' + Date.now(), { cache: 'no-store' });
+      const sha = v._sha || await sdLatestSha();
+      const r = await fetch(`https://raw.githubusercontent.com/${SD_REPO}/${sha || 'main'}/${v.file || 'SaiDeck.html'}` + (sha ? '' : '?t=' + Date.now()), { cache: 'no-store' });
       if(!r.ok) throw new Error('GitHub answered ' + r.status);
       const src = await r.text();
       if(!/const SD_BUILD = \d+;/.test(src) || src.length < 100000) throw new Error('The download looks incomplete — nothing was changed.');
+      const got = sdBuildOf(src);
+      if(got < want) throw new Error(`GitHub is still handing out the old file (build ${got}) — nothing was changed. Try again in a minute or two.`);
       // this file and its twin copies (any SaiDeck in the folder that can update itself), each backed up first
       const targets = [here];
       for await (const [nm, h] of dir.entries()){
         if(h.kind !== 'file' || nm === here || !/\.html?$/i.test(nm) || /\((before update|build \d+)\)/i.test(nm)) continue;
-        try{ const t = await (await h.getFile()).text(); const m = /const SD_BUILD = (\d+);/.exec(t); if(m && (m[1] | 0) < (v.build | 0) && t.includes(`SD_REPO = '${SD_REPO}'`)) targets.push(nm); }catch(e){}
+        try{ const t = await (await h.getFile()).text(); const b = sdBuildOf(t); if(b && b < got && t.includes(`SD_REPO = '${SD_REPO}'`)) targets.push(nm); }catch(e){}
       }
       // (the old copy goes into an "Old versions" folder next to it, named by its build)
       const oldDir = await dir.getDirectoryHandle('Old versions', { create: true });
       for(const nm of targets){
         const fh = await dir.getFileHandle(nm), old = await (await fh.getFile()).text();
-        const ob = (/const SD_BUILD = (\d+);/.exec(old) || [])[1] || '0';
-        const bak = await oldDir.getFileHandle(nm.replace(/(\.html?)$/i, ` (build ${ob})$1`), { create: true });
+        const bak = await oldDir.getFileHandle(nm.replace(/(\.html?)$/i, ` (build ${sdBuildOf(old)})$1`), { create: true });
         let w = await bak.createWritable(); await w.write(old); await w.close();
         w = await fh.createWritable(); await w.write(src); await w.close();
       }
+      // make sure it really landed
+      const now = sdBuildOf(await (await (await dir.getFileHandle(here)).getFile()).text());
+      if(now < got) throw new Error("The new version couldn't be written into the folder (is the file open somewhere else, or read-only?).");
+      sdPending = { build: got, file: here, folder: dir.name };
       sdAfterUpdate(v);
     }catch(err){
       if(err && err.name === 'AbortError') toast('Update cancelled.', 1600);
-      else { console.error(err); toast(`Couldn't update: ${err.message || err}`, 4200); }
+      else { console.error(err); toast(`Couldn't update: ${err.message || err}`, 5200); }
     }finally{ sdBusy = false; sdBtn.classList.remove('busy'); }
   }
   // After an update: offer to save, then reload into the new version straight away
   // (without the browser's own "Leave site?" box, since SaiDeck just asked).
-  let sdReloading = false;
-  function sdReload(){ sdReloading = true; location.reload(); }
+  let sdReloading = false, sdPending = null;
+  function sdRemember(){ if(sdPending) try{ localStorage.setItem('sd.update.expect', JSON.stringify(sdPending)); }catch(e){} }
+  function sdReload(){ sdReloading = true; sdRemember(); location.reload(); }
+  // After the reload: if this is still the old build, the new one went into
+  // another copy of SaiDeck with the same name — say where, and forget that
+  // folder so the next Update asks for the right one.
+  (() => {
+    let x = null; try{ x = JSON.parse(localStorage.getItem('sd.update.expect') || 'null'); localStorage.removeItem('sd.update.expect'); }catch(e){}
+    if(!x || !(x.build > SD_BUILD)) return;
+    const here = location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '';
+    if(x.file && here && x.file !== here) return;
+    idbSet('saideckAppFolder', null);
+    setTimeout(() => lyrConfirm(`This SaiDeck is still build ${SD_BUILD}`,
+      `The new build ${x.build} was saved into the SaiDeck in the folder “${x.folder || '?'}”, but the file you have open is a different copy somewhere else.\n\nEither open the SaiDeck.html in “${x.folder || '?'}”, or press the Update button again and pick the folder of this file.`, 'Got it'), 1200);
+  })();
   function sdAskSave(v){
     return new Promise(resolve => {
       const ov = document.createElement('div');
@@ -20230,7 +20278,7 @@
     const work = tracks.length || projVideo;
     if(!work){ toast(`Updated to SaiDeck ${v.version || ''} (build ${v.build}) — reloading…`, 2000); setTimeout(sdReload, 900); return; }
     const choice = await sdAskSave(v);
-    if(choice === 'later'){ toast('Updated. SaiDeck starts the new version the next time it opens or reloads.', 4000); return; }
+    if(choice === 'later'){ sdRemember(); toast('Updated. SaiDeck starts the new version the next time it opens or reloads.', 4000); return; }
     if(choice === 'save'){
       try{
         if(!projectFolderHandle && pendingProjectFolderHandle) await connectProjectFolder();   // (this click lets the browser reconnect the folder)

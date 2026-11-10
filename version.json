@@ -1,9 +1,9 @@
 {
-  "build": 12,
+  "build": 13,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Keys: click “Keys” on a track to pick all its keys; a key bar appears with In line (every key at the same moment), Whole track, Copy, Paste and Delete.",
-    "Keys: paste copied keys onto any tracks — at the playhead or at the same times (Ctrl+C / Ctrl+V work too), then drag them into place."
+    "Update fix: SaiDeck now always downloads the exact newest version (no more getting the old file again right after a release).",
+    "Update fix: it checks it's updating the same SaiDeck file you have open, and tells you if the new version went into a different copy."
   ]
 }
