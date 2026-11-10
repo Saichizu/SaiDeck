@@ -166,7 +166,7 @@
   .chat-msg{display:flex;gap:8px;align-items:flex-end;max-width:92%;}
   .chat-msg.me{align-self:flex-end;flex-direction:row-reverse;}
   .chat-av{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 11px 'Inter',sans-serif;color:#111;}
-  .chat-msg.me .chat-av{display:none;}
+  .chat-msg.me .chat-av{width:22px;height:22px;font-size:10px;}
   .chat-bub{min-width:0;padding:7px 10px 6px;border-radius:12px 12px 12px 4px;background:#23242e;color:var(--text);font-size:13px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;}
   .chat-msg.me .chat-bub{border-radius:12px 12px 4px 12px;background:rgba(180,140,255,.22);border:1px solid rgba(180,140,255,.35);}
   .chat-meta{display:flex;gap:6px;align-items:baseline;margin-bottom:2px;font-size:11px;}
@@ -256,6 +256,36 @@
   .chat-crop-z{align-self:stretch;display:flex;align-items:center;gap:10px;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);}
   .chat-crop-z input{flex:1;accent-color:#b48cff;}
   .chat-crop .chat-row{align-self:stretch;}
+  .chat-fd{display:flex;align-items:center;gap:9px;margin-top:6px;padding:7px 8px 7px 9px;border-radius:10px;background:rgba(180,140,255,.12);border:1px solid rgba(180,140,255,.4);white-space:normal;}
+  .chat-fd-ic{flex:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#b48cff,#35d0b8);}
+  .chat-fd-ic svg{width:16px;height:16px;fill:#16102a;}
+  .chat-fd-t{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .chat-fd-t b{font:700 12.5px 'Inter',sans-serif;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-fd-t small{font-size:10.5px;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-fd-go{all:unset;flex:none;cursor:pointer;padding:6px 11px;border-radius:8px;background:#b48cff;color:#16102a;font:800 11.5px 'Inter',sans-serif;}
+  .chat-fd-go:hover{background:#c6a6ff;}
+  .chat-fd-go:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .chat-fd-go.done{background:rgba(53,208,184,.18);color:#7ee8d6;}
+  .chat-fd-go:disabled{opacity:.6;cursor:default;}
+  .chat-fd-x{width:24px;height:24px;flex:none;}
+  .chat-fd-x svg{width:14px;height:14px;}
+  .chat-offtag.you{background:#b48cff;}
+  .chat-av.poke{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;}
+  .chat-av.poke:hover{transform:scale(1.1);box-shadow:0 0 0 2px rgba(180,140,255,.7);}
+  .chat-av.poke:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
+  .chat-poke{position:absolute;z-index:6;display:flex;flex-direction:column;gap:7px;padding:9px;border-radius:12px;background:#22232d;border:1px solid rgba(180,140,255,.45);box-shadow:0 12px 30px rgba(0,0,0,.55);max-width:calc(100% - 16px);}
+  .chat-poke-h{display:flex;flex-direction:column;gap:1px;padding:0 3px;}
+  .chat-poke-h b{font:700 12.5px 'Inter',sans-serif;color:var(--text);}
+  .chat-poke-h span{font-size:10.5px;color:var(--text-faint);}
+  .chat-poke-row{display:flex;gap:3px;flex-wrap:wrap;}
+  .chat-poke-row button{all:unset;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;line-height:1;}
+  .chat-poke-row button:hover:not(:disabled){background:rgba(255,255,255,.1);transform:scale(1.15);}
+  .chat-poke-row button:focus-visible{outline:2px solid #b48cff;}
+  .chat-poke-row button:disabled{opacity:.35;cursor:default;}
+  .poke-fx{position:fixed;inset:0;z-index:9000;pointer-events:none;overflow:hidden;}
+  .poke-fx-big{position:absolute;left:50%;top:45%;font-size:min(22vw,180px);line-height:1;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45));}
+  .poke-fx-bit{position:absolute;bottom:-60px;line-height:1;}
+  .poke-fx-tag{position:absolute;left:50%;bottom:90px;padding:8px 14px;border-radius:999px;background:rgba(23,24,31,.92);border:1px solid rgba(180,140,255,.5);color:var(--text);font:700 13px 'Inter',sans-serif;white-space:nowrap;}
   .chat-pops{position:fixed;right:18px;bottom:18px;z-index:370;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
   .chat-pop{pointer-events:auto;width:min(320px, calc(100vw - 36px));display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;
     background:#1d1e28;border:1px solid rgba(180,140,255,.45);box-shadow:0 14px 36px rgba(0,0,0,.55);animation:chatPopIn .22s ease-out;}
@@ -20144,7 +20174,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 13;                 // ← goes up by one with every published version
+  const SD_BUILD = 14;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20448,10 +20478,17 @@
   }
   function chatRerenderSoon(){ clearTimeout(CHAT._rrT); CHAT._rrT = setTimeout(() => { if(CHAT.open) chatRender(); }, 120); }
   const chatInSetup = () => !!chatPanel.querySelector('.chat-setup');
-  function chatAv(uid, name, official){
+  function chatAv(uid, name, official, pokeable){
     const av = document.createElement('div'); av.className = 'chat-av';
-    if(official){ av.classList.add('official'); av.textContent = 'S'; return av; }
+    if(pokeable && uid && !official && !chatIsMe(uid) && !/^u[a-z0-9]{6,20}$/.test(uid)){
+      av.classList.add('poke'); av.tabIndex = 0; av.setAttribute('role', 'button');
+      av.title = `Send ${chatBadName(name) ? 'them' : name} an emoji`; av.setAttribute('aria-label', av.title);
+      const go = (e) => { e.preventDefault(); e.stopPropagation(); chatPokeMenu(uid, chatBadName(name) ? 'someone' : name, av); };
+      av.addEventListener('click', go);
+      av.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') go(e); });
+    }
     const p = chatProfile(uid);
+    if(official && !p){ av.classList.add('official'); av.textContent = 'S'; return av; }
     if(p){ av.classList.add('pic'); av.style.backgroundImage = `url("${p}")`; }
     else { av.style.background = chatColor(name); av.textContent = (name || '?').trim().charAt(0).toUpperCase(); }
     return av;
@@ -20560,7 +20597,8 @@
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
             <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
-            <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label></div>
+            <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label>
+            <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label></div>
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
@@ -20581,6 +20619,9 @@
       const ov = chatPanel.querySelector('.chat-o-vis');
       ov.checked = chatVisible();
       ov.addEventListener('change', () => { chatLS('visible', ov.checked ? '1' : '0'); ov.blur(); presBeat(); toast(ov.checked ? 'Others can see you\'re online.' : 'You now appear offline to others.', 2200); });
+      const ofx = chatPanel.querySelector('.chat-o-fx');
+      ofx.checked = chatFxOn();
+      ofx.addEventListener('change', () => { chatLS('fx', ofx.checked ? '1' : '0'); ofx.blur(); presBeat(); toast(ofx.checked ? 'Emoji effects on — emojis people send you pop up on screen.' : "Emoji effects off — nobody's emojis will pop up on your screen.", 2600); });
       const oc = chatPanel.querySelector('.chat-online');
       oc.addEventListener('click', () => { const w = chatPanel.querySelector('.chat-who'); w.hidden = !w.hidden; oc.setAttribute('aria-expanded', String(!w.hidden)); presRender(); });
       grow();
@@ -20628,7 +20669,7 @@
     const side = chatPanel.querySelector('.chat-side'); if(!side) return;
     const rb = chatPanel.querySelector('.chat-rooms'); if(rb) rb.setAttribute('aria-expanded', String(CHAT.side === 'rooms'));
     side.hidden = CHAT.side !== 'rooms';
-    if(side.hidden){ side.innerHTML = ''; return; }
+    if(side.hidden){ side.innerHTML = ''; side.dataset.built = ''; return; }
     if(side.dataset.built === chatRoom() + '|' + (CHAT.cfg.rooms !== false)) return;
     side.dataset.built = chatRoom() + '|' + (CHAT.cfg.rooms !== false);
     const cur = chatRoom(), groupsOn = CHAT.cfg.rooms !== false;
@@ -20671,27 +20712,32 @@
     const body = chatPanel.querySelector('.chat-body'); if(!body) return;
     const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
     body.innerHTML = '';
-    const shown = CHAT.order.filter(k => { const m = CHAT.msgs.get(k); return m && !(chatBanned(m.u) && !m.a); });
+    const shown = CHAT.order.filter(k => { const m = CHAT.msgs.get(k); return m && !(chatBanned(m.u) && !m.a); }).map(k => CHAT.msgs.get(k));
+    // Freedits the admin sent just to you show in every room
+    for(const [id, it] of Object.entries(CHAT.inbox || {})) if(it && it.name) shown.push({ n: 'SaiDeck', m: it.m || '', t: it.t || 0, u: it.u, a: true, f: { id, name: it.name, size: it.size }, mine: true });
+    shown.sort((a, b) => a.t - b.t);
     if(!shown.length){
       body.innerHTML = `<div class="chat-empty">${!CHAT.ready ? 'Loading messages…' : chatRoom() === CHAT_ROOM ? 'No messages yet. Say hi — everyone using SaiDeck sees it.' : `No messages in ${escapeHtml(chatRoomLabel(chatRoom()))} yet. Share the code “${escapeHtml(chatRoom().slice(2))}” so friends can join.`}</div>`;
       return;
     }
     let lastDay = '';
-    for(const k of shown){
-      const m = CHAT.msgs.get(k), day = chatFmtDay(m.t), off = m.a === true;
+    for(const m of shown){
+      const day = chatFmtDay(m.t), off = m.a === true;
       if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
       const mine = chatIsMe(m.u) && !off;
       const row = document.createElement('div'); row.className = 'chat-msg' + (mine ? ' me' : '') + (off ? ' official' : '');
-      const av = chatAv(m.u, m.n, off);
+      const av = chatAv(m.u, m.n, off, true);
       const bub = document.createElement('div'); bub.className = 'chat-bub';
       const meta = document.createElement('div'); meta.className = 'chat-meta';
       const nb = document.createElement('b'); nb.textContent = off ? 'SaiDeck' : chatBadName(m.n) ? 'someone' : m.n; if(!off) nb.style.color = chatColor(m.n);
       meta.appendChild(nb);
-      if(off){ const tag = document.createElement('i'); tag.className = 'chat-offtag'; tag.textContent = 'official'; meta.appendChild(tag); }
+      if(off){ const tag = document.createElement('i'); tag.className = 'chat-offtag' + (m.mine ? ' you' : ''); tag.textContent = m.mine ? 'just for you' : 'official'; meta.appendChild(tag); }
       const tm = document.createElement('span'); tm.textContent = chatFmtTime(m.t);
       meta.appendChild(tm);
-      const tx = document.createElement('div'); tx.textContent = off ? m.m : chatMask(m.m);
-      bub.append(meta, tx); row.append(av, bub); body.appendChild(row);
+      bub.appendChild(meta);
+      if(m.m){ const tx = document.createElement('div'); tx.textContent = off ? m.m : chatMask(m.m); bub.appendChild(tx); }
+      if(off && m.f && m.f.id) bub.appendChild(chatFdChip(m.f, m.mine));
+      row.append(av, bub); body.appendChild(row);
     }
     if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
   }
@@ -20744,7 +20790,7 @@
         catch(err){ console.error(err); toast(chatBanned(chatUid()) ? "You can't change your picture right now." : "Couldn't save your picture — check your internet connection.", 3200); }
       }
       CHAT._setupAv = null;
-      presStart(); presBeat();
+      presStart(); presBeat(); chatRegister(); chatPollInbox();
       chatPanel.innerHTML = '';
       if(!CHAT.es) chatConnect();
       CHAT._scrollDown = true;
@@ -20758,7 +20804,7 @@
     CHAT.open = open == null ? !CHAT.open : !!open;
     chatPanel.hidden = !CHAT.open;
     if(CHAT.open){
-      if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans();
+      if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans(); chatPollInbox();
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
@@ -20852,7 +20898,187 @@
       if((prevRooms === false) !== (CHAT.cfg.rooms === false) && CHAT.room && CHAT.room !== chatRoom()){ chatConnect(); chatPanel.innerHTML = ''; }
       if(CHAT.open) chatRender();
     });
+    if(chatName()){ chatPollInbox(); chatRegister(); }
+    setInterval(() => { if(document.visibilityState === 'visible') chatPollInbox(); }, 30000);
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') chatPollInbox(); });
     CHAT.pollBans = chatPoll('bans', (b) => { CHAT.bans = b || {}; chatUpdateBadge(); if(CHAT.open) chatRender(); });
+  }
+  // ----- Freedits from the admin: in a room, or sent just to you -----
+  // The file itself is kept at fddata/<id> (only the admin can write it, and
+  // only the people it was sent to — or everyone, for a room — can read it).
+  const fdSize = (n) => !n ? '' : n < 1024 * 1024 ? Math.max(1, Math.round(n / 1024)) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
+  function chatFdGot(){ try{ return new Set(JSON.parse(chatLS('fdgot') || '[]')); }catch(e){ return new Set(); } }
+  function chatFdChip(f, mine){
+    const box = document.createElement('div'); box.className = 'chat-fd';
+    box.innerHTML = `<span class="chat-fd-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 14.6 8.6 21.5 9.2 16.2 13.7 17.9 20.5 12 16.8 6.1 20.5 7.8 13.7 2.5 9.2 9.4 8.6z"/></svg></span>
+      <span class="chat-fd-t"><b></b><small></small></span><button type="button" class="chat-fd-go"></button>`;
+    box.querySelector('b').textContent = f.name;
+    box.querySelector('small').textContent = ['Freedit', fdSize(f.size)].filter(Boolean).join(' · ');
+    const b = box.querySelector('.chat-fd-go'), got = chatFdGot().has(f.id);
+    b.textContent = got ? 'Installed ✓' : 'Install';
+    b.classList.toggle('done', got);
+    b.title = got ? 'Installed — click to install it again' : `Add the ${f.name} Freedit to SaiDeck`;
+    b.addEventListener('click', () => chatFdInstall(f, b));
+    if(mine){
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'chat-icon chat-fd-x'; x.title = 'Remove this from your chat'; x.setAttribute('aria-label', `Remove ${f.name} from your chat`); x.innerHTML = ICON_X;
+      x.addEventListener('click', () => chatInboxRemove(f.id));
+      box.appendChild(x);
+    }
+    return box;
+  }
+  async function chatFdInstall(f, btn){
+    if(btn){ btn.disabled = true; btn.textContent = 'Installing…'; }
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/fddata/${encodeURIComponent(f.id)}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+      if(r.status === 401 || r.status === 403) throw new Error("This Freedit isn't available anymore.");
+      if(!r.ok) throw new Error("Couldn't download it — check your internet connection.");
+      const src = await r.json();
+      if(typeof src !== 'string' || !src) throw new Error("This Freedit isn't available anymore.");
+      const P = fdActivate(src);
+      await fdDbPut({ id: P.id, name: P.name, version: P.version || 1, src, at: Date.now() }).catch(err => { console.error(err); toast(`${P.name} works for now, but this browser wouldn't save it for next time.`, 4000); });
+      fdRenderInstalled(); syncRecControls();
+      const got = chatFdGot(); got.add(f.id); chatLS('fdgot', JSON.stringify([...got].slice(-200)));
+      if(btn){ btn.textContent = 'Installed ✓'; btn.classList.add('done'); }
+      toast(`Installed ${P.name || f.name} — pick it under Freedit → Edit style in the Render panel.`, 3600);
+    }catch(err){
+      console.error(err);
+      if(btn) btn.textContent = 'Install';
+      toast(err.message || "Couldn't install it.", 3600);
+    }finally{ if(btn) btn.disabled = false; }
+  }
+  // your own "for you" list, checked every 30 s (and when the chat opens)
+  async function chatPollInbox(){
+    if(!chatName() || !chatLS('rt') || CHAT._inboxBusy) return;
+    CHAT._inboxBusy = true;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/inbox/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+      if(!r.ok) return;
+      const box = (await r.json()) || {};
+      let seen; try{ seen = new Set(JSON.parse(chatLS('inboxseen') || '[]')); }catch(e){ seen = new Set(); }
+      const fresh = Object.entries(box).filter(([id, it]) => it && it.name && !seen.has(id));
+      const changed = JSON.stringify(box) !== JSON.stringify(CHAT.inbox || {});
+      CHAT.inbox = box;
+      for(const [id, it] of fresh){
+        seen.add(id);
+        if(CHAT.open && document.visibilityState === 'visible') continue;
+        CHAT.unread++;
+        if(chatSoundOn()) chatPing();
+        if(chatPopsOn()) chatPopup({ n: 'SaiDeck', a: true, u: it.u, m: it.m ? `“${it.name}” Freedit for you: ${it.m}` : `sent you the “${it.name}” Freedit — open the chat to install it.` });
+      }
+      if(fresh.length) chatLS('inboxseen', JSON.stringify([...seen].slice(-300)));
+      chatUpdateBadge();
+      if(changed && CHAT.open){ CHAT._scrollDown = fresh.length > 0; chatRender(); }
+    }catch(e){}
+    finally{ CHAT._inboxBusy = false; }
+  }
+  async function chatInboxRemove(id){
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/inbox/${encodeURIComponent(chatUid())}/${encodeURIComponent(id)}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' });
+      if(!r.ok) throw new Error('the chat server answered ' + r.status);
+      delete CHAT.inbox[id]; chatRender();
+    }catch(err){ console.error(err); toast("Couldn't remove it — check your internet connection.", 2600); }
+  }
+  // the admin's list of everyone who has used the chat (only the admin can read it)
+  async function chatRegister(){
+    const name = chatName(); if(!name || chatBadName(name)) return;
+    try{
+      const tok = await chatAuth();
+      await fetch(`${CHAT_DB}/people/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
+    }catch(e){}
+  }
+  // ----- emoji pokes: click someone's picture, pick an emoji, it pops up on their screen -----
+  // pokes/<their chat id>/<id> = { e: which emoji, n: your name, u: you, t }.
+  // Each SaiDeck listens to its own list (only it can read it), shows each one
+  // and removes it. "Emoji effects" off = nothing pops up (and others see that).
+  const POKE_EMO = ['👋', '❤️', '😂', '🔥', '👏', '🎉', '😮', '🎵'];
+  const chatFxOn = () => chatLS('fx') !== '0';
+  let pokeMenuEl = null;
+  function chatPokeClose(){ if(pokeMenuEl){ pokeMenuEl.remove(); pokeMenuEl = null; document.removeEventListener('pointerdown', chatPokeOutside, true); window.removeEventListener('keydown', chatPokeKey, true); } }
+  function chatPokeOutside(e){ if(pokeMenuEl && !pokeMenuEl.contains(e.target)) chatPokeClose(); }
+  function chatPokeKey(e){ if(e.key === 'Escape' && pokeMenuEl){ e.preventDefault(); e.stopImmediatePropagation(); const a = pokeMenuEl._anchor; chatPokeClose(); if(a) a.focus(); } }
+  function chatPokeMenu(uid, name, anchor){
+    const same = pokeMenuEl && pokeMenuEl._uid === uid && pokeMenuEl._anchor === anchor;
+    chatPokeClose(); if(same) return;
+    const p = PRES.list && PRES.list[uid], off = !!(p && p.x === false), on = !!(p && typeof p.t === 'number' && Date.now() + PRES.offset - p.t < 150000);
+    const m = document.createElement('div'); m.className = 'chat-poke'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', `Send ${name} an emoji`);
+    m._uid = uid; m._anchor = anchor;
+    m.innerHTML = `<div class="chat-poke-h"><b></b><span>${off ? 'has emoji effects turned off' : on ? 'online now — it pops up on their screen' : "isn't online — they'll see it next time"}</span></div><div class="chat-poke-row"></div>`;
+    m.querySelector('b').textContent = name;
+    const row = m.querySelector('.chat-poke-row');
+    POKE_EMO.forEach((em, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = em; b.disabled = off || chatBanned(chatUid());
+      b.setAttribute('aria-label', `Send ${em}`);
+      b.addEventListener('click', () => { chatPokeSend(uid, name, i); chatPokeClose(); });
+      row.appendChild(b);
+    });
+    chatPanel.appendChild(m); pokeMenuEl = m;
+    const pr = chatPanel.getBoundingClientRect(), r = anchor.getBoundingClientRect();
+    const x = Math.max(8, Math.min(pr.width - m.offsetWidth - 8, r.left - pr.left));
+    let y = r.bottom - pr.top + 6; if(y + m.offsetHeight > pr.height - 8) y = r.top - pr.top - m.offsetHeight - 6;
+    m.style.left = x + 'px'; m.style.top = Math.max(8, y) + 'px';
+    setTimeout(() => { document.addEventListener('pointerdown', chatPokeOutside, true); window.addEventListener('keydown', chatPokeKey, true); const f = row.querySelector('button:not(:disabled)'); if(f) f.focus(); }, 0);
+  }
+  async function chatPokeSend(uid, name, e){
+    const wait = 2500 - (Date.now() - (CHAT.lastPoke || 0));
+    if(wait > 0){ toast(`One at a time — you can send another emoji in ${Math.ceil(wait / 1000)} s.`, 1600); return; }
+    CHAT.lastPoke = Date.now();
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ e, n: chatName().slice(0, CHAT_NAME_MAX), u: chatUid(), t: { '.sv': 'timestamp' } }) });
+      if(!r.ok) throw new Error('the chat server answered ' + r.status);
+      toast(`${POKE_EMO[e]} sent to ${name}.`, 1600);
+    }catch(err){ console.error(err); CHAT.lastPoke = 0; toast(chatBlock() || "Couldn't send it — check your internet connection.", 2600); }
+  }
+  // listening for my own pokes
+  const POKE = { es: null, seen: new Set() };
+  async function chatPokeListen(){
+    if(!chatName() || POKE.es) return;
+    let tok; try{ tok = await chatAuth(); }catch(e){ setTimeout(chatPokeListen, 30000); return; }
+    const uid = chatUid();
+    const es = new EventSource(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`);
+    POKE.es = es;
+    const handle = (id, p) => {
+      if(!p || POKE.seen.has(id)) return;
+      POKE.seen.add(id);
+      const age = Date.now() + PRES.offset - (p.t || 0);
+      if(chatFxOn() && age < 90000 && !chatBanned(p.u) && POKE_EMO[p.e]) chatPokeShow(POKE_EMO[p.e], chatBadName(p.n) ? 'Someone' : p.n);
+      chatAuth().then(t => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}/${encodeURIComponent(id)}.json?auth=${encodeURIComponent(t)}`, { method: 'DELETE' })).catch(() => {});
+    };
+    es.addEventListener('put', (ev) => {
+      let d; try{ d = JSON.parse(ev.data); }catch(_){ return; }
+      if(d.path === '/'){ for(const [id, p] of Object.entries(d.data || {})) handle(id, p); }
+      else { const parts = d.path.replace(/^\//, '').split('/'); if(parts.length === 1 && d.data) handle(parts[0], d.data); }
+    });
+    es.addEventListener('patch', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } if(d.path === '/') for(const [id, p] of Object.entries(d.data || {})) handle(id, p); });
+    // (the sign-in pass lasts an hour: when it runs out, get a new one and listen again)
+    const again = (ms) => { if(POKE.es !== es) return; es.close(); POKE.es = null; CHAT_AUTH.exp = 0; setTimeout(chatPokeListen, ms); };
+    es.addEventListener('auth_revoked', () => again(500));
+    es.addEventListener('cancel', () => again(15000));
+    es.addEventListener('error', () => { if(es.readyState === 2) again(8000); });
+  }
+  let pokeFxLayer = null;
+  function chatPokeShow(em, from){
+    if(!pokeFxLayer){ pokeFxLayer = document.createElement('div'); pokeFxLayer.className = 'poke-fx'; pokeFxLayer.setAttribute('aria-live', 'polite'); document.body.appendChild(pokeFxLayer); }
+    const L = pokeFxLayer, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const tag = document.createElement('div'); tag.className = 'poke-fx-tag'; tag.textContent = `${from} sent you ${em}`;
+    L.appendChild(tag);
+    tag.animate([{ opacity: 0, transform: 'translate(-50%, 12px)' }, { opacity: 1, transform: 'translate(-50%, 0)', offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 3000, easing: 'ease-out' }).onfinish = () => tag.remove();
+    const big = document.createElement('div'); big.className = 'poke-fx-big'; big.textContent = em; L.appendChild(big);
+    big.animate(still ? [{ opacity: 0 }, { opacity: 1, offset: .2 }, { opacity: 1, offset: .8 }, { opacity: 0 }]
+      : [{ opacity: 0, transform: 'translate(-50%,-50%) scale(.2) rotate(-20deg)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1.15) rotate(6deg)', offset: .18 }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1) rotate(0)', offset: .3 }, { opacity: 1, transform: 'translate(-50%,-62%) scale(1)', offset: .75 }, { opacity: 0, transform: 'translate(-50%,-80%) scale(.8)' }],
+      { duration: 2200, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => big.remove();
+    if(still) return;
+    for(let i = 0; i < 9; i++){
+      const f = document.createElement('div'); f.className = 'poke-fx-bit'; f.textContent = em;
+      const x = 8 + Math.random() * 84, size = 26 + Math.random() * 30, dx = (Math.random() - .5) * 120, rot = (Math.random() - .5) * 60;
+      f.style.left = x + 'vw'; f.style.fontSize = size + 'px';
+      L.appendChild(f);
+      f.animate([{ transform: 'translateY(0) rotate(0)', opacity: 0 }, { opacity: 1, offset: .12 }, { opacity: 1, offset: .7 }, { transform: `translate(${dx}px, -${55 + Math.random() * 35}vh) rotate(${rot}deg)`, opacity: 0 }],
+        { duration: 1800 + Math.random() * 1200, delay: Math.random() * 450, easing: 'cubic-bezier(.25,.6,.4,1)', fill: 'backwards' }).onfinish = () => f.remove();
+    }
   }
   function chatIncoming(m){
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a)) return;   // (my own message coming back / someone banned)
@@ -20921,7 +21147,8 @@
     try{
       const tok = await chatAuth(), uid = chatUid();
       if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
-      const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify({ n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) });
+      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false;
+      const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
     }catch(e){}
@@ -20946,7 +21173,7 @@
       const h = document.createElement('div'); h.className = 'chat-who-h'; h.textContent = on.length ? `Using SaiDeck now · ${on.length}` : 'Nobody else is on right now'; w.appendChild(h);
       for(const p of on){
         const row = document.createElement('div'); row.className = 'chat-who-r';
-        const av = chatAv(p.uid, p.n);
+        const av = chatAv(p.uid, p.n, false, true);
         const nm = document.createElement('span'); nm.textContent = p.n + (p.me ? ' (you)' : '');
         const dot = document.createElement('span'); dot.className = 'chat-dot on';
         row.append(av, nm, dot); w.appendChild(row);
@@ -20960,7 +21187,7 @@
   function presStart(){
     if(PRES.started || !chatName()) return;
     PRES.started = true;
-    presBeat();
+    presBeat(); chatPokeListen();
     PRES.timer = setInterval(presBeat, 45000);
     setInterval(presRender, 20000);                              // (people drop off when they stop checking in)
     const open = () => {
