@@ -1506,6 +1506,36 @@
   .key-marker.multi .key-handle::after{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px rgba(255,255,255,.7));}
   body.key-dragging, body.key-dragging *{cursor:ew-resize !important;}
   .key-marker .key-handle{touch-action:none;}
+  .track-key-row .key-all-btn{all:unset;box-sizing:border-box;flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:clip;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text-faint);cursor:pointer;border-radius:4px;padding:2px 0;}
+  .track-key-row .key-all-btn:hover{color:var(--text);text-decoration:underline;text-underline-offset:2px;}
+  .track-key-row .key-all-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .key-bar{position:fixed;z-index:330;transform:translateX(-50%);width:max-content;display:flex;align-items:center;gap:4px;padding:5px 6px 5px 12px;border-radius:12px;background:rgba(23,24,31,.96);border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 32px rgba(0,0,0,.5);max-width:calc(100vw - 16px);flex-wrap:wrap;justify-content:center;}
+  .key-bar[hidden]{display:none;}
+  .key-bar .kb-n{font:700 11.5px 'Inter',sans-serif;color:var(--text);margin-right:6px;white-space:nowrap;}
+  .key-bar button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:8px;cursor:pointer;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);white-space:nowrap;}
+  .key-bar button svg{width:15px;height:15px;fill:currentColor;flex:none;}
+  .key-bar button:hover:not(:disabled){background:rgba(255,255,255,.08);color:var(--text);}
+  .key-bar button:focus-visible{outline:2px solid var(--accent);}
+  .key-bar button:disabled{opacity:.35;cursor:default;}
+  .key-bar .kb-del:hover:not(:disabled){color:#ff8a94;background:rgba(255,77,94,.12);}
+  .key-bar .kb-x{padding:6px;}
+  .key-bar .kb-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 3px;}
+  .key-paste{position:fixed;z-index:340;width:260px;max-height:70vh;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#1b1c24;border:1px solid rgba(255,255,255,.16);box-shadow:0 16px 40px rgba(0,0,0,.55);font-size:12.5px;color:var(--text);}
+  .key-paste .kp-h{font:800 13px 'Manrope',sans-serif;}
+  .key-paste .kp-list{display:flex;flex-direction:column;gap:2px;overflow-y:auto;max-height:240px;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px;}
+  .key-paste .kp-list label{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;}
+  .key-paste .kp-list label:hover{background:rgba(255,255,255,.06);}
+  .key-paste .kp-list i{width:10px;height:10px;border-radius:3px;flex:none;}
+  .key-paste .kp-list span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .key-paste .kp-where{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--text-dim);}
+  .key-paste .kp-where label{display:flex;gap:7px;align-items:center;cursor:pointer;}
+  .key-paste input{accent-color:var(--accent);}
+  .key-paste .kp-row{display:flex;gap:6px;}
+  .key-paste .kp-row button{all:unset;box-sizing:border-box;flex:1;text-align:center;padding:7px 8px;border-radius:8px;cursor:pointer;font:700 11.5px 'Inter',sans-serif;border:1px solid rgba(255,255,255,.14);color:var(--text);}
+  .key-paste .kp-row button:hover{background:rgba(255,255,255,.06);}
+  .key-paste .kp-row button:focus-visible{outline:2px solid var(--accent);}
+  .key-paste .kp-go{background:var(--accent) !important;border-color:var(--accent) !important;color:#fff !important;}
+  .key-paste .kp-go:disabled{opacity:.45;cursor:default;}
   .key-box{position:fixed;display:none;z-index:400;border:1px dashed #fff;background:rgba(180,140,255,.14);border-radius:3px;pointer-events:none;}
   .key-hover-line{
     position:absolute;
@@ -7887,7 +7917,7 @@
           </div>
         </div>
         <div class="track-key-row">
-          <span class="key-row-label">Keys</span>
+          <button type="button" class="key-row-label key-all-btn" title="Pick all of this track's keys — then drag them, copy them, or paste them onto another track" aria-label="Pick all keys on ${escapeHtml(t.name)}">Keys</button>
           <button class="ms-btn harm-mark-btn" title="Harmony Mark: start / end this track's harmony at the playhead" aria-label="Harmony mark on ${escapeHtml(t.name)}">
             <svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="15" cy="12" r="5.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
           </button>
@@ -8094,6 +8124,7 @@
     t.ownResInput.addEventListener('input', () => { t.resPow = t.ownResInput.value / 100; syncTrackPowerUI(t); });
     syncTrackPowerUI(t);
     keyNextBtn.addEventListener('click', () => navigateKey(t, 1));
+    header.querySelector('.key-all-btn').addEventListener('click', (e) => { e.stopPropagation(); keyPickTrack(t, e.ctrlKey || e.metaKey || e.shiftKey); });
     keyEditBtn.addEventListener('click', (e) => {
       const key = t.keys.find(k => k.id === t.selectedKeyId);
       if(!key){ toast('No key selected — click a key marker or use the arrows first.'); return; }
@@ -8920,7 +8951,7 @@
   let keyDrag = null;
   const KEY_SAME_MOMENT = 0.25;              // s — "at the same position" for Alt+click
   function keySelItems(){ const out = []; for(const t of tracks) for(const k of t.keys) if(keySel.has(k.id)) out.push({ t, k }); return out; }
-  function keySelRefresh(){ for(const t of tracks) renderKeyMarkers(t); }
+  function keySelRefresh(){ for(const t of tracks) renderKeyMarkers(t); keyBarUpdate(); }
   function keySelClear(){
     if(!keySel.size) return false;
     keySel.clear();
@@ -9019,6 +9050,148 @@
     scheduleHistoryCheck(0);
     toast(`${items.length} key${items.length === 1 ? '' : 's'} removed (Ctrl+Z brings ${items.length === 1 ? 'it' : 'them'} back).`, 2400);
     return true;
+  }
+  // ----- the key bar: shows while keys are picked (or copied) -----
+  // In line = every key at the same moments as the picked ones (all tracks)
+  // Whole track = every key on the picked keys' tracks
+  // Copy / Paste = put copies on other tracks, at the playhead or at the same times
+  let KEY_CLIP = null;           // { items: [{ dT, color, trailEffect, transitionMs }], n, tracks }
+  const keyBar = document.createElement('div'); keyBar.className = 'key-bar'; keyBar.hidden = true; keyBar.setAttribute('role', 'toolbar'); keyBar.setAttribute('aria-label', 'Picked keys');
+  keyBar.innerHTML = `<span class="kb-n"></span>
+    <button type="button" data-k="line" title="Also pick every key at the same moment on all tracks (Alt+click a key does this too)"><svg viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M12 5.5 15 8.5 12 11.5 9 8.5zM12 12.5 15 15.5 12 18.5 9 15.5z"/></svg>In line</button>
+    <button type="button" data-k="track" title="Pick every key on the picked keys' tracks (clicking “Keys” on a track does this too)"><svg viewBox="0 0 24 24"><path d="M2 11h20v2H2z"/><path d="M6 8.5 9 11.5 6 14.5 3 11.5zM12 8.5 15 11.5 12 14.5 9 11.5zM18 8.5 21 11.5 18 14.5 15 11.5z"/></svg>Whole track</button>
+    <span class="kb-sep"></span>
+    <button type="button" data-k="copy" title="Copy the picked keys (Ctrl+C)"><svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11z"/></svg>Copy</button>
+    <button type="button" data-k="paste" title="Paste the copied keys onto tracks you choose (Ctrl+V)"><svg viewBox="0 0 24 24"><path d="M19 2h-4.2A3 3 0 0 0 12 0a3 3 0 0 0-2.8 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 18H5V4h2v3h10V4h2z"/></svg>Paste…</button>
+    <span class="kb-sep"></span>
+    <button type="button" data-k="del" class="kb-del" title="Remove the picked keys (Delete)"><svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></svg>Delete</button>
+    <button type="button" data-k="clear" class="kb-x" title="Let go of the picked keys (Esc)" aria-label="Let go of the picked keys"><svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg></button>`;
+  document.body.appendChild(keyBar);
+  function keyBarPlace(){
+    if(keyBar.hidden) return;
+    const r = $('timelineCol').getBoundingClientRect();
+    keyBar.style.left = (r.left + r.width / 2) + 'px';
+    const ruler = $('ruler'), rh = ruler ? ruler.getBoundingClientRect().height : 26;
+    keyBar.style.top = Math.max(8, Math.min(window.innerHeight - 56, r.top + rh + 8)) + 'px';
+  }
+  function keyBarUpdate(){
+    if(keySel.size){ const live = new Set(); for(const g of tracks) for(const k of g.keys) live.add(k.id); for(const id of [...keySel]) if(!live.has(id)) keySel.delete(id); }
+    const n = keySel.size;
+    const show = n > 0 || !!KEY_CLIP;
+    keyBar.hidden = !show || !tracks.length;
+    if(keyBar.hidden) return;
+    keyBar.querySelector('.kb-n').textContent = n ? `${n} key${n === 1 ? '' : 's'} picked` : `${KEY_CLIP.n} key${KEY_CLIP.n === 1 ? '' : 's'} copied`;
+    for(const k of ['line', 'track', 'copy', 'del']) keyBar.querySelector(`[data-k="${k}"]`).disabled = !n;
+    keyBar.querySelector('[data-k="paste"]').disabled = !KEY_CLIP;
+    keyBar.querySelector('[data-k="clear"]').title = n ? 'Let go of the picked keys (Esc)' : 'Forget the copied keys';
+    keyBarPlace();
+  }
+  window.addEventListener('resize', keyBarPlace);
+  keyBar.addEventListener('pointerdown', (e) => e.stopPropagation());
+  keyBar.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-k]'); if(!b || b.disabled) return;
+    const k = b.dataset.k;
+    if(k === 'line') keyPickInLine();
+    else if(k === 'track') keyPickTracks();
+    else if(k === 'copy') keyCopy();
+    else if(k === 'paste') keyPasteMenu(b);
+    else if(k === 'del') keySelDelete();
+    else if(k === 'clear'){ if(keySel.size) keySelClear(); else { KEY_CLIP = null; keyBarUpdate(); } }
+  });
+  function keyPickInLine(){
+    const moments = keySelItems().map(({ t, k }) => k.time + (t.offset || 0));
+    if(!moments.length) return;
+    const before = keySel.size;
+    for(const g of tracks) for(const k of g.keys){ const T = k.time + (g.offset || 0); if(moments.some(m => Math.abs(m - T) <= KEY_SAME_MOMENT)) keySel.add(k.id); }
+    keySelRefresh();
+    toast(keySel.size > before ? `${keySel.size} keys picked — every key in line with the ones you had.` : 'No other keys are in line with these.', 2200);
+  }
+  function keyPickTracks(){
+    const ts = new Set(keySelItems().map(it => it.t));
+    for(const g of ts) for(const k of g.keys) keySel.add(k.id);
+    keySelRefresh();
+    toast(`${keySel.size} keys picked on ${ts.size === 1 ? [...ts][0].name : ts.size + ' tracks'}.`, 2000);
+  }
+  function keyPickTrack(t, add){
+    if(!t.keys.length){ toast(`${t.name} has no keys yet — right-click its waveform to add one.`, 2400); return; }
+    if(!add) keySel.clear();
+    for(const k of t.keys) keySel.add(k.id);
+    keySelRefresh();
+    toast(`${t.keys.length} key${t.keys.length === 1 ? '' : 's'} on ${t.name} picked — drag one to move them all${add ? '' : ' (Ctrl+click “Keys” on another track to add its keys too)'}.`, 2800);
+  }
+  function keyCopy(){
+    const items = keySelItems(); if(!items.length) return;
+    const Ts = items.map(({ t, k }) => k.time + (t.offset || 0)), T0 = Math.min(...Ts);
+    KEY_CLIP = { n: items.length, tracks: new Set(items.map(it => it.t)).size,
+      items: items.map(({ t, k }, i) => ({ T: Ts[i], dT: Ts[i] - T0, color: k.color, trailEffect: k.trailEffect, transitionMs: k.transitionMs })) };
+    keyBarUpdate();
+    toast(`${items.length} key${items.length === 1 ? '' : 's'} copied — press Paste (Ctrl+V) to put ${items.length === 1 ? 'it' : 'them'} on other tracks.`, 2600);
+  }
+  // copies onto each chosen track; a key already sitting at that spot is replaced
+  function keyPaste(targets, atPlayhead){
+    if(!KEY_CLIP || !targets.length) return;
+    const base = atPlayhead ? nowTime() : null, made = [];
+    let skipped = 0;
+    for(const t of targets){
+      const off = t.offset || 0, span = trackSpan(t);
+      // the same moment copied from several tracks only needs one key here
+      const seen = new Set();
+      for(const it of KEY_CLIP.items){
+        const T = atPlayhead ? base + it.dT : it.T, lt = Math.round((T - off) * 1000) / 1000;
+        if(lt < -1e-6 || lt > span + 1e-6){ skipped++; continue; }
+        const slot = Math.round(lt * 50); if(seen.has(slot)) continue; seen.add(slot);
+        let key = findKeyNear(t, lt, 0.02);
+        if(key){ key.color = it.color; key.trailEffect = it.trailEffect; if(typeof it.transitionMs === 'number') key.transitionMs = it.transitionMs; else delete key.transitionMs; }
+        else { key = { id: trackKeyIdSeq++, time: Math.max(0, Math.min(span, lt)), color: it.color, trailEffect: it.trailEffect }; if(typeof it.transitionMs === 'number') key.transitionMs = it.transitionMs; t.keys.push(key); }
+        made.push(key.id);
+      }
+      sortKeys(t); t._activeKeyId = undefined;
+    }
+    keySel.clear(); for(const id of made) keySel.add(id);
+    updateTrackKeyStates();
+    keySelRefresh();
+    scheduleHistoryCheck(0);
+    toast(`${made.length} key${made.length === 1 ? '' : 's'} pasted on ${targets.length === 1 ? targets[0].name : targets.length + ' tracks'}${skipped ? ` (${skipped} fell outside the audio and were left out)` : ''} — they're picked, so you can drag them into place.`, 3200);
+  }
+  let keyPasteEl = null;
+  function keyPasteMenu(anchor){
+    if(!KEY_CLIP) return;
+    if(keyPasteEl){ keyPasteEl.remove(); keyPasteEl = null; return; }
+    const m = document.createElement('div'); m.className = 'key-paste'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Paste keys');
+    const pre = new Set(selectedTracks());
+    m.innerHTML = `<div class="kp-h">Paste ${KEY_CLIP.n} key${KEY_CLIP.n === 1 ? '' : 's'} onto…</div><div class="kp-list"></div>
+      <div class="kp-row"><button type="button" class="kp-all">All</button><button type="button" class="kp-none">None</button></div>
+      <div class="kp-where"><label><input type="radio" name="kpWhere" value="ph" checked> Starting at the playhead (${formatKeyTime(nowTime())})</label>
+        <label><input type="radio" name="kpWhere" value="same"> At the same times as the copied ones</label></div>
+      <div class="kp-row"><button type="button" class="kp-cancel">Cancel</button><button type="button" class="kp-go">Paste</button></div>`;
+    const list = m.querySelector('.kp-list');
+    for(const t of tracks){
+      const l = document.createElement('label');
+      l.innerHTML = `<input type="checkbox"${pre.has(t) ? ' checked' : ''}><i style="background:${escapeHtml(t.color)}"></i><span></span>`;
+      l.querySelector('span').textContent = t.name;
+      l._t = t; list.appendChild(l);
+    }
+    const boxes = () => [...list.children].map(l => [l._t, l.querySelector('input')]);
+    const go = m.querySelector('.kp-go');
+    const upd = () => { const n = boxes().filter(([, b]) => b.checked).length; go.disabled = !n; go.textContent = n ? `Paste on ${n} track${n === 1 ? '' : 's'}` : 'Pick a track'; };
+    list.addEventListener('change', upd);
+    m.querySelector('.kp-all').addEventListener('click', () => { boxes().forEach(([, b]) => b.checked = true); upd(); });
+    m.querySelector('.kp-none').addEventListener('click', () => { boxes().forEach(([, b]) => b.checked = false); upd(); });
+    const close = () => { m.remove(); keyPasteEl = null; document.removeEventListener('pointerdown', outside, true); document.removeEventListener('keydown', onKey, true); };
+    const outside = (e) => { if(!m.contains(e.target) && !keyBar.contains(e.target)) close(); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); close(); } else if(e.key === 'Enter' && !go.disabled){ e.preventDefault(); e.stopImmediatePropagation(); go.click(); } };
+    m.querySelector('.kp-cancel').addEventListener('click', close);
+    go.addEventListener('click', () => {
+      const ts = boxes().filter(([, b]) => b.checked).map(([t]) => t);
+      const ph = m.querySelector('input[name=kpWhere]:checked').value === 'ph';
+      close(); keyPaste(ts, ph);
+    });
+    document.body.appendChild(m); keyPasteEl = m;
+    const r = anchor.getBoundingClientRect();
+    m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.left + r.width / 2 - m.offsetWidth / 2)) + 'px';
+    m.style.top = (r.top - m.offsetHeight - 10 >= 8 ? r.top - m.offsetHeight - 10 : Math.min(window.innerHeight - m.offsetHeight - 8, r.bottom + 10)) + 'px';
+    upd();
+    setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', onKey, true); (list.querySelector('input:checked') || list.querySelector('input') || go).focus(); }, 0);
   }
   // Alt+drag on the timeline: draw a box around keys to pick them
   // (with Ctrl/Shift held as well, adds to what's already picked)
@@ -11407,7 +11580,7 @@
               && keySel.size > 1){
       e.preventDefault();
       keySelDelete();
-    } else if(e.code === 'Escape' && tag !== 'INPUT' && tag !== 'TEXTAREA' && keySel.size > 1){
+    } else if(e.code === 'Escape' && tag !== 'INPUT' && tag !== 'TEXTAREA' && keySel.size && !keyPasteEl){
       keySelClear();
     } else if((e.code === 'Delete' || e.code === 'Backspace') && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT'
               && tracks.some(x => x.selSeg)){
@@ -11421,6 +11594,14 @@
       finishReorder(false);
     } else if(e.code === 'Escape' && tag !== 'INPUT' && tag !== 'TEXTAREA' && selectedTracks().length){
       clearSelection();
+    } else if((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.code === 'KeyC'
+              && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && keySel.size && !String(window.getSelection() || '')){
+      e.preventDefault();
+      keyCopy();
+    } else if((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.code === 'KeyV'
+              && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && KEY_CLIP && !isTypingField(e.target)){
+      e.preventDefault();
+      keyPasteMenu(keyBar.querySelector('[data-k="paste"]'));
     } else if((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.code === 'KeyA'
               && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && tracks.length){
       e.preventDefault();
@@ -19963,7 +20144,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 11;                 // ← goes up by one with every published version
+  const SD_BUILD = 12;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

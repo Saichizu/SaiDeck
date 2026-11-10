@@ -1,9 +1,9 @@
 {
-  "build": 11,
+  "build": 12,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: zoom and crop your profile picture after picking it.",
-    "Chat: uses fewer connections, so the chat (and the admin console) keep updating live even with several SaiDeck tabs open."
+    "Keys: click “Keys” on a track to pick all its keys; a key bar appears with In line (every key at the same moment), Whole track, Copy, Paste and Delete.",
+    "Keys: paste copied keys onto any tracks — at the playhead or at the same times (Ctrl+C / Ctrl+V work too), then drag them into place."
   ]
 }
