@@ -230,6 +230,11 @@
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
   .chat-bell{position:relative;}
+  .chat-casbar{display:flex;align-items:center;gap:8px;margin:0 10px 8px;padding:7px 8px 7px 11px;border-radius:12px;background:linear-gradient(90deg, rgba(245,208,74,.14), rgba(255,94,138,.10));border:1px solid rgba(245,208,74,.45);font-size:12px;color:#ffe9b0;}
+  .chat-casbar[hidden]{display:none;}
+  .chat-casbar .cb-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .chat-casbar .cb-join{all:unset;flex:none;cursor:pointer;padding:5px 12px;border-radius:999px;font:800 11.5px 'Inter',sans-serif;color:#2a0d0d;background:linear-gradient(135deg,#ffd76a,#ff9a3c);}
+  .chat-casbar .cb-join:hover{filter:brightness(1.08);} .chat-casbar .cb-join:focus-visible{outline:2px solid #fff;}
   /* the Casino */
   .arc-cas{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:10px 6px;}
   .arc-cas-art{font-size:46px;line-height:1;filter:drop-shadow(0 6px 14px rgba(245,208,74,.35));}
@@ -20747,7 +20752,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 37;                 // ← goes up by one with every published version
+  const SD_BUILD = 39;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21174,6 +21179,7 @@
         <button type="button" class="chat-modal-x" title="Close (Esc)" aria-label="Close" hidden>${ICON_X}</button>
         <div class="chat-pin" hidden></div>
         <div class="chat-body" role="log" aria-live="polite"></div>
+        <div class="chat-casbar" hidden></div>
         <div class="chat-foot">
           <div class="chat-note" hidden></div>
           <div class="chat-replying" hidden></div>
@@ -21231,6 +21237,7 @@
     chatRenderArcade();
     chatRenderAlerts();
     casRender();
+    casBarRender();
     { const bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x'); if(bk) bk.hidden = !CHAT.side; if(x) x.hidden = !CHAT.side; }
     chatRenderPin();
     chatRenderMessages();
@@ -21275,7 +21282,7 @@
     const was = CHAT.side;
     CHAT.side = CHAT.side === which ? null : which;
     if(was === 'casino' && CHAT.side !== 'casino') casLeave();       // (closing the casino gets you up from your seat)
-    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender();
+    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender(); casBarRender();
     const open = !!CHAT.side, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
     if(bk) bk.hidden = !open; if(x) x.hidden = !open;
     chatPanel.classList.toggle('cas-open', CHAT.side === 'casino');
@@ -21533,6 +21540,7 @@
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
       if(!SC.loaded && chatName()) scLoad();      // (your points, bubble and bullets, ready before you send anything)
+      if(chatName() && !CAS.on) chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(!CAS.on){ CAS.seats = d || {}; casBarRender(); } }).catch(() => {});
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
     chatUpdateBadge();
@@ -22282,34 +22290,38 @@
   function casLeave(){
     if(!CAS.on) return;
     CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0;
-    if(CAS.es){ CAS.es.close(); CAS.es = null; }
+    clearInterval(CAS.poll); CAS.poll = 0;
     chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
   }
   window.addEventListener('pagehide', () => { if(CAS.on) casLeave(); });
-  async function casListen(){
-    if(CAS.es) return;
-    let tok; try{ tok = await chatAuth(); }catch(e){ return; }
-    if(!CAS.on) return;
-    const es = new EventSource(`${CHAT_DB}/casino.json?auth=${encodeURIComponent(tok)}`); CAS.es = es;
-    const set = (path, v) => {
-      const [top, uid, key] = path;
-      if(top !== 'seats' && top !== 'spin') return;
-      const store = top === 'seats' ? CAS.seats : CAS.spins;
-      if(!uid){ for(const k of Object.keys(store)) delete store[k]; Object.assign(store, v || {}); return; }
-      if(key){ store[uid] = Object.assign({}, store[uid]); if(v == null) delete store[uid][key]; else store[uid][key] = v; }
-      else if(v == null) delete store[uid]; else store[uid] = v;
+  // (the casino is checked twice a second instead of kept open as a live stream: the browser only keeps a few
+  // connections to the chat server open, and one more stream could leave a spin stuck waiting in line)
+  function casListen(){
+    if(CAS.poll) return;
+    const tick = async () => {
+      if(!CAS.on){ clearInterval(CAS.poll); CAS.poll = 0; return; }
+      if(CAS.polling) return; CAS.polling = true;
+      try{
+        const tok = await chatAuth();
+        const r = await casFetch(`${CHAT_DB}/casino.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+        const d = r.ok ? await r.json() : null;
+        if(CAS.on){
+          CAS.seats = (d && d.seats) || {};
+          const sp = (d && d.spin) || {}, me = chatUid();
+          // (your own spin is shown the moment it's made — don't let an older copy undo it)
+          if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t)) sp[me] = CAS.spins[me];
+          CAS.spins = sp;
+          casSync();
+        }
+      }catch(e){}
+      CAS.polling = false;
     };
-    const apply = (path, v, patch) => {
-      const p = path.replace(/^\//, '').split('/').filter(Boolean);
-      if(!p.length){ if(patch){ for(const [k, x] of Object.entries(v || {})) set([k], x); } else { set(['seats'], (v && v.seats) || {}); set(['spin'], (v && v.spin) || {}); } }
-      else if(patch){ for(const [k, x] of Object.entries(v || {})) set(p.concat(k.split('/')), x); }
-      else set(p, v);
-      casSync();
-    };
-    es.addEventListener('put', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } apply(d.path, d.data, false); });
-    es.addEventListener('patch', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } apply(d.path, d.data, true); });
-    es.addEventListener('cancel', () => { es.close(); if(CAS.es === es) CAS.es = null; });
-    es.addEventListener('error', () => { if(es.readyState === 2 && CAS.es === es){ CAS.es = null; if(CAS.on) setTimeout(casListen, 4000); } });
+    tick(); CAS.poll = setInterval(tick, 500);
+  }
+  // a fetch that gives up instead of waiting forever
+  function casFetch(url, opt, ms){
+    const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms || 12000);
+    return fetch(url, Object.assign({}, opt, { signal: ac.signal })).finally(() => clearTimeout(t));
   }
   // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
   async function casSpin(){
@@ -22325,16 +22337,18 @@
     try{
       const tok = await chatAuth(), body = {};
       body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false };
-      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); toast(r.status === 401 ? 'Slow down a little — one spin every few seconds.' : "Couldn't spin — check your connection.", 2400); return; }
       SC.s += bet;
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
-      if(typeof T !== 'number'){ const g = await fetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
+      if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
       const sp = { b: bet, t: T, c: false }; CAS.spins[me] = sp;
-      casSync();
+      CAS.seen[me] = T;
+      const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
+      if(myM) casShow(myM, sp, true, { n: chatName() });
       await casClaim(sp);
-    }catch(e){ toast("Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
+    }catch(e){ toast(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
     CAS.busy = false; casCtl(); chatRenderArcade();
   }
   async function casClaim(sp){
@@ -22343,13 +22357,33 @@
       try{
         const tok = await chatAuth(), body = {};
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
-        const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+        const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
         if(r.ok){ SC.p += win; sp.c = true; return win; }
         await scLoad();
       }catch(e){}
     }
     return -1;
   }
+  // the chat's casino bar: one line saying who's in the casino right now (never a pile of messages), with Join
+  function casBarRender(){
+    const el = chatPanel.querySelector('.chat-casbar'); if(!el) return;
+    const me = chatUid(), who = Object.entries(CAS.seats || {}).filter(([u, st]) => u !== me && casSeatLive(st) && !chatBanned(u)).map(([, st]) => chatBadName(st.n) ? 'someone' : st.n);
+    const show = who.length > 0 && !CAS.on;
+    if(!show){ el.hidden = true; el.dataset.sig = ''; return; }
+    const names = who.length === 1 ? who[0] : who.length === 2 ? `${who[0]} and ${who[1]}` : who.length === 3 ? `${who[0]}, ${who[1]} and ${who[2]}` : `${who[0]}, ${who[1]} and ${who.length - 2} others`;
+    const txt = `${names} ${who.length === 1 ? 'is' : 'are'} in the casino`;
+    if(el.dataset.sig === txt && !el.hidden) return;
+    const fresh = el.hidden; el.hidden = false; el.dataset.sig = txt;
+    el.innerHTML = `<span aria-hidden="true">🎰</span><span class="cb-t"></span><button type="button" class="cb-join">Join</button>`;
+    el.querySelector('.cb-t').textContent = txt;
+    el.querySelector('.cb-join').addEventListener('click', () => casJoin());
+    if(fresh) el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
+  }
+  // (who's sitting is checked every 10 s while the chat is open and you're not in the casino yourself)
+  setInterval(async () => {
+    if(!CHAT.open || CAS.on || !chatName() || document.visibilityState !== 'visible') return;
+    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`); if(r.ok && !CAS.on){ CAS.seats = (await r.json()) || {}; casBarRender(); } }catch(e){}
+  }, 10000);
   // the Casino window
   function casRender(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el) return;

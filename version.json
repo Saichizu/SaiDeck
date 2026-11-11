@@ -1,9 +1,8 @@
 {
-  "build": 37,
+  "build": 39,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Arcade: new 🎰 Casino tab — join, sit at a slot machine and bet 1–500 points a spin. Everyone in the casino sees each other sitting, spinning, betting and winning.",
-    "Pays: 7️⃣7️⃣7️⃣ ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back. Every spin is checked by the server, so it's fair for everyone."
+    "Chat: a bar above the message box shows who's in the casino right now (\"Jayne and Sai are in the casino\") with a Join button — one line that updates, never a pile of messages."
   ]
 }
