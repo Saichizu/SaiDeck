@@ -169,7 +169,7 @@
   .chat-msg.me{align-self:flex-end;flex-direction:row-reverse;}
   .chat-av{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 11px 'Inter',sans-serif;color:#111;}
   .chat-msg.me .chat-av{width:22px;height:22px;font-size:10px;}
-  .chat-bub{min-width:0;padding:7px 10px 6px;border-radius:12px 12px 12px 4px;background:#23242e;color:var(--text);font-size:13px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;}
+  .chat-bub{min-width:0;max-width:100%;box-sizing:border-box;padding:7px 10px 6px;border-radius:12px 12px 12px 4px;background:#23242e;color:var(--text);font-size:13px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap;}
   .chat-msg.me .chat-bub{border-radius:12px 12px 4px 12px;background:rgba(180,140,255,.22);border:1px solid rgba(180,140,255,.35);}
   .chat-meta{display:flex;gap:6px;align-items:baseline;margin-bottom:2px;font-size:11px;}
   .chat-meta b{font-weight:700;}
@@ -212,6 +212,66 @@
   .chat-side[hidden]{display:none;}
   .chat-side .chat-who-h{color:#d2bcff;}
   .chat-side-p{margin:0;font-size:11px;line-height:1.45;color:var(--text-faint);}
+  /* the Arcade: points, shop, leaderboard */
+  .chat-arcade{max-height:62%;}
+  .arc-top{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:2px 0 4px;}
+  .arc-pts{display:flex;align-items:baseline;gap:6px;}
+  .arc-pts b{font:800 24px 'Manrope',sans-serif;color:#f5d04a;line-height:1;}
+  .arc-pts span{font-size:11px;color:var(--text-dim);}
+  .arc-earned{font-size:10.5px;color:var(--text-faint);}
+  .arc-tabs{display:flex;gap:4px;padding:2px;border-radius:9px;background:rgba(255,255,255,.05);}
+  .arc-tabs button{all:unset;flex:1;text-align:center;padding:5px 0;border-radius:7px;font:700 11.5px 'Inter',sans-serif;color:var(--text-dim);cursor:pointer;}
+  .arc-tabs button.on{background:rgba(180,140,255,.25);color:var(--text);}
+  .arc-tabs button:focus-visible{outline:2px solid #b48cff;}
+  .arc-item{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid transparent;}
+  .arc-item.on{border-color:rgba(180,140,255,.55);background:rgba(180,140,255,.1);}
+  .arc-em{font-size:20px;width:26px;text-align:center;flex:none;}
+  .arc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+  .arc-t b{font:700 12px 'Inter',sans-serif;color:var(--text);}
+  .arc-t b i{font-style:normal;color:#f5d04a;}
+  .arc-t span{font-size:10.5px;line-height:1.35;color:var(--text-faint);}
+  .arc-buy{all:unset;flex:none;padding:5px 9px;border-radius:7px;font:800 11px 'Inter',sans-serif;cursor:pointer;color:#16102a;background:#f5d04a;white-space:nowrap;}
+  .arc-buy.own{background:rgba(180,140,255,.3);color:var(--text);}
+  .arc-buy:disabled{background:transparent;color:#b48cff;cursor:default;}
+  .arc-buy:hover:not(:disabled){filter:brightness(1.1);}
+  .arc-buy:focus-visible{outline:2px solid #fff;}
+  .arc-board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;}
+  .arc-board li{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.03);font-size:12px;}
+  .arc-board li.me{background:rgba(245,208,74,.12);box-shadow:inset 0 0 0 1px rgba(245,208,74,.4);}
+  .arc-board li b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .arc-board li > span:last-child{font:800 12px 'Inter',sans-serif;color:#f5d04a;}
+  .arc-rank{width:22px;text-align:center;color:var(--text-faint);font-weight:700;}
+  /* slime bullets and splats */
+  .splat-layer{position:fixed;inset:0;z-index:9550;pointer-events:none;overflow:hidden;}
+  .splat{position:absolute;transform:translate(-50%,-50%) rotate(var(--r,0deg));background:center/contain no-repeat;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));}
+  .splat.glitter{filter:drop-shadow(0 0 6px rgba(255,220,150,.7));animation:splatTw 1.4s ease-in-out infinite alternate;}
+  @keyframes splatTw{from{opacity:.75;}to{opacity:1;}}
+  .splat-bullet{position:absolute;width:18px;height:18px;border-radius:50%;box-shadow:inset -3px -3px 0 rgba(0,0,0,.2), 0 0 10px rgba(255,255,255,.35);}
+  .splat-bit{position:absolute;border-radius:50%;}
+  .infil-hud{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9620;pointer-events:none;display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;background:rgba(23,24,31,.9);border:1px solid rgba(180,140,255,.5);font:700 11px 'Inter',sans-serif;color:var(--text-dim);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+  .infil-hud .ih-t{padding:0 6px 0 2px;}
+  .infil-hud .ih-a{display:inline-flex;align-items:center;gap:2px;padding:3px 6px;border-radius:999px;font-size:14px;}
+  .infil-hud .ih-a i{font:700 9.5px 'Inter',sans-serif;font-style:normal;color:var(--text-faint);}
+  .infil-hud .ih-a.on{background:rgba(180,140,255,.35);}
+  .infil-hud .ih-a.locked{opacity:.3;filter:grayscale(1);}
+  /* artillery */
+  .art-btn{all:unset;position:fixed;right:18px;bottom:18px;z-index:9630;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;cursor:pointer;font:800 12px 'Inter',sans-serif;color:#16102a;background:linear-gradient(135deg,#f5d04a,#ff9a5a);box-shadow:0 6px 20px rgba(0,0,0,.45);}
+  .art-btn span{font-size:15px;}
+  .art-btn.live{background:rgba(23,24,31,.92);color:var(--text);border:1px solid rgba(245,208,74,.6);cursor:default;}
+  .art-btn:disabled{background:rgba(23,24,31,.92);color:var(--text-dim);border:1px solid var(--border);cursor:default;}
+  .art-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .art-menu{position:fixed;right:18px;bottom:64px;z-index:9640;width:270px;display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:12px;background:#22232d;border:1px solid rgba(245,208,74,.45);box-shadow:0 12px 30px rgba(0,0,0,.55);font-family:'Inter',sans-serif;}
+  .art-menu > b{font:800 12.5px 'Manrope',sans-serif;color:var(--text);}
+  .art-menu p{margin:0;font-size:11px;line-height:1.45;color:var(--text-faint);}
+  .art-menu button{all:unset;display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:9px;cursor:pointer;background:rgba(255,255,255,.04);}
+  .art-menu button:hover{background:rgba(245,208,74,.14);}
+  .art-menu button:focus-visible{outline:2px solid #f5d04a;}
+  .art-menu button > span{font-size:20px;}
+  .art-menu button div{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .art-menu button b{font-size:12px;color:var(--text);}
+  .art-menu button i{font-style:normal;font-size:10.5px;color:var(--text-faint);}
+  .art-turret{position:fixed;right:24px;bottom:66px;z-index:9625;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;pointer-events:none;background:rgba(23,24,31,.9);box-shadow:0 0 0 3px var(--c,#f5d04a), 0 0 18px var(--c,#f5d04a);}
+  .art-shot{position:fixed;z-index:9626;width:12px;height:12px;border-radius:50%;pointer-events:none;box-shadow:0 0 12px currentColor;}
   .chat-rlist{display:flex;flex-direction:column;gap:4px;}
   .chat-rrow{display:flex;align-items:center;gap:4px;border-radius:9px;border:1px solid transparent;}
   .chat-rrow.cur{border-color:rgba(180,140,255,.45);background:rgba(180,140,255,.1);}
@@ -2718,6 +2778,15 @@
     font:600 11.5px 'Inter',sans-serif;cursor:pointer;
   }
   .rec-small-btn:hover{background:var(--bg-control-hover);}
+  .fd-marks{display:flex;flex-wrap:wrap;gap:5px;padding:0 0 8px;margin-top:-2px;justify-content:flex-end;}
+  .fd-marks[hidden]{display:none;}
+  .fd-marks.disabled{opacity:.45;pointer-events:none;}
+  .fd-mark{display:inline-flex;align-items:center;border-radius:999px;background:rgba(229,72,77,.12);border:1px solid rgba(229,72,77,.4);overflow:hidden;}
+  .fd-mark button{all:unset;cursor:pointer;font:600 11px 'Inter',sans-serif;color:var(--text);line-height:1;}
+  .fd-mark .fd-mark-t{padding:4px 4px 4px 9px;font-variant-numeric:tabular-nums;}
+  .fd-mark .fd-mark-x{padding:4px 8px 4px 5px;color:var(--text-dim);}
+  .fd-mark button:hover{background:rgba(255,255,255,.08);color:var(--text);}
+  .fd-mark button:focus-visible{outline:2px solid #b48cff;outline-offset:-2px;}
   .rec-hint{font-size:11px;color:var(--text-faint);line-height:1.5;}
   /* Freedit: the styles as a compact grid, and each style's blurb folded to two lines */
   .rec-row.fd-pick{flex-wrap:wrap;gap:6px;}
@@ -7163,7 +7232,7 @@
       showPlayhead, followPlayhead, centerPlayhead, showNames,
       zoom: pxPerSecond,
       // Recording tab (video export) settings + chosen format.
-      recording: Object.assign({}, recSettings), renderPreset: renderPresetKey,
+      recording: (() => { const o = Object.assign({}, recSettings); for(const k in o) if(FD_MARK_KEY.test(k)){ const L = fdMarksAll(k.slice(0, -3)); o[k.slice(0, -3)] = L.length ? L[0] : -1; } return o; })(), renderPreset: renderPresetKey,
       masterVolume: Number(masterVol.value),
       markIn, markOut,
       // The video isn't embedded (far too big) — with a project folder it's
@@ -12262,6 +12331,7 @@
       for(const key in REC_DEFAULTS){
         if(typeof saved[key] === typeof REC_DEFAULTS[key]) recSettings[key] = saved[key];
       }
+      for(const k in saved) if(/^[a-z]{2}Climax\d?All$/.test(k) && typeof saved[k] === 'string') recSettings[k] = saved[k];
     }
   }catch(e){}
   // Scroll position of the zoomed recording view (seconds at its left edge)
@@ -13770,6 +13840,31 @@
     return hi - kk * sp((hi - v) / kk);
   }
   // a big moment's 0…1 (eases in over inS, out over outS)
+  // A big moment can be marked at several times. Every time is kept in
+  // S[key + 'All'] (a JSON list); S[key] itself holds the one that's playing
+  // (or just about to) at the moment being drawn, so every Freedit — old ones
+  // too — plays its big moment again at each marked time.
+  function fdMarksAll(key){
+    const S = recSettings, raw = S[key + 'All'];
+    if(typeof raw === 'string' && raw){ try{ const a = JSON.parse(raw); if(Array.isArray(a)) return a.map(Number).filter(x => isFinite(x) && x >= 0).sort((x, y) => x - y); }catch(e){} }
+    const v = Number(S[key]); return v >= 0 ? [v] : [];
+  }
+  function fdMarksSet(key, list){
+    list = list.slice().sort((a, b) => a - b);
+    recSettings[key + 'All'] = JSON.stringify(list);
+    recSettings[key] = list.length ? list[0] : -1;
+  }
+  const FD_MARK_KEY = /^[a-z]{2}Climax\d?All$/;
+  function fdMarksSync(T){
+    const S = recSettings;
+    for(const k in S){
+      if(k.charCodeAt(k.length - 1) !== 108 || !FD_MARK_KEY.test(k)) continue;      // (…All)
+      const key = k.slice(0, -3), L = fdMarksAll(key);
+      if(!L.length){ S[key] = -1; continue; }
+      let c = L[0]; for(const t of L) if(T >= t - 0.3) c = t;
+      S[key] = c;
+    }
+  }
   function fdEnv(c, L, T, inS, outS){
     if(!(c >= 0)) return 0;
     const sm = (x) => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -15955,6 +16050,7 @@
     const dur = Math.max(re - rs, 0.001);
     renderNowTime = renderOfflineTime != null ? renderOfflineTime : (isPlaying ? currentPlayheadTime() : playheadTime);
     const pt = Math.max(rs, Math.min(re, renderNowTime));
+    fdMarksSync(pt);
     // Every fixed size below is designed for a 1080p frame and scaled by the
     // frame's SHORT side, so 1080p landscape and portrait share the same
     // proportions (and so do both 4K presets, at 2x).
@@ -17703,6 +17799,22 @@
     sel.value = v;
   }
 
+  // every big-moment row: how many times it's marked, and the times listed under it (click one to jump there, ✕ removes it)
+  function fdMarksUI(){
+    for(const tt of recPanel.querySelectorAll('[id$="Txt"]')){
+      const mm = /^([a-z]{2})Climax(\d?)Txt$/.exec(tt.id); if(!mm || mm[1] === 'jv') continue;
+      const key = mm[1] + 'Climax' + mm[2], L = fdMarksAll(key), row = tt.closest('.rec-row'); if(!row) continue;
+      tt.textContent = !L.length ? 'not set' : L.length === 1 ? fmtTime(L[0]) : `${L.length} times`;
+      const cb = $(key + 'ClearBtn'); if(cb){ cb.hidden = L.length < 2; cb.title = 'Remove every time this big moment is marked'; }
+      const mb = $(key + 'Btn'); if(mb){ mb.textContent = L.length ? 'Add here' : 'Mark here'; mb.title = L.length ? 'Plays this big moment again from where the playhead is now' : 'Starts where the playhead is now'; }
+      let box = row.nextElementSibling;
+      if(!(box && box.classList.contains('fd-marks') && box.dataset.k === key)){ box = document.createElement('div'); box.className = 'fd-marks'; box.dataset.k = key; row.after(box); }
+      box.hidden = row.hidden || L.length < 1;
+      box.classList.toggle('disabled', row.classList.contains('disabled'));
+      const sig = L.join(','); if(box.dataset.sig === sig) continue; box.dataset.sig = sig;
+      box.innerHTML = L.map(t => `<span class="fd-mark"><button type="button" class="fd-mark-t" data-t="${t}" title="Jump to ${fmtTime(t)}">${fmtTime(t)}</button><button type="button" class="fd-mark-x" data-k="${key}" data-t="${t}" title="Remove this time" aria-label="Remove the big moment at ${fmtTime(t)}">✕</button></span>`).join('');
+    }
+  }
   function syncRecControls(){
     try{ buildTrackColorList(); }catch(e){}
     buildVideoSlotOptions();
@@ -17865,6 +17977,7 @@
         const cc = $(k + 'ClearBtn'); if(cc) cc.hidden = !(S[k] >= 0);
       }
     }
+    fdMarksUI();
     { const miss = $('fdMissing'), m = S.freeditMode, need = !!(m && m !== 'beat' && m !== 'jvke' && !FD_INSTALLED[m]);
       if(miss){ miss.hidden = !need; if(need) miss.textContent = `This project uses the ${FD_NAMES[m] || m} Freedit, which isn't installed here. Install its .saifreedit file, or pick another style.`; } }
     const man = S.beatMode === 'manual';
@@ -18075,7 +18188,7 @@
   // the Freedit styles' own "mark it here" buttons (their panels come with the
   // installed .saifreedit files, so these are caught here for whichever are installed)
   recPanel.addEventListener('click', (e) => {
-    const b = e.target.closest && e.target.closest('.fd-pane button[id]');
+    const b = e.target.closest && e.target.closest('.fd-pane button[id], .fd-marks button');
     if(!b) return;
     const S = recSettings, now = Math.round(beatNowTime() * 100) / 100;
     let m;
@@ -18091,12 +18204,22 @@
       b.blur(); S.frBattles = ''; saveRecSettings(); syncRecControls();
     } else if((m = /^([a-z]{2})Climax(\d?)Btn$/.exec(b.id)) && m[1] !== 'jv'){
       // (a Freedit can have several big moments: xxClimax, xxClimax2 … xxClimax6)
+      // (each press adds another time — the list shows under the button, each with its own ✕)
       b.blur();
-      S[m[1] + 'Climax' + m[2]] = now; S.beatOn = true;
+      const key = m[1] + 'Climax' + m[2], list = fdMarksAll(key);
+      if(list.some(x => Math.abs(x - now) < 0.3)){ toast(`Already marked at ${fmtTime(now)}.`, 1800); return; }
+      list.push(now); fdMarksSet(key, list); fdMarksSync(now); S.beatOn = true;
       saveRecSettings(); syncRecControls();
-      toast(`${m[1] === 'td' ? 'Lights out' : 'Big moment'} at ${fmtTime(now)}.`, 2000);
+      toast(`${m[1] === 'td' ? 'Lights out' : 'Big moment'} at ${fmtTime(now)}` + (list.length > 1 ? ` (${list.length} times now).` : '.'), 2000);
     } else if((m = /^([a-z]{2})Climax(\d?)ClearBtn$/.exec(b.id)) && m[1] !== 'jv'){
-      b.blur(); S[m[1] + 'Climax' + m[2]] = -1; saveRecSettings(); syncRecControls();
+      b.blur(); fdMarksSet(m[1] + 'Climax' + m[2], []); saveRecSettings(); syncRecControls();
+    } else if(b.classList.contains('fd-mark-x')){
+      b.blur();
+      const key = b.dataset.k, t = Number(b.dataset.t);
+      fdMarksSet(key, fdMarksAll(key).filter(x => Math.abs(x - t) > 0.001)); fdMarksSync(beatNowTime());
+      saveRecSettings(); syncRecControls();
+    } else if(b.classList.contains('fd-mark-t')){
+      b.blur(); seekTo(Number(b.dataset.t));
     }
   });
   // a style's blurb opens / folds with a click
@@ -18154,6 +18277,7 @@
     const txt = $('beatNowTxt'), dot = $('beatDot');
     if(!txt) return;
     const T = beatNowTime();
+    fdMarksSync(T);
     drawBeatTicks(false);
     for(const [mode, px, idle] of [['david', 'dv', 'David · fire & sakura'], ['khaii', 'kh', 'Khaii · catboy noir'], ['forest2', 'sg', 'Forest 2 · the three-sword swordsman'], ['junnyy', 'jn', 'Junnyy · late night drive home'], ['saichizu', 'sz', 'Saichizu · the signature edit']]){
       if(!(recSettings.beatOn && recSettings.freeditMode === mode)) continue;
@@ -18393,6 +18517,9 @@
     for(const key in REC_DEFAULTS){
       if(typeof obj[key] === typeof REC_DEFAULTS[key]) recSettings[key] = obj[key];
     }
+    // the big moments' lists of times (a project without them goes back to its single times)
+    for(const k of Object.keys(recSettings)) if(FD_MARK_KEY.test(k) && typeof obj[k] !== 'string') delete recSettings[k];
+    for(const k of Object.keys(obj)) if(FD_MARK_KEY.test(k) && typeof obj[k] === 'string'){ recSettings[k] = obj[k]; const L = fdMarksAll(k.slice(0, -3)); recSettings[k.slice(0, -3)] = L.length ? L[0] : -1; }
     enforceFixedRecSettings();
     if(presetKey && RENDER_PRESETS.some(p => p.key === presetKey)){
       renderPresetKey = presetKey;
@@ -20436,7 +20563,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 21;                 // ← goes up by one with every published version
+  const SD_BUILD = 23;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20716,6 +20843,7 @@
   const ICON_X = '<svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg>';
   const ICON_GEAR = '<svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>';
   const ICON_ROOMS = '<svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1a4.2 4.2 0 0 1 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>';
+  const ICON_TROPHY = '<svg viewBox="0 0 24 24"><path d="M19 4h-2V3H7v1H5a2 2 0 0 0-2 2v1a4 4 0 0 0 3.6 4A5 5 0 0 0 11 14.9V18H8v2h8v-2h-3v-3.1A5 5 0 0 0 17.4 11 4 4 0 0 0 21 7V6a2 2 0 0 0-2-2zM5 7V6h2v3.8A2 2 0 0 1 5 7zm14 0a2 2 0 0 1-2 1.8V6h2z"/></svg>';
   const ICON_PIN = '<svg viewBox="0 0 24 24"><path d="M16 3H8v2l1.5 1.5V11L6 14v2h5.2v5h1.6v-5H18v-2l-3.5-3V6.5L16 5z"/></svg>';
   function chatUpdateBadge(){
     chatBadge.hidden = !CHAT.unread; chatBadge.textContent = CHAT.unread > 99 ? '99+' : CHAT.unread;
@@ -20845,12 +20973,14 @@
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
           <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now — and everyone else who uses it"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
+          <button type="button" class="chat-icon chat-arc" title="Arcade — your points, the shop and the leaderboard" aria-label="Arcade: points, shop and leaderboard" aria-expanded="false">${ICON_TROPHY}</button>
           <button type="button" class="chat-icon chat-rooms" title="Rooms — Everyone, or a group chat with a code" aria-label="Rooms and group chats" aria-expanded="false">${ICON_ROOMS}</button>
           <button type="button" class="chat-icon chat-set" title="Your name and profile picture" aria-label="Your chat name and picture">${ICON_GEAR}</button>
           <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
         <div class="chat-roombar"></div>
         <div class="chat-who" hidden></div>
         <div class="chat-side" hidden></div>
+        <div class="chat-side chat-arcade" hidden></div>
         <div class="chat-pin" hidden></div>
         <div class="chat-body" role="log" aria-live="polite"></div>
         <div class="chat-foot">
@@ -20867,7 +20997,13 @@
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
       const rb = chatPanel.querySelector('.chat-rooms');
-      rb.addEventListener('click', () => { CHAT.side = CHAT.side === 'rooms' ? null : 'rooms'; chatRenderSide(); });
+      rb.addEventListener('click', () => { CHAT.side = CHAT.side === 'rooms' ? null : 'rooms'; chatRenderSide(); chatRenderArcade(); });
+      chatPanel.querySelector('.chat-arc').addEventListener('click', () => { CHAT.side = CHAT.side === 'arcade' ? null : 'arcade'; chatRenderSide(); chatRenderArcade(); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
+      chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
+        const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
+        const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
+        const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); }
+      });
       const ta = chatPanel.querySelector('textarea'), send = chatPanel.querySelector('.chat-send');
       const cnt = chatPanel.querySelector('.chat-count');
       const grow = () => { const mx = chatMaxLen(); ta.maxLength = mx; ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; send.disabled = !ta.value.trim() || !chatCanSend(); cnt.textContent = `${ta.value.length} / ${mx}`; cnt.classList.toggle('full', ta.value.length >= mx); };
@@ -20895,6 +21031,7 @@
     }
     chatRenderStatus();
     chatRenderSide();
+    chatRenderArcade();
     chatRenderPin();
     chatRenderMessages();
     chatRenderReply();
@@ -21491,15 +21628,35 @@
     window.addEventListener('pointerdown', infClick, true);
     window.addEventListener('click', infEat, true);
     window.addEventListener('keydown', infKey, true);
+    window.addEventListener('contextmenu', infCtx, true);
     document.addEventListener('visibilitychange', infHidden);
-    toast(`You're infiltrating ${name}'s screen — move your mouse to annoy them. Click anywhere to leave.`, 3200);
+    if(!SC.loaded) scLoad();
+    INF.me.hud = document.createElement('div'); INF.me.hud.className = 'infil-hud'; document.body.appendChild(INF.me.hud); infHud();
+    toast(`You're infiltrating ${name}'s screen — right-click to shoot slime, click anywhere to leave.`, 3200);
     infLoop();
   }
   function infMove(e){ INF.mx = e.clientX; INF.my = e.clientY; if(INF.me){ INF.me.mx = e.clientX; INF.me.my = e.clientY; INF.me.lastMove = performance.now(); INF.me.dirty = true; } }
   window.addEventListener('pointermove', (e) => { INF.mx = e.clientX; INF.my = e.clientY; }, { passive: true });
-  function infClick(e){ if(!INF.me || e.button !== 0) return; e.preventDefault(); e.stopPropagation(); infStop('click'); INF.eatClick = true; }
+  function infClick(e){
+    if(!INF.me) return;
+    if(e.button === 2){ e.preventDefault(); e.stopPropagation(); infShoot(); return; }
+    if(e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation(); infStop('click'); INF.eatClick = true;
+  }
+  // the little bar at the bottom while you're in: which bullet you're firing (1–6 to switch)
+  function infHud(){
+    const M = INF.me; if(!M || !M.hud) return;
+    const cur = ammoNow();
+    M.hud.innerHTML = `<span class="ih-t">Right-click to shoot</span>` + AMMO.map((a, i) => `<span class="ih-a${a.k === cur ? ' on' : ''}${ammoOwned(a.k) ? '' : ' locked'}"><i>${i + 1}</i>${a.em}</span>`).join('');
+  }
   function infEat(e){ if(INF.eatClick){ e.preventDefault(); e.stopPropagation(); INF.eatClick = false; window.removeEventListener('click', infEat, true); } }
-  function infKey(e){ if(INF.me && e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); infStop('click'); } }
+  function infKey(e){
+    if(!INF.me) return;
+    if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); infStop('click'); return; }
+    const n = /^[1-6]$/.test(e.key) ? Number(e.key) - 1 : -1;
+    if(n >= 0){ e.preventDefault(); e.stopImmediatePropagation(); const a = AMMO[n];
+      if(ammoOwned(a.k)){ chatLS('ammo', a.k); infHud(); } else toast(`${a.em} ${a.name} is locked — buy it for ${a.price} points in the chat's Arcade (trophy button).`, 2600); }
+  }
   function infHidden(){ if(INF.me && document.visibilityState !== 'visible') infStop('idle'); }
   async function infSend(final){
     const M = INF.me; if(!M) return;
@@ -21507,7 +21664,7 @@
     try{
       const tok = await chatAuth();
       await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT',
-        body: JSON.stringify({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }) });
+        body: JSON.stringify(Object.assign({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }, M.shots && M.shots.length ? { s: infShotStr(M) } : {})) });
     }catch(e){}
     finally{ M.busy = false; }
   }
@@ -21519,6 +21676,9 @@
     window.removeEventListener('pointerdown', infClick, true);
     window.removeEventListener('keydown', infKey, true);
     document.removeEventListener('visibilitychange', infHidden);
+    setTimeout(() => window.removeEventListener('contextmenu', infCtx, true), 400);
+    if(M.hud) M.hud.remove();
+    splatClear(true);
     setTimeout(() => { INF.eatClick = false; window.removeEventListener('click', infEat, true); }, 400);
     infPop(M.px, M.py, M.el); M.el.remove();
     chatAuth().then(tok => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
@@ -21540,7 +21700,8 @@
     const s = path[0]; if(!/^s[123]$/.test(s || '')) return;
     if(path.length > 1){ const cur = Object.assign({}, INF.remote[s] && INF.remote[s].d); cur[path[1]] = v; v = cur; }
     const R = INF.remote[s];
-    if(!v || !v.u){ if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; } return; }
+    if(!v || !v.u){ if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; } artUI(); return; }
+    const G = INF.gone && INF.gone[s]; if(G && G.u === v.u && Date.now() < G.until) return;
     if(!chatInfOn() || chatBanned(v.u)){ infKick(s); return; }
     if(!R || R.d.u !== v.u){
       if(R){ R.el.remove(); }
@@ -21550,25 +21711,30 @@
       el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); infSwat(s); });
       document.body.appendChild(el);
       INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
-    } else R.d = v;
-    infLoop();
+      infShotsIn(INF.remote[s], v.s, true);
+    } else { R.d = v; infShotsIn(R, v.s, false); }
+    infLoop(); artUI();
   }
   async function infKick(s){
     const R = INF.remote[s];
     if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; }
+    artUI();
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
   }
   function infKickAll(){ for(const s of Object.keys(INF.remote)) infKick(s); }
-  async function infSwat(s){
+  // swatting someone out (by clicking them, or your artillery): they pop out, you get a point, and the room hears about it
+  async function infSwat(s, arty){
     const R = INF.remote[s]; if(!R) return;
     const who = R.d.u, nm = chatBadName(R.d.n) ? 'them' : R.d.n;
-    infKick(s);
-    toast(`You swatted ${nm} out!`, 1800);
-    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(who)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', t: { '.sv': 'timestamp' } }) }); }catch(e){}
+    INF.gone = INF.gone || {}; INF.gone[s] = { u: who, until: Date.now() + 2500 };
+    infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI();
+    await scAward(who, nm, arty ? `${arty.em} Your ${arty.name} swatted` : 'You swatted');      // (while their seat is still there: that's the proof)
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
     // and tell the room (a small notice in the middle of the chat)
     if(chatName() && !chatBlock()){
       try{
-        const tok = await chatAuth(), txt = ('swatted out ' + (chatBadName(R.d.n) ? 'someone' : R.d.n)).slice(0, chatMaxLen());
+        const who2 = chatBadName(R.d.n) ? 'someone' : R.d.n;
+        const tok = await chatAuth(), txt = (arty ? `blasted ${who2} out with a ${arty.name.toLowerCase()}` : 'swatted out ' + who2).slice(0, chatMaxLen());
         await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: { '.sv': 'timestamp' }, u: chatUid(), e: 'swat' }) });
       }catch(e){}
     }
@@ -21597,7 +21763,7 @@
       }
       const srvNow = Date.now() + PRES.offset;
       for(const [s, R] of Object.entries(INF.remote)){
-        if(R.d.t && srvNow - R.d.t > 7500){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; continue; }
+        if(R.d.t && srvNow - R.d.t > 7500){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI(); continue; }
         place(R, (R.d.x || 0) * innerWidth, (R.d.y || 0) * innerHeight, 7, R.el);
       }
       if(INF.me || Object.keys(INF.remote).length) INF.raf = requestAnimationFrame(step);
@@ -21607,6 +21773,282 @@
   }
   // (keep sending while the picture is still catching up with the mouse)
   function o_far(M){ return Math.hypot(M.mx - M.px, M.my - M.py) > 2; }
+  // ----- Slime bullets, points, the shop and artillery -----
+  // While infiltrating, a right-click shoots a bullet from your picture the way
+  // its arrow points; it bursts a random distance away and splats the screen.
+  // The seat carries the last few shots (s = "id,kind,x0,y0,x1,y1;…", shares
+  // of the window) so the person you're on sees the same splats; on yours they
+  // vanish when you leave. Swatting an infiltrator out earns a point
+  // (scores/<id> = { n, p: earned, s: spent, v: who you last swatted, t });
+  // points buy bullet kinds (50) and artillery (20, one use: it guards your
+  // screen for 10 minutes, then 5 minutes before the next can go up).
+  const AMMO = [
+    { k: 'slime', name: 'Slime', em: '🟢', price: 0, desc: 'Gooey green slime. Everyone has it.', col: '#6fe03a' },
+    { k: 'paint', name: 'Paint bomb', em: '🎨', price: 50, desc: 'Bursts into bright paint splats, a new colour every time.', col: '#ff5a9a' },
+    { k: 'glitter', name: 'Glitter bomb', em: '✨', price: 50, desc: 'A cloud of sparkling glitter that twinkles.', col: '#ffd76a' },
+    { k: 'pie', name: 'Cream pie', em: '🥧', price: 50, desc: 'A cream pie right in the screen, crust and all.', col: '#fff3d6' },
+    { k: 'ink', name: 'Squid ink', em: '🦑', price: 50, desc: 'Inky purple-black blots that splash in all directions.', col: '#3a2550' },
+    { k: 'snow', name: 'Snowball', em: '❄️', price: 50, desc: 'Packed snow that frosts over the screen.', col: '#e9f7ff' },
+  ];
+  const ARTY = [
+    { k: 'swatter', name: 'Swatter turret', em: '🪰', price: 20, every: 4, hit: 1, desc: 'Slow but never misses: one swat every 4 seconds.', col: '#f5d04a' },
+    { k: 'cannon', name: 'Water cannon', em: '💦', price: 20, every: 2.5, hit: 0.75, desc: 'Sprays every 2.5 seconds — hits 3 times out of 4.', col: '#5ac8ff' },
+    { k: 'laser', name: 'Laser turret', em: '🔴', price: 20, every: 1.5, hit: 0.5, desc: 'Fires every 1.5 seconds, but only half the shots land.', col: '#ff4d6d' },
+  ];
+  const ARTY_LEN = 10 * 60 * 1000, ARTY_COOL = 5 * 60 * 1000;
+  const SC = { p: 0, s: 0, fx: {}, art: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
+  const scBal = () => Math.max(0, SC.p - SC.s);
+  const ammoOwned = (k) => k === 'slime' || !!SC.fx[k];
+  const ammoNow = () => { const k = chatLS('ammo') || 'slime'; return AMMO.some(a => a.k === k) && ammoOwned(k) ? k : 'slime'; };
+  async function scLoad(){
+    if(!chatName()) return;
+    try{
+      const tok = await chatAuth(), uid = chatUid();
+      const [a, b] = await Promise.all([
+        fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
+        fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
+      SC.p = (a && a.p) | 0; SC.s = (a && a.s) | 0;
+      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {};
+      SC.loaded = true;
+    }catch(e){}
+    chatRenderArcade(); artUI();
+  }
+  // a swat that counts: tell them, and take the point (the database checks they were really on your screen)
+  async function scAward(victim, vname, how){
+    const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX) || 'Someone', sv = { '.sv': 'timestamp' };
+    let ok = false;
+    try{
+      const tok = await chatAuth();
+      if(!SC.loaded) await scLoad();
+      const body = {}; body[`pokes/${victim}/zs`] = { u: me, n: nm, t: sv };
+      body[`scores/${me}`] = { n: nm, p: SC.p + 1, s: SC.s, v: victim, t: sv };
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      if(r.ok){ ok = true; SC.p++; }
+      else { SC.loaded = false; setTimeout(scLoad, 1200); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(victim)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: me, n: nm, t: sv }) }); }
+    }catch(e){}
+    toast(`${how || 'You swatted'} ${vname} out!` + (ok ? `  +1 point · ${scBal()} to spend` : ''), 2200);
+    SC.boardAt = 0; chatRenderArcade(); artUI();
+    return ok;
+  }
+  async function scBuy(kind, k){
+    const list = kind === 'fx' ? AMMO : ARTY, it = list.find(x => x.k === k); if(!it || SC.busy) return;
+    if(!SC.loaded) await scLoad();
+    if(kind === 'fx' && SC.fx[k]){ chatLS('ammo', k); chatRenderArcade(); return; }
+    if(scBal() < it.price){ toast(`${it.name} costs ${it.price} points — you have ${scBal()}. Swat infiltrators to earn more.`, 2800); return; }
+    SC.busy = true;
+    try{
+      const tok = await chatAuth(), me = chatUid(), body = {};
+      body[`scores/${me}/s`] = SC.s + it.price; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
+      if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      if(!r.ok) throw new Error('no');
+      SC.s += it.price;
+      if(kind === 'fx'){ SC.fx[k] = true; chatLS('ammo', k); toast(`${it.em} ${it.name} unlocked — it's your bullet now (switch any time with 1–6 while infiltrating).`, 3200); }
+      else { SC.art[k] = (SC.art[k] | 0) + 1; toast(`${it.em} ${it.name} bought — deploy it from the artillery button when someone infiltrates you.`, 3200); }
+    }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
+    SC.busy = false; chatRenderArcade(); artUI();
+  }
+  async function scBoard(){
+    if(SC.board && Date.now() - SC.boardAt < 20000) return;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=25&auth=${encodeURIComponent(tok)}`);
+      const d = r.ok ? await r.json() : null;
+      SC.board = Object.entries(d || {}).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: (v && v.p) | 0 })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
+      SC.boardAt = Date.now();
+    }catch(e){ SC.board = SC.board || []; }
+    chatRenderArcade();
+  }
+  // the Arcade: your points, the shop and the leaderboard (in the chat, under the trophy)
+  function chatRenderArcade(){
+    const el = chatPanel.querySelector('.chat-arcade'); if(!el) return;
+    const btn = chatPanel.querySelector('.chat-arc'); if(btn) btn.setAttribute('aria-expanded', String(CHAT.side === 'arcade'));
+    el.hidden = CHAT.side !== 'arcade';
+    if(el.hidden){ el.innerHTML = ''; return; }
+    const cur = ammoNow(), bal = scBal();
+    let h = `<div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
+      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button></div>`;
+    if(SC.tab === 'shop'){
+      h += `<div class="chat-who-h">Bullets</div><p class="chat-side-p">Right-click while infiltrating to shoot. Press 1–6 to switch to any you own.</p>`;
+      AMMO.forEach((a, i) => {
+        const own = ammoOwned(a.k), on = own && cur === a.k;
+        h += `<div class="arc-item${on ? ' on' : ''}"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${i + 1} · ${escapeHtml(a.name)}</b><span>${escapeHtml(a.desc)}</span></div>
+          <button type="button" class="arc-buy${own ? ' own' : ''}" data-fx="${a.k}" ${on ? 'disabled' : ''}>${on ? 'In use' : own ? 'Use' : a.price + ' pts'}</button></div>`;
+      });
+      h += `<div class="chat-who-h" style="margin-top:6px">Artillery</div><p class="chat-side-p">One use each. When someone infiltrates you, deploy it from the button at the bottom right: it guards your screen for 10 minutes and swats infiltrators for points. Then it needs 5 minutes before the next one.</p>`;
+      for(const a of ARTY){
+        const n = SC.art[a.k] | 0;
+        h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(a.desc)}</span></div>
+          <button type="button" class="arc-buy" data-art="${a.k}">${a.price} pts</button></div>`;
+      }
+    } else {
+      const B = SC.board;
+      if(!B){ h += `<p class="chat-side-p">Loading…</p>`; scBoard(); }
+      else if(!B.length) h += `<p class="chat-side-p">Nobody has swatted anyone yet. Be the first!</p>`;
+      else { h += `<ol class="arc-board">` + B.map((x, i) => `<li class="${x.u === chatUid() ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><span>${x.p}</span></li>`).join('') + `</ol>`;
+        if(Date.now() - SC.boardAt > 20000) scBoard(); }
+      h += `<p class="chat-side-p">Points come from swatting infiltrators — by clicking them or with artillery.</p>`;
+    }
+    el.innerHTML = h;
+  }
+  // ----- the splats -----
+  const SPLAT = { img: {}, on: null, mine: null };
+  function splatImg(kind, v){
+    const key = kind + v; if(SPLAT.img[key]) return SPLAT.img[key];
+    const S = 256, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d'), m = S / 2;
+    let seed = (v + 1) * 9973 + kind.length * 131; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const blob = (r0, lobes, drips) => {
+      g.beginPath(); g.arc(m, m, r0, 0, Math.PI * 2);
+      for(let i = 0; i < lobes; i++){ const a = rnd() * Math.PI * 2, d = r0 * (0.7 + rnd() * 0.55), r = r0 * (0.18 + rnd() * 0.32); g.moveTo(m + Math.cos(a) * d + r, m + Math.sin(a) * d); g.arc(m + Math.cos(a) * d, m + Math.sin(a) * d, r, 0, Math.PI * 2); }
+      for(let i = 0; i < 9; i++){ const a = rnd() * Math.PI * 2, d = r0 * (1.25 + rnd() * 0.5), r = 2 + rnd() * 7; g.moveTo(m + Math.cos(a) * d + r, m + Math.sin(a) * d); g.arc(m + Math.cos(a) * d, m + Math.sin(a) * d, r, 0, Math.PI * 2); }
+      for(let i = 0; i < drips; i++){ const x = m + (rnd() - 0.5) * r0 * 1.4, w = 6 + rnd() * 10, l = r0 * (0.6 + rnd() * 0.8); g.moveTo(x - w / 2, m); g.rect(x - w / 2, m, w, l); g.moveTo(x + w / 2, m + l); g.arc(x, m + l, w / 2, 0, Math.PI * 2); }
+    };
+    const gloss = (a) => { const q = g.createRadialGradient(m - 22, m - 26, 2, m - 22, m - 26, 46); q.addColorStop(0, `rgba(255,255,255,${a})`); q.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = q; g.fillRect(0, 0, S, S); };
+    const fillBlob = (c1, c2) => { const q = g.createRadialGradient(m - 15, m - 20, 10, m, m, 110); q.addColorStop(0, c1); q.addColorStop(1, c2); g.fillStyle = q; g.fill(); };
+    if(kind === 'slime'){ blob(62, 11, 4); fillBlob('#a6ff6e', '#38a417'); gloss(0.55); }
+    else if(kind === 'paint'){ const cs = [['#ff8ab6', '#e0306f'], ['#8fd0ff', '#2a86e0'], ['#ffe27a', '#e6a800'], ['#a6ff8a', '#35b52b'], ['#cfa2ff', '#7d3fe0']][v % 5]; blob(58, 14, 3); fillBlob(cs[0], cs[1]); gloss(0.4); }
+    else if(kind === 'pie'){ blob(64, 12, 2); fillBlob('#fffdf6', '#efdcb4'); g.fillStyle = '#c98a3d'; for(let i = 0; i < 9; i++){ const a = rnd() * Math.PI * 2, d = 30 + rnd() * 70; g.beginPath(); g.ellipse(m + Math.cos(a) * d, m + Math.sin(a) * d, 6 + rnd() * 9, 4 + rnd() * 5, rnd() * 3, 0, Math.PI * 2); g.fill(); } g.fillStyle = '#d12d3c'; for(let i = 0; i < 3; i++){ g.beginPath(); g.arc(m + (rnd() - 0.5) * 60, m + (rnd() - 0.5) * 60, 7, 0, Math.PI * 2); g.fill(); } gloss(0.3); }
+    else if(kind === 'ink'){ blob(56, 16, 3); fillBlob('#5b3d7a', '#140b22'); g.strokeStyle = '#1d1030'; g.lineCap = 'round'; for(let i = 0; i < 14; i++){ const a = rnd() * Math.PI * 2, d0 = 50, d1 = 80 + rnd() * 45; g.lineWidth = 2 + rnd() * 5; g.beginPath(); g.moveTo(m + Math.cos(a) * d0, m + Math.sin(a) * d0); g.lineTo(m + Math.cos(a) * d1, m + Math.sin(a) * d1); g.stroke(); } gloss(0.25); }
+    else if(kind === 'snow'){ blob(60, 13, 0); fillBlob('#ffffff', '#b9e3ff'); g.fillStyle = 'rgba(255,255,255,.9)'; for(let i = 0; i < 40; i++){ g.beginPath(); g.arc(m + (rnd() - 0.5) * 230, m + (rnd() - 0.5) * 230, 1 + rnd() * 3, 0, Math.PI * 2); g.fill(); } gloss(0.5); }
+    else if(kind === 'glitter'){
+      blob(50, 10, 0); g.fillStyle = 'rgba(255,170,220,.28)'; g.fill();
+      const cs = ['#ffd76a', '#ff9ad5', '#ffffff', '#b8f0ff', '#e6b3ff'];
+      for(let i = 0; i < 160; i++){ const a = rnd() * Math.PI * 2, d = Math.pow(rnd(), 0.6) * 118, x = m + Math.cos(a) * d, y = m + Math.sin(a) * d, r = 0.8 + rnd() * 2.6; g.fillStyle = cs[i % cs.length];
+        if(i % 9 === 0){ g.beginPath(); for(let k = 0; k < 8; k++){ const rr = k % 2 ? r * 1.2 : r * 3.6, aa = k / 8 * Math.PI * 2; g.lineTo(x + Math.cos(aa) * rr, y + Math.sin(aa) * rr); } g.fill(); }
+        else { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); } }
+    }
+    return (SPLAT.img[key] = c.toDataURL('image/png'));
+  }
+  function splatLayer(mine){
+    const k = mine ? 'mine' : 'on';
+    if(!SPLAT[k] || !SPLAT[k].isConnected){ const L = document.createElement('div'); L.className = 'splat-layer'; document.body.appendChild(L); SPLAT[k] = L; }
+    return SPLAT[k];
+  }
+  // a bullet flying from (x0,y0) to (x1,y1), then bursting into a splat there
+  function splatShot(kind, x0, y0, x1, y1, mine){
+    const A = AMMO.find(a => a.k === kind) || AMMO[0], L = splatLayer(mine);
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const land = () => {
+      const sz = 170 + Math.random() * 170, v = Math.floor(Math.random() * 5);
+      const s = document.createElement('div'); s.className = 'splat ' + kind; s.style.left = x1 + 'px'; s.style.top = y1 + 'px'; s.style.width = s.style.height = sz + 'px';
+      s.style.backgroundImage = `url("${splatImg(kind, v)}")`; s.style.setProperty('--r', (Math.random() * 360) + 'deg');
+      L.appendChild(s);
+      while(L.children.length > 45) L.firstChild.remove();
+      if(!still) s.animate([{ transform: 'translate(-50%,-50%) rotate(var(--r)) scale(.25)', opacity: .6 }, { transform: 'translate(-50%,-50%) rotate(var(--r)) scale(1.12)', opacity: 1, offset: .35 }, { transform: 'translate(-50%,-50%) rotate(var(--r)) scale(1)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
+      const life = mine ? 600000 : 16000;
+      s.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 2500, delay: life - 2500, fill: 'forwards' }).onfinish = () => s.remove();
+      if(!still && (kind === 'slime' || kind === 'paint' || kind === 'pie')) s.animate([{ marginTop: '0px' }, { marginTop: (10 + Math.random() * 18) + 'px' }], { duration: 9000, easing: 'ease-in', fill: 'forwards' });
+      if(!still) for(let i = 0; i < 8; i++){
+        const b = document.createElement('div'); b.className = 'splat-bit'; b.style.background = A.col; b.style.left = x1 + 'px'; b.style.top = y1 + 'px';
+        const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 90, z = 5 + Math.random() * 9; b.style.width = b.style.height = z + 'px'; L.appendChild(b);
+        b.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d + 30}px)) scale(.4)`, opacity: 0 }], { duration: 500 + Math.random() * 250, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' }).onfinish = () => b.remove();
+      }
+    };
+    if(still){ land(); return; }
+    const bl = document.createElement('div'); bl.className = 'splat-bullet'; bl.style.background = A.col; bl.style.left = x0 + 'px'; bl.style.top = y0 + 'px'; L.appendChild(bl);
+    const dur = 180 + Math.hypot(x1 - x0, y1 - y0) * 0.6;
+    bl.animate([{ transform: 'translate(-50%,-50%) scale(.6)' }, { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(1.1)` }], { duration: dur, easing: 'cubic-bezier(.3,.6,.5,1)', fill: 'forwards' }).onfinish = () => { bl.remove(); land(); };
+  }
+  function splatClear(mine){ const L = SPLAT[mine ? 'mine' : 'on']; if(L){ L.remove(); SPLAT[mine ? 'mine' : 'on'] = null; } }
+  // you shooting (right-click while infiltrating)
+  function infShoot(){
+    const M = INF.me; if(!M) return;
+    const now = performance.now(); if(now - (M.lastShot || 0) < 280) return; M.lastShot = now;
+    const kind = ammoNow(), dist = 120 + Math.random() * 360, ang = M.sp > 40 ? M.ang : Math.atan2(M.my - M.py, M.mx - M.px) || M.ang;
+    const x0 = M.px, y0 = M.py;
+    let x1 = x0 + Math.cos(ang) * dist, y1 = y0 + Math.sin(ang) * dist;
+    x1 = Math.max(20, Math.min(innerWidth - 20, x1)); y1 = Math.max(20, Math.min(innerHeight - 20, y1));
+    splatShot(kind, x0, y0, x1, y1, true);
+    M.shotN = ((M.shotN || Math.floor(Math.random() * 90000)) + 1) % 100000;
+    const f = (v) => Math.round(v * 1000) / 1000;
+    M.shots = (M.shots || []).concat([[M.shotN, AMMO.findIndex(a => a.k === kind), f(x0 / innerWidth), f(y0 / innerHeight), f(x1 / innerWidth), f(y1 / innerHeight)]]).slice(-4);
+    M.dirty = true;
+  }
+  function infShotStr(M){ return (M.shots || []).map(s => s.join(',')).join(';'); }
+  // their shots arriving on your screen
+  function infShotsIn(R, str, first){
+    if(typeof str !== 'string' || !str) return;
+    R.seen = R.seen || new Set();
+    for(const part of str.split(';')){
+      const a = part.split(',').map(Number); if(a.length !== 6 || !a.every(isFinite)) continue;
+      if(R.seen.has(a[0])) continue; R.seen.add(a[0]);
+      if(R.seen.size > 40) R.seen = new Set([...R.seen].slice(-20));
+      if(first) continue;
+      const kind = (AMMO[a[1]] || AMMO[0]).k;
+      splatShot(kind, a[2] * innerWidth, a[3] * innerHeight, a[4] * innerWidth, a[5] * innerHeight, false);
+    }
+  }
+  function infCtx(e){ if(INF.me){ e.preventDefault(); e.stopPropagation(); } }
+  // ----- artillery: guards your screen while it's up -----
+  const ART = { el: null, btn: null, menu: null, timer: 0, nextShot: 0 };
+  const artState = () => { try{ return JSON.parse(chatLS('arty') || 'null') || {}; }catch(e){ return {}; } };
+  function artActive(){ const S = artState(); return S.k && Date.now() < S.until ? S : null; }
+  function artCoolLeft(){ const S = artState(); return S.until ? Math.max(0, S.until + ARTY_COOL - Date.now()) : 0; }
+  const mmss = (ms) => { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  async function artDeploy(k){
+    const it = ARTY.find(a => a.k === k); if(!it) return;
+    if(artActive() || artCoolLeft() > 0) return;
+    if(!(SC.art[k] > 0)){ toast(`You don't have a ${it.name} — buy one in the chat's Arcade (trophy button) for ${it.price} points.`, 3000); return; }
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/inv/${encodeURIComponent(chatUid())}/art/${k}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify((SC.art[k] | 0) - 1) });
+      if(!r.ok) throw new Error('no');
+    }catch(e){ toast("Couldn't deploy it — check your connection.", 2400); return; }
+    SC.art[k] = (SC.art[k] | 0) - 1;
+    chatLS('arty', JSON.stringify({ k, until: Date.now() + ARTY_LEN }));
+    ART.nextShot = performance.now() + 900;
+    toast(`${it.em} ${it.name} is up for 10 minutes — it'll swat anyone who infiltrates you.`, 3000);
+    artMenu(false); artUI(); chatRenderArcade();
+  }
+  function artMenu(open){
+    if(ART.menu){ ART.menu.remove(); ART.menu = null; }
+    if(!open) return;
+    const m = document.createElement('div'); m.className = 'art-menu';
+    const owned = ARTY.filter(a => SC.art[a.k] > 0);
+    m.innerHTML = `<b>Deploy artillery</b>` + (owned.length ? owned.map(a => `<button type="button" data-k="${a.k}"><span>${a.em}</span><div><b>${escapeHtml(a.name)} × ${SC.art[a.k]}</b><i>${escapeHtml(a.desc)}</i></div></button>`).join('')
+      : `<p>You don't have any yet. Buy some in the chat's Arcade (the trophy button) — 20 points each.</p>`);
+    m.addEventListener('pointerdown', (e) => e.stopPropagation());
+    m.addEventListener('click', (e) => { const b = e.target.closest('button[data-k]'); if(b) artDeploy(b.dataset.k); });
+    document.body.appendChild(m); ART.menu = m;
+    setTimeout(() => { const off = (e) => { if(ART.menu && !ART.menu.contains(e.target) && e.target !== ART.btn){ artMenu(false); window.removeEventListener('pointerdown', off, true); } }; window.addEventListener('pointerdown', off, true); }, 0);
+  }
+  // the button (shows while someone's on your screen, or while artillery is up / cooling down) and the turret
+  function artUI(){
+    const someone = Object.keys(INF.remote).length > 0, act = artActive(), cool = act ? 0 : artCoolLeft();
+    const show = someone || !!act;
+    if(!show){ if(ART.btn){ ART.btn.remove(); ART.btn = null; } artMenu(false); }
+    else {
+      if(!ART.btn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'art-btn'; b.addEventListener('pointerdown', (e) => e.stopPropagation()); b.addEventListener('click', () => { if(!artActive() && artCoolLeft() <= 0){ if(!SC.loaded) scLoad().then(() => artMenu(!ART.menu)); else artMenu(!ART.menu); } }); document.body.appendChild(b); ART.btn = b; }
+      const it = act && ARTY.find(a => a.k === act.k);
+      ART.btn.classList.toggle('live', !!act); ART.btn.disabled = !act && cool > 0;
+      ART.btn.innerHTML = act ? `<span>${it.em}</span>${escapeHtml(it.name)} · ${mmss(act.until - Date.now())}` : cool > 0 ? `<span>⏳</span>Artillery ready in ${mmss(cool)}` : `<span>🎯</span>Deploy artillery`;
+    }
+    if(act && !ART.el){ const t = document.createElement('div'); t.className = 'art-turret'; document.body.appendChild(t); ART.el = t; }
+    if(ART.el){ if(!act){ ART.el.remove(); ART.el = null; } else { const it = ARTY.find(a => a.k === act.k); ART.el.textContent = it.em; ART.el.style.setProperty('--c', it.col); } }
+    if((show || act) && !ART.timer) ART.timer = setInterval(artTick, 250);
+    if(!show && !act && ART.timer){ clearInterval(ART.timer); ART.timer = 0; }
+  }
+  function artTick(){
+    const act = artActive();
+    if(act && ART.el && performance.now() >= ART.nextShot){
+      const seats = Object.keys(INF.remote);
+      if(seats.length){
+        const it = ARTY.find(a => a.k === act.k); ART.nextShot = performance.now() + it.every * 1000;
+        const s = seats[Math.floor(Math.random() * seats.length)], R = INF.remote[s];
+        const r = ART.el.getBoundingClientRect(), x0 = r.left + r.width / 2, y0 = r.top + r.height / 2, hit = Math.random() < it.hit;
+        const tx = R.px + (hit ? 0 : (Math.random() < 0.5 ? -1 : 1) * (60 + Math.random() * 60)), ty = R.py + (hit ? 0 : (Math.random() - 0.5) * 120);
+        ART.el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 240 });
+        const p = document.createElement('div'); p.className = 'art-shot'; p.style.background = it.col; p.style.left = x0 + 'px'; p.style.top = y0 + 'px'; document.body.appendChild(p);
+        p.animate([{ transform: 'translate(-50%,-50%)' }, { transform: `translate(calc(-50% + ${tx - x0}px), calc(-50% + ${ty - y0}px))` }], { duration: 380, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+          p.remove();
+          if(hit && INF.remote[s] === R) infSwat(s, it);
+          else infPop(tx, ty, null);
+        };
+      } else ART.nextShot = performance.now() + 500;
+    }
+    artUI();
+  }
+  setTimeout(() => { try{ artUI(); }catch(e){} }, 2500);
   let pokeFxLayer = null;
   function chatPokeShow(em, from){
     if(!pokeFxLayer){ pokeFxLayer = document.createElement('div'); pokeFxLayer.className = 'poke-fx'; pokeFxLayer.setAttribute('aria-live', 'polite'); document.body.appendChild(pokeFxLayer); }

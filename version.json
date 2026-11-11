@@ -1,8 +1,10 @@
 {
-  "build": 21,
+  "build": 23,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: the react / reply buttons now sit on the corner of the message you hover, even on short messages."
+    "Infiltrate: right-click to shoot slime at the screen you're on! It splats where it lands (and disappears from your screen when you leave).",
+    "Swat infiltrators to earn points — check the new trophy button in the chat for your points, the shop and the leaderboard.",
+    "Shop: 5 new bullets (paint, glitter, cream pie, squid ink, snowball) for 50 points each, and artillery for 20 points that guards your screen for 10 minutes."
   ]
 }
