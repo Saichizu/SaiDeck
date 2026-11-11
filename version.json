@@ -1,8 +1,9 @@
 {
-  "build": 25,
+  "build": 27,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Infiltrate: when you swat someone out, all their slime melts off your screen right away."
+    "Chat: Online, Rooms and the Arcade now take turns — opening one closes the others.",
+    "Chat: the toggles at the bottom are lined up in two neat columns."
   ]
 }

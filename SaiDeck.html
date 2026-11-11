@@ -183,9 +183,9 @@
   .chat-send svg{width:18px;height:18px;fill:currentColor;}
   .chat-send:disabled{opacity:.4;cursor:default;}
   .chat-send:focus-visible{outline:2px solid #fff;outline-offset:2px;}
-  .chat-opts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text-dim);}
+  .chat-opts{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8px 12px;font-size:11.5px;color:var(--text-dim);}
   .chat-opts label{display:flex;align-items:center;gap:7px;cursor:pointer;}
-  .chat-count{margin-right:auto;font:600 11px 'JetBrains Mono',monospace;color:var(--text-faint);font-variant-numeric:tabular-nums;}
+  .chat-count{grid-column:1 / -1;justify-self:end;margin:-4px 0 -2px;font:600 11px 'JetBrains Mono',monospace;color:var(--text-faint);font-variant-numeric:tabular-nums;}
   .chat-count.full{color:#f5d04a;}
   .chat-setup{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
   .chat-setup p{margin:0;font-size:12.5px;line-height:1.5;color:var(--text-dim);}
@@ -18192,7 +18192,11 @@
     if(!b) return;
     const S = recSettings, now = Math.round(beatNowTime() * 100) / 100;
     let m;
-    if(b.id === 'frBattleBtn'){
+    if(b.dataset.now && /^[a-zA-Z0-9]+$/.test(b.dataset.now) && typeof REC_DEFAULTS[b.dataset.now] === 'number'){
+      // (a Freedit's "Here" button: that setting becomes where the playhead is now)
+      b.blur(); S[b.dataset.now] = now; saveRecSettings(); syncRecControls();
+      toast(`Set to ${fmtTime(now)}.`, 1600);
+    } else if(b.id === 'frBattleBtn'){
       b.blur();
       const L = Number(S.frBattleLen) || 8;
       const list = frManualBattles().filter(x => Math.abs(x - now) > 0.5);
@@ -20563,7 +20567,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 25;                 // ← goes up by one with every published version
+  const SD_BUILD = 27;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20997,8 +21001,8 @@
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
       const rb = chatPanel.querySelector('.chat-rooms');
-      rb.addEventListener('click', () => { CHAT.side = CHAT.side === 'rooms' ? null : 'rooms'; chatRenderSide(); chatRenderArcade(); });
-      chatPanel.querySelector('.chat-arc').addEventListener('click', () => { CHAT.side = CHAT.side === 'arcade' ? null : 'arcade'; chatRenderSide(); chatRenderArcade(); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
+      rb.addEventListener('click', () => chatSideTo('rooms'));
+      chatPanel.querySelector('.chat-arc').addEventListener('click', () => { chatSideTo('arcade'); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
         const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
@@ -21026,7 +21030,7 @@
       oin.checked = chatInfOn();
       oin.addEventListener('change', () => { chatLS('inf', oin.checked ? '1' : '0'); oin.blur(); presBeat(); if(!oin.checked) infKickAll(); toast(oin.checked ? 'Others can infiltrate your screen again (click their picture to swat them out).' : "Nobody can infiltrate your screen now.", 2600); });
       const oc = chatPanel.querySelector('.chat-online');
-      oc.addEventListener('click', () => { const w = chatPanel.querySelector('.chat-who'); w.hidden = !w.hidden; oc.setAttribute('aria-expanded', String(!w.hidden)); presRender(); });
+      oc.addEventListener('click', () => chatSideTo('who'));
       grow();
     }
     chatRenderStatus();
@@ -21070,7 +21074,14 @@
     if(p && p.m) el.innerHTML = `${ICON_PIN}<div><b>SaiDeck</b><span>${escapeHtml(p.m)}</span></div>`;
   }
   // the rooms list (Everyone + your group chats + join / make one)
+  // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
+  function chatSideTo(which){
+    CHAT.side = CHAT.side === which ? null : which;
+    chatRenderSide(); chatRenderArcade();
+  }
   function chatRenderSide(){
+    const w = chatPanel.querySelector('.chat-who'), oc = chatPanel.querySelector('.chat-online');
+    if(w){ const was = !w.hidden; w.hidden = CHAT.side !== 'who'; if(oc) oc.setAttribute('aria-expanded', String(!w.hidden)); if(!w.hidden && !was) presRender(); }
     const side = chatPanel.querySelector('.chat-side'); if(!side) return;
     const rb = chatPanel.querySelector('.chat-rooms'); if(rb) rb.setAttribute('aria-expanded', String(CHAT.side === 'rooms'));
     side.hidden = CHAT.side !== 'rooms';
