@@ -360,6 +360,17 @@
   .infil .infil-arrow{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .2s;transform:rotate(var(--ang,0rad)) translateX(31px);}
   .infil .infil-arrow::after{content:'';position:absolute;left:-2px;top:-8px;border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
   .infil.moving .infil-arrow{opacity:1;}
+  .chat-event.inf{border-color:rgba(53,208,184,.45);}
+  .chat-join{all:unset;margin-left:6px;padding:2px 9px;border-radius:999px;cursor:pointer;font:800 10.5px 'Inter',sans-serif;color:#0e2a26;background:#35d0b8;}
+  .chat-join:hover:not(:disabled){filter:brightness(1.1);}
+  .chat-join:disabled{opacity:.4;cursor:default;}
+  .chat-join:focus-visible{outline:2px solid #fff;}
+  .infil.peer .infil-av{box-shadow:0 0 0 3px #35d0b8, 0 6px 18px rgba(0,0,0,.45);opacity:.92;}
+  .infil.peer .infil-arrow::after{border-left-color:#35d0b8;}
+  .infil.peer .infil-tag{border-color:rgba(53,208,184,.6);color:#c9fff4;}
+  .infil.tgt .infil-av{width:34px;height:34px;box-shadow:0 0 0 3px #f5d04a, 0 0 18px rgba(245,208,74,.6);}
+  .infil.tgt .infil-arrow::after{border-left-color:#f5d04a;}
+  .infil.tgt .infil-tag{border-color:rgba(245,208,74,.7);color:#fff1b8;}
   .infil.them .infil-av{pointer-events:auto;cursor:pointer;box-shadow:0 0 0 3px #ff7ab6, 0 6px 18px rgba(0,0,0,.45);}
   .infil.them .infil-arrow::after{border-left-color:#ff7ab6;}
   .infil-tag{position:absolute;left:0;top:30px;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:999px;background:rgba(23,24,31,.9);border:1px solid rgba(255,122,182,.6);color:#ffd0e6;font:700 10.5px 'Inter',sans-serif;}
@@ -15924,7 +15935,7 @@
       }
       camFit.w += ((has ? 1 : 0) - camFit.w) * k;
     }
-    if(camFit.w < 0.005) return cam;
+    if(camFit.w < 0.005) return camKeepVideo(cam, geo);
     yT = camFit.yT; yB = camFit.yB;
     const pad = 22 * geo.u, top0 = geo.cy - geo.contentH / 2, bot = top0 + geo.contentH;
     // (what's under the header and ruler, which stay over the top while zoomed, doesn't count as in view)
@@ -15942,6 +15953,26 @@
     const fitAxis = (v1, v2, lo, hi) => { const mn = Math.min(v1, v2), mx = Math.max(v1, v2); if(mx - mn > hi - lo) return (lo + hi) / 2 - (mn + mx) / 2; if(mn < lo) return lo - mn; if(mx > hi) return hi - mx; return 0; };
     const dx = fitAxis(a[0], b[0], pad, geo.W - pad) * camFit.w, dy = fitAxis(a[1], b[1], top + pad, bot - pad) * camFit.w;
     // a screen shift (dx, dy) = moving the focus the other way, turned back
+    return camKeepVideo(Object.assign({}, cam, { s, fx: cam.fx - (co * dx + si * dy) / s, fy: cam.fy - (-si * dx + co * dy) / s }), geo);
+  }
+  // The video box (with a Freedit on) is part of the layout, not something to zoom past: the camera zooms in
+  // no further than keeps the whole box on screen — between the header / ruler and the bottom margin — and
+  // slides so it's inside. (A full-width box means no zoom while it's there; a smaller one leaves room.)
+  function camKeepVideo(cam, geo){
+    const V = geo.vid; if(!cam || !V) return cam;
+    const top0 = geo.cy - geo.contentH / 2, bot = top0 + geo.contentH;
+    const top = geo.fitTop != null && isFinite(geo.fitTop) ? Math.max(top0, Math.min(V.y0, geo.fitTop)) : top0;
+    const co = Math.cos(cam.rot), si = Math.sin(cam.rot), w = V.x1 - V.x0, h = V.y1 - V.y0;
+    const extW = Math.abs(co) * w + Math.abs(si) * h, extH = Math.abs(si) * w + Math.abs(co) * h;
+    const sV = Math.min(geo.W / Math.max(1, extW), (bot - top) / Math.max(1, extH));
+    const s = Math.min(cam.s, Math.max(1, sV));
+    // where the box's corners land on screen, then slide them inside
+    const P = (x, y) => [geo.cx + s * (co * (x - cam.fx) - si * (y - cam.fy)), geo.cy + s * (si * (x - cam.fx) + co * (y - cam.fy))];
+    const C = [P(V.x0, V.y0), P(V.x1, V.y0), P(V.x0, V.y1), P(V.x1, V.y1)];
+    const xs = C.map(c => c[0]), ys = C.map(c => c[1]);
+    const fit = (mn, mx, lo, hi) => { if(mx - mn > hi - lo) return (lo + hi) / 2 - (mn + mx) / 2; if(mn < lo) return lo - mn; if(mx > hi) return hi - mx; return 0; };
+    const dx = fit(Math.min(...xs), Math.max(...xs), 0, geo.W), dy = fit(Math.min(...ys), Math.max(...ys), top, bot);
+    if(s === cam.s && !dx && !dy) return cam;
     return Object.assign({}, cam, { s, fx: cam.fx - (co * dx + si * dy) / s, fy: cam.fy - (-si * dx + co * dy) / s });
   }
   // Puts the camera on the canvas; returns the frame-space matrix (or null).
@@ -16156,6 +16187,16 @@
       vidSlot = S.videoSlot;
       if(/^\d+$/.test(vidSlot)) vidSlot = Math.min(nT, Number(vidSlot));
       else if(vidSlot !== 'frameBottom') vidSlot = 'frameTop';
+      // Between the tracks (or right under the ruler): the box has to end above the bottom margin,
+      // so it shrinks (keeping its shape) to the room that's left under the bars and the tracks above it.
+      if(typeof vidSlot === 'number' && S.videoFit !== 'fill'){
+        // (tracks that can shrink to fit squeeze first; with "Tracks can go off the frame" they keep their height)
+        const offOK = !S.fillFrame && S.vocalReorder && S.vocalOverflow;
+        const g0 = S.gap * u, laneMin = offOK ? Math.max(6 * u, S.trackHeight * u) : 6 * u;
+        const fullTop = mT + headerH + rulerH;
+        const room = contentBottom - fullTop - g0 - vidSlot * (laneMin + g0);
+        if(vidH > room){ vidH = Math.max(Math.round(24 * u), Math.floor(room)); vidW = Math.round(vidH * rw / rh); }
+      }
       if(S.videoFit === 'fill'){
         // Fill: tracks keep their own height; the box takes whatever is left.
         const g0 = S.gap * u, n0 = Math.max(1, nT);
@@ -16265,6 +16306,8 @@
       laneTop: (i) => lanePos ? laneYAt(lanePos[i]) : laneTopAt(i), lanesAt: (Tq) => vocalLanePositions(Tq), rowY: (p) => laneYAt(p),
       // the instrumental lanes playing right now (kept in the shot)
       fitTop: vidTop ? null : topH,      // (the header + ruler stay over the top while zoomed)
+      // a Freedit's camera keeps the whole video box on screen (between the bars and the bottom margin)
+      vid: (S.videoSpace && vidH > 0 && S.beatOn && S.freeditMode && S.freeditMode !== 'beat') ? { x0: (RENDER_W - vidW) / 2, y0: vidY, x1: (RENDER_W + vidW) / 2, y1: vidY + vidH } : null,
       inst: S.fdKeepInst !== false ? rows.map((t, i) => (t && t.icon !== 'mic' && t.buffer && isTrackSounding(t, pt) && effectiveGain(t) > 0.001) ? i : -1).filter(i => i >= 0) : null };
     const M0 = ctx.getTransform();          // (the frame's own transform, before the camera: for the margin strips)
     const cam = keepSingersInView(junnyyActive() ? junnyyCamera(pt, camGeo) : jvkeActive() ? jvkeCamera(pt, camGeo) : frierenActive() ? frierenCamera(pt, camGeo) : forestActive() ? forestCamera(pt, camGeo) : todohActive() ? todohCamera(pt, camGeo) : davidActive() ? davidCamera(pt, camGeo) : khaiiActive() ? khaiiCamera(pt, camGeo) : sageActive() ? sageCamera(pt, camGeo) : saichizuActive() ? saichizuCamera(pt, camGeo) : (fdGen() && fdGen().camera) ? fdGen().camera(pt, camGeo) : beatCameraAt(pt, camGeo), camGeo, dtSec);
@@ -20633,7 +20676,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 29;                 // ← goes up by one with every published version
+  const SD_BUILD = 34;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21214,12 +21257,22 @@
     for(const m of shown){
       const day = chatFmtDay(m.t), off = m.a === true;
       if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
-      if(m.e === 'swat'){
-        const ev = document.createElement('div'); ev.className = 'chat-event';
-        ev.innerHTML = '<span aria-hidden="true">💥</span><b></b> <span class="ev-t"></span>';
+      if(m.e === 'swat' || m.e === 'inf'){
+        const inf = m.e === 'inf';
+        const ev = document.createElement('div'); ev.className = 'chat-event' + (inf ? ' inf' : '');
+        ev.innerHTML = `<span aria-hidden="true">${inf ? '🕵️' : '💥'}</span><b></b> <span class="ev-t"></span>`;
         ev.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('b').style.color = chatColor(m.n);
         ev.querySelector('.ev-t').textContent = chatMask(m.m) + ' · ' + chatFmtTime(m.t);
         if(fresh(m._k)) ev.classList.add('in');
+        // Join: go in too (not on yourself, not while you're already in somewhere, and only while it's fresh)
+        if(inf && typeof m.v === 'string' && !chatIsMe(m.v) && !chatIsMe(m.u) && Date.now() + PRES.offset - (m.t || 0) < 180000){
+          const jb = document.createElement('button'); jb.type = 'button'; jb.className = 'chat-join'; jb.textContent = 'Join';
+          const tn = (PRES.list && PRES.list[m.v] && PRES.list[m.v].n) || String(m.m || '').replace(/^is infiltrating /, '') || 'them';
+          jb.title = `Infiltrate ${tn}'s screen too`;
+          jb.disabled = !!INF.me;
+          jb.addEventListener('click', () => { jb.blur(); if(!INF.me) infStart(m.v, tn); });
+          ev.appendChild(jb);
+        }
         body.appendChild(ev); continue;
       }
       const mine = chatIsMe(m.u) && !off;
@@ -21722,6 +21775,8 @@
     window.addEventListener('contextmenu', infCtx, true);
     document.addEventListener('visibilitychange', infHidden);
     if(!SC.loaded) scLoad();
+    infWatch(uid, name, slot);
+    infAnnounce(uid, name);
     INF.me.hud = document.createElement('div'); INF.me.hud.className = 'infil-hud'; document.body.appendChild(INF.me.hud); infHud();
     toast(`You're infiltrating ${name}'s screen — right-click to shoot slime, click anywhere to leave.`, 3200);
     infLoop();
@@ -21769,6 +21824,9 @@
     document.removeEventListener('visibilitychange', infHidden);
     setTimeout(() => window.removeEventListener('contextmenu', infCtx, true), 400);
     if(M.hud) M.hud.remove();
+    if(M.es){ M.es.close(); M.es = null; }
+    for(const P of Object.values(M.peers || {})) P.el.remove();
+    if(M.tgt) M.tgt.el.remove();
     splatClear(true);
     setTimeout(() => { INF.eatClick = false; window.removeEventListener('click', infEat, true); }, 400);
     infPop(M.px, M.py, M.el); M.el.remove();
@@ -21803,6 +21861,8 @@
       document.body.appendChild(el);
       INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
       infShotsIn(INF.remote[s], v.s, true);
+      // (a heads-up when someone new comes in)
+      if(!R || R.d.u !== v.u){ toast(`👀 ${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating your screen! Click their picture to swat them out.`, 3200); if(chatSoundOn()) chatPing(); }
     } else { R.d = v; infShotsIn(R, v.s, false); }
     infLoop(); artUI();
   }
@@ -21849,11 +21909,21 @@
       };
       const M = INF.me;
       if(M){
+        const srv = Date.now() + PRES.offset;
+        for(const [s, P] of Object.entries(M.peers || {})){
+          if(P.d.t && srv - P.d.t > 7500){ P.el.remove(); delete M.peers[s]; continue; }
+          place(P, (P.d.x || 0) * innerWidth, (P.d.y || 0) * innerHeight, 7, P.el);
+        }
+        if(M.tgt){
+          if(M.tgt.d.t && srv - M.tgt.d.t > 6000) M.tgt.el.style.opacity = '0';
+          else { M.tgt.el.style.opacity = ''; place(M.tgt, (M.tgt.d.x || 0) * innerWidth, (M.tgt.d.y || 0) * innerHeight, 10, M.tgt.el); }
+        }
         place(M, M.mx, M.my, 9, M.el);
         if(now - M.lastMove > 5000){ infStop('idle'); }
         else if((M.dirty || o_far(M)) && !M.busy && now - M.lastSend > 80){ M.lastSend = now; infSend(); }
       }
       const srvNow = Date.now() + PRES.offset;
+      if(Object.keys(INF.remote).length) infCursorOut(now);
       for(const [s, R] of Object.entries(INF.remote)){
         if(R.d.t && srvNow - R.d.t > 7500){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI(); continue; }
         place(R, (R.d.x || 0) * innerWidth, (R.d.y || 0) * innerHeight, 7, R.el);
@@ -21862,6 +21932,93 @@
       else INF.raf = 0;
     };
     INF.raf = requestAnimationFrame(step);
+  }
+  // ----- seeing each other: the infiltrators on the same screen, and that person's own cursor -----
+  // pokes/<their id>/zi can be read by whoever holds a seat there; zi/c = their cursor (x, y, t),
+  // sent by them while anyone's on their screen.
+  async function infWatch(uid, name, slot){
+    const M = INF.me; if(!M) return;
+    M.peers = {}; M.tgt = null;
+    let tok; try{ tok = await chatAuth(); }catch(e){ return; }
+    if(INF.me !== M) return;
+    const es = new EventSource(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}/zi.json?auth=${encodeURIComponent(tok)}`);
+    M.es = es;
+    const seat = (s, v) => {
+      if(INF.me !== M) return;
+      if(s === 'c'){
+        if(!v || typeof v.x !== 'number'){ if(M.tgt){ M.tgt.el.remove(); M.tgt = null; } return; }
+        if(!M.tgt){
+          const el = infAvatar(uid, name, 'tgt');
+          const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = `${chatBadName(name) ? 'They' : name} — run!`; el.appendChild(tag);
+          document.body.appendChild(el);
+          M.tgt = { d: v, el, px: v.x * innerWidth, py: v.y * innerHeight, ang: 0, sp: 0 };
+        } else M.tgt.d = v;
+        infLoop(); return;
+      }
+      if(!/^s[123]$/.test(s) || s === slot) return;
+      const P = M.peers[s];
+      if(!v || !v.u || v.u === chatUid()){ if(P){ P.el.remove(); delete M.peers[s]; } return; }
+      if(!P || P.d.u !== v.u){
+        if(P) P.el.remove();
+        const el = infAvatar(v.u, v.n, 'peer');
+        const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = chatBadName(v.n) ? 'Someone' : v.n; el.appendChild(tag);
+        document.body.appendChild(el);
+        M.peers[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
+        infShotsIn(M.peers[s], v.s, true);
+      } else { P.d = v; infShotsInMine(P, v.s); }
+      infLoop();
+    };
+    const merge = (s, part) => { if(s === 'c') seat('c', Object.assign({}, M.tgt && M.tgt.d, part)); else seat(s, Object.assign({}, M.peers[s] && M.peers[s].d, part)); };
+    es.addEventListener('put', (ev) => {
+      let d; try{ d = JSON.parse(ev.data); }catch(_){ return; }
+      const parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
+      if(!parts.length){ const all = d.data || {}; for(const k of ['s1', 's2', 's3', 'c']) seat(k, all[k] || null); }
+      else if(parts.length === 1) seat(parts[0], d.data);
+      else { const o = {}; o[parts[1]] = d.data; merge(parts[0], o); }
+    });
+    es.addEventListener('patch', (ev) => {
+      let d; try{ d = JSON.parse(ev.data); }catch(_){ return; }
+      const parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
+      if(!parts.length){ for(const [k, v] of Object.entries(d.data || {})) seat(k, v); }
+      else merge(parts[0], d.data || {});
+    });
+    es.addEventListener('cancel', () => { es.close(); if(M.es === es) M.es = null; });
+    es.addEventListener('error', () => { if(es.readyState === 2 && M.es === es) M.es = null; });
+  }
+  // the room hears that you've gone in — everyone else gets a Join button on that notice
+  const INFA = {};
+  async function infAnnounce(uid, name){
+    if(!chatName() || chatBlock() || Date.now() - (INFA[uid] || 0) < 90000) return;
+    INFA[uid] = Date.now();
+    try{
+      const tok = await chatAuth(), txt = ('is infiltrating ' + (chatBadName(name) ? 'someone' : name)).slice(0, chatMaxLen());
+      await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: { '.sv': 'timestamp' }, u: chatUid(), e: 'inf', v: uid }) });
+    }catch(e){}
+  }
+  // another infiltrator's shots: they splat on your screen too (gone when you leave)
+  function infShotsInMine(P, str){
+    if(typeof str !== 'string' || !str) return;
+    P.seen = P.seen || new Set();
+    for(const part of str.split(';')){
+      const a = part.split(',').map(Number); if(a.length !== 6 || !a.every(isFinite) || P.seen.has(a[0])) continue;
+      P.seen.add(a[0]); if(P.seen.size > 40) P.seen = new Set([...P.seen].slice(-20));
+      splatShot((AMMO[a[1]] || AMMO[0]).k, a[2] * innerWidth, a[3] * innerHeight, a[4] * innerWidth, a[5] * innerHeight, true);
+    }
+  }
+  // you, being infiltrated: your cursor goes out to them (a few times a second while it moves)
+  const INFC = { last: 0, busy: false, x: -1, y: -1, live: false };
+  function infCursorOut(now){
+    if(INFC.busy || now - INFC.last < 90 || INF.mx == null) return;
+    const x = Math.round(INF.mx / innerWidth * 1000) / 1000, y = Math.round(INF.my / innerHeight * 1000) / 1000;
+    if(x === INFC.x && y === INFC.y && now - INFC.last < 2500) return;
+    INFC.last = now; INFC.busy = true; INFC.x = x; INFC.y = y; INFC.live = true;
+    chatAuth().then(tok => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/c.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ x: Math.max(-0.1, Math.min(1.1, x)), y: Math.max(-0.1, Math.min(1.1, y)), t: { '.sv': 'timestamp' } }) }))
+      .catch(() => {}).finally(() => { INFC.busy = false; });
+  }
+  function infCursorOff(){
+    if(!INFC.live || Object.keys(INF.remote).length) return;
+    INFC.live = false;
+    chatAuth().then(tok => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/c.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
   }
   // (keep sending while the picture is still catching up with the mouse)
   function o_far(M){ return Math.hypot(M.mx - M.px, M.my - M.py) > 2; }
@@ -21888,7 +22045,7 @@
     { k: 'laser', name: 'Laser turret', em: '🔴', price: 20, every: 1.5, hit: 0.5, desc: 'Fires every 1.5 seconds, but only half the shots land.', col: '#ff4d6d' },
   ];
   const SWAT_PTS = 10;                       // (the database only accepts exactly this many per swat)
-  const ARTY_LEN = 10 * 60 * 1000, ARTY_COOL = 5 * 60 * 1000;
+  const ARTY_SHOTS = 10, ARTY_COOL = 5 * 60 * 1000;      // (each artillery swats up to 10 infiltrators, then 5 minutes' cooldown)
   const SC = { p: 0, s: 0, fx: {}, art: {}, bub: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
   const scBal = () => Math.max(0, SC.p - SC.s);
   const ammoOwned = (k) => k === 'slime' || !!SC.fx[k];
@@ -22054,7 +22211,7 @@
         h += `<div class="arc-item${on ? ' on' : ''}"><button type="button" class="arc-em bub-sw bub-${b.k}" data-prev="${b.k}" title="Preview">${b.em}</button><div class="arc-t"><b>${escapeHtml(b.name)}</b><span>${escapeHtml(b.desc)}</span></div>
           <button type="button" class="arc-buy${own ? ' own' : ''}" data-bub="${b.k}" ${on ? 'disabled' : ''}>${on ? 'In use' : own ? 'Use' : b.price + ' pts'}</button></div>`;
       }
-      h += `<div class="chat-who-h" style="margin-top:6px">Artillery</div><p class="chat-side-p">One use each. When someone infiltrates you, deploy it from the button at the bottom right: it guards your screen for 10 minutes and swats infiltrators for points. Then it needs 5 minutes before the next one.</p>`;
+      h += `<div class="chat-who-h" style="margin-top:6px">Artillery</div><p class="chat-side-p">One use each. When someone infiltrates you, deploy it from the button at the bottom right: it guards your screen and swats up to 10 infiltrators for points. Then it needs 5 minutes before the next one.</p>`;
       for(const a of ARTY){
         const n = SC.art[a.k] | 0;
         h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(a.desc)}</span></div>
@@ -22184,8 +22341,15 @@
   // ----- artillery: guards your screen while it's up -----
   const ART = { el: null, btn: null, menu: null, timer: 0, nextShot: 0 };
   const artState = () => { try{ return JSON.parse(chatLS('arty') || 'null') || {}; }catch(e){ return {}; } };
-  function artActive(){ const S = artState(); return S.k && Date.now() < S.until ? S : null; }
-  function artCoolLeft(){ const S = artState(); return S.until ? Math.max(0, S.until + ARTY_COOL - Date.now()) : 0; }
+  function artActive(){ const S = artState(); if(!S.k) return null; if(S.left == null) return Date.now() < S.until ? Object.assign(S, { left: ARTY_SHOTS }) : null; return !S.done && S.left > 0 ? S : null; }
+  function artCoolLeft(){ const S = artState(), d = S.done || (S.left == null ? S.until : 0); return d ? Math.max(0, d + ARTY_COOL - Date.now()) : 0; }
+  // one of its swats landed: one fewer left; after the last it goes into cooldown
+  function artUsed(it){
+    const S = artState(); if(!S.k || S.left == null) return;
+    S.left = Math.max(0, S.left - 1);
+    if(S.left <= 0){ S.done = Date.now(); toast(`${it.em} Your ${it.name} swatted ${ARTY_SHOTS} infiltrators — it's done. The next one can go up in 5 minutes.`, 3600); }
+    chatLS('arty', JSON.stringify(S)); artUI();
+  }
   const mmss = (ms) => { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   async function artDeploy(k){
     const it = ARTY.find(a => a.k === k); if(!it) return;
@@ -22197,9 +22361,9 @@
       if(!r.ok) throw new Error('no');
     }catch(e){ toast("Couldn't deploy it — check your connection.", 2400); return; }
     SC.art[k] = (SC.art[k] | 0) - 1;
-    chatLS('arty', JSON.stringify({ k, until: Date.now() + ARTY_LEN }));
+    chatLS('arty', JSON.stringify({ k, left: ARTY_SHOTS, at: Date.now() }));
     ART.nextShot = performance.now() + 900;
-    toast(`${it.em} ${it.name} is up for 10 minutes — it'll swat anyone who infiltrates you.`, 3000);
+    toast(`${it.em} ${it.name} is up — it'll swat the next ${ARTY_SHOTS} infiltrators that come onto your screen.`, 3000);
     artMenu(false); artUI(); chatRenderArcade();
   }
   function artMenu(open){
@@ -22216,6 +22380,7 @@
   }
   // the button (shows while someone's on your screen, or while artillery is up / cooling down) and the turret
   function artUI(){
+    infCursorOff();
     const someone = Object.keys(INF.remote).length > 0, act = artActive(), cool = act ? 0 : artCoolLeft();
     const show = someone || !!act;
     if(!show){ if(ART.btn){ ART.btn.remove(); ART.btn = null; } artMenu(false); }
@@ -22223,7 +22388,7 @@
       if(!ART.btn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'art-btn'; b.addEventListener('pointerdown', (e) => e.stopPropagation()); b.addEventListener('click', () => { if(!artActive() && artCoolLeft() <= 0){ if(!SC.loaded) scLoad().then(() => artMenu(!ART.menu)); else artMenu(!ART.menu); } }); document.body.appendChild(b); ART.btn = b; }
       const it = act && ARTY.find(a => a.k === act.k);
       ART.btn.classList.toggle('live', !!act); ART.btn.disabled = !act && cool > 0;
-      ART.btn.innerHTML = act ? `<span>${it.em}</span>${escapeHtml(it.name)} · ${mmss(act.until - Date.now())}` : cool > 0 ? `<span>⏳</span>Artillery ready in ${mmss(cool)}` : `<span>🎯</span>Deploy artillery`;
+      ART.btn.innerHTML = act ? `<span>${it.em}</span>${escapeHtml(it.name)} · ${act.left} swat${act.left === 1 ? '' : 's'} left` : cool > 0 ? `<span>⏳</span>Artillery ready in ${mmss(cool)}` : `<span>🎯</span>Deploy artillery`;
     }
     if(act && !ART.el){ const t = document.createElement('div'); t.className = 'art-turret'; document.body.appendChild(t); ART.el = t; }
     if(ART.el){ if(!act){ ART.el.remove(); ART.el = null; } else { const it = ARTY.find(a => a.k === act.k); ART.el.textContent = it.em; ART.el.style.setProperty('--c', it.col); } }
@@ -22243,7 +22408,7 @@
         const p = document.createElement('div'); p.className = 'art-shot'; p.style.background = it.col; p.style.left = x0 + 'px'; p.style.top = y0 + 'px'; document.body.appendChild(p);
         p.animate([{ transform: 'translate(-50%,-50%)' }, { transform: `translate(calc(-50% + ${tx - x0}px), calc(-50% + ${ty - y0}px))` }], { duration: 380, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
           p.remove();
-          if(hit && INF.remote[s] === R) infSwat(s, it);
+          if(hit && INF.remote[s] === R){ infSwat(s, it); artUsed(it); }
           else infPop(tx, ty, null);
         };
       } else ART.nextShot = performance.now() + 500;

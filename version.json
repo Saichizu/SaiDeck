@@ -1,9 +1,10 @@
 {
-  "build": 29,
+  "build": 34,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Shop: chat bubbles for 500 points — Chopper drop, Rocket mail, UFO beam, Paper plane, Balloon float and Thunder strike. Each has its own colour, and everyone sees your messages arrive with its entrance.",
-    "Click a bubble's picture in the shop to preview its entrance."
+    "Infiltrate: when several people are on the same screen they see each other's pictures (and shots), and everyone sees the person's own cursor chasing them.",
+    "Infiltrate: you get a heads-up when someone starts infiltrating you, and the chat shows who's infiltrating whom with a Join button so others can pile in.",
+    "Artillery now swats up to 10 infiltrators instead of lasting 10 minutes, then cools down for 5 minutes."
   ]
 }
