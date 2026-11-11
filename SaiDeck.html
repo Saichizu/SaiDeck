@@ -20563,7 +20563,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 23;                 // ← goes up by one with every published version
+  const SD_BUILD = 24;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21722,7 +21722,7 @@
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
   }
   function infKickAll(){ for(const s of Object.keys(INF.remote)) infKick(s); }
-  // swatting someone out (by clicking them, or your artillery): they pop out, you get a point, and the room hears about it
+  // swatting someone out (by clicking them, or your artillery): they pop out, you get 10 points, and the room hears about it
   async function infSwat(s, arty){
     const R = INF.remote[s]; if(!R) return;
     const who = R.d.u, nm = chatBadName(R.d.n) ? 'them' : R.d.n;
@@ -21778,7 +21778,7 @@
   // its arrow points; it bursts a random distance away and splats the screen.
   // The seat carries the last few shots (s = "id,kind,x0,y0,x1,y1;…", shares
   // of the window) so the person you're on sees the same splats; on yours they
-  // vanish when you leave. Swatting an infiltrator out earns a point
+  // vanish when you leave. Swatting an infiltrator out earns 10 points
   // (scores/<id> = { n, p: earned, s: spent, v: who you last swatted, t });
   // points buy bullet kinds (50) and artillery (20, one use: it guards your
   // screen for 10 minutes, then 5 minutes before the next can go up).
@@ -21795,6 +21795,7 @@
     { k: 'cannon', name: 'Water cannon', em: '💦', price: 20, every: 2.5, hit: 0.75, desc: 'Sprays every 2.5 seconds — hits 3 times out of 4.', col: '#5ac8ff' },
     { k: 'laser', name: 'Laser turret', em: '🔴', price: 20, every: 1.5, hit: 0.5, desc: 'Fires every 1.5 seconds, but only half the shots land.', col: '#ff4d6d' },
   ];
+  const SWAT_PTS = 10;                       // (the database only accepts exactly this many per swat)
   const ARTY_LEN = 10 * 60 * 1000, ARTY_COOL = 5 * 60 * 1000;
   const SC = { p: 0, s: 0, fx: {}, art: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
   const scBal = () => Math.max(0, SC.p - SC.s);
@@ -21813,7 +21814,7 @@
     }catch(e){}
     chatRenderArcade(); artUI();
   }
-  // a swat that counts: tell them, and take the point (the database checks they were really on your screen)
+  // a swat that counts: tell them, and take the points (the database checks they were really on your screen)
   async function scAward(victim, vname, how){
     const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX) || 'Someone', sv = { '.sv': 'timestamp' };
     let ok = false;
@@ -21821,12 +21822,12 @@
       const tok = await chatAuth();
       if(!SC.loaded) await scLoad();
       const body = {}; body[`pokes/${victim}/zs`] = { u: me, n: nm, t: sv };
-      body[`scores/${me}`] = { n: nm, p: SC.p + 1, s: SC.s, v: victim, t: sv };
+      body[`scores/${me}`] = { n: nm, p: SC.p + SWAT_PTS, s: SC.s, v: victim, t: sv };
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-      if(r.ok){ ok = true; SC.p++; }
+      if(r.ok){ ok = true; SC.p += SWAT_PTS; }
       else { SC.loaded = false; setTimeout(scLoad, 1200); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(victim)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: me, n: nm, t: sv }) }); }
     }catch(e){}
-    toast(`${how || 'You swatted'} ${vname} out!` + (ok ? `  +1 point · ${scBal()} to spend` : ''), 2200);
+    toast(`${how || 'You swatted'} ${vname} out!` + (ok ? `  +${SWAT_PTS} points · ${scBal()} to spend` : ''), 2200);
     SC.boardAt = 0; chatRenderArcade(); artUI();
     return ok;
   }
