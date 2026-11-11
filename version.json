@@ -1,8 +1,8 @@
 {
-  "build": 24,
+  "build": 25,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Swatting an infiltrator out now gets you 10 points (it was 1)."
+    "Infiltrate: when you swat someone out, all their slime melts off your screen right away."
   ]
 }

@@ -20563,7 +20563,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 24;                 // ← goes up by one with every published version
+  const SD_BUILD = 25;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21728,6 +21728,7 @@
     const who = R.d.u, nm = chatBadName(R.d.n) ? 'them' : R.d.n;
     INF.gone = INF.gone || {}; INF.gone[s] = { u: who, until: Date.now() + 2500 };
     infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI();
+    splatFade(who);
     await scAward(who, nm, arty ? `${arty.em} Your ${arty.name} swatted` : 'You swatted');      // (while their seat is still there: that's the proof)
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
     // and tell the room (a small notice in the middle of the chat)
@@ -21926,13 +21927,15 @@
     return SPLAT[k];
   }
   // a bullet flying from (x0,y0) to (x1,y1), then bursting into a splat there
-  function splatShot(kind, x0, y0, x1, y1, mine){
+  function splatShot(kind, x0, y0, x1, y1, mine, owner){
+    const t0 = Date.now();
     const A = AMMO.find(a => a.k === kind) || AMMO[0], L = splatLayer(mine);
     const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const land = () => {
+      if(owner && SPLAT.gone && SPLAT.gone[owner] >= t0) return;      // (they were swatted out while it flew)
       const sz = 170 + Math.random() * 170, v = Math.floor(Math.random() * 5);
       const s = document.createElement('div'); s.className = 'splat ' + kind; s.style.left = x1 + 'px'; s.style.top = y1 + 'px'; s.style.width = s.style.height = sz + 'px';
-      s.style.backgroundImage = `url("${splatImg(kind, v)}")`; s.style.setProperty('--r', (Math.random() * 360) + 'deg');
+      s.style.backgroundImage = `url("${splatImg(kind, v)}")`; if(owner) s.dataset.u = owner; s.style.setProperty('--r', (Math.random() * 360) + 'deg');
       L.appendChild(s);
       while(L.children.length > 45) L.firstChild.remove();
       if(!still) s.animate([{ transform: 'translate(-50%,-50%) rotate(var(--r)) scale(.25)', opacity: .6 }, { transform: 'translate(-50%,-50%) rotate(var(--r)) scale(1.12)', opacity: 1, offset: .35 }, { transform: 'translate(-50%,-50%) rotate(var(--r)) scale(1)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
@@ -21949,6 +21952,17 @@
     const bl = document.createElement('div'); bl.className = 'splat-bullet'; bl.style.background = A.col; bl.style.left = x0 + 'px'; bl.style.top = y0 + 'px'; L.appendChild(bl);
     const dur = 180 + Math.hypot(x1 - x0, y1 - y0) * 0.6;
     bl.animate([{ transform: 'translate(-50%,-50%) scale(.6)' }, { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(1.1)` }], { duration: dur, easing: 'cubic-bezier(.3,.6,.5,1)', fill: 'forwards' }).onfinish = () => { bl.remove(); land(); };
+  }
+  // swat someone out and their slime melts away off your screen
+  function splatFade(owner){
+    SPLAT.gone = SPLAT.gone || {}; SPLAT.gone[owner] = Date.now();
+    const L = SPLAT.on; if(!L) return;
+    for(const s of L.querySelectorAll('.splat')){
+      if(s.dataset.u !== owner) continue;
+      s.dataset.u = '';
+      s.getAnimations().forEach(a => a.cancel());
+      s.animate([{ opacity: 1, transform: 'translate(-50%,-50%) rotate(var(--r)) scale(1)' }, { opacity: 0, transform: 'translate(-50%,-50%) rotate(var(--r)) scale(.85)' }], { duration: 700, easing: 'ease-in', fill: 'forwards' }).onfinish = () => s.remove();
+    }
   }
   function splatClear(mine){ const L = SPLAT[mine ? 'mine' : 'on']; if(L){ L.remove(); SPLAT[mine ? 'mine' : 'on'] = null; } }
   // you shooting (right-click while infiltrating)
@@ -21976,7 +21990,7 @@
       if(R.seen.size > 40) R.seen = new Set([...R.seen].slice(-20));
       if(first) continue;
       const kind = (AMMO[a[1]] || AMMO[0]).k;
-      splatShot(kind, a[2] * innerWidth, a[3] * innerHeight, a[4] * innerWidth, a[5] * innerHeight, false);
+      splatShot(kind, a[2] * innerWidth, a[3] * innerHeight, a[4] * innerWidth, a[5] * innerHeight, false, R.d && R.d.u);
     }
   }
   function infCtx(e){ if(INF.me){ e.preventDefault(); e.stopPropagation(); } }
