@@ -1,8 +1,8 @@
 {
-  "build": 16,
+  "build": 17,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Tracks: select 2 or more tracks (Ctrl/Shift+click) and a bar appears to merge them into one track — same sound, one waveform, the top track's look and all their keys. Ctrl+Z splits them back."
+    "Tracks: a plain click on a track now picks just that track (letting go of the others), and clicking empty space lets go of the selection. Ctrl/Shift+click still picks several."
   ]
 }
