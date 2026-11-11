@@ -1,9 +1,9 @@
 {
-  "build": 27,
+  "build": 28,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: Online, Rooms and the Arcade now take turns — opening one closes the others.",
-    "Chat: the toggles at the bottom are lined up in two neat columns."
+    "Chat: smooth animations — the panel opens with a glide, new messages, reactions and swat notices pop in, the send button flies off, and Online, Rooms and the Arcade slide open.",
+    "Arcade: the shop and leaderboard slide in row by row, medals spin in, the tab highlight slides across, and your points bounce when they change."
   ]
 }

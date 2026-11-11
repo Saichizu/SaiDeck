@@ -420,6 +420,46 @@
   @keyframes chatPopIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}
   @keyframes chatPopOut{to{opacity:0;transform:translateX(16px);}}
   @media (prefers-reduced-motion: reduce){ .chat-pop, .chat-pop.out{animation:none;} }
+  /* chat motion: the panel, new messages, sending, the drop-down spots and the Arcade */
+  .chat-panel:not([hidden]){animation:chatPanelIn .26s cubic-bezier(.2,.9,.3,1);transform-origin:top right;}
+  @keyframes chatPanelIn{from{opacity:0;transform:translateY(-10px) scale(.97);}to{opacity:1;transform:none;}}
+  .chat-msg.in{animation:chatMsgIn .34s cubic-bezier(.2,.9,.3,1.25) both;transform-origin:left bottom;}
+  .chat-msg.me.in{transform-origin:right bottom;animation-name:chatMsgInMe;}
+  @keyframes chatMsgIn{from{opacity:0;transform:translate(-14px,10px) scale(.92);}to{opacity:1;transform:none;}}
+  @keyframes chatMsgInMe{from{opacity:0;transform:translate(14px,12px) scale(.92);}to{opacity:1;transform:none;}}
+  .chat-event.in{animation:chatEvIn .5s cubic-bezier(.2,.9,.3,1.4) both;}
+  @keyframes chatEvIn{0%{opacity:0;transform:scale(.6);}60%{opacity:1;transform:scale(1.06);}100%{transform:none;}}
+  .chat-react.in{animation:chatReactIn .35s cubic-bezier(.2,.9,.3,1.6) both;}
+  @keyframes chatReactIn{from{transform:scale(.3);opacity:0;}to{transform:none;opacity:1;}}
+  .chat-send.fly svg{animation:chatSendFly .5s cubic-bezier(.5,0,.3,1);}
+  @keyframes chatSendFly{0%{transform:none;}35%{transform:translate(18px,-14px) rotate(-18deg);opacity:0;}36%{transform:translate(-16px,10px);opacity:0;}100%{transform:none;opacity:1;}}
+  .chat-send.fly{animation:chatSendPress .3s ease-out;}
+  @keyframes chatSendPress{0%{transform:scale(.88);}60%{transform:scale(1.06);}100%{transform:none;}}
+  .chat-who:not([hidden]), .chat-side:not([hidden]){animation:chatSideIn .26s cubic-bezier(.2,.9,.3,1) both;transform-origin:top center;}
+  @keyframes chatSideIn{from{opacity:0;transform:translateY(-8px) scaleY(.96);}to{opacity:1;transform:none;}}
+  .chat-replying:not([hidden]){animation:chatReplyIn .22s ease-out both;}
+  @keyframes chatReplyIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .chat-arcade .ani{animation:chatItemIn .34s cubic-bezier(.2,.9,.3,1.15) both;animation-delay:calc(var(--i, 0) * 40ms);}
+  @keyframes chatItemIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
+  .chat-arcade li.ani .arc-rank{animation:chatMedal .5s cubic-bezier(.2,.9,.3,1.8) both;animation-delay:calc(var(--i, 0) * 40ms + 120ms);}
+  @keyframes chatMedal{from{transform:scale(0) rotate(-40deg);}to{transform:none;}}
+  .arc-pts b.bump{animation:chatBump .45s cubic-bezier(.2,.9,.3,1.6);display:inline-block;}
+  @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
+  .arc-tabs{position:relative;}
+  .arc-tabs button{position:relative;z-index:1;transition:color .2s;}
+  .arc-tabs button.on{background:transparent;}
+  .arc-tabs::before{content:'';position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 4px);border-radius:7px;background:rgba(180,140,255,.25);transition:transform .28s cubic-bezier(.2,.9,.3,1.1);transform:translateX(var(--tab-x, 0));}
+  .arc-buy{transition:transform .12s, filter .12s;}
+  .arc-buy:active:not(:disabled){transform:scale(.92);}
+  .arc-item.bought{animation:chatBought .7s ease-out;}
+  @keyframes chatBought{0%{box-shadow:0 0 0 0 rgba(245,208,74,.8);}100%{box-shadow:0 0 0 14px rgba(245,208,74,0);}}
+  .chat-online, .chat-icon{transition:background .15s, transform .12s;}
+  .chat-icon:active, .chat-online:active{transform:scale(.9);}
+  @media (prefers-reduced-motion: reduce){
+    .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-replying:not([hidden]),
+    .chat-arcade .ani, .chat-arcade .ani .arc-rank, .arc-pts b.bump, .arc-item.bought{animation:none !important;}
+    .arc-tabs::before{transition:none;}
+  }
   .sd-update-btn{all:unset;box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:9px;cursor:pointer;flex-shrink:0;
     font:700 12.5px 'Inter',sans-serif;color:#35d0b8;background:rgba(53,208,184,.12);border:1.5px solid rgba(53,208,184,.75);transition:color .12s, border-color .12s, background .12s;}
   .sd-update-btn svg{width:17px;height:17px;fill:currentColor;}
@@ -20567,7 +20607,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 27;                 // ← goes up by one with every published version
+  const SD_BUILD = 28;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21128,10 +21168,15 @@
     const body = chatPanel.querySelector('.chat-body'); if(!body) return;
     const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
     body.innerHTML = '';
+    // (which messages are new since the last time: only those animate in)
+    if(CHAT._animRoom !== chatRoom()){ CHAT._animRoom = chatRoom(); CHAT._animSeen = new Set(); CHAT._animPrimed = false; }
+    const seen = CHAT._animSeen, seenRoom = CHAT._animPrimed;
+    const fresh = (k) => { if(!k || seen.has(k)) return false; seen.add(k); return !!seenRoom && CHAT.ready; };
     const shown = CHAT.order.filter(k => { const m = CHAT.msgs.get(k); return m && !(chatBanned(m.u) && !m.a); }).map(k => CHAT.msgs.get(k));
     // Freedits the admin sent just to you show in every room
     for(const [id, it] of Object.entries(CHAT.inbox || {})) if(it && it.name) shown.push({ n: 'SaiDeck', m: it.m || '', t: it.t || 0, u: it.u, a: true, f: { id, name: it.name, size: it.size }, mine: true });
     shown.sort((a, b) => a.t - b.t);
+    if(CHAT.ready && shown.length) setTimeout(() => { CHAT._animPrimed = true; }, 0);      // (the first batch that loads doesn't animate in)
     if(!shown.length){
       body.innerHTML = `<div class="chat-empty">${!CHAT.ready ? 'Loading messages…' : chatRoom() === CHAT_ROOM ? 'No messages yet. Say hi — everyone using SaiDeck sees it.' : `No messages in ${escapeHtml(chatRoomLabel(chatRoom()))} yet. Share the code “${escapeHtml(chatRoom().slice(2))}” so friends can join.`}</div>`;
       return;
@@ -21145,12 +21190,14 @@
         ev.innerHTML = '<span aria-hidden="true">💥</span><b></b> <span class="ev-t"></span>';
         ev.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('b').style.color = chatColor(m.n);
         ev.querySelector('.ev-t').textContent = chatMask(m.m) + ' · ' + chatFmtTime(m.t);
+        if(fresh(m._k)) ev.classList.add('in');
         body.appendChild(ev); continue;
       }
       const mine = chatIsMe(m.u) && !off;
       const toMe = !!(m.r && m.r.k && CHAT.msgs.get(m.r.k) && chatIsMe(CHAT.msgs.get(m.r.k).u) && !mine);
       const row = document.createElement('div'); row.className = 'chat-msg' + (mine ? ' me' : '') + (off ? ' official' : '') + (toMe ? ' to-me' : '');
       if(m._k) row.dataset.k = m._k;
+      if(fresh(m._k || (off && m.f && 'fd:' + m.f.id))) row.classList.add('in');
       const av = chatAv(m.u, m.n, off, true);
       const bub = document.createElement('div'); bub.className = 'chat-bub';
       const meta = document.createElement('div'); meta.className = 'chat-meta';
@@ -21180,6 +21227,7 @@
         for(const e of keys.sort()){
           const who = Object.keys(rx[e]), mineR = who.some(chatIsMe);
           const b = document.createElement('button'); b.type = 'button'; b.className = 'chat-react' + (mineR ? ' on' : '');
+          { CHAT._rx = CHAT._rx || new Map(); const rk = m._k + '|' + e, prev = CHAT._rx.get(rk); if(seenRoom && CHAT.ready && (prev == null || who.length > prev)) b.classList.add('in'); CHAT._rx.set(rk, who.length); }
           b.innerHTML = `<span>${CHAT_REACT[e]}</span><b>${who.length}</b>`;
           b.title = chatReactNames(who) + (mineR ? ' — click to take yours off' : ' — click to add yours');
           b.setAttribute('aria-pressed', String(mineR));
@@ -21855,7 +21903,7 @@
       if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok) throw new Error('no');
-      SC.s += it.price;
+      SC.s += it.price; SC._justBought = k;
       if(kind === 'fx'){ SC.fx[k] = true; chatLS('ammo', k); toast(`${it.em} ${it.name} unlocked — it's your bullet now (switch any time with 1–6 while infiltrating).`, 3200); }
       else { SC.art[k] = (SC.art[k] | 0) + 1; toast(`${it.em} ${it.name} bought — deploy it from the artillery button when someone infiltrates you.`, 3200); }
     }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
@@ -21877,8 +21925,11 @@
     const el = chatPanel.querySelector('.chat-arcade'); if(!el) return;
     const btn = chatPanel.querySelector('.chat-arc'); if(btn) btn.setAttribute('aria-expanded', String(CHAT.side === 'arcade'));
     el.hidden = CHAT.side !== 'arcade';
-    if(el.hidden){ el.innerHTML = ''; return; }
+    if(el.hidden){ el.innerHTML = ''; el._h = ''; el.dataset.fresh = ''; delete el.dataset.bal; delete el.dataset.tabx; return; }
     const cur = ammoNow(), bal = scBal();
+    const freshKey = SC.tab + '|' + (SC.tab === 'board' ? !!SC.board : '');
+    const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
+    const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
     let h = `<div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
       <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button></div>`;
     if(SC.tab === 'shop'){
@@ -21902,7 +21953,17 @@
         if(Date.now() - SC.boardAt > 20000) scBoard(); }
       h += `<p class="chat-side-p">Points come from swatting infiltrators — by clicking them or with artillery.</p>`;
     }
+    if(el._h === h && !isFresh) return;      // (nothing changed: leave it, so animations play out)
+    el._h = h;
     el.innerHTML = h;
+    { const tb = el.querySelector('.arc-tabs'), x = SC.tab === 'board' ? 'calc(100% + 4px)' : '0px';
+      if(el.dataset.tabx && el.dataset.tabx !== x){ tb.style.setProperty('--tab-x', el.dataset.tabx); void tb.offsetWidth; }
+      tb.style.setProperty('--tab-x', x); el.dataset.tabx = x; }
+    if(isFresh) el._freshAt = performance.now();
+    const since = performance.now() - (el._freshAt || -1e9);
+    if(since < 900){ let i = 0; for(const c of el.querySelectorAll('.arc-item, .arc-board li, .chat-who-h, .chat-side-p')){ c.classList.add('ani'); c.style.setProperty('--i', i++); if(since > 0) c.style.animationDelay = (i * 40 - 40 - since) + 'ms'; } }
+    if(bump){ const b = el.querySelector('.arc-pts b'); if(b) b.classList.add('bump'); }
+    if(SC._justBought){ const it = el.querySelector(`[data-fx="${SC._justBought}"], [data-art="${SC._justBought}"]`); if(it) it.closest('.arc-item').classList.add('bought'); SC._justBought = null; }
   }
   // ----- the splats -----
   const SPLAT = { img: {}, on: null, mine: null };
@@ -22215,7 +22276,7 @@
     const slow = Math.max(1.5, Number(CHAT.cfg.slow) || 0) * 1000, wait = slow - (Date.now() - (CHAT.lastSend || 0));
     if(wait > 0){ toast(slow > 1500 ? `Slow mode is on — you can send again in ${Math.ceil(wait / 1000)} s.` : 'Slow down a little — one message at a time.', 1800); return; }
     CHAT.lastSend = Date.now();
-    const send = chatPanel.querySelector('.chat-send'); if(send) send.disabled = true;
+    const send = chatPanel.querySelector('.chat-send'); if(send){ send.disabled = true; send.classList.remove('fly'); void send.offsetWidth; send.classList.add('fly'); setTimeout(() => send.classList.remove('fly'), 600); }
     try{
       const tok = await chatAuth();
       const msg = { n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: { '.sv': 'timestamp' }, u: chatUid() };
