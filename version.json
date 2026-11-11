@@ -1,10 +1,10 @@
 {
-  "build": 35,
+  "build": 36,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Artillery: drag the button or the turret anywhere on the screen to get it out of the way (it remembers where you put it).",
-    "Infiltrate: fixed someone's picture staying frozen on your screen after they'd already left.",
-    "Chat bubbles: your bubble now works right after you open SaiDeck — no need to switch to Plain and back."
+    "Chat: pictures have a cyan ring when that person is using SaiDeck, amber when they've been idle 30 seconds or more, and no ring when they're offline.",
+    "Chat: Online, Rooms and the Arcade open as a big window in the middle of the screen (click outside, the ✕ or Esc to close).",
+    "Chat: infiltration and swat notices stay in the chat for 5 minutes, then move to the new Alerts window (the bell) so you can still look back at them."
   ]
 }

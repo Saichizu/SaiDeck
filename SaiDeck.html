@@ -214,7 +214,32 @@
   .chat-side-p{margin:0;font-size:11px;line-height:1.45;color:var(--text-faint);}
   /* the Arcade: points, shop, leaderboard */
   .chat-arcade{max-height:62%;}
-  .arc-top{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:2px 0 4px;}
+  /* Online, Rooms, Arcade and Alerts open as a window in the middle of the screen */
+  .chat-who:not([hidden]), .chat-side:not([hidden]){position:fixed;z-index:3;top:9vh;left:50%;width:min(480px, calc(100vw - 32px));max-height:min(78vh, 760px);transform:translateX(-50%);
+    padding:16px 18px 18px;border:1px solid rgba(180,140,255,.45);border-radius:16px;background:#1b1c25;box-shadow:0 30px 80px rgba(0,0,0,.65);gap:8px;animation:chatModalIn .26s cubic-bezier(.2,.9,.3,1.1) both;}
+  .chat-who:not([hidden]){border-color:rgba(53,208,184,.5);}
+  @keyframes chatModalIn{from{opacity:0;transform:translate(-50%, 14px) scale(.96);}to{opacity:1;transform:translateX(-50%);}}
+  .chat-modal-back{position:fixed;inset:0;z-index:2;background:rgba(6,6,12,.55);backdrop-filter:blur(2px);animation:chatFade .2s ease-out both;}
+  .chat-modal-back[hidden]{display:none;}
+  @keyframes chatFade{from{opacity:0;}to{opacity:1;}}
+  .chat-modal-x{all:unset;position:fixed;z-index:4;top:calc(9vh + 10px);left:calc(50% + min(480px, calc(100vw - 32px)) / 2 - 40px);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+  .chat-modal-x[hidden]{display:none;}
+  .chat-modal-x:hover{background:rgba(255,255,255,.1);color:var(--text);}
+  .chat-modal-x svg{width:18px;height:18px;fill:currentColor;}
+  .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
+  .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
+  .chat-bell{position:relative;}
+  .chat-bell-n{position:absolute;top:1px;right:0;min-width:15px;height:15px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#ff4d6d;color:#fff;font:800 9.5px/15px 'Inter',sans-serif;text-align:center;}
+  .chat-bell-n[hidden]{display:none;}
+  .alert-list{display:flex;flex-direction:column;gap:4px;}
+  .alert-r{display:flex;align-items:flex-start;gap:9px;padding:7px 9px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12px;color:var(--text-dim);}
+  .alert-r .alert-em{font-size:16px;line-height:1.2;}
+  .alert-r b{font-weight:700;}
+  .alert-r i{display:block;font-style:normal;font-size:10.5px;color:var(--text-faint);margin-top:2px;}
+  /* picture rings: using SaiDeck now (cyan), idle 30 s+ (amber), offline (none) */
+  .chat-av.st-on{box-shadow:0 0 0 2px #17181f, 0 0 0 4px #35d0b8;}
+  .chat-av.st-idle{box-shadow:0 0 0 2px #17181f, 0 0 0 4px #f5a524;}
+  .arc-top{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:2px 38px 4px 0;}
   .arc-pts{display:flex;align-items:baseline;gap:6px;}
   .arc-pts b{font:800 24px 'Manrope',sans-serif;color:#f5d04a;line-height:1;}
   .arc-pts span{font-size:11px;color:var(--text-dim);}
@@ -448,7 +473,6 @@
   @keyframes chatSendFly{0%{transform:none;}35%{transform:translate(18px,-14px) rotate(-18deg);opacity:0;}36%{transform:translate(-16px,10px);opacity:0;}100%{transform:none;opacity:1;}}
   .chat-send.fly{animation:chatSendPress .3s ease-out;}
   @keyframes chatSendPress{0%{transform:scale(.88);}60%{transform:scale(1.06);}100%{transform:none;}}
-  .chat-who:not([hidden]), .chat-side:not([hidden]){animation:chatSideIn .26s cubic-bezier(.2,.9,.3,1) both;transform-origin:top center;}
   @keyframes chatSideIn{from{opacity:0;transform:translateY(-8px) scaleY(.96);}to{opacity:1;transform:none;}}
   .chat-replying:not([hidden]){animation:chatReplyIn .22s ease-out both;}
   @keyframes chatReplyIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -495,7 +519,7 @@
   .bubfx-bolt{position:absolute;width:26px;margin-left:-13px;top:0;background:linear-gradient(180deg,#fff,#d8b8ff);clip-path:polygon(55% 0, 20% 52%, 48% 52%, 30% 100%, 82% 40%, 54% 40%, 75% 0);filter:drop-shadow(0 0 8px #b98cff);}
   .bubfx-flash{position:absolute;inset:0;background:#e6d6ff;}
   @media (prefers-reduced-motion: reduce){
-    .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-replying:not([hidden]),
+    .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-modal-back, .chat-replying:not([hidden]),
     .chat-arcade .ani, .chat-arcade .ani .arc-rank, .arc-pts b.bump, .arc-item.bought{animation:none !important;}
     .arc-tabs::before{transition:none;}
   }
@@ -20678,7 +20702,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 35;                 // ← goes up by one with every published version
+  const SD_BUILD = 36;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20958,6 +20982,7 @@
   const ICON_X = '<svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg>';
   const ICON_GEAR = '<svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1L11 21h4l.4-2.9c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.2-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>';
   const ICON_ROOMS = '<svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1a4.2 4.2 0 0 1 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>';
+  const ICON_BELL = '<svg viewBox="0 0 24 24"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/></svg>';
   const ICON_TROPHY = '<svg viewBox="0 0 24 24"><path d="M19 4h-2V3H7v1H5a2 2 0 0 0-2 2v1a4 4 0 0 0 3.6 4A5 5 0 0 0 11 14.9V18H8v2h8v-2h-3v-3.1A5 5 0 0 0 17.4 11 4 4 0 0 0 21 7V6a2 2 0 0 0-2-2zM5 7V6h2v3.8A2 2 0 0 1 5 7zm14 0a2 2 0 0 1-2 1.8V6h2z"/></svg>';
   const ICON_PIN = '<svg viewBox="0 0 24 24"><path d="M16 3H8v2l1.5 1.5V11L6 14v2h5.2v5h1.6v-5H18v-2l-3.5-3V6.5L16 5z"/></svg>';
   function chatUpdateBadge(){
@@ -20993,6 +21018,7 @@
       av.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') go(e); });
     }
     const p = chatProfile(uid);
+    if(uid && !official){ av.dataset.u = uid; const st = presStatus(uid); if(st) av.classList.add('st-' + st); }
     if(official && !p){ av.classList.add('official'); av.textContent = 'S'; return av; }
     if(p){ av.classList.add('pic'); av.style.backgroundImage = `url("${p}")`; }
     else { av.style.background = chatColor(name); av.textContent = (name || '?').trim().charAt(0).toUpperCase(); }
@@ -21088,6 +21114,7 @@
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
           <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now — and everyone else who uses it"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
+          <button type="button" class="chat-icon chat-bell" title="Alerts — infiltrations and swats" aria-label="Alerts" aria-expanded="false">${ICON_BELL}<span class="chat-bell-n" hidden></span></button>
           <button type="button" class="chat-icon chat-arc" title="Arcade — your points, the shop and the leaderboard" aria-label="Arcade: points, shop and leaderboard" aria-expanded="false">${ICON_TROPHY}</button>
           <button type="button" class="chat-icon chat-rooms" title="Rooms — Everyone, or a group chat with a code" aria-label="Rooms and group chats" aria-expanded="false">${ICON_ROOMS}</button>
           <button type="button" class="chat-icon chat-set" title="Your name and profile picture" aria-label="Your chat name and picture">${ICON_GEAR}</button>
@@ -21096,6 +21123,9 @@
         <div class="chat-who" hidden></div>
         <div class="chat-side" hidden></div>
         <div class="chat-side chat-arcade" hidden></div>
+        <div class="chat-side chat-alerts" hidden></div>
+        <div class="chat-modal-back" hidden></div>
+        <button type="button" class="chat-modal-x" title="Close (Esc)" aria-label="Close" hidden>${ICON_X}</button>
         <div class="chat-pin" hidden></div>
         <div class="chat-body" role="log" aria-live="polite"></div>
         <div class="chat-foot">
@@ -21113,6 +21143,9 @@
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
       const rb = chatPanel.querySelector('.chat-rooms');
       rb.addEventListener('click', () => chatSideTo('rooms'));
+      chatPanel.querySelector('.chat-bell').addEventListener('click', () => chatSideTo('alerts'));
+      chatPanel.querySelector('.chat-modal-back').addEventListener('click', () => chatSideTo(CHAT.side));
+      chatPanel.querySelector('.chat-modal-x').addEventListener('click', () => chatSideTo(CHAT.side));
       chatPanel.querySelector('.chat-arc').addEventListener('click', () => { chatSideTo('arcade'); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
         const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
@@ -21149,6 +21182,8 @@
     chatRenderStatus();
     chatRenderSide();
     chatRenderArcade();
+    chatRenderAlerts();
+    { const bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x'); if(bk) bk.hidden = !CHAT.side; if(x) x.hidden = !CHAT.side; }
     chatRenderPin();
     chatRenderMessages();
     chatRenderReply();
@@ -21190,8 +21225,36 @@
   // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
   function chatSideTo(which){
     CHAT.side = CHAT.side === which ? null : which;
-    chatRenderSide(); chatRenderArcade();
+    chatRenderSide(); chatRenderArcade(); chatRenderAlerts();
+    const open = !!CHAT.side, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
+    if(bk) bk.hidden = !open; if(x) x.hidden = !open;
   }
+  // Esc closes the open window (before it would close the chat)
+  window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.side && !chatPanel.hidden){ e.preventDefault(); e.stopImmediatePropagation(); chatSideTo(CHAT.side); } }, true);
+  // the Alerts window: infiltrations and swats, once they're more than 5 minutes old (newest first)
+  const CHAT_EV_LIVE = 5 * 60 * 1000;
+  function chatRenderAlerts(){
+    const el = chatPanel.querySelector('.chat-alerts'); if(!el) return;
+    const bell = chatPanel.querySelector('.chat-bell'); if(bell) bell.setAttribute('aria-expanded', String(CHAT.side === 'alerts'));
+    const list = (CHAT.alerts || []).slice().sort((a, b) => b.t - a.t);
+    const seenAt = Number(chatLS('alertsSeen:' + chatRoom())) || 0, unseen = list.filter(m => m.t > seenAt).length;
+    const n = chatPanel.querySelector('.chat-bell-n'); if(n){ n.hidden = !unseen || CHAT.side === 'alerts'; n.textContent = unseen > 9 ? '9+' : unseen; }
+    el.hidden = CHAT.side !== 'alerts';
+    if(el.hidden){ el.innerHTML = ''; return; }
+    if(list.length) chatLS('alertsSeen:' + chatRoom(), list[0].t);
+    el.innerHTML = `<div class="chat-who-h">Alerts</div><p class="chat-side-p">Infiltrations and swats in this room. They show in the chat for 5 minutes, then move here.</p>` +
+      (list.length ? '<div class="alert-list"></div>' : '<p class="chat-side-p">Nothing yet.</p>');
+    const box = el.querySelector('.alert-list');
+    for(const m of list.slice(0, 200)){
+      const r = document.createElement('div'); r.className = 'alert-r';
+      r.innerHTML = `<span class="alert-em">${m.e === 'inf' ? '🕵️' : '💥'}</span><div><b></b> <span class="alert-t"></span><i></i></div>`;
+      r.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; r.querySelector('b').style.color = chatColor(m.n);
+      r.querySelector('.alert-t').textContent = chatMask(m.m);
+      r.querySelector('i').textContent = chatFmtDay(m.t) + ' · ' + chatFmtTime(m.t);
+      box.appendChild(r);
+    }
+  }
+  setInterval(() => { if(CHAT.evNext && Date.now() + PRES.offset > CHAT.evNext) chatRenderMessages(); }, 15000);
   function chatRenderSide(){
     const w = chatPanel.querySelector('.chat-who'), oc = chatPanel.querySelector('.chat-online');
     if(w){ const was = !w.hidden; w.hidden = CHAT.side !== 'who'; if(oc) oc.setAttribute('aria-expanded', String(!w.hidden)); if(!w.hidden && !was) presRender(); }
@@ -21256,7 +21319,13 @@
       return;
     }
     let lastDay = '';
+    CHAT.alerts = []; CHAT.evNext = 0;
+    const nowS = Date.now() + PRES.offset;
     for(const m of shown){
+      if(m.e === 'swat' || m.e === 'inf'){
+        if(nowS - (m.t || 0) > CHAT_EV_LIVE){ CHAT.alerts.push(m); continue; }
+        const due = (m.t || 0) + CHAT_EV_LIVE; if(!CHAT.evNext || due < CHAT.evNext) CHAT.evNext = due;
+      }
       const day = chatFmtDay(m.t), off = m.a === true;
       if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
       if(m.e === 'swat' || m.e === 'inf'){
@@ -21341,6 +21410,7 @@
       row.append(av, col); body.appendChild(row);
     }
     if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
+    chatRenderAlerts();
     for(const [row, bk, mine] of fxQ){ const b = row.querySelector('.chat-bub'); if(b){ b.style.opacity = '0'; requestAnimationFrame(() => { b.style.opacity = ''; chatBubbleFx(b, bk, mine); }); } }
   }
   function chatRenderSetup(fromSettings){
@@ -22619,12 +22689,33 @@
     try{
       const tok = await chatAuth(), uid = chatUid();
       if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
-      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false;
+      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true;
       const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
     }catch(e){}
   }
+  // a picture's ring: 'on' = using SaiDeck now, 'idle' = open but nothing done for 30 s+, '' = offline
+  function presStatus(uid){
+    if(chatIsMe(uid)) return chatVisible() && chatName() ? (PRES.away ? 'idle' : 'on') : '';
+    const p = PRES.list && PRES.list[uid];
+    if(!p || typeof p.t !== 'number' || Date.now() + PRES.offset - p.t > 150000) return '';
+    return p.w ? 'idle' : 'on';
+  }
+  function chatRingsUpdate(){
+    for(const av of chatPanel.querySelectorAll('.chat-av[data-u]')){
+      const st = presStatus(av.dataset.u);
+      av.classList.toggle('st-on', st === 'on'); av.classList.toggle('st-idle', st === 'idle');
+    }
+  }
+  // whether you're doing anything in SaiDeck: after 30 s of nothing you show as idle (others see the ring change)
+  PRES.act = Date.now(); PRES.away = false;
+  const presActive = () => { PRES.act = Date.now(); if(PRES.away){ PRES.away = false; presBeat(); chatRingsUpdate(); } };
+  for(const ev of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, presActive, { passive: true, capture: true });
+  setInterval(() => {
+    if(!PRES.away && Date.now() - PRES.act > 30000){ PRES.away = true; presBeat(); }
+    chatRingsUpdate();
+  }, 5000);
   function presOnline(){
     const now = Date.now() + PRES.offset, out = [];
     for(const [uid, p] of Object.entries(PRES.list || {})){
@@ -22637,6 +22728,7 @@
     return out;
   }
   function presRender(){
+    chatRingsUpdate();
     const on = presOnline();
     const nEl = chatPanel.querySelector('.chat-online-n'); if(nEl) nEl.textContent = on.length;
     const w = chatPanel.querySelector('.chat-who');
