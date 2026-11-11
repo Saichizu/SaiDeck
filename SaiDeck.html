@@ -1568,6 +1568,13 @@
   .key-paste .kp-row button:focus-visible{outline:2px solid var(--accent);}
   .key-paste .kp-go{background:var(--accent) !important;border-color:var(--accent) !important;color:#fff !important;}
   .key-paste .kp-go:disabled{opacity:.45;cursor:default;}
+  .track-bar{border-color:rgba(255,181,71,.35);}
+  .track-bar button[data-t="merge"]{color:#ffd27a;}
+  .track-bar button[data-t="merge"]:hover{background:rgba(255,181,71,.14);color:#ffe2a8;}
+  .merge-name{display:flex;flex-direction:column;gap:6px;font:600 12px 'Inter',sans-serif;color:var(--text-dim);margin:-4px 0 6px;}
+  .merge-name input{box-sizing:border-box;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #3a3b48;background:#121319;color:var(--text);font:14px 'Inter',sans-serif;outline:none;}
+  .merge-name input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(229,72,77,.22);}
+  .merge-hint{font-size:11.5px;color:var(--text-faint);margin-bottom:16px;}
   .key-box{position:fixed;display:none;z-index:400;border:1px dashed #fff;background:rgba(180,140,255,.14);border-radius:3px;pointer-events:none;}
   .key-hover-line{
     position:absolute;
@@ -9225,6 +9232,156 @@
     upd();
     setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', onKey, true); (list.querySelector('input:checked') || list.querySelector('input') || go).focus(); }, 0);
   }
+  // ----- the track bar: shows while 2+ tracks are selected (Ctrl/Shift+click) -----
+  // Merge = the selected tracks become one track (one lane, one waveform):
+  // their sound is combined into a single audio clip, laid out exactly as
+  // they play now (offsets, cuts and volumes), so it still sounds the same.
+  // It takes the top track's look (colour, picture, icon, trail) and keeps
+  // every track's keys. Undo brings the separate tracks back.
+  var trackBarEl = null;
+  function trackBarUpdate(){
+    if(!trackBarEl){
+      if(!document.body) return;
+      trackBarEl = document.createElement('div'); trackBarEl.className = 'key-bar track-bar'; trackBarEl.hidden = true;
+      trackBarEl.setAttribute('role', 'toolbar'); trackBarEl.setAttribute('aria-label', 'Selected tracks');
+      trackBarEl.innerHTML = `<span class="kb-n"></span>
+        <button type="button" data-t="merge" title="Combine the selected tracks into one track"><svg viewBox="0 0 24 24"><path d="M17 20.4 18.4 19l-4-4H11v2h2.6zM7 3 2 8h4v6c0 2.8 2.2 5 5 5h0v-2h0a3 3 0 0 1-3-3V8h4zm10.6 0-1.4 1.4L18.8 7H14v2h4.8l-2.6 2.6 1.4 1.4L22.6 8z"/></svg>Merge into one track</button>
+        <span class="kb-sep"></span>
+        <button type="button" data-t="clear" class="kb-x" title="Clear the selection (Esc)" aria-label="Clear the track selection"><svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg></button>`;
+      document.body.appendChild(trackBarEl);
+      trackBarEl.addEventListener('pointerdown', (e) => e.stopPropagation());
+      trackBarEl.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-t]'); if(!b || b.disabled) return;
+        if(b.dataset.t === 'merge') mergeTracksAsk();
+        else clearSelection();
+      });
+      window.addEventListener('resize', trackBarPlace);
+    }
+    const n = tracks.filter(t => t.selected).length;
+    let busy = false; try{ busy = !!(renderState && renderState.active); }catch(e){}
+    trackBarEl.hidden = n < 2 || busy;
+    if(trackBarEl.hidden) return;
+    trackBarEl.querySelector('.kb-n').textContent = `${n} tracks selected`;
+    trackBarPlace();
+  }
+  function trackBarPlace(){
+    if(!trackBarEl || trackBarEl.hidden) return;
+    const r = $('timelineCol').getBoundingClientRect();
+    trackBarEl.style.left = (r.left + r.width / 2) + 'px';
+    trackBarEl.style.top = Math.max(8, Math.min(window.innerHeight - 56, r.bottom - 60)) + 'px';
+  }
+  function mergeTracksAsk(){
+    const sel = tracks.filter(t => t.selected);
+    if(sel.length < 2) return;
+    const top = sel[0];
+    const ov = document.createElement('div'); ov.className = 'confirm-overlay';
+    ov.innerHTML = `<div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="mergeTtl">
+        <div class="confirm-title" id="mergeTtl">Merge ${sel.length} tracks into one?</div>
+        <div class="confirm-text">These become one track with one waveform: ${sel.map(t => '“' + escapeHtml(t.name) + '”').join(', ')}. It sounds the same as now, takes the look of the top track and keeps all their keys. Undo (Ctrl+Z) splits them back.</div>
+        <label class="merge-name"><span>Name of the merged track</span><input type="text" maxlength="60" placeholder="${escapeHtml(top.name)}" aria-describedby="mergeHint"></label>
+        <div class="merge-hint" id="mergeHint">Leave it empty to use “${escapeHtml(top.name)}”.</div>
+        <div class="confirm-actions"><button type="button" class="cf-cancel">Cancel</button><button type="button" class="cf-primary">Merge</button></div></div>`;
+    const inp = ov.querySelector('input');
+    const done = (go) => {
+      window.removeEventListener('keydown', onKey, true); ov.remove();
+      if(go) mergeTracks(sel, inp.value.trim().replace(/\s+/g, ' ') || top.name);
+    };
+    const onKey = (ev) => { if(ev.key === 'Escape'){ ev.preventDefault(); ev.stopImmediatePropagation(); done(false); } else if(ev.key === 'Enter'){ ev.preventDefault(); ev.stopImmediatePropagation(); done(true); } else ev.stopPropagation(); };
+    ov.querySelector('.cf-cancel').addEventListener('click', () => done(false));
+    ov.querySelector('.cf-primary').addEventListener('click', () => done(true));
+    ov.addEventListener('pointerdown', (ev) => { if(ev.target === ov) done(false); });
+    window.addEventListener('keydown', onKey, true);
+    document.body.appendChild(ov);
+    setTimeout(() => inp.focus(), 0);
+  }
+  // an AudioBuffer as a .wav file (16-bit; 32-bit float if the mix goes over full scale)
+  function audioBufferToWav(buf){
+    const nc = buf.numberOfChannels, sr = buf.sampleRate, n = buf.length, chans = [];
+    let peak = 0;
+    for(let c = 0; c < nc; c++){ const d = buf.getChannelData(c); chans.push(d); for(let i = 0; i < n; i += 7){ const v = Math.abs(d[i]); if(v > peak) peak = v; } }
+    const fl = peak > 1, bps = fl ? 4 : 2, dataLen = n * nc * bps, out = new ArrayBuffer(44 + dataLen), v = new DataView(out);
+    const str = (o, t) => { for(let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    str(0, 'RIFF'); v.setUint32(4, 36 + dataLen, true); str(8, 'WAVE'); str(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, fl ? 3 : 1, true); v.setUint16(22, nc, true); v.setUint32(24, sr, true);
+    v.setUint32(28, sr * nc * bps, true); v.setUint16(32, nc * bps, true); v.setUint16(34, bps * 8, true); str(36, 'data'); v.setUint32(40, dataLen, true);
+    let o = 44;
+    if(fl){ for(let i = 0; i < n; i++) for(let c = 0; c < nc; c++){ v.setFloat32(o, chans[c][i], true); o += 4; } }
+    else { for(let i = 0; i < n; i++) for(let c = 0; c < nc; c++){ const x = Math.max(-1, Math.min(1, chans[c][i])); v.setInt16(o, x < 0 ? x * 0x8000 : x * 0x7fff, true); o += 2; } }
+    return out;
+  }
+  async function mergeTracks(sel, name){
+    if(renderState && renderState.active){ toast("Can't merge tracks while a video is rendering."); return; }
+    sel = sel.filter(t => tracks.includes(t));
+    if(sel.length < 2) return;
+    ensureCtx();
+    const top = sel[0], at = tracks.indexOf(top);
+    const wasPlaying = isPlaying, playAt = wasPlaying ? currentPlayheadTime() : playheadTime;
+    toast(`Merging ${sel.length} tracks…`, 2000);
+    try{
+      // where they start and end on the song's timeline
+      let a = Infinity, b = -Infinity;
+      for(const t of sel) for(const g of segsOf(t)){ const sA = (t.offset || 0) + g.s + g.d; a = Math.min(a, sA); b = Math.max(b, sA + (g.e - g.s)); }
+      if(!(b > a)) return;
+      // each track's level relative to the loudest one (the merged track gets that volume); muted ones stay silent
+      const vol = (t) => t.muted ? 0 : t.volume, vmax = Math.max(0.01, ...sel.map(vol));
+      const sr = audioCtx.sampleRate, nc = Math.max(...sel.map(t => t.buffer.numberOfChannels)) > 1 ? 2 : 1;
+      const Ctor = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      const oc = new Ctor(nc, Math.max(1, Math.ceil((b - a) * sr)), sr);
+      for(const t of sel){
+        const gv = vol(t) / vmax; if(gv <= 0) continue;
+        const gn = oc.createGain(); gn.gain.value = gv; gn.connect(oc.destination);
+        for(const g of segsOf(t)){
+          const src = oc.createBufferSource(); src.buffer = t.buffer; src.connect(gn);
+          src.start((t.offset || 0) + g.s + g.d - a, g.s, g.e - g.s);
+        }
+      }
+      const mixed = await oc.startRendering();
+      if(wasPlaying) stopPlayback(false);
+      // its audio file (into the project's audio folder when one is connected; otherwise kept for the session file)
+      const wav = audioBufferToWav(mixed);
+      const fileName = sanitizeFileName(name) + ' (merged).wav';
+      let savedName = null;
+      try{ savedName = await writeAudioFileToProject(new File([wav], fileName, { type: 'audio/wav' })); }catch(e){ console.error(e); }
+      // every track's keys, moved onto the merged track's own time (one per moment)
+      const keys = [];
+      for(const t of sel) for(const k of t.keys){
+        const lt = Math.round(((t.offset || 0) + k.time - a) * 1000) / 1000;
+        if(lt < 0 || lt > b - a || keys.some(x => Math.abs(x.time - lt) < 0.02)) continue;
+        keys.push({ id: trackKeyIdSeq++, time: lt, color: k.color, trailEffect: k.trailEffect, transitionMs: k.transitionMs });
+      }
+      keys.sort((x, y) => x.time - y.time);
+      const harmMarks = (top.harmMarks || []).map(m => ({ on: m.on + (top.offset || 0) - a, off: m.off == null ? null : m.off + (top.offset || 0) - a })).filter(m => m.on >= 0);
+      const nt = addTrack(name, mixed, {
+        color: top.baseColor || top.color, icon: top.icon,
+        volume: vmax, avatarDataUrl: top.avatarDataUrl, avatarShape: top.avatarShape, trailEffect: top.baseTrailEffect,
+        keys, offset: a, harmMarks, ownPower: top.ownPower, trailPow: top.trailPow, resPow: top.resPow,
+        audioFileName: savedName, audioRaw: wav, audioMime: 'audio/wav'
+      });
+      // lyrics sung by any of them are now sung by the merged track
+      const ids = new Set(sel.map(t => t.id));
+      try{
+        for(const LT of (typeof lyrTracks !== 'undefined' ? lyrTracks : [])){
+          for(const L of ((LT.lyr && LT.lyr.lines) || [])) for(const w of (L.words || [])){
+            if(Array.isArray(w.sing) && w.sing.some(id => ids.has(id))){ w.sing = [...new Set(w.sing.map(id => ids.has(id) ? nt.id : id))]; }
+          }
+        }
+      }catch(e){ console.error(e); }
+      for(const t of sel) removeTrack(t.id);
+      // the merged track goes where the top one was
+      const i = tracks.indexOf(nt); if(i >= 0){ tracks.splice(i, 1); tracks.splice(Math.min(at, tracks.length), 0, nt); }
+      applyTrackOrderToDOM();
+      clearSelection();
+      resetHarmonyCache(); refreshGains(); relayout(); redrawAllWaveforms();
+      nt._activeKeyId = undefined; updateTrackKeyStates();
+      if(typeof Quest !== 'undefined' && Quest.changed) Quest.changed();
+      if(wasPlaying){ playheadTime = playAt; startPlayback(); }
+      scheduleHistoryCheck(0);
+      toast(`Merged into “${name}”${savedName ? ' — its audio is saved in the audio folder as ' + savedName : ''}. Ctrl+Z splits them back.`, 3600);
+    }catch(err){
+      console.error(err);
+      toast("Couldn't merge those tracks: " + (err.message || err), 4200);
+    }
+  }
   // Alt+drag on the timeline: draw a box around keys to pick them
   // (with Ctrl/Shift held as well, adds to what's already picked)
   let keyBox = null;
@@ -9597,6 +9754,7 @@
     $('colorAllBtn').classList.toggle('has-selection', partial);
     $('paletteBtn').classList.toggle('has-selection', partial);
     $('selectAllLabel').textContent = (total && n === total) ? 'Clear selection' : (n ? `Select all · ${n} picked` : 'Select all');
+    trackBarUpdate();
   }
   function clearSelection(){
     tracks.forEach(t => setTrackSelected(t, false));
@@ -20176,7 +20334,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 15;                 // ← goes up by one with every published version
+  const SD_BUILD = 16;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

@@ -1,9 +1,8 @@
 {
-  "build": 15,
+  "build": 16,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: the people list now shows everyone who uses SaiDeck, not just who's online (with when they were last on).",
-    "Chat: SaiDeck now tells the chat which build it is, so it's easy to see who still needs to update."
+    "Tracks: select 2 or more tracks (Ctrl/Shift+click) and a bar appears to merge them into one track — same sound, one waveform, the top track's look and all their keys. Ctrl+Z splits them back."
   ]
 }
