@@ -1,10 +1,9 @@
 {
-  "build": 36,
+  "build": 37,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: pictures have a cyan ring when that person is using SaiDeck, amber when they've been idle 30 seconds or more, and no ring when they're offline.",
-    "Chat: Online, Rooms and the Arcade open as a big window in the middle of the screen (click outside, the ✕ or Esc to close).",
-    "Chat: infiltration and swat notices stay in the chat for 5 minutes, then move to the new Alerts window (the bell) so you can still look back at them."
+    "Arcade: new 🎰 Casino tab — join, sit at a slot machine and bet 1–500 points a spin. Everyone in the casino sees each other sitting, spinning, betting and winning.",
+    "Pays: 7️⃣7️⃣7️⃣ ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back. Every spin is checked by the server, so it's fair for everyone."
   ]
 }

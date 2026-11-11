@@ -224,11 +224,56 @@
   @keyframes chatFade{from{opacity:0;}to{opacity:1;}}
   .chat-modal-x{all:unset;position:fixed;z-index:4;top:calc(9vh + 10px);left:calc(50% + min(480px, calc(100vw - 32px)) / 2 - 40px);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
   .chat-modal-x[hidden]{display:none;}
+  .chat-panel.cas-open .chat-modal-x{top:calc(6vh + 10px);left:calc(50% + min(1000px, calc(100vw - 32px)) / 2 - 40px);}
   .chat-modal-x:hover{background:rgba(255,255,255,.1);color:var(--text);}
   .chat-modal-x svg{width:18px;height:18px;fill:currentColor;}
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
   .chat-bell{position:relative;}
+  /* the Casino */
+  .arc-cas{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:10px 6px;}
+  .arc-cas-art{font-size:46px;line-height:1;filter:drop-shadow(0 6px 14px rgba(245,208,74,.35));}
+  .arc-cas > b{font:800 16px 'Manrope',sans-serif;color:var(--text);}
+  .arc-cas-join{all:unset;margin-top:4px;padding:10px 22px;border-radius:999px;cursor:pointer;font:800 13px 'Inter',sans-serif;color:#1d1405;background:linear-gradient(135deg,#ffd76a,#ff9a3c);box-shadow:0 6px 18px rgba(255,170,60,.35);}
+  .arc-cas-join:hover{filter:brightness(1.08);} .arc-cas-join:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .chat-casino:not([hidden]){width:min(1000px, calc(100vw - 32px));max-height:min(84vh, 900px);top:6vh;border-color:rgba(245,208,74,.55);background:radial-gradient(120% 80% at 50% 0%, #3a1c2c 0%, #1b1c25 60%);}
+  .cas-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-right:38px;}
+  .cas-head b{display:block;font:800 18px 'Manrope',sans-serif;color:#ffe08a;}
+  .cas-head span{font-size:11.5px;color:var(--text-dim);}
+  .cas-bal{display:flex;align-items:baseline;gap:5px;} .cas-bal b{font:800 22px 'Manrope',sans-serif;color:#f5d04a;}
+  .cas-floor{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:14px 12px;padding:6px 2px 4px;}
+  .cas-m{display:flex;flex-direction:column;align-items:center;gap:0;border-radius:14px;}
+  .cas-cab{width:100%;box-sizing:border-box;padding:10px 9px 8px;border-radius:14px 14px 8px 8px;background:linear-gradient(180deg,#5b1f36,#2c1424);border:2px solid #c9993b;box-shadow:inset 0 0 0 2px rgba(255,220,140,.15), 0 8px 20px rgba(0,0,0,.4);}
+  .cas-m.me .cas-cab{border-color:#ffd76a;box-shadow:inset 0 0 0 2px rgba(255,220,140,.3), 0 0 22px rgba(255,200,90,.35);}
+  .cas-light{height:6px;margin:0 6px 8px;border-radius:3px;background:repeating-linear-gradient(90deg,#ffd76a 0 6px,#ff5e8a 6px 12px);opacity:.75;animation:casLights 1.2s linear infinite;background-size:24px 6px;}
+  @keyframes casLights{to{background-position:24px 0;}}
+  .cas-reels{display:flex;gap:5px;justify-content:center;}
+  .cas-reel{width:38px;height:44px;overflow:hidden;border-radius:7px;background:linear-gradient(180deg,#fff,#e9e3d6 50%,#fff);box-shadow:inset 0 3px 6px rgba(0,0,0,.35), inset 0 -3px 6px rgba(0,0,0,.25);}
+  .cas-strip{display:flex;flex-direction:column;will-change:transform;}
+  .cas-strip span{height:44px;line-height:44px;text-align:center;font-size:24px;flex:none;}
+  .cas-res{margin-top:7px;min-height:16px;text-align:center;font-size:11px;color:#f1d9b0;}
+  .cas-res b{color:#fff;} .cas-res b.w{color:#7dffb2;}
+  .cas-m.won .cas-cab{border-color:#7dffb2;} .cas-m.big .cas-light{opacity:1;animation-duration:.35s;}
+  .cas-seat{position:relative;margin-top:-6px;display:flex;flex-direction:column;align-items:center;}
+  .cas-seat .cas-av{width:40px;height:40px;font-size:15px;z-index:1;border:2px solid #17181f;}
+  .cas-stool{width:34px;height:12px;margin-top:-6px;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#8a5a2b,#5a3a1a);box-shadow:0 10px 0 -4px #3a2612;}
+  .cas-nm{margin-top:10px;font-size:11.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cas-ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:10px 0 2px;border-top:1px solid rgba(245,208,74,.2);}
+  .cas-bet{display:flex;align-items:center;gap:3px;}
+  .cas-bet button, .cas-chips button{all:unset;cursor:pointer;padding:6px 9px;border-radius:8px;background:rgba(255,255,255,.07);font:700 12px 'Inter',sans-serif;color:var(--text);}
+  .cas-bet button:hover, .cas-chips button:hover{background:rgba(255,255,255,.14);}
+  .cas-bet input{width:64px;text-align:center;padding:6px 4px;border-radius:8px;border:1px solid rgba(245,208,74,.45);background:#14151c;color:#ffe08a;font:800 14px 'Inter',sans-serif;}
+  .cas-chips{display:flex;gap:4px;}
+  .cas-chips button{border-radius:999px;border:1px dashed rgba(245,208,74,.5);}
+  .cas-spin{all:unset;cursor:pointer;padding:10px 26px;border-radius:999px;font:900 14px 'Manrope',sans-serif;letter-spacing:.05em;color:#2a0d0d;background:linear-gradient(135deg,#ffd76a,#ff7a3c);box-shadow:0 6px 18px rgba(255,140,60,.4);}
+  .cas-spin:disabled{opacity:.5;cursor:default;} .cas-spin:active:not(:disabled){transform:scale(.95);}
+  .cas-leave{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;font:700 12px 'Inter',sans-serif;color:var(--text-dim);border:1px solid var(--border);}
+  .cas-leave:hover{color:var(--text);}
+  .cas-bet button:focus-visible, .cas-chips button:focus-visible, .cas-spin:focus-visible, .cas-leave:focus-visible{outline:2px solid #fff;}
+  .cas-pays{text-align:center;font-size:10.5px;color:var(--text-faint);}
+  .cas-feed{display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto;}
+  .cas-f{font-size:11.5px;color:var(--text-dim);padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.03);}
+  .cas-f.big{color:#ffe08a;background:rgba(245,208,74,.1);}
   .chat-bell-n{position:absolute;top:1px;right:0;min-width:15px;height:15px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#ff4d6d;color:#fff;font:800 9.5px/15px 'Inter',sans-serif;text-align:center;}
   .chat-bell-n[hidden]{display:none;}
   .alert-list{display:flex;flex-direction:column;gap:4px;}
@@ -244,7 +289,7 @@
   .arc-pts b{font:800 24px 'Manrope',sans-serif;color:#f5d04a;line-height:1;}
   .arc-pts span{font-size:11px;color:var(--text-dim);}
   .arc-earned{font-size:10.5px;color:var(--text-faint);}
-  .arc-tabs{display:flex;gap:4px;padding:2px;border-radius:9px;background:rgba(255,255,255,.05);}
+  .arc-tabs{display:flex;gap:0;padding:2px;border-radius:9px;background:rgba(255,255,255,.05);}
   .arc-tabs button{all:unset;flex:1;text-align:center;padding:5px 0;border-radius:7px;font:700 11.5px 'Inter',sans-serif;color:var(--text-dim);cursor:pointer;}
   .arc-tabs button.on{background:rgba(180,140,255,.25);color:var(--text);}
   .arc-tabs button:focus-visible{outline:2px solid #b48cff;}
@@ -485,7 +530,7 @@
   .arc-tabs{position:relative;}
   .arc-tabs button{position:relative;z-index:1;transition:color .2s;}
   .arc-tabs button.on{background:transparent;}
-  .arc-tabs::before{content:'';position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 4px);border-radius:7px;background:rgba(180,140,255,.25);transition:transform .28s cubic-bezier(.2,.9,.3,1.1);transform:translateX(var(--tab-x, 0));}
+  .arc-tabs::before{content:'';position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px) / 3);border-radius:7px;background:rgba(180,140,255,.25);transition:transform .28s cubic-bezier(.2,.9,.3,1.1);transform:translateX(var(--tab-x, 0));}
   .arc-buy{transition:transform .12s, filter .12s;}
   .arc-buy:active:not(:disabled){transform:scale(.92);}
   .arc-item.bought{animation:chatBought .7s ease-out;}
@@ -520,7 +565,7 @@
   .bubfx-flash{position:absolute;inset:0;background:#e6d6ff;}
   @media (prefers-reduced-motion: reduce){
     .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-modal-back, .chat-replying:not([hidden]),
-    .chat-arcade .ani, .chat-arcade .ani .arc-rank, .arc-pts b.bump, .arc-item.bought{animation:none !important;}
+    .chat-arcade .ani, .chat-arcade .ani .arc-rank, .arc-pts b.bump, .cas-light, .arc-item.bought{animation:none !important;}
     .arc-tabs::before{transition:none;}
   }
   .sd-update-btn{all:unset;box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:9px;cursor:pointer;flex-shrink:0;
@@ -20702,7 +20747,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 36;                 // ← goes up by one with every published version
+  const SD_BUILD = 37;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21124,6 +21169,7 @@
         <div class="chat-side" hidden></div>
         <div class="chat-side chat-arcade" hidden></div>
         <div class="chat-side chat-alerts" hidden></div>
+        <div class="chat-side chat-casino" hidden></div>
         <div class="chat-modal-back" hidden></div>
         <button type="button" class="chat-modal-x" title="Close (Esc)" aria-label="Close" hidden>${ICON_X}</button>
         <div class="chat-pin" hidden></div>
@@ -21148,6 +21194,7 @@
       chatPanel.querySelector('.chat-modal-x').addEventListener('click', () => chatSideTo(CHAT.side));
       chatPanel.querySelector('.chat-arc').addEventListener('click', () => { chatSideTo('arcade'); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
+        if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
@@ -21183,6 +21230,7 @@
     chatRenderSide();
     chatRenderArcade();
     chatRenderAlerts();
+    casRender();
     { const bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x'); if(bk) bk.hidden = !CHAT.side; if(x) x.hidden = !CHAT.side; }
     chatRenderPin();
     chatRenderMessages();
@@ -21224,10 +21272,13 @@
   // the rooms list (Everyone + your group chats + join / make one)
   // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
   function chatSideTo(which){
+    const was = CHAT.side;
     CHAT.side = CHAT.side === which ? null : which;
-    chatRenderSide(); chatRenderArcade(); chatRenderAlerts();
+    if(was === 'casino' && CHAT.side !== 'casino') casLeave();       // (closing the casino gets you up from your seat)
+    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender();
     const open = !!CHAT.side, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
     if(bk) bk.hidden = !open; if(x) x.hidden = !open;
+    chatPanel.classList.toggle('cas-open', CHAT.side === 'casino');
   }
   // Esc closes the open window (before it would close the chat)
   window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.side && !chatPanel.hidden){ e.preventDefault(); e.stopImmediatePropagation(); chatSideTo(CHAT.side); } }, true);
@@ -21475,6 +21526,7 @@
   function chatToggle(open){
     CHAT.open = open == null ? !CHAT.open : !!open;
     chatPanel.hidden = !CHAT.open;
+    if(!CHAT.open && CHAT.side === 'casino'){ CHAT.side = null; casLeave(); }
     if(CHAT.open){
       if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans(); chatPollInbox();
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
@@ -22199,6 +22251,206 @@
       done(1100);
     } else L.remove();
   }
+  // ----- the Casino: sit at a slot machine and bet your points -----
+  // casino/seats/<id> = { n, t } (who's sitting, a heartbeat every 30 s);
+  // casino/spin/<id> = { b: bet, t: server time of the spin, c: paid out yet }.
+  // The reels come from the spin's server time (nobody can pick it), and the
+  // database checks that the bet was paid and the winnings are exactly right.
+  const CAS_SYMS = ['🍒', '🍋', '🍊', '🔔', '💎', '7️⃣'];
+  const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: Math.max(1, Math.min(500, Number(chatLS('casBet')) || 10)) };
+  const casReels = (T) => [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
+  function casMult(T){
+    const [a, b, c] = casReels(T);
+    if(a === b && b === c) return a === 5 ? 25 : a === 4 ? 12 : 6;
+    if(a === b || a === c) return a >= 4 ? 2 : 1;
+    if(b === c) return b >= 4 ? 2 : 1;
+    return 0;
+  }
+  const casSeatLive = (st) => st && typeof st.t === 'number' && Date.now() + PRES.offset - st.t < 95000;
+  async function casJoin(){
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(!SC.loaded) await scLoad();
+    CAS.on = true; CAS.seen = {}; CAS.feed = [];
+    if(CHAT.side !== 'casino') chatSideTo('casino');
+    casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
+    casListen(); casRender();
+  }
+  async function casBeat(){
+    if(!CAS.on) return;
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) }); }catch(e){}
+  }
+  function casLeave(){
+    if(!CAS.on) return;
+    CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0;
+    if(CAS.es){ CAS.es.close(); CAS.es = null; }
+    chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
+  }
+  window.addEventListener('pagehide', () => { if(CAS.on) casLeave(); });
+  async function casListen(){
+    if(CAS.es) return;
+    let tok; try{ tok = await chatAuth(); }catch(e){ return; }
+    if(!CAS.on) return;
+    const es = new EventSource(`${CHAT_DB}/casino.json?auth=${encodeURIComponent(tok)}`); CAS.es = es;
+    const set = (path, v) => {
+      const [top, uid, key] = path;
+      if(top !== 'seats' && top !== 'spin') return;
+      const store = top === 'seats' ? CAS.seats : CAS.spins;
+      if(!uid){ for(const k of Object.keys(store)) delete store[k]; Object.assign(store, v || {}); return; }
+      if(key){ store[uid] = Object.assign({}, store[uid]); if(v == null) delete store[uid][key]; else store[uid][key] = v; }
+      else if(v == null) delete store[uid]; else store[uid] = v;
+    };
+    const apply = (path, v, patch) => {
+      const p = path.replace(/^\//, '').split('/').filter(Boolean);
+      if(!p.length){ if(patch){ for(const [k, x] of Object.entries(v || {})) set([k], x); } else { set(['seats'], (v && v.seats) || {}); set(['spin'], (v && v.spin) || {}); } }
+      else if(patch){ for(const [k, x] of Object.entries(v || {})) set(p.concat(k.split('/')), x); }
+      else set(p, v);
+      casSync();
+    };
+    es.addEventListener('put', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } apply(d.path, d.data, false); });
+    es.addEventListener('patch', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } apply(d.path, d.data, true); });
+    es.addEventListener('cancel', () => { es.close(); if(CAS.es === es) CAS.es = null; });
+    es.addEventListener('error', () => { if(es.readyState === 2 && CAS.es === es){ CAS.es = null; if(CAS.on) setTimeout(casListen, 4000); } });
+  }
+  // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
+  async function casSpin(){
+    if(!CAS.on || CAS.busy) return;
+    const bet = Math.round(CAS.bet);
+    if(!(bet >= 1 && bet <= 500)){ toast('Bet between 1 and 500 points.', 2000); return; }
+    if(!SC.loaded) await scLoad();
+    if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
+    const last = CAS.spins[chatUid()];
+    if(last && last.c === false){ await casClaim(last); }
+    CAS.busy = true; casCtl();
+    const me = chatUid(), sv = { '.sv': 'timestamp' };
+    try{
+      const tok = await chatAuth(), body = {};
+      body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false };
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); toast(r.status === 401 ? 'Slow down a little — one spin every few seconds.' : "Couldn't spin — check your connection.", 2400); return; }
+      SC.s += bet;
+      let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
+      if(typeof T !== 'number'){ const g = await fetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
+      if(typeof T !== 'number') throw new Error('no time');
+      const sp = { b: bet, t: T, c: false }; CAS.spins[me] = sp;
+      casSync();
+      await casClaim(sp);
+    }catch(e){ toast("Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
+    CAS.busy = false; casCtl(); chatRenderArcade();
+  }
+  async function casClaim(sp){
+    const me = chatUid(), win = sp.b * casMult(sp.t);
+    for(let tries = 0; tries < 2; tries++){
+      try{
+        const tok = await chatAuth(), body = {};
+        body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
+        const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+        if(r.ok){ SC.p += win; sp.c = true; return win; }
+        await scLoad();
+      }catch(e){}
+    }
+    return -1;
+  }
+  // the Casino window
+  function casRender(){
+    const el = chatPanel.querySelector('.chat-casino'); if(!el) return;
+    el.hidden = CHAT.side !== 'casino';
+    if(el.hidden){ if(el.dataset.built){ el.innerHTML = ''; el.dataset.built = ''; } return; }
+    if(!el.dataset.built){
+      el.dataset.built = '1';
+      el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><div class="cas-bal"><b></b><span>points</span></div></div>
+        <div class="cas-floor"></div>
+        <div class="cas-ctl"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
+          <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
+          <button type="button" class="cas-spin">SPIN</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-pays">Pays: 7️⃣7️⃣7️⃣ ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two = your bet back</div>
+        <div class="cas-feed"></div>`;
+      const inp = el.querySelector('.cas-bet input');
+      inp.value = CAS.bet;
+      const setBet = (v) => { CAS.bet = Math.max(1, Math.min(500, Math.round(v) || 1)); inp.value = CAS.bet; chatLS('casBet', CAS.bet); casCtl(); };
+      inp.addEventListener('change', () => setBet(Number(inp.value)));
+      inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); casSpin(); } });
+      el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(CAS.bet + Number(b.dataset.d)); });
+      el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
+      el.querySelector('.cas-spin').addEventListener('click', casSpin);
+      el.querySelector('.cas-leave').addEventListener('click', () => chatSideTo('casino'));
+    }
+    casSync(); casCtl();
+  }
+  function casCtl(){
+    const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
+    el.querySelector('.cas-bal b').textContent = SC.loaded ? scBal() : '…';
+    const sb = el.querySelector('.cas-spin'); sb.disabled = CAS.busy || !CAS.on || scBal() < CAS.bet; sb.textContent = CAS.busy ? '…' : `SPIN · ${CAS.bet}`;
+  }
+  const casSym = (i) => CAS_SYMS[i] || '❔';
+  // the machines on the floor (one per person sitting), kept in place so the reels can roll
+  function casSync(){
+    const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
+    const floor = el.querySelector('.cas-floor'), me = chatUid();
+    const who = Object.entries(CAS.seats).filter(([u, st]) => casSeatLive(st) || (u === me && CAS.on)).map(([u, st]) => ({ u, n: (st && st.n) || 'Someone', t: (st && st.t) || 0 }));
+    if(CAS.on && !who.some(w => w.u === me)) who.push({ u: me, n: chatName(), t: Date.now() });
+    who.sort((a, b) => (b.u === me) - (a.u === me) || a.t - b.t);
+    const want = new Set(who.map(w => w.u));
+    for(const m of [...floor.children]) if(!want.has(m.dataset.u)) m.remove();
+    who.forEach((w, i) => {
+      let m = floor.querySelector(`.cas-m[data-u="${CSS.escape(w.u)}"]`);
+      if(!m){
+        m = document.createElement('div'); m.className = 'cas-m' + (w.u === me ? ' me' : ''); m.dataset.u = w.u;
+        m.innerHTML = `<div class="cas-cab"><div class="cas-light"></div><div class="cas-reels">${'<div class="cas-reel"><div class="cas-strip"><span>❔</span></div></div>'.repeat(3)}</div><div class="cas-res">sat down</div></div>
+          <div class="cas-seat"><div class="cas-stool"></div></div><b class="cas-nm"></b>`;
+        const av = chatAv(w.u, w.n, false, false); av.classList.add('cas-av'); m.querySelector('.cas-seat').prepend(av);
+        m.querySelector('.cas-nm').textContent = (chatBadName(w.n) ? 'someone' : w.n) + (w.u === me ? ' (you)' : '');
+        m.querySelector('.cas-nm').style.color = chatColor(w.n);
+        m.animate([{ opacity: 0, transform: 'translateY(16px) scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
+      }
+      if(floor.children[i] !== m) floor.insertBefore(m, floor.children[i] || null);
+      const sp = CAS.spins[w.u];
+      if(sp && typeof sp.t === 'number'){
+        const prev = CAS.seen[w.u];
+        if(prev == null){ CAS.seen[w.u] = sp.t; casShow(m, sp, false); }
+        else if(sp.t !== prev){ CAS.seen[w.u] = sp.t; casShow(m, sp, true, w); }
+      }
+    });
+    if(!who.length) floor.innerHTML = '<p class="chat-side-p">Nobody here yet.</p>';
+    casCtl();
+  }
+  // a machine's reels: roll and land on the spin's result (or just show it)
+  function casShow(m, sp, roll, w){
+    const R = casReels(sp.t), win = sp.b * casMult(sp.t), res = m.querySelector('.cas-res');
+    const strips = [...m.querySelectorAll('.cas-strip')];
+    const still = !roll || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const done = () => {
+      res.innerHTML = win > 0 ? `bet <b>${sp.b}</b> · won <b class="w">${win}</b>` : `bet <b>${sp.b}</b> · lost`;
+      m.classList.toggle('won', win > 0); m.classList.toggle('big', win >= sp.b * 6);
+      if(roll){
+        if(win > 0) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
+        const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
+        casFeed(`${nm} bet ${sp.b} → ${R.map(casSym).join('')} ${win > 0 ? 'won ' + win : 'lost'}`, win >= sp.b * 6);
+        if(m.classList.contains('me') && win >= sp.b * 6) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win} points!`, 3000);
+        if(m.classList.contains('me')) chatRenderArcade();
+      }
+    };
+    if(still){ strips.forEach((s, i) => { s.innerHTML = `<span>${casSym(R[i])}</span>`; s.style.transform = ''; }); done(); return; }
+    res.textContent = `bet ${sp.b} · spinning…`; m.classList.remove('won', 'big');
+    let left = 3;
+    strips.forEach((s, i) => {
+      const n = 14 + i * 5, syms = [];
+      for(let k = 0; k < n; k++) syms.push(casSym(Math.floor(Math.random() * 6)));
+      syms.push(casSym(R[i]));
+      s.innerHTML = syms.map(x => `<span>${x}</span>`).join('');
+      const h = s.firstElementChild.getBoundingClientRect().height || 40;
+      s.getAnimations().forEach(a => a.cancel());
+      s.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${-(n) * h}px)` }], { duration: 900 + i * 380, easing: 'cubic-bezier(.25,.1,.2,1.08)', fill: 'forwards' }).onfinish = () => {
+        s.innerHTML = `<span>${casSym(R[i])}</span>`; s.getAnimations().forEach(a => a.cancel());
+        if(--left === 0) done();
+      };
+    });
+  }
+  function casFeed(txt, big){
+    const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
+    const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
+    el.prepend(d); while(el.children.length > 12) el.lastChild.remove();
+    d.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
+  }
   async function scLoad(){
     if(!chatName()) return;
     try{
@@ -22271,7 +22523,7 @@
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
     let h = `<div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
-      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button></div>`;
+      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div>`;
     if(SC.tab === 'shop'){
       h += `<div class="chat-who-h">Bullets</div><p class="chat-side-p">Right-click while infiltrating to shoot. Press 1–6 to switch to any you own.</p>`;
       AMMO.forEach((a, i) => {
@@ -22293,6 +22545,13 @@
         h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(a.desc)}</span></div>
           <button type="button" class="arc-buy" data-art="${a.k}">${a.price} pts</button></div>`;
       }
+    } else if(SC.tab === 'casino'){
+      const here = Object.values(CAS.seats).filter(casSeatLive);
+      h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
+        <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
+        <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
+        <button type="button" class="arc-cas-join" data-cas-join>Join the casino</button></div>`;
+      if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {
       const B = SC.board;
       if(!B){ h += `<p class="chat-side-p">Loading…</p>`; scBoard(); }
@@ -22304,7 +22563,7 @@
     if(el._h === h && !isFresh) return;      // (nothing changed: leave it, so animations play out)
     el._h = h;
     el.innerHTML = h;
-    { const tb = el.querySelector('.arc-tabs'), x = SC.tab === 'board' ? 'calc(100% + 4px)' : '0px';
+    { const tb = el.querySelector('.arc-tabs'), x = SC.tab === 'board' ? '100%' : SC.tab === 'casino' ? '200%' : '0px';
       if(el.dataset.tabx && el.dataset.tabx !== x){ tb.style.setProperty('--tab-x', el.dataset.tabx); void tb.offsetWidth; }
       tb.style.setProperty('--tab-x', x); el.dataset.tabx = x; }
     if(isFresh) el._freshAt = performance.now();
