@@ -1,9 +1,9 @@
 {
-  "build": 28,
+  "build": 29,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: smooth animations — the panel opens with a glide, new messages, reactions and swat notices pop in, the send button flies off, and Online, Rooms and the Arcade slide open.",
-    "Arcade: the shop and leaderboard slide in row by row, medals spin in, the tab highlight slides across, and your points bounce when they change."
+    "Shop: chat bubbles for 500 points — Chopper drop, Rocket mail, UFO beam, Paper plane, Balloon float and Thunder strike. Each has its own colour, and everyone sees your messages arrive with its entrance.",
+    "Click a bubble's picture in the shop to preview its entrance."
   ]
 }
