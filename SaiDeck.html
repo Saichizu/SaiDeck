@@ -230,6 +230,35 @@
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
   .chat-bell{position:relative;}
+  /* jackpots: a shiny notice in the chat (stays), and a pop-up on everyone's screen until closed */
+  .chat-jack{position:relative;overflow:hidden;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:10px 12px;border-radius:14px;
+    background:linear-gradient(120deg,#5a3a00,#b8860b 30%,#ffd76a 50%,#b8860b 70%,#5a3a00);background-size:250% 100%;animation:jackBg 4s linear infinite;border:1px solid #ffe08a;box-shadow:0 0 18px rgba(255,200,80,.45);color:#2a1800;font-size:12.5px;}
+  .chat-jack .cj-i{font-size:24px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));}
+  .chat-jack .cj-h{font:900 13px 'Manrope',sans-serif;letter-spacing:.08em;color:#fff;text-shadow:0 1px 0 #7a4a00, 0 0 8px rgba(255,255,255,.7);}
+  .chat-jack .cj-n{font-weight:800;}
+  .chat-jack .cj-r{margin-left:6px;}
+  .chat-jack i{display:block;font-style:normal;font-size:10.5px;opacity:.7;}
+  .chat-jack.in{animation:jackBg 4s linear infinite, chatEvIn .6s cubic-bezier(.2,.9,.3,1.4) both;}
+  @keyframes jackBg{to{background-position:-250% 0;}}
+  .jp-shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.65) 50%, transparent 65%);background-size:250% 100%;animation:jackShine 2.6s ease-in-out infinite;}
+  @keyframes jackShine{0%{background-position:150% 0;}60%,100%{background-position:-100% 0;}}
+  .jack-pops{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9700;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+  .jack-pop{position:relative;overflow:hidden;pointer-events:auto;display:flex;align-items:center;gap:12px;min-width:min(380px, calc(100vw - 32px));padding:12px 44px 12px 16px;border-radius:16px;
+    background:linear-gradient(120deg,#5a3a00,#b8860b 30%,#ffd76a 50%,#b8860b 70%,#5a3a00);background-size:250% 100%;animation:jackBg 4s linear infinite, jackIn .6s cubic-bezier(.2,.9,.3,1.4) both;
+    border:2px solid #fff3c4;box-shadow:0 0 0 4px rgba(255,215,106,.25), 0 18px 50px rgba(0,0,0,.55), 0 0 40px rgba(255,200,80,.55);color:#2a1800;}
+  @keyframes jackIn{from{opacity:0;transform:translateY(-24px) scale(.85);}to{opacity:1;transform:none;}}
+  .jack-pop .jp-icon{font-size:34px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));animation:jackWob 1.4s ease-in-out infinite;}
+  @keyframes jackWob{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg) scale(1.08);}}
+  .jack-pop .jp-t{display:flex;flex-direction:column;gap:1px;}
+  .jack-pop .jp-t b{font:900 20px 'Manrope',sans-serif;letter-spacing:.1em;color:#fff;text-shadow:0 2px 0 #7a4a00, 0 0 12px rgba(255,255,255,.8);}
+  .jack-pop .jp-t span{font:700 13px 'Inter',sans-serif;}
+  .jack-pop .jp-t i{font-style:normal;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+  .jack-pop .jp-t em{font-style:normal;font-size:15px;letter-spacing:.2em;}
+  .jack-pop .jp-x{all:unset;position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3a2400;background:rgba(255,255,255,.35);}
+  .jack-pop .jp-x svg{width:15px;height:15px;fill:currentColor;} .jack-pop .jp-x:hover{background:rgba(255,255,255,.6);}
+  .jack-pop .jp-x:focus-visible{outline:2px solid #fff;}
+  .jack-coin{position:fixed;z-index:9701;pointer-events:none;font-size:20px;}
+  @media (prefers-reduced-motion: reduce){ .chat-jack, .jack-pop, .jp-shine, .jack-pop .jp-icon{animation:none !important;} }
   .chat-casbar{display:flex;align-items:center;gap:8px;margin:0 10px 8px;padding:7px 8px 7px 11px;border-radius:12px;background:linear-gradient(90deg, rgba(245,208,74,.14), rgba(255,94,138,.10));border:1px solid rgba(245,208,74,.45);font-size:12px;color:#ffe9b0;}
   .chat-casbar[hidden]{display:none;}
   .chat-casbar .cb-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -20752,7 +20781,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 39;                 // ← goes up by one with every published version
+  const SD_BUILD = 41;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21189,7 +21218,8 @@
             <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
             <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label>
             <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label>
-            <label title="Let people fly their picture around your screen (Infiltrate). You can always swat them out by clicking their picture."><span class="switch"><input type="checkbox" class="chat-o-inf"><span class="track"></span><span class="knob"></span></span>Let people infiltrate</label></div>
+            <label title="Let people fly their picture around your screen (Infiltrate). You can always swat them out by clicking their picture."><span class="switch"><input type="checkbox" class="chat-o-inf"><span class="track"></span><span class="knob"></span></span>Let people infiltrate</label>
+            <label title="Sounds for the games: someone infiltrating you, slime shots and splats, jackpots"><span class="switch"><input type="checkbox" class="chat-o-sfx"><span class="track"></span><span class="knob"></span></span>Game sounds</label></div>
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
@@ -21225,6 +21255,9 @@
       const ofx = chatPanel.querySelector('.chat-o-fx');
       ofx.checked = chatFxOn();
       ofx.addEventListener('change', () => { chatLS('fx', ofx.checked ? '1' : '0'); ofx.blur(); presBeat(); toast(ofx.checked ? 'Emoji effects on — emojis people send you pop up on screen.' : "Emoji effects off — nobody's emojis will pop up on your screen.", 2600); });
+      const osx = chatPanel.querySelector('.chat-o-sfx');
+      osx.checked = sfxOn();
+      osx.addEventListener('change', () => { chatLS('sfx', osx.checked ? '1' : '0'); osx.blur(); if(osx.checked) sfxIntruder(); });
       const oin = chatPanel.querySelector('.chat-o-inf');
       oin.checked = chatInfOn();
       oin.addEventListener('change', () => { chatLS('inf', oin.checked ? '1' : '0'); oin.blur(); presBeat(); if(!oin.checked) infKickAll(); toast(oin.checked ? 'Others can infiltrate your screen again (click their picture to swat them out).' : "Nobody can infiltrate your screen now.", 2600); });
@@ -21380,6 +21413,16 @@
     CHAT.alerts = []; CHAT.evNext = 0;
     const nowS = Date.now() + PRES.offset;
     for(const m of shown){
+      if(m.e === 'jack'){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+        const ev = document.createElement('div'); ev.className = 'chat-jack';
+        ev.innerHTML = '<div class="jp-shine"></div><span class="cj-i">🎰</span><div><b class="cj-h">JACKPOT</b> <b class="cj-n"></b> <span class="cj-m"></span><span class="cj-r">7️⃣7️⃣7️⃣</span><i></i></div>';
+        ev.querySelector('.cj-n').textContent = chatBadName(m.n) ? 'someone' : m.n;
+        ev.querySelector('.cj-m').textContent = chatMask(String(m.m || '').replace(/^hit the JACKPOT and /, ''));
+        ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)) ev.classList.add('in');
+        body.appendChild(ev); continue;
+      }
       if(m.e === 'swat' || m.e === 'inf'){
         if(nowS - (m.t || 0) > CHAT_EV_LIVE){ CHAT.alerts.push(m); continue; }
         const due = (m.t || 0) + CHAT_EV_LIVE; if(!CHAT.evNext || due < CHAT.evNext) CHAT.evNext = due;
@@ -21600,7 +21643,7 @@
       const fresh = [], parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
       if(parts.length){ for(const [k, v] of Object.entries(d.data || {})) applyDeep(parts.concat(k.split('/')), v); }
       else for(const [k, m] of Object.entries(d.data || {})) apply(k, m, fresh);
-      chatSort(); for(const m of fresh) chatIncoming(m); chatUpdateBadge(); if(CHAT.open) chatRender();
+      chatSort(); for(const m of fresh){ chatIncoming(m); if(m.e === 'jack' && Date.now() + PRES.offset - (m.t || 0) < 180000) chatJackPop(m); } chatUpdateBadge(); if(CHAT.open) chatRender();
     });
     es.addEventListener('cancel', () => { CHAT.status = 'err'; chatRenderStatus(); });
     es.addEventListener('error', () => {
@@ -21998,7 +22041,7 @@
       INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0, heard: performance.now() };
       infShotsIn(INF.remote[s], v.s, true);
       // (a heads-up when someone new comes in)
-      if(!R || R.d.u !== v.u){ toast(`👀 ${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating your screen! Click their picture to swat them out.`, 3200); if(chatSoundOn()) chatPing(); }
+      if(!R || R.d.u !== v.u){ toast(`👀 ${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating your screen! Click their picture to swat them out.`, 3200); sfxIntruder(); }
     } else { R.d = v; R.heard = performance.now(); infShotsIn(R, v.s, false); }
     infLoop(); artUI();
   }
@@ -22460,6 +22503,7 @@
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
         casFeed(`${nm} bet ${sp.b} → ${R.map(casSym).join('')} ${win > 0 ? 'won ' + win : 'lost'}`, win >= sp.b * 6);
         if(m.classList.contains('me') && win >= sp.b * 6) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win} points!`, 3000);
+        if(m.classList.contains('me') && casMult(sp.t) === 25) casJackpotPost(win);
         if(m.classList.contains('me')) chatRenderArcade();
       }
     };
@@ -22478,6 +22522,35 @@
         if(--left === 0) done();
       };
     });
+  }
+  // a jackpot goes out to the whole room as a shiny notice that stays in the chat
+  async function casJackpotPost(win){
+    if(!chatName() || chatBlock()) return;
+    try{
+      const tok = await chatAuth(), txt = `hit the JACKPOT and won ${win}`.slice(0, chatMaxLen());
+      await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: { '.sv': 'timestamp' }, u: chatUid(), e: 'jack' }) });
+    }catch(e){}
+  }
+  // …and pops up on everyone's screen (gold, sparkling) until they close it
+  function chatJackPop(m){
+    if(chatBanned(m.u)) return;
+    let host = document.querySelector('.jack-pops'); if(!host){ host = document.createElement('div'); host.className = 'jack-pops'; document.body.appendChild(host); }
+    const c = document.createElement('div'); c.className = 'jack-pop'; c.setAttribute('role', 'status');
+    c.innerHTML = `<div class="jp-shine"></div><span class="jp-icon">🎰</span><div class="jp-t"><b>JACKPOT!</b><span><i></i> <span class="jp-m"></span></span><em>7️⃣ 7️⃣ 7️⃣</em></div><button type="button" class="jp-x" aria-label="Close">${ICON_X}</button>`;
+    c.querySelector('i').textContent = chatBadName(m.n) ? 'Someone' : m.n; c.querySelector('i').style.color = '#fff';
+    c.querySelector('.jp-m').textContent = String(m.m || '').replace(/^hit the JACKPOT and /, '');
+    c.querySelector('.jp-x').addEventListener('click', () => { c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px) scale(.96)' }], { duration: 220 }).onfinish = () => c.remove(); });
+    host.prepend(c); while(host.children.length > 3) host.lastChild.remove();
+    if(!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+      const r = c.getBoundingClientRect();
+      for(let i = 0; i < 26; i++){
+        const b = document.createElement('div'); b.className = 'jack-coin'; b.textContent = i % 3 ? '🪙' : '✨';
+        b.style.left = (r.left + r.width / 2) + 'px'; b.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(b);
+        const a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 200;
+        b.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d + 120}px)) rotate(${Math.random() * 720 - 360}deg) scale(1)`, opacity: 0 }], { duration: 1300 + Math.random() * 700, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' }).onfinish = () => b.remove();
+      }
+    }
+    sfxJackpot();
   }
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
@@ -22644,7 +22717,7 @@
     const t0 = Date.now();
     const A = AMMO.find(a => a.k === kind) || AMMO[0], L = splatLayer(mine);
     const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const land = () => {
+    let land = () => {
       if(owner && SPLAT.gone && SPLAT.gone[owner] >= t0) return;      // (they were swatted out while it flew)
       const sz = 170 + Math.random() * 170, v = Math.floor(Math.random() * 5);
       const s = document.createElement('div'); s.className = 'splat ' + kind; s.style.left = x1 + 'px'; s.style.top = y1 + 'px'; s.style.width = s.style.height = sz + 'px';
@@ -22661,6 +22734,9 @@
         b.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d + 30}px)) scale(.4)`, opacity: 0 }], { duration: 500 + Math.random() * 250, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' }).onfinish = () => b.remove();
       }
     };
+    const land0 = land;
+    land = () => { sfxSplat(kind); land0(); };
+    sfxShoot(kind);
     if(still){ land(); return; }
     const bl = document.createElement('div'); bl.className = 'splat-bullet'; bl.style.background = A.col; bl.style.left = x0 + 'px'; bl.style.top = y0 + 'px'; L.appendChild(bl);
     const dur = 180 + Math.hypot(x1 - x0, y1 - y0) * 0.6;
@@ -22942,6 +23018,57 @@
       g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
       [880, 1320].forEach((f, i) => { const o = chatAc.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.connect(g); o.start(t0 + i * 0.09); o.stop(t0 + 0.36); });
     }catch(e){}
+  }
+  // ----- game sounds (made with the Web Audio API, nothing to download) -----
+  const sfxOn = () => chatLS('sfx') !== '0';
+  function sfxCtx(){ try{ chatAc = chatAc || new (window.AudioContext || window.webkitAudioContext)(); if(chatAc.state === 'suspended') chatAc.resume(); return chatAc; }catch(e){ return null; } }
+  let sfxNoiseBuf = null;
+  function sfxNoise(ac){
+    if(sfxNoiseBuf) return sfxNoiseBuf;
+    const n = ac.sampleRate, b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+    for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    return (sfxNoiseBuf = b);
+  }
+  const sfxEnv = (ac, t0, peak, att, dec, out) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + att); g.gain.exponentialRampToValueAtTime(0.0001, t0 + att + dec); g.connect(out || ac.destination); return g; };
+  function sfxTone(ac, t0, type, f0, f1, dur, peak, out){
+    const o = ac.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t0); if(f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    o.connect(sfxEnv(ac, t0, peak, 0.01, dur, out)); o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function sfxNoiseHit(ac, t0, type, fA, fB, q, dur, peak, out){
+    const s = ac.createBufferSource(); s.buffer = sfxNoise(ac);
+    const f = ac.createBiquadFilter(); f.type = type; f.Q.value = q; f.frequency.setValueAtTime(fA, t0); f.frequency.exponentialRampToValueAtTime(fB, t0 + dur);
+    s.connect(f); f.connect(sfxEnv(ac, t0, peak, 0.005, dur, out)); s.start(t0, Math.random() * 0.5); s.stop(t0 + dur + 0.05);
+  }
+  // someone just came onto your screen: a sneaky "uh-oh" and two little alarm blips
+  function sfxIntruder(){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    sfxTone(ac, t, 'triangle', 660, 620, 0.16, 0.16); sfxTone(ac, t + 0.18, 'triangle', 495, 440, 0.26, 0.16);
+    for(let i = 0; i < 2; i++){ sfxTone(ac, t + 0.52 + i * 0.16, 'square', 1250, 1250, 0.08, 0.05); sfxTone(ac, t + 0.6 + i * 0.16, 'square', 940, 940, 0.07, 0.05); }
+  }
+  // a slime bullet leaving (a quick wet "thwip")
+  function sfxShoot(kind){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    const hi = kind === 'glitter' || kind === 'snow';
+    sfxTone(ac, t, 'sine', hi ? 1400 : 900, hi ? 500 : 220, 0.14, 0.14);
+    sfxNoiseHit(ac, t, 'bandpass', 3000, 900, 2, 0.09, 0.08);
+  }
+  // …and landing (each kind its own splat)
+  function sfxSplat(kind){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    if(kind === 'glitter'){ for(let i = 0; i < 6; i++) sfxTone(ac, t + i * 0.035, 'sine', 2200 + Math.random() * 2200, 2600 + Math.random() * 2000, 0.12, 0.05); sfxNoiseHit(ac, t, 'highpass', 6000, 4000, 1, 0.25, 0.05); return; }
+    if(kind === 'snow'){ sfxNoiseHit(ac, t, 'lowpass', 2600, 500, 0.7, 0.22, 0.22); sfxTone(ac, t, 'sine', 160, 90, 0.1, 0.12); return; }
+    if(kind === 'pie'){ sfxTone(ac, t, 'sine', 120, 55, 0.18, 0.35); sfxNoiseHit(ac, t, 'lowpass', 1400, 300, 1, 0.2, 0.25); return; }
+    if(kind === 'ink'){ sfxNoiseHit(ac, t, 'lowpass', 900, 200, 4, 0.3, 0.3); sfxTone(ac, t, 'sine', 90, 50, 0.22, 0.2); return; }
+    // slime and paint: a squelchy splat
+    sfxNoiseHit(ac, t, 'lowpass', 1800, 250, 6, 0.24, 0.32);
+    sfxTone(ac, t, 'sine', 210, 70, 0.2, 0.22);
+    sfxNoiseHit(ac, t + 0.07, 'bandpass', 700, 300, 8, 0.16, 0.12);
+  }
+  // a jackpot: a coin shower going up the scale
+  function sfxJackpot(){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => { sfxTone(ac, t + i * 0.08, 'triangle', f, f, 0.22, 0.12); sfxTone(ac, t + i * 0.08 + 0.02, 'sine', f * 2, f * 2, 0.12, 0.04); });
+    for(let i = 0; i < 10; i++) sfxTone(ac, t + 0.6 + Math.random() * 0.8, 'sine', 2500 + Math.random() * 2500, 3000 + Math.random() * 2000, 0.09, 0.04);
   }
   async function chatSend(ta, grow){
     const text = ta.value.trim().replace(/\s+/g, ' '); if(!text) return;

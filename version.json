@@ -1,8 +1,9 @@
 {
-  "build": 39,
+  "build": 41,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: a bar above the message box shows who's in the casino right now (\"Jayne and Sai are in the casino\") with a Join button — one line that updates, never a pile of messages."
+    "Casino: hitting the 7️⃣7️⃣7️⃣ jackpot pops a shiny gold notice on everyone's screen (it stays until they close it) and a sparkling jackpot card stays in the chat.",
+    "Game sounds: an alarm when someone starts infiltrating you, a \"thwip\" and splat for every slime shot (each bullet sounds different), and a coin shower for jackpots. Turn them off with \"Game sounds\" in the chat."
   ]
 }
