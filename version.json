@@ -1,10 +1,8 @@
 {
-  "build": 18,
+  "build": 21,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Chat: Infiltrate — click someone's picture and fly your own picture around their screen with your mouse (up to 3 at once). Click to leave; 5 s without moving pops you out. They can swat you out by clicking your picture, or switch it off (“Let people infiltrate”).",
-    "Render: with “Tracks can go off the frame” on, the tracks carry on through the bottom margin instead of being cut off at it.",
-    "Tracks: while renaming, Tab jumps to the next track's name (Shift+Tab to the one before)."
+    "Chat: the react / reply buttons now sit on the corner of the message you hover, even on short messages."
   ]
 }
