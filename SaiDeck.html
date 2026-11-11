@@ -288,6 +288,26 @@
   .poke-fx-big{position:absolute;left:50%;top:45%;font-size:min(22vw,180px);line-height:1;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45));}
   .poke-fx-bit{position:absolute;bottom:-60px;line-height:1;}
   .poke-fx-tag{position:absolute;left:50%;bottom:90px;padding:8px 14px;border-radius:999px;background:rgba(23,24,31,.92);border:1px solid rgba(180,140,255,.5);color:var(--text);font:700 13px 'Inter',sans-serif;white-space:nowrap;}
+  .chat-infil-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 10px;border-radius:9px;cursor:pointer;font:800 12px 'Inter',sans-serif;color:#16102a;background:linear-gradient(135deg,#b48cff,#ff7ab6);}
+  .chat-infil-btn svg{width:15px;height:15px;fill:currentColor;}
+  .chat-infil-btn:hover:not(:disabled){filter:brightness(1.08);}
+  .chat-infil-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .chat-infil-btn:disabled{opacity:.4;cursor:default;}
+  .chat-poke-note{font-size:10.5px;color:var(--text-faint);text-align:center;margin-top:-2px;}
+  body.infil-mode, body.infil-mode *{cursor:none !important;}
+  .infil{position:fixed;left:0;top:0;z-index:9600;pointer-events:none;width:0;height:0;will-change:transform;}
+  .infil .infil-av{position:absolute;left:0;top:0;width:42px;height:42px;transform:translate(-50%,-50%);font-size:16px;box-shadow:0 0 0 3px #fff, 0 6px 18px rgba(0,0,0,.45);}
+  .infil .infil-arrow{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .2s;transform:rotate(var(--ang,0rad)) translateX(31px);}
+  .infil .infil-arrow::after{content:'';position:absolute;left:-2px;top:-8px;border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
+  .infil.moving .infil-arrow{opacity:1;}
+  .infil.them .infil-av{pointer-events:auto;cursor:pointer;box-shadow:0 0 0 3px #ff7ab6, 0 6px 18px rgba(0,0,0,.45);}
+  .infil.them .infil-arrow::after{border-left-color:#ff7ab6;}
+  .infil-tag{position:absolute;left:0;top:30px;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:999px;background:rgba(23,24,31,.9);border:1px solid rgba(255,122,182,.6);color:#ffd0e6;font:700 10.5px 'Inter',sans-serif;}
+  .infil-pop{position:fixed;z-index:9610;pointer-events:none;width:0;height:0;}
+  .infil-pop .infil-av{position:absolute;width:42px;height:42px;}
+  .infil-pop > .infil{position:absolute;}
+  .infil-ring{position:absolute;left:0;top:0;width:60px;height:60px;border-radius:50%;border:3px solid #fff;transform:translate(-50%,-50%);}
+  .infil-bit{position:absolute;left:0;top:0;border-radius:50%;transform:translate(-50%,-50%);}
   .chat-pops{position:fixed;right:18px;bottom:18px;z-index:370;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
   .chat-pop{pointer-events:auto;width:min(320px, calc(100vw - 36px));display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;cursor:pointer;
     background:#1d1e28;border:1px solid rgba(180,140,255,.45);box-shadow:0 14px 36px rgba(0,0,0,.55);animation:chatPopIn .22s ease-out;}
@@ -8493,16 +8513,22 @@
     input.focus();
     input.select();
 
+    let ended = false;
     function commit(){
+      if(ended) return;
       const val = input.value.trim();
       t.name = val || current;
       finish();
     }
     function cancel(){
+      if(ended) return;
       finish();
     }
     function finish(){
+      ended = true;
       t.nameEl.textContent = t.name;
+      if(t.labelEl) t.labelEl.textContent = t.name;
+      scheduleHistoryCheck(0);
       t.nameEl.title = 'Click to rename';
       refreshLinkUI();
       t.iconBtn.setAttribute('aria-label', 'Change icon or color for ' + t.name);
@@ -8510,6 +8536,13 @@
     input.addEventListener('keydown', (e) => {
       if(e.key === 'Enter'){ e.preventDefault(); commit(); }
       else if(e.key === 'Escape'){ e.preventDefault(); cancel(); }
+      else if(e.key === 'Tab'){
+        // Tab / Shift+Tab: save this name and go straight on to renaming the next / previous track
+        e.preventDefault();
+        const i = tracks.indexOf(t), next = tracks[i + (e.shiftKey ? -1 : 1)];
+        commit();
+        if(next){ if(next.headerEl) next.headerEl.scrollIntoView({ block: 'nearest' }); startRename(next); }
+      }
       e.stopPropagation();
     });
     input.addEventListener('blur', commit);
@@ -16079,7 +16112,9 @@
     // margin bands is kept now (before any tracks are drawn) and put back there
     // instead of plain background.
     const fdMarg = !!(S.beatOn && S.freeditMode && S.freeditMode !== 'beat') && (mT > 0 || mB > 0);
-    if(fdMarg) fdMarginGrab(ctx, M0, mT, contentBottom, mB);
+    // ("Tracks can go off the frame": the tracks carry on through the bottom margin to the frame's edge, not cut off at it)
+    const mBpaint = overflowOK ? 0 : mB;
+    if(fdMarg) fdMarginGrab(ctx, M0, mT, contentBottom, mBpaint);
     if(S.showHeader && !topStick){ drawRenderHeader(ctx, headerY, headerH, u, hs, pt, rs); hlAdd('header', 0, headerY, RENDER_W, headerH); }
 
     const dvHide0 = davidActive() ? dvClimaxEnv(pt) : 0;
@@ -16721,7 +16756,7 @@
       else {
         ctx.fillStyle = bgPaint();
         if(mT > 0) ctx.fillRect(0, 0, RENDER_W, mT);
-        if(mB > 0) ctx.fillRect(0, contentBottom, RENDER_W, mB);
+        if(mBpaint > 0) ctx.fillRect(0, contentBottom, RENDER_W, mBpaint);
       }
       if(vq) ctx.restore();
       // the left icon panel carries on through the margins (see stripSpans)
@@ -20360,7 +20395,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 17;                 // ← goes up by one with every published version
+  const SD_BUILD = 18;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20784,7 +20819,8 @@
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
             <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
             <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label>
-            <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label></div>
+            <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label>
+            <label title="Let people fly their picture around your screen (Infiltrate). You can always swat them out by clicking their picture."><span class="switch"><input type="checkbox" class="chat-o-inf"><span class="track"></span><span class="knob"></span></span>Let people infiltrate</label></div>
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
       chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
@@ -20808,6 +20844,9 @@
       const ofx = chatPanel.querySelector('.chat-o-fx');
       ofx.checked = chatFxOn();
       ofx.addEventListener('change', () => { chatLS('fx', ofx.checked ? '1' : '0'); ofx.blur(); presBeat(); toast(ofx.checked ? 'Emoji effects on — emojis people send you pop up on screen.' : "Emoji effects off — nobody's emojis will pop up on your screen.", 2600); });
+      const oin = chatPanel.querySelector('.chat-o-inf');
+      oin.checked = chatInfOn();
+      oin.addEventListener('change', () => { chatLS('inf', oin.checked ? '1' : '0'); oin.blur(); presBeat(); if(!oin.checked) infKickAll(); toast(oin.checked ? 'Others can infiltrate your screen again (click their picture to swat them out).' : "Nobody can infiltrate your screen now.", 2600); });
       const oc = chatPanel.querySelector('.chat-online');
       oc.addEventListener('click', () => { const w = chatPanel.querySelector('.chat-who'); w.hidden = !w.hidden; oc.setAttribute('aria-expanded', String(!w.hidden)); presRender(); });
       grow();
@@ -21220,6 +21259,13 @@
       b.addEventListener('click', () => { chatPokeSend(uid, name, i); chatPokeClose(); });
       row.appendChild(b);
     });
+    const ioff = !!(p && p.i === false), ib = document.createElement('button'); ib.type = 'button'; ib.className = 'chat-infil-btn';
+    ib.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3l7.5 18 2.4-7.1L21 11.5z"/></svg><span>Infiltrate</span>';
+    ib.disabled = ioff || chatBanned(chatUid()) || !!INF.me;
+    ib.title = ioff ? `${name} has infiltrating turned off` : INF.me ? "You're already infiltrating someone" : `Fly your picture around ${name}'s screen — copying your mouse. Click anywhere to leave.`;
+    ib.addEventListener('click', () => { chatPokeClose(); infStart(uid, name); });
+    m.appendChild(ib);
+    if(ioff){ const q = document.createElement('div'); q.className = 'chat-poke-note'; q.textContent = 'has infiltrating turned off'; m.appendChild(q); }
     chatPanel.appendChild(m); pokeMenuEl = m;
     const pr = chatPanel.getBoundingClientRect(), r = anchor.getBoundingClientRect();
     const x = Math.max(8, Math.min(pr.width - m.offsetWidth - 8, r.left - pr.left));
@@ -21247,6 +21293,8 @@
     const es = new EventSource(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`);
     POKE.es = es;
     const handle = (id, p) => {
+      if(id === 'zi'){ infRemoteSet(p || {}); return; }
+      if(id === 'zs'){ if(p) infSwatted(p); return; }
       if(!p || POKE.seen.has(id)) return;
       POKE.seen.add(id);
       const age = Date.now() + PRES.offset - (p.t || 0);
@@ -21256,15 +21304,195 @@
     es.addEventListener('put', (ev) => {
       let d; try{ d = JSON.parse(ev.data); }catch(_){ return; }
       if(d.path === '/'){ for(const [id, p] of Object.entries(d.data || {})) handle(id, p); }
-      else { const parts = d.path.replace(/^\//, '').split('/'); if(parts.length === 1 && d.data) handle(parts[0], d.data); }
+      else {
+        const parts = d.path.replace(/^\//, '').split('/');
+        if(parts[0] === 'zi'){ if(parts.length === 1) infRemoteSet(d.data || {}); else infRemotePatch(parts.slice(1), d.data); }
+        else if(parts.length === 1 && (d.data || parts[0] === 'zi')) handle(parts[0], d.data);
+      }
+      if(d.path === '/' && !(d.data && d.data.zi)) infRemoteSet({});
     });
-    es.addEventListener('patch', (ev) => { let d; try{ d = JSON.parse(ev.data); }catch(_){ return; } if(d.path === '/') for(const [id, p] of Object.entries(d.data || {})) handle(id, p); });
+    es.addEventListener('patch', (ev) => {
+      let d; try{ d = JSON.parse(ev.data); }catch(_){ return; }
+      const parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
+      if(!parts.length){ for(const [id, p] of Object.entries(d.data || {})) handle(id, p); }
+      else if(parts[0] === 'zi'){ for(const [k, v] of Object.entries(d.data || {})) infRemotePatch(parts.slice(1).concat(k), v); }
+    });
     // (the sign-in pass lasts an hour: when it runs out, get a new one and listen again)
     const again = (ms) => { if(POKE.es !== es) return; es.close(); POKE.es = null; CHAT_AUTH.exp = 0; setTimeout(chatPokeListen, ms); };
     es.addEventListener('auth_revoked', () => again(500));
     es.addEventListener('cancel', () => again(15000));
     es.addEventListener('error', () => { if(es.readyState === 2) again(8000); });
   }
+  // ----- Infiltrate: your picture flies around someone else's SaiDeck, copying your mouse -----
+  // pokes/<their id>/zi/s1…s3 = { u: you, n: your name, x, y (share of the window), d (direction), t }.
+  // Three seats per person; a seat left alone for 7 s counts as empty. You
+  // only see your own screen: your pointer becomes your picture with an
+  // arrow, following the mouse a little behind. One click (or Esc, or 5 s
+  // without moving) and you pop out. They can click your picture to swat
+  // you out (pokes/<your id>/zs tells you), or switch it off altogether.
+  const chatInfOn = () => chatLS('inf') !== '0';
+  const INF = { me: null, remote: {}, raf: 0, last: 0 };
+  function infAvatar(uid, name, cls){
+    const w = document.createElement('div'); w.className = 'infil ' + (cls || '');
+    const av = chatAv(uid, name, false); av.classList.add('infil-av');
+    const ar = document.createElement('div'); ar.className = 'infil-arrow';
+    w.append(ar, av);
+    // (their picture may still be on its way: put it in when it arrives)
+    if(!av.classList.contains('pic')){
+      let n = 0;
+      const tryPic = () => { const pic = chatProfile(uid); if(pic){ av.classList.add('pic'); av.style.background = ''; av.style.backgroundImage = `url("${pic}")`; av.textContent = ''; } else if(++n < 5 && w.isConnected !== false) setTimeout(tryPic, 900); };
+      setTimeout(tryPic, 700);
+    }
+    return w;
+  }
+  function infPop(x, y, src){
+    const L = document.createElement('div'); L.className = 'infil-pop'; L.style.left = x + 'px'; L.style.top = y + 'px';
+    document.body.appendChild(L);
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(src){ const c = src.cloneNode(true); c.style.left = '0px'; c.style.top = '0px'; c.style.transform = 'translate(-50%,-50%)'; c.classList.add('popping'); L.appendChild(c);
+      c.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(1.7)', opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' }); }
+    if(!still){
+      const ring = document.createElement('div'); ring.className = 'infil-ring'; L.appendChild(ring);
+      ring.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: .9 }, { transform: 'translate(-50%,-50%) scale(2.6)', opacity: 0 }], { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' });
+      const cols = ['#b48cff', '#ff7ab6', '#f5d04a', '#35d0b8', '#ffffff'];
+      for(let i = 0; i < 16; i++){
+        const b = document.createElement('div'); b.className = 'infil-bit'; b.style.background = cols[i % cols.length];
+        const a = i / 16 * Math.PI * 2 + Math.random() * 0.3, d = 40 + Math.random() * 46, sz = 4 + Math.random() * 6;
+        b.style.width = b.style.height = sz + 'px'; L.appendChild(b);
+        b.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d + 18}px)) scale(.3)`, opacity: 0 }], { duration: 480 + Math.random() * 200, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' });
+      }
+    }
+    setTimeout(() => L.remove(), 800);
+  }
+  // ----- you, infiltrating -----
+  async function infStart(uid, name){
+    if(INF.me) return;
+    const p = PRES.list && PRES.list[uid];
+    if(p && p.i === false){ toast(`${name} has infiltrating turned off.`, 2200); return; }
+    let tok; try{ tok = await chatAuth(); }catch(e){ toast("Couldn't reach the chat — check your internet connection.", 2600); return; }
+    const x0 = INF.mx != null ? INF.mx : innerWidth / 2, y0 = INF.my != null ? INF.my : innerHeight / 2;
+    const body = JSON.stringify({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: x0 / innerWidth, y: y0 / innerHeight, t: { '.sv': 'timestamp' } });
+    let slot = null;
+    for(const s of ['s1', 's2', 's3']){
+      try{ const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body }); if(r.ok){ slot = s; break; } }catch(e){}
+    }
+    if(!slot){ toast(chatBlock() || `Couldn't get in — ${name}'s screen already has 3 infiltrators (or they just switched it off).`, 3000); return; }
+    const el = infAvatar(chatUid(), chatName(), 'me'); document.body.appendChild(el);
+    INF.me = { uid, name, slot, el, px: x0, py: y0, mx: x0, my: y0, ang: 0, sp: 0, lastMove: performance.now(), lastSend: 0, busy: false, dirty: false };
+    document.body.classList.add('infil-mode');
+    window.addEventListener('pointermove', infMove, true);
+    window.addEventListener('pointerdown', infClick, true);
+    window.addEventListener('click', infEat, true);
+    window.addEventListener('keydown', infKey, true);
+    document.addEventListener('visibilitychange', infHidden);
+    toast(`You're infiltrating ${name}'s screen — move your mouse to annoy them. Click anywhere to leave.`, 3200);
+    infLoop();
+  }
+  function infMove(e){ INF.mx = e.clientX; INF.my = e.clientY; if(INF.me){ INF.me.mx = e.clientX; INF.me.my = e.clientY; INF.me.lastMove = performance.now(); INF.me.dirty = true; } }
+  window.addEventListener('pointermove', (e) => { INF.mx = e.clientX; INF.my = e.clientY; }, { passive: true });
+  function infClick(e){ if(!INF.me || e.button !== 0) return; e.preventDefault(); e.stopPropagation(); infStop('click'); INF.eatClick = true; }
+  function infEat(e){ if(INF.eatClick){ e.preventDefault(); e.stopPropagation(); INF.eatClick = false; window.removeEventListener('click', infEat, true); } }
+  function infKey(e){ if(INF.me && e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); infStop('click'); } }
+  function infHidden(){ if(INF.me && document.visibilityState !== 'visible') infStop('idle'); }
+  async function infSend(final){
+    const M = INF.me; if(!M) return;
+    M.busy = true; M.dirty = false;
+    try{
+      const tok = await chatAuth();
+      await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT',
+        body: JSON.stringify({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }) });
+    }catch(e){}
+    finally{ M.busy = false; }
+  }
+  function infStop(why, by){
+    const M = INF.me; if(!M) return;
+    INF.me = null;
+    document.body.classList.remove('infil-mode');
+    window.removeEventListener('pointermove', infMove, true);
+    window.removeEventListener('pointerdown', infClick, true);
+    window.removeEventListener('keydown', infKey, true);
+    document.removeEventListener('visibilitychange', infHidden);
+    setTimeout(() => { INF.eatClick = false; window.removeEventListener('click', infEat, true); }, 400);
+    infPop(M.px, M.py, M.el); M.el.remove();
+    chatAuth().then(tok => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
+    if(why === 'idle') toast(`You popped out of ${M.name}'s screen (no movement for 5 seconds).`, 2600);
+    else if(why === 'swat') toast(`${by || M.name} swatted you out!`, 2600);
+  }
+  function infSwatted(p){
+    const uid = chatUid();
+    chatAuth().then(tok => fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
+    if(INF.me && p.u === INF.me.uid) infStop('swat', chatBadName(p.n) ? 'They' : p.n);
+  }
+  // ----- them, infiltrating you -----
+  function infRemoteSet(all){
+    const seen = new Set();
+    for(const [s, v] of Object.entries(all || {})){ if(/^s[123]$/.test(s)){ seen.add(s); infRemotePatch([s], v); } }
+    for(const s of Object.keys(INF.remote)) if(!seen.has(s)) infRemotePatch([s], null);
+  }
+  function infRemotePatch(path, v){
+    const s = path[0]; if(!/^s[123]$/.test(s || '')) return;
+    if(path.length > 1){ const cur = Object.assign({}, INF.remote[s] && INF.remote[s].d); cur[path[1]] = v; v = cur; }
+    const R = INF.remote[s];
+    if(!v || !v.u){ if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; } return; }
+    if(!chatInfOn() || chatBanned(v.u)){ infKick(s); return; }
+    if(!R || R.d.u !== v.u){
+      if(R){ R.el.remove(); }
+      const el = infAvatar(v.u, v.n, 'them');
+      const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = `${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating`; el.appendChild(tag);
+      el.title = `${chatBadName(v.n) ? 'Someone' : v.n} — click to swat them out`;
+      el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); infSwat(s); });
+      document.body.appendChild(el);
+      INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
+    } else R.d = v;
+    infLoop();
+  }
+  async function infKick(s){
+    const R = INF.remote[s];
+    if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; }
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
+  }
+  function infKickAll(){ for(const s of Object.keys(INF.remote)) infKick(s); }
+  async function infSwat(s){
+    const R = INF.remote[s]; if(!R) return;
+    const who = R.d.u, nm = chatBadName(R.d.n) ? 'them' : R.d.n;
+    infKick(s);
+    toast(`You swatted ${nm} out!`, 1800);
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(who)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', t: { '.sv': 'timestamp' } }) }); }catch(e){}
+  }
+  // ----- the animation: everything glides a little behind where it's heading -----
+  function infLoop(){
+    if(INF.raf) return;
+    INF.last = performance.now();
+    const step = (now) => {
+      const dt = Math.min(0.1, (now - INF.last) / 1000); INF.last = now;
+      const place = (o, tx, ty, k, el) => {
+        const ox = o.px, oy = o.py, f = 1 - Math.exp(-dt * k);
+        o.px += (tx - o.px) * f; o.py += (ty - o.py) * f;
+        const vx = (o.px - ox) / Math.max(dt, 1e-3), vy = (o.py - oy) / Math.max(dt, 1e-3), sp = Math.hypot(vx, vy);
+        o.sp += (sp - o.sp) * Math.min(1, dt * 10);
+        if(sp > 20){ const a = Math.atan2(vy, vx); let da = a - o.ang; da = Math.atan2(Math.sin(da), Math.cos(da)); o.ang += da * Math.min(1, dt * 12); }
+        el.style.transform = `translate(${o.px}px, ${o.py}px)`;
+        el.style.setProperty('--ang', o.ang + 'rad');
+        el.classList.toggle('moving', o.sp > 40);
+      };
+      const M = INF.me;
+      if(M){
+        place(M, M.mx, M.my, 9, M.el);
+        if(now - M.lastMove > 5000){ infStop('idle'); }
+        else if((M.dirty || o_far(M)) && !M.busy && now - M.lastSend > 80){ M.lastSend = now; infSend(); }
+      }
+      const srvNow = Date.now() + PRES.offset;
+      for(const [s, R] of Object.entries(INF.remote)){
+        if(R.d.t && srvNow - R.d.t > 7500){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; continue; }
+        place(R, (R.d.x || 0) * innerWidth, (R.d.y || 0) * innerHeight, 7, R.el);
+      }
+      if(INF.me || Object.keys(INF.remote).length) INF.raf = requestAnimationFrame(step);
+      else INF.raf = 0;
+    };
+    INF.raf = requestAnimationFrame(step);
+  }
+  // (keep sending while the picture is still catching up with the mouse)
+  function o_far(M){ return Math.hypot(M.mx - M.px, M.my - M.py) > 2; }
   let pokeFxLayer = null;
   function chatPokeShow(em, from){
     if(!pokeFxLayer){ pokeFxLayer = document.createElement('div'); pokeFxLayer.className = 'poke-fx'; pokeFxLayer.setAttribute('aria-live', 'polite'); document.body.appendChild(pokeFxLayer); }
@@ -21353,7 +21581,7 @@
     try{
       const tok = await chatAuth(), uid = chatUid();
       if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
-      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false;
+      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false;
       const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
