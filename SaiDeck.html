@@ -255,10 +255,12 @@
   .infil-hud .ih-a.on{background:rgba(180,140,255,.35);}
   .infil-hud .ih-a.locked{opacity:.3;filter:grayscale(1);}
   /* artillery */
-  .art-btn{all:unset;position:fixed;right:18px;bottom:18px;z-index:9630;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;cursor:pointer;font:800 12px 'Inter',sans-serif;color:#16102a;background:linear-gradient(135deg,#f5d04a,#ff9a5a);box-shadow:0 6px 20px rgba(0,0,0,.45);}
+  .art-btn{all:unset;touch-action:none;position:fixed;right:18px;bottom:18px;z-index:9630;display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;cursor:pointer;font:800 12px 'Inter',sans-serif;color:#16102a;background:linear-gradient(135deg,#f5d04a,#ff9a5a);box-shadow:0 6px 20px rgba(0,0,0,.45);}
   .art-btn span{font-size:15px;}
   .art-btn.live{background:rgba(23,24,31,.92);color:var(--text);border:1px solid rgba(245,208,74,.6);cursor:default;}
-  .art-btn:disabled{background:rgba(23,24,31,.92);color:var(--text-dim);border:1px solid var(--border);cursor:default;}
+  .art-btn.cool{background:rgba(23,24,31,.92);color:var(--text-dim);border:1px solid var(--border);cursor:grab;}
+  .art-btn.live{cursor:grab;}
+  body.art-dragging, body.art-dragging *{cursor:grabbing !important;user-select:none;}
   .art-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
   .art-menu{position:fixed;right:18px;bottom:64px;z-index:9640;width:270px;display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:12px;background:#22232d;border:1px solid rgba(245,208,74,.45);box-shadow:0 12px 30px rgba(0,0,0,.55);font-family:'Inter',sans-serif;}
   .art-menu > b{font:800 12.5px 'Manrope',sans-serif;color:var(--text);}
@@ -270,7 +272,7 @@
   .art-menu button div{display:flex;flex-direction:column;gap:1px;min-width:0;}
   .art-menu button b{font-size:12px;color:var(--text);}
   .art-menu button i{font-style:normal;font-size:10.5px;color:var(--text-faint);}
-  .art-turret{position:fixed;right:24px;bottom:66px;z-index:9625;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;pointer-events:none;background:rgba(23,24,31,.9);box-shadow:0 0 0 3px var(--c,#f5d04a), 0 0 18px var(--c,#f5d04a);}
+  .art-turret{position:fixed;right:24px;bottom:66px;z-index:9625;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:grab;touch-action:none;background:rgba(23,24,31,.9);box-shadow:0 0 0 3px var(--c,#f5d04a), 0 0 18px var(--c,#f5d04a);}
   .art-shot{position:fixed;z-index:9626;width:12px;height:12px;border-radius:50%;pointer-events:none;box-shadow:0 0 12px currentColor;}
   .chat-rlist{display:flex;flex-direction:column;gap:4px;}
   .chat-rrow{display:flex;align-items:center;gap:4px;border-radius:9px;border:1px solid transparent;}
@@ -20676,7 +20678,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 34;                 // ← goes up by one with every published version
+  const SD_BUILD = 35;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21408,6 +21410,7 @@
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
+      if(!SC.loaded && chatName()) scLoad();      // (your points, bubble and bullets, ready before you send anything)
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
     chatUpdateBadge();
@@ -21809,8 +21812,11 @@
     M.busy = true; M.dirty = false;
     try{
       const tok = await chatAuth();
+      if(INF.me !== M) return;      // (you've already left)
       await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT',
         body: JSON.stringify(Object.assign({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }, M.shots && M.shots.length ? { s: infShotStr(M) } : {})) });
+      // (if you left while that was on its way, it put your seat back — take it away again)
+      if(INF.me !== M) await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' });
     }catch(e){}
     finally{ M.busy = false; }
   }
@@ -21859,11 +21865,11 @@
       el.title = `${chatBadName(v.n) ? 'Someone' : v.n} — click to swat them out`;
       el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); infSwat(s); });
       document.body.appendChild(el);
-      INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
+      INF.remote[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0, heard: performance.now() };
       infShotsIn(INF.remote[s], v.s, true);
       // (a heads-up when someone new comes in)
       if(!R || R.d.u !== v.u){ toast(`👀 ${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating your screen! Click their picture to swat them out.`, 3200); if(chatSoundOn()) chatPing(); }
-    } else { R.d = v; infShotsIn(R, v.s, false); }
+    } else { R.d = v; R.heard = performance.now(); infShotsIn(R, v.s, false); }
     infLoop(); artUI();
   }
   async function infKick(s){
@@ -21911,11 +21917,11 @@
       if(M){
         const srv = Date.now() + PRES.offset;
         for(const [s, P] of Object.entries(M.peers || {})){
-          if(P.d.t && srv - P.d.t > 7500){ P.el.remove(); delete M.peers[s]; continue; }
+          if(now - (P.heard || now) > 7000){ P.el.remove(); delete M.peers[s]; continue; }
           place(P, (P.d.x || 0) * innerWidth, (P.d.y || 0) * innerHeight, 7, P.el);
         }
         if(M.tgt){
-          if(M.tgt.d.t && srv - M.tgt.d.t > 6000) M.tgt.el.style.opacity = '0';
+          if(now - (M.tgt.heard || now) > 6000) M.tgt.el.style.opacity = '0';
           else { M.tgt.el.style.opacity = ''; place(M.tgt, (M.tgt.d.x || 0) * innerWidth, (M.tgt.d.y || 0) * innerHeight, 10, M.tgt.el); }
         }
         place(M, M.mx, M.my, 9, M.el);
@@ -21925,7 +21931,7 @@
       const srvNow = Date.now() + PRES.offset;
       if(Object.keys(INF.remote).length) infCursorOut(now);
       for(const [s, R] of Object.entries(INF.remote)){
-        if(R.d.t && srvNow - R.d.t > 7500){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI(); continue; }
+        if(now - (R.heard || now) > 7000 || (R.d.t && srvNow - R.d.t > 15000)){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI(); infKick(s); continue; }
         place(R, (R.d.x || 0) * innerWidth, (R.d.y || 0) * innerHeight, 7, R.el);
       }
       if(INF.me || Object.keys(INF.remote).length) INF.raf = requestAnimationFrame(step);
@@ -21951,8 +21957,8 @@
           const el = infAvatar(uid, name, 'tgt');
           const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = `${chatBadName(name) ? 'They' : name} — run!`; el.appendChild(tag);
           document.body.appendChild(el);
-          M.tgt = { d: v, el, px: v.x * innerWidth, py: v.y * innerHeight, ang: 0, sp: 0 };
-        } else M.tgt.d = v;
+          M.tgt = { d: v, el, px: v.x * innerWidth, py: v.y * innerHeight, ang: 0, sp: 0, heard: performance.now() };
+        } else { M.tgt.d = v; M.tgt.heard = performance.now(); }
         infLoop(); return;
       }
       if(!/^s[123]$/.test(s) || s === slot) return;
@@ -21963,9 +21969,9 @@
         const el = infAvatar(v.u, v.n, 'peer');
         const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = chatBadName(v.n) ? 'Someone' : v.n; el.appendChild(tag);
         document.body.appendChild(el);
-        M.peers[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0 };
+        M.peers[s] = { d: v, el, px: (v.x || 0.5) * innerWidth, py: (v.y || 0.5) * innerHeight, ang: v.d || 0, sp: 0, heard: performance.now() };
         infShotsIn(M.peers[s], v.s, true);
-      } else { P.d = v; infShotsInMine(P, v.s); }
+      } else { P.d = v; P.heard = performance.now(); infShotsInMine(P, v.s); }
       infLoop();
     };
     const merge = (s, part) => { if(s === 'c') seat('c', Object.assign({}, M.tgt && M.tgt.d, part)); else seat(s, Object.assign({}, M.peers[s] && M.peers[s].d, part)); };
@@ -22375,7 +22381,7 @@
       : `<p>You don't have any yet. Buy some in the chat's Arcade (the trophy button) — 20 points each.</p>`);
     m.addEventListener('pointerdown', (e) => e.stopPropagation());
     m.addEventListener('click', (e) => { const b = e.target.closest('button[data-k]'); if(b) artDeploy(b.dataset.k); });
-    document.body.appendChild(m); ART.menu = m;
+    document.body.appendChild(m); ART.menu = m; artPlace();
     setTimeout(() => { const off = (e) => { if(ART.menu && !ART.menu.contains(e.target) && e.target !== ART.btn){ artMenu(false); window.removeEventListener('pointerdown', off, true); } }; window.addEventListener('pointerdown', off, true); }, 0);
   }
   // the button (shows while someone's on your screen, or while artillery is up / cooling down) and the turret
@@ -22385,16 +22391,44 @@
     const show = someone || !!act;
     if(!show){ if(ART.btn){ ART.btn.remove(); ART.btn = null; } artMenu(false); }
     else {
-      if(!ART.btn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'art-btn'; b.addEventListener('pointerdown', (e) => e.stopPropagation()); b.addEventListener('click', () => { if(!artActive() && artCoolLeft() <= 0){ if(!SC.loaded) scLoad().then(() => artMenu(!ART.menu)); else artMenu(!ART.menu); } }); document.body.appendChild(b); ART.btn = b; }
+      if(!ART.btn){ const b = document.createElement('button'); b.type = 'button'; b.className = 'art-btn'; b.title = 'Drag to move it out of the way'; artDraggable(b); b.addEventListener('click', () => { if(ART.dragged) return; if(!artActive() && artCoolLeft() <= 0){ if(!SC.loaded) scLoad().then(() => artMenu(!ART.menu)); else artMenu(!ART.menu); } }); document.body.appendChild(b); ART.btn = b; artPlace(); }
       const it = act && ARTY.find(a => a.k === act.k);
-      ART.btn.classList.toggle('live', !!act); ART.btn.disabled = !act && cool > 0;
+      ART.btn.classList.toggle('live', !!act); ART.btn.classList.toggle('cool', !act && cool > 0); ART.btn.setAttribute('aria-disabled', String(!act && cool > 0));
       ART.btn.innerHTML = act ? `<span>${it.em}</span>${escapeHtml(it.name)} · ${act.left} swat${act.left === 1 ? '' : 's'} left` : cool > 0 ? `<span>⏳</span>Artillery ready in ${mmss(cool)}` : `<span>🎯</span>Deploy artillery`;
     }
-    if(act && !ART.el){ const t = document.createElement('div'); t.className = 'art-turret'; document.body.appendChild(t); ART.el = t; }
+    if(act && !ART.el){ const t = document.createElement('div'); t.className = 'art-turret'; t.title = 'Drag to move it'; artDraggable(t); document.body.appendChild(t); ART.el = t; artPlace(); }
     if(ART.el){ if(!act){ ART.el.remove(); ART.el = null; } else { const it = ARTY.find(a => a.k === act.k); ART.el.textContent = it.em; ART.el.style.setProperty('--c', it.col); } }
     if((show || act) && !ART.timer) ART.timer = setInterval(artTick, 250);
     if(!show && !act && ART.timer){ clearInterval(ART.timer); ART.timer = 0; }
   }
+  // the button, its menu and the turret move together; drag either one (where you leave it is remembered)
+  function artPos(){ try{ const p = JSON.parse(chatLS('artpos') || 'null'); if(p && isFinite(p.r) && isFinite(p.b)) return p; }catch(e){} return { r: 18, b: 18 }; }
+  function artPlace(){
+    const p = artPos(), r = Math.max(4, Math.min(innerWidth - 120, p.r)), b = Math.max(4, Math.min(innerHeight - 110, p.b));
+    if(ART.btn){ ART.btn.style.right = r + 'px'; ART.btn.style.bottom = b + 'px'; }
+    if(ART.el){ ART.el.style.right = (r + 6) + 'px'; ART.el.style.bottom = (b + 48) + 'px'; }
+    if(ART.menu){ ART.menu.style.right = r + 'px'; ART.menu.style.bottom = (b + 46) + 'px'; }
+  }
+  function artDraggable(el){
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation(); if(e.button !== 0) return;
+      const p0 = artPos(), x0 = e.clientX, y0 = e.clientY; let moved = false;
+      ART.dragged = false;
+      const mv = (ev) => {
+        const dx = ev.clientX - x0, dy = ev.clientY - y0;
+        if(!moved && Math.hypot(dx, dy) < 5) return;
+        if(!moved){ moved = true; artMenu(false); document.body.classList.add('art-dragging'); }
+        chatLS('artpos', JSON.stringify({ r: p0.r - dx, b: p0.b - dy })); artPlace();
+      };
+      const up = () => {
+        window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+        document.body.classList.remove('art-dragging');
+        if(moved){ const p = artPos(); chatLS('artpos', JSON.stringify({ r: Math.max(4, Math.min(innerWidth - 120, p.r)), b: Math.max(4, Math.min(innerHeight - 110, p.b)) })); artPlace(); ART.dragged = true; setTimeout(() => { ART.dragged = false; }, 0); }
+      };
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+    });
+  }
+  window.addEventListener('resize', () => { if(ART.btn || ART.el) artPlace(); });
   function artTick(){
     const act = artActive();
     if(act && ART.el && performance.now() >= ART.nextShot){
@@ -22560,6 +22594,8 @@
     try{
       const tok = await chatAuth();
       const msg = { n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: { '.sv': 'timestamp' }, u: chatUid() };
+      // (your bubble: what you own is loaded first if this is the first message since SaiDeck opened)
+      if(chatLS('bubble') && !SC.loaded) await scLoad();
       if(bubNow()) msg.b = bubNow();
       if(CHAT.reply && CHAT.reply.room === chatRoom()) msg.r = { k: CHAT.reply.k, n: String(CHAT.reply.n || '').slice(0, 20), m: String(CHAT.reply.m || '').slice(0, 60) };
       const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify(msg) });

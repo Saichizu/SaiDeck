@@ -1,10 +1,10 @@
 {
-  "build": 34,
+  "build": 35,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Infiltrate: when several people are on the same screen they see each other's pictures (and shots), and everyone sees the person's own cursor chasing them.",
-    "Infiltrate: you get a heads-up when someone starts infiltrating you, and the chat shows who's infiltrating whom with a Join button so others can pile in.",
-    "Artillery now swats up to 10 infiltrators instead of lasting 10 minutes, then cools down for 5 minutes."
+    "Artillery: drag the button or the turret anywhere on the screen to get it out of the way (it remembers where you put it).",
+    "Infiltrate: fixed someone's picture staying frozen on your screen after they'd already left.",
+    "Chat bubbles: your bubble now works right after you open SaiDeck — no need to switch to Plain and back."
   ]
 }
