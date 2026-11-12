@@ -1,6 +1,6 @@
 {
-  "build": 58,
+  "build": 59,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The jackpot notice in the chat is redesigned: a level gold card, easier to read, and nothing gets cut off."
+  "notes": "The Trick or Treat jumpscare sound is a bit quieter."
 }

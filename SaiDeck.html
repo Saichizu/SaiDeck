@@ -21100,7 +21100,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 58;                 // ← goes up by one with every published version
+  const SD_BUILD = 59;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24134,7 +24134,7 @@
   function sfxScare(){
     if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
     const lim = ac.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .002; lim.release.value = .2;
-    const out = ac.createGain(); out.gain.value = 1.0; lim.connect(out); out.connect(ac.destination);
+    const out = ac.createGain(); out.gain.value = 0.5; lim.connect(out); out.connect(ac.destination);   // (about half as loud as before)
     // (a gritty distortion for the scream)
     const ws = ac.createWaveShaper(), curve = new Float32Array(1024); for(let i = 0; i < 1024; i++){ const x = i / 512 - 1; curve[i] = Math.tanh(x * 6); } ws.curve = curve; ws.connect(lim);
     const env = (node, at, peak, attack, hold, rel) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t + at); g.gain.exponentialRampToValueAtTime(peak, t + at + attack); g.gain.setValueAtTime(peak, t + at + attack + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + at + attack + hold + rel); node.connect(g); return g; };
