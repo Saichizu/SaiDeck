@@ -286,6 +286,38 @@
   .bj-l{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;font:700 11px 'Inter',sans-serif;color:#e9f7ee;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.2);}
   .bj-l:hover{background:rgba(0,0,0,.35);} .bj-l.on{border-color:#ff7a8a;color:#ffb3bd;} .bj-l:focus-visible{outline:2px solid #fff;}
   .bj-note{font-size:11.5px;color:var(--text-dim);}
+  .bj-specs{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 10px;width:100%;margin-top:2px;}
+  .bj-specs:empty{display:none;}
+  .bj-specs-h{font:700 11px 'Inter',sans-serif;color:rgba(255,255,255,.7);}
+  .bj-spec{position:relative;display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 3px;border-radius:999px;background:rgba(0,0,0,.25);font-size:11px;}
+  .bj-spec .chat-av{width:20px;height:20px;font-size:9px;}
+  .bj-sit.on{border-color:rgba(125,255,178,.6);color:#7dffb2;}
+  .chat-gift{position:relative;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:9px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(125,255,178,.14),rgba(245,208,74,.12));border:1px solid rgba(125,255,178,.4);font-size:12.5px;color:var(--text);}
+  .chat-gift.to-me{border-color:#7dffb2;box-shadow:0 0 0 1px rgba(125,255,178,.35), 0 0 18px rgba(125,255,178,.18);}
+  .chat-gift .cg-i{font-size:20px;} .chat-gift .cg-t{flex:1;min-width:0;line-height:1.4;} .chat-gift .cg-a{color:#7dffb2;}
+  .chat-gift i{margin-left:6px;font-style:normal;font-size:10.5px;color:var(--text-faint);}
+  .chat-gift.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
+  @keyframes chatGiftIn{from{opacity:0;transform:translateY(10px) scale(.94);}to{opacity:1;transform:none;}}
+  .chat-poke .chat-gift-btn{margin-top:6px;}
+  .chat-poke .chat-gift-btn span:first-child{font-size:14px;}
+  .bj-fast{display:flex;justify-content:center;min-height:0;} .bj-go{border-color:rgba(255,224,138,.7);color:#ffe08a;font-size:12px;padding:6px 14px;}
+  .bj-go:disabled{opacity:.5;}
+  .gift-asks{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:420;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:min(380px, calc(100vw - 32px));}
+  .gift-ask{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#1f2030;border:1px solid rgba(125,255,178,.6);box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 24px rgba(125,255,178,.15);font-size:13px;color:var(--text);}
+  .gift-ask .ga-i{font-size:24px;} .gift-ask .ga-t{flex:1;min-width:150px;line-height:1.4;} .gift-ask .ga-a{color:#7dffb2;}
+  .gift-ask .ga-btns{display:flex;gap:6px;margin-left:auto;}
+  .gift-ask button{all:unset;cursor:pointer;padding:7px 14px;border-radius:999px;font:800 12px 'Inter',sans-serif;}
+  .gift-ask .ga-yes{background:linear-gradient(135deg,#7dffb2,#2fb37a);color:#06200f;} .gift-ask .ga-no{border:1px solid var(--border);color:var(--text-dim);}
+  .gift-ask button:disabled{opacity:.5;cursor:default;} .gift-ask button:focus-visible{outline:2px solid #fff;}
+  .gift-ask .ga-done{font:700 12px 'Inter',sans-serif;color:#7dffb2;}
+  .chat-compose{position:relative;}
+  .chat-games{all:unset;flex:none;width:38px;height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--border);background:var(--bg-control);font-size:18px;cursor:pointer;transition:transform .15s, border-color .15s;}
+  .chat-games:hover{border-color:#ffd76a;transform:translateY(-1px) rotate(-6deg);} .chat-games:focus-visible{outline:2px solid #ffd76a;outline-offset:2px;}
+  .chat-games[aria-expanded="true"]{border-color:#ffd76a;background:rgba(245,208,74,.12);}
+  .chat-games-m{position:absolute;left:0;bottom:calc(100% + 8px);z-index:5;min-width:230px;padding:6px;border-radius:12px;background:#1f2030;border:1px solid rgba(245,208,74,.45);box-shadow:0 16px 40px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px;}
+  .chat-games-m button{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;color:var(--text);}
+  .chat-games-m button:hover, .chat-games-m button:focus-visible{background:rgba(255,255,255,.08);}
+  .chat-games-m span{font-size:17px;} .chat-games-m b{font-weight:700;} .chat-games-m i{margin-left:auto;font-style:normal;font-size:10.5px;color:#7dffb2;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -20892,7 +20924,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 48;                 // ← goes up by one with every published version
+  const SD_BUILD = 51;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21324,7 +21356,7 @@
         <div class="chat-foot">
           <div class="chat-note" hidden></div>
           <div class="chat-replying" hidden></div>
-          <div class="chat-compose"><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
+          <div class="chat-compose"><button type="button" class="chat-games" title="Games — slots and blackjack" aria-label="Games" aria-expanded="false">🎮</button><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
             <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
@@ -21556,6 +21588,19 @@
         ev.querySelector('.cj-m').textContent = chatMask(String(m.m || '').replace(/^hit the JACKPOT and /, ''));
         ev.querySelector('i').textContent = chatFmtTime(m.t);
         if(fresh(m._k)) ev.classList.add('in');
+        body.appendChild(ev); continue;
+      }
+      if(m.e === 'gift'){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+        const mm = /^sent (\d+) points? to (.+)$/.exec(String(m.m || '')), toMe = typeof m.v === 'string' && chatIsMe(m.v);
+        const ev = document.createElement('div'); ev.className = 'chat-gift' + (toMe ? ' to-me' : '');
+        ev.innerHTML = '<span class="cg-i" aria-hidden="true">💸</span><div class="cg-t"><b class="cg-f"></b> sent <b class="cg-a"></b> to <b class="cg-to"></b><i></i></div>';
+        ev.querySelector('.cg-f').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('.cg-f').style.color = chatColor(m.n);
+        ev.querySelector('.cg-a').textContent = (mm ? mm[1] : '?') + ' points';
+        const tn = toMe ? 'you' : chatMask(mm ? mm[2] : 'someone');
+        ev.querySelector('.cg-to').textContent = tn; if(!toMe) ev.querySelector('.cg-to').style.color = chatColor(mm ? mm[2] : '');
+        ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)){ ev.classList.add('in'); if(toMe && Date.now() + PRES.offset - (m.t || 0) < 60000) setTimeout(() => giftCheck(), 300); }
         body.appendChild(ev); continue;
       }
       if(m.e === 'swat' || m.e === 'inf'){
@@ -21964,6 +22009,11 @@
     ib.title = ioff ? `${name} has infiltrating turned off` : INF.me ? "You're already infiltrating someone" : `Fly your picture around ${name}'s screen — copying your mouse. Click anywhere to leave.`;
     ib.addEventListener('click', () => { chatPokeClose(); infStart(uid, name); });
     m.appendChild(ib);
+    const gb = document.createElement('button'); gb.type = 'button'; gb.className = 'chat-infil-btn chat-gift-btn';
+    gb.innerHTML = '<span aria-hidden="true">💸</span><span>Send points</span>'; gb.title = `Send ${name} some of your points`;
+    gb.disabled = chatBanned(chatUid());
+    gb.addEventListener('click', () => { chatPokeClose(); gpOpen(uid, name, anchor); });
+    m.appendChild(gb);
     if(ioff){ const q = document.createElement('div'); q.className = 'chat-poke-note'; q.textContent = 'has infiltrating turned off'; m.appendChild(q); }
     chatPanel.appendChild(m); pokeMenuEl = m;
     const pr = chatPanel.getBoundingClientRect(), r = anchor.getBoundingClientRect();
@@ -22750,7 +22800,7 @@
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
     if(CAS.on) casLeave();
-    BJ.on = true; BJ.joinedAt = Date.now(); BJ.skip = new Set(); BJ.shown = {};
+    BJ.on = true; BJ.watch = false; BJ.joinedAt = Date.now(); BJ.skip = new Set(); BJ.shown = {}; BJ.sess = { hands: 0, bet: 0, won: 0 };
     if(CHAT.side !== 'bj') chatSideTo('bj');
     const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
     try{
@@ -22773,7 +22823,9 @@
   function bjLeave(){
     if(!BJ.on) return;
     const me = chatUid(), D = BJ.d;
-    BJ.on = false; clearInterval(BJ.hb); BJ.hb = 0; clearInterval(BJ.poll); BJ.poll = 0;
+    BJ.on = false; BJ.watch = false; clearInterval(BJ.hb); BJ.hb = 0; clearInterval(BJ.poll); BJ.poll = 0;
+    const Ss = BJ.sess; BJ.sess = null;
+    if(Ss && Ss.hands > 0) bjSessionPost(Ss);
     const body = { [`bj/p/${me}/o`]: true, [`bj/p/${me}/t`]: bjSv };
     if(D && D.u === me){ body['bj/d/u'] = 'bot'; body['bj/d/n'] = 'Dealer'; body['bj/d/ut'] = bjSv; }
     chatAuth().then(tok => fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', keepalive: true, body: JSON.stringify(body) })).catch(() => {});
@@ -22799,7 +22851,7 @@
   // who's at the table, in seat order; and who's playing this round
   function bjSeats(){
     const me = chatUid();
-    return Object.entries(BJ.p).filter(([u, s]) => (bjLive(s) || (u === me && BJ.on)) && !chatBanned(u)).map(([u, s]) => Object.assign({ u }, s)).sort((a, b) => (a.j || 0) - (b.j || 0));
+    return Object.entries(BJ.p).filter(([u, s]) => (bjLive(s) || (u === me && BJ.on && !BJ.watch)) && !chatBanned(u) && !(u === me && BJ.watch)).map(([u, s]) => Object.assign({ u }, s)).sort((a, b) => (a.j || 0) - (b.j || 0));
   }
   const bjInRound = (s, D) => D && s.r === D.r && s.b > 0;
   const bjHandDone = (s) => s.pe ? false : s.k < 2 ? false : s.st === 'd' ? s.k >= 3 : s.st === 's' || s.v >= 21;
@@ -22897,7 +22949,7 @@
       if(!BJ.doneAt['f' + R]) BJ.doneAt['f' + R] = now;
       // (results stay up for 7 s, then the next round opens for bets)
       if((driver || (human && sNow - (D.ut || 0) > 9000 && seats[0] && seats[0].u === me)) && now - BJ.doneAt['f' + R] > 7000)
-        bjDo(() => bjPatch({ 'bj/d': { u: D.u, n: D.n, r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv }, 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v } }));
+        bjNextRound();
     }
   }
   async function bjClaim(S, Dd){
@@ -22910,6 +22962,7 @@
       S.pd = S.r;
       const net = res.amt - S.b;
       BJ.res[S.r] = res;
+      if(BJ.sess){ BJ.sess.hands++; BJ.sess.bet += S.b; BJ.sess.won += res.amt; }
       if(Date.now() - BJ.joinedAt > 1500){
         toast(net > 0 ? `🃏 ${res.lbl} — you won ${net} points!` : net === 0 ? `🃏 Push — you got your ${S.b} back.` : `🃏 ${res.lbl} — you lost ${S.b}.`, 2600);
         sfxSlotResult(net > 0 ? (res.amt >= S.b * 2.5 ? 12 : 2) : net === 0 ? 1 : 0, 0.8);
@@ -22948,6 +23001,16 @@
     if(!D || D.u !== 'bot' || !(D.f || D.k === 0) || (S && bjInRound(S, D))) { toast('You can take the dealer seat between rounds (and not after betting).', 2400); return; }
     bjDo(async () => { if(await bjPatch({ 'bj/d/u': me, 'bj/d/n': chatName().slice(0, CHAT_NAME_MAX), 'bj/d/ut': bjSv })) bjFeed('You took the dealer seat', false); else toast("Couldn't take the dealer seat.", 2000); });
   }
+  // stop playing but keep watching the table (a hand you already bet on still plays out and pays)
+  function bjWatchToggle(){
+    const me = chatUid(), D = BJ.d, sit = BJ.watch;
+    bjDo(async () => {
+      const body = { [`bj/p/${me}/o`]: !sit, [`bj/p/${me}/t`]: bjSv };
+      if(!sit && D && D.u === me){ body['bj/d/u'] = 'bot'; body['bj/d/n'] = 'Dealer'; body['bj/d/ut'] = bjSv; }
+      if(await bjPatch(body)){ BJ.watch = !sit; if(BJ.p[me]) BJ.p[me].o = !sit; bjFeed(sit ? 'You sat back down' : "You're watching — sit back down any time", false); bjSync(); }
+      else toast("Couldn't do that — check your connection.", 2000);
+    });
+  }
   function bjDropDealer(){ bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
   function bjVoteKick(){
     const me = chatUid(), D = BJ.d; if(!D || D.u === 'bot' || D.u === me) return;
@@ -22967,14 +23030,16 @@
       el.innerHTML = `<div class="cas-head"><div><b>🃏 Blackjack</b><span>Beat the dealer without going over 21. Blackjack pays 3 to 2, a win pays 2 to 1.</span></div><button type="button" class="cas-sw" data-go-slots>🎰 Slots</button><div class="cas-bal"><b></b><span>points</span></div></div>
         <div class="bj-table">
           <div class="bj-dealer"><div class="bj-who"></div><div class="bj-hand bj-dhand"></div><div class="bj-tot bj-dtot"></div><div class="bj-dctl"></div></div>
-          <div class="bj-msg"></div>
+          <div class="bj-msg"></div><div class="bj-fast"></div>
           <div class="bj-seats"></div>
+          <div class="bj-specs"></div>
         </div>
         <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
           <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
           <button type="button" class="cas-spin bj-betb">BET</button></div>
           <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button></div>
           <span class="bj-note"></span>
+          <button type="button" class="cas-leave bj-sit">👀 Sit out &amp; watch</button>
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
         <div class="cas-feed bj-feed"></div>`;
       const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
@@ -22984,11 +23049,13 @@
       el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(BJ.bet + Number(b.dataset.d)); });
       el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
       el.querySelector('.bj-betb').addEventListener('click', bjPlaceBet);
+      el.querySelector('.bj-fast').addEventListener('click', (e) => { const b = e.target.closest('[data-fast]'); if(!b) return; b.blur(); b.disabled = true; if(b.dataset.fast === 'next') bjNextRound(); else bjDealNow(); });
       el.querySelector('[data-go-slots]').addEventListener('click', () => { CHAT.side = null; bjLeave(); casJoin(); });
       el.querySelector('.bj-hit').addEventListener('click', bjHit);
       el.querySelector('.bj-stand').addEventListener('click', bjStand);
       el.querySelector('.bj-dbl').addEventListener('click', bjDouble);
       el.querySelector('.bj-leave').addEventListener('click', () => chatSideTo('bj'));
+      el.querySelector('.bj-sit').addEventListener('click', (e) => { e.currentTarget.blur(); bjWatchToggle(); });
       el.querySelector('.bj-dealer').addEventListener('click', (e) => {
         const b = e.target.closest('[data-dact]'); if(!b) return; b.blur();
         ({ take: bjTakeDealer, drop: bjDropDealer, kick: bjVoteKick, deal: bjDealerDeal, hit: bjDealerHit, stand: bjDealerStand })[b.dataset.dact]();
@@ -23056,6 +23123,10 @@
     else if(ph === 'dealer') msg = D.u === me ? 'Your turn to deal: hit or stand' : 'Dealer plays…';
     else if(ph === 'done') msg = D.h > 21 ? 'Dealer busts! Next round soon…' : `Dealer has ${D.v}. Next round soon…`;
     const me2 = el.querySelector('.bj-msg'); if(me2.textContent !== msg) me2.textContent = msg;
+    { const fast = el.querySelector('.bj-fast'), S = BJ.p[me]; let f = '';
+      if(D && ph === 'done' && (D.u === 'bot' || D.u === me || bjNow() - (D.ut || 0) > 8000)) f = '<button type="button" class="bj-l bj-go" data-fast="next">Next round ▶</button>';
+      else if(D && ph === 'bet' && D.u === 'bot' && S && bjInRound(S, D)) f = '<button type="button" class="bj-l bj-go" data-fast="deal">Deal now ▶</button>';
+      if(fast.dataset.sig !== f){ fast.dataset.sig = f; fast.innerHTML = f; } }
     // the players
     const box = el.querySelector('.bj-seats'), seats = bjSeats().filter(s => !D || s.u !== D.u), want = new Set(seats.map(s => s.u));
     for(const n of [...box.children]) if(!want.has(n.dataset.u)) n.remove();
@@ -23080,6 +23151,21 @@
       if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
       n.classList.toggle('turn', !!(T && T.u === s.u));
     });
+    { const sp = el.querySelector('.bj-specs'), list = Object.entries(BJ.p).filter(([u, x]) => x && x.o === true && typeof x.t === 'number' && bjNow() - x.t < 30000 && !chatBanned(u) && (u !== me || BJ.watch))
+        .concat(BJ.watch && !(BJ.p[me] && BJ.p[me].o) ? [[me, { n: chatName() }]] : []);
+      const sig = list.map(([u, x]) => u + ':' + x.n).join('|');
+      if(sp.dataset.sig !== sig){
+        sp.dataset.sig = sig; sp.innerHTML = '';
+        if(list.length){
+          const h = document.createElement('span'); h.className = 'bj-specs-h'; h.textContent = '👀 Watching'; sp.appendChild(h);
+          for(const [u, x] of list){
+            const c = document.createElement('span'); c.className = 'bj-spec'; c.dataset.u = u;
+            const av = chatAv(u, x.n, false, false); c.appendChild(av);
+            const nm = document.createElement('b'); nm.textContent = bjName(x.n) + (u === me ? ' (you)' : ''); nm.style.color = chatColor(x.n || ''); c.appendChild(nm);
+            sp.appendChild(c);
+          }
+        }
+      } }
     if(!seats.length){ if(!box.querySelector('.chat-side-p')) box.innerHTML = '<p class="chat-side-p">Nobody at the table yet.</p>'; }
     else { const p = box.querySelector('.chat-side-p'); if(p) p.remove(); }
     bjCtl();
@@ -23090,7 +23176,8 @@
     const me = chatUid(), D = BJ.d, S = BJ.p[me], ph = bjPhase(), T = bjTurn();
     const dealer = D && D.u === me, inR = S && D && bjInRound(S, D);
     const canBet = BJ.on && ph === 'bet' && !dealer && !inR && !BJ.act;
-    el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !dealer && !inR);
+    el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !dealer && !inR) || !!BJ.watch;
+    const sit = el.querySelector('.bj-sit'); sit.textContent = BJ.watch ? '🪑 Sit back down' : '👀 Sit out & watch'; sit.classList.toggle('on', !!BJ.watch);
     const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `BET · ${BJ.bet}`;
     const my = !!(T && T.u === me && S && S.k >= 2 && !S.pe);
     el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR);
@@ -23098,7 +23185,7 @@
     el.querySelector('.bj-stand').disabled = !(my && S.st === 'p') || BJ.act;
     el.querySelector('.bj-dbl').disabled = !(my && S.st === 'p' && S.k === 2 && scBal() >= S.b) || BJ.act;
     const note = el.querySelector('.bj-note');
-    note.textContent = dealer ? "You're dealing — your buttons are by the dealer's cards." : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
+    note.textContent = BJ.watch ? "You're watching — you won't be dealt in." : dealer ? "You're dealing — your buttons are by the dealer's cards." : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
   }
   function bjFeed(txt, big){
     const el = chatPanel.querySelector('.chat-bj .bj-feed'); if(!el) return;
@@ -23106,11 +23193,47 @@
     el.prepend(d); while(el.children.length > 8) el.lastChild.remove();
     d.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
   }
+  // getting up from the table: one notice in the chat with how it went (it joins the casino results card)
+  // the 🎮 button by the message box: straight into a game
+  function chatGamesMenu(btn){
+    const old = chatPanel.querySelector('.chat-games-m'); if(old){ old.remove(); btn.setAttribute('aria-expanded', 'false'); return; }
+    const me = chatUid(), nS = Object.entries(CAS.seats || {}).filter(([u, st]) => u !== me && casSeatLive(st)).length, nB = Object.entries(BJ.peek || BJ.p || {}).filter(([u, st]) => u !== me && bjLive(st)).length;
+    const m = document.createElement('div'); m.className = 'chat-games-m'; m.setAttribute('role', 'menu');
+    m.innerHTML = `<button type="button" role="menuitem" data-g="slots"><span>🎰</span><b>Slots</b><i>${nS ? nS + ' playing' : ''}</i></button>
+      <button type="button" role="menuitem" data-g="bj"><span>🃏</span><b>Blackjack</b><i>${nB ? nB + ' at the table' : ''}</i></button>
+      <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
+    btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
+    m.animate([{ opacity: 0, transform: 'translateY(6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 160, easing: 'ease-out' });
+    const close = () => { m.remove(); btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', out, true); };
+    const out = (e) => { if(!m.contains(e.target) && e.target !== btn) close(); };
+    setTimeout(() => document.addEventListener('pointerdown', out, true), 0);
+    m.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-g]'); if(!b) return; close();
+      if(b.dataset.g === 'slots'){ if(CHAT.side === 'casino') return; if(CHAT.side) chatSideTo(CHAT.side); casJoin(); }
+      else if(b.dataset.g === 'bj'){ if(CHAT.side === 'bj') return; if(CHAT.side) chatSideTo(CHAT.side); bjJoin(); }
+      else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
+    });
+  }
+  chatPanel.addEventListener('click', (e) => { const g = e.target.closest('.chat-games'); if(g){ g.blur(); chatGamesMenu(g); } });
+  function bjSessionPost(S){
+    if(!chatName() || chatBlock()) return;
+    const net = S.won - S.bet, hn = `${S.hands} hand${S.hands === 1 ? '' : 's'}`;
+    const txt = (net > 0 ? `won ${net} at blackjack (${hn})` : net < 0 ? `lost ${-net} at blackjack (${hn})` : `broke even at blackjack (${hn})`).slice(0, chatMaxLen());
+    const post = (tk) => fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tk)}`, { method: 'POST', keepalive: true, body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: { '.sv': 'timestamp' }, u: chatUid(), e: 'cas' }) });
+    const tok = CHAT_AUTH.tok;
+    if(tok && CHAT_AUTH.exp > Date.now() + 5000) post(tok).catch(() => {}); else chatAuth().then(post).catch(() => {});
+  }
+  // skip the wait: deal now (once you've bet), or start the next round once the results are in
+  function bjNextRound(){
+    const D = BJ.d; if(!D || !D.f) return;
+    bjDo(() => bjPatch({ 'bj/d': { u: D.u, n: D.n, r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv }, 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v } }));
+  }
+  function bjDealNow(){ const D = BJ.d; if(D && D.u === 'bot' && bjPhase() === 'bet' && bjPlayers().length) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
   // a chat message from someone at the table pops up as a bubble over their head
   function bjSay(m){
     if(!BJ.on || !m || m.e || !m.m || chatBanned(m.u)) return;
     const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
-    const D = BJ.d, host = (D && D.u === m.u) ? el.querySelector('.bj-who') : el.querySelector(`.bj-seat[data-u="${CSS.escape(m.u)}"] .bj-pl`);
+    const D = BJ.d, host = (D && D.u === m.u) ? el.querySelector('.bj-who') : (el.querySelector(`.bj-seat[data-u="${CSS.escape(m.u)}"] .bj-pl`) || el.querySelector(`.bj-spec[data-u="${CSS.escape(m.u)}"]`));
     if(!host) return;
     host.querySelectorAll('.bj-say').forEach(x => x.remove());
     const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(m.m).slice(0, 80);
@@ -23150,30 +23273,62 @@
     if(scBal() < amt){ toast(`You only have ${scBal()} points.`, 2000); return; }
     const btn = pop && pop.querySelector('.gp-send'); if(btn){ btn.disabled = true; btn.textContent = '…'; }
     const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const ok = await bjPatch({ [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv }).catch(() => null);
+    const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
+    const note = `sent ${amt} point${amt === 1 ? '' : 's'} to ${bjName(name)}`.slice(0, chatMaxLen());
+    let ok = chatBlock() ? null : await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, base)).catch(() => null);
+    if(!ok) ok = await bjPatch(base).catch(() => null);      // (if the chat won't take the notice, the points still go)
     if(ok){ SC.s += amt; gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
     else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
   }
-  // collecting points people sent you (checked when the chat starts, then every 20 s)
-  let giftBusy = false;
+  // points people sent you: a popup to accept or decline each one (checked when the chat starts, then every 20 s).
+  // Declining sends them back — the sender gets them back automatically (it undoes their spend, it doesn't count as new points).
+  let giftBusy = false; const giftAsked = new Map();
   async function giftCheck(){
     if(giftBusy || !chatName() || document.visibilityState !== 'visible') return; giftBusy = true;
     try{
       const tok = await chatAuth(), me = chatUid();
       const r = await fetch(`${CHAT_DB}/gifts/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`);
-      const d = r.ok ? await r.json() : null;
-      if(d && typeof d === 'object'){
+      const d = (r.ok ? await r.json() : null) || {};
+      for(const [id, el] of giftAsked) if(!d[id]){ el.remove(); giftAsked.delete(id); }     // (answered somewhere else)
+      const back = Object.entries(d).filter(([, g]) => g && g.r === true && g.a > 0);
+      if(back.length){
         await scLoad();
-        for(const [id, g] of Object.entries(d)){
-          if(!g || !(g.a > 0)) continue;
-          const body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
-          if(await bjPatch(body)){ SC.p += g.a; toast(`💸 ${bjName(g.n)} sent you ${g.a} points!`, 3200); sfxChip(); }
+        for(const [id, g] of back){
+          const body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/s`]: SC.s - g.a, [`scores/${me}/t`]: bjSv };
+          if(await bjPatch(body)){ SC.s -= g.a; toast(`💸 ${bjName(g.n)} declined your ${g.a} points — you got them back.`, 3400); }
           else await scLoad();
         }
         chatRenderArcade(); bjCtl();
       }
+      for(const [id, g] of Object.entries(d)) if(g && g.r !== true && g.a > 0 && !giftAsked.has(id)) giftAsk(id, g);
     }catch(e){}
     giftBusy = false;
+  }
+  function giftAsk(id, g){
+    let host = document.querySelector('.gift-asks'); if(!host){ host = document.createElement('div'); host.className = 'gift-asks'; document.body.appendChild(host); }
+    const c = document.createElement('div'); c.className = 'gift-ask'; c.setAttribute('role', 'alertdialog');
+    c.innerHTML = `<span class="ga-i" aria-hidden="true">💸</span><div class="ga-t"><b class="ga-n"></b> wants to send you <b class="ga-a"></b></div>
+      <div class="ga-btns"><button type="button" class="ga-yes">Accept</button><button type="button" class="ga-no">Decline</button></div>`;
+    c.querySelector('.ga-n').textContent = bjName(g.n); c.querySelector('.ga-n').style.color = chatColor(g.n || '');
+    c.querySelector('.ga-a').textContent = `${g.a} point${g.a === 1 ? '' : 's'}`;
+    const yes = c.querySelector('.ga-yes'), no = c.querySelector('.ga-no');
+    const done = (txt) => { giftAsked.delete(id); c.querySelector('.ga-btns').innerHTML = `<span class="ga-done">${txt}</span>`; setTimeout(() => c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-8px) scale(.96)' }], { duration: 240, fill: 'forwards' }).onfinish = () => c.remove(), 1400); };
+    yes.addEventListener('click', async () => {
+      yes.disabled = no.disabled = true; yes.textContent = '…';
+      await scLoad();
+      const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+      if(await bjPatch(body).catch(() => null)){ SC.p += g.a; sfxChip(); done(`+${g.a} points`); chatRenderArcade(); bjCtl(); }
+      else { yes.disabled = no.disabled = false; yes.textContent = 'Accept'; toast("Couldn't accept — try again in a moment.", 2200); }
+    });
+    no.addEventListener('click', async () => {
+      yes.disabled = no.disabled = true; no.textContent = '…';
+      const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`gifts/${g.f}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: g.a, t: bjSv, r: true } };
+      if(await bjPatch(body).catch(() => null)) done('Declined — sent back');
+      else { yes.disabled = no.disabled = false; no.textContent = 'Decline'; toast("Couldn't decline — try again in a moment.", 2200); }
+    });
+    host.appendChild(c); giftAsked.set(id, c);
+    c.animate([{ opacity: 0, transform: 'translateY(-14px) scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
+    sfxChip();
   }
   setInterval(giftCheck, 20000); setTimeout(giftCheck, 4000);
   function casFeed(txt, big){
