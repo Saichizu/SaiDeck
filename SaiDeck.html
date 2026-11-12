@@ -21108,7 +21108,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 60;                 // ← goes up by one with every published version
+  const SD_BUILD = 61;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23938,7 +23938,7 @@
         await scLoad();
         for(const [id, g] of back){
           const body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/s`]: SC.s - g.a, [`scores/${me}/t`]: bjSv };
-          if(await bjPatch(body)){ SC.s -= g.a; toast(`💸 ${bjName(g.n)} declined your ${g.a} points — you got them back.`, 3400); }
+          if(await bjPatch(body)){ SC.s -= g.a; toast(giftNoLine(bjName(g.n), g.a), 4200); }
           else await scLoad();
         }
         chatRenderArcade(); bjCtl();
@@ -23946,6 +23946,22 @@
       for(const [id, g] of Object.entries(d)) if(g && g.r !== true && g.a > 0 && !giftAsked.has(id)) giftAsk(id, g);
     }catch(e){}
     giftBusy = false;
+  }
+  // when someone turns down your points (they come back to you), say so with a little sass
+  function giftNoLine(n, a){
+    const L = [
+      `💸 ${n} doesn't want your pitiful ${a} points. You got them back.`,
+      `🙅 ${n} looked at your ${a} points and said "no thanks, I'm good." Refunded.`,
+      `😤 ${n} is too proud for your ${a} points. Back in your pocket they go.`,
+      `🗑️ ${n} threw your ${a} points right back at you. Ouch.`,
+      `🤨 ${a} points? ${n} expected more. Returned to sender.`,
+      `👑 ${n} is simply too rich for your ${a} points. You got them back.`,
+      `🧾 ${n} declined. Your ${a} points have been returned, along with your dignity (maybe).`,
+      `😂 ${n} laughed at your ${a} points and sent them home.`,
+      `🚫 ${n} said "keep your change." ${a} points refunded.`,
+      `💔 ${n} rejected your ${a} points. It's not you, it's… no, it's probably you.`,
+    ];
+    return L[Math.floor(Math.random() * L.length)];
   }
   function giftAsk(id, g){
     let host = document.querySelector('.gift-asks'); if(!host){ host = document.createElement('div'); host.className = 'gift-asks'; document.body.appendChild(host); }
