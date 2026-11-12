@@ -502,6 +502,9 @@
   @keyframes totMarkPulse{0%,100%{opacity:.55;}50%{opacity:1;}}
   .tot-mark span{position:relative;font-size:30px;opacity:.85;filter:drop-shadow(0 0 10px rgba(255,138,31,.8));}
   .tot-mark b{position:relative;margin-top:2px;padding:2px 8px;border-radius:999px;background:rgba(20,8,28,.82);border:1px solid rgba(255,138,31,.5);color:#ffd0a0;font:700 10.5px 'Inter',sans-serif;white-space:nowrap;}
+
+  .chat-gift.declined{background:linear-gradient(135deg,rgba(255,77,94,.13),rgba(120,60,160,.12));border-color:rgba(255,120,130,.45);}
+  .chat-gift.declined .cg-a{color:#ff9aa8;text-decoration:line-through;text-decoration-thickness:2px;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21108,7 +21111,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 61;                 // ← goes up by one with every published version
+  const SD_BUILD = 62;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22114,6 +22117,24 @@
       if(m.e === 'gift'){
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const mm = /^sent (\d+) points? to (.+)$/.exec(String(m.m || '')), toMe = typeof m.v === 'string' && chatIsMe(m.v);
+        if(m.d === true){
+          const fromN = chatBadName(m.n) ? 'someone' : m.n, toN = chatMask(mm ? mm[2] : 'someone'), amt = mm ? mm[1] : '?';
+          const ev = document.createElement('div'); ev.className = 'chat-gift declined';
+          ev.innerHTML = '<span class="cg-i" aria-hidden="true"></span><div class="cg-t"><span class="cg-line"></span><i></i></div>';
+          const [em, line] = giftNoChatLine(m._k || '', toN, fromN, amt);
+          ev.querySelector('.cg-i').textContent = em;
+          const ln = ev.querySelector('.cg-line');
+          // (names in their colours, the amount struck through)
+          for(const part of line.split(/(\{to\}|\{from\}|\{a\})/)){
+            if(part === '{to}'){ const b = document.createElement('b'); b.textContent = toN; b.style.color = chatColor(toN); ln.appendChild(b); }
+            else if(part === '{from}'){ const b = document.createElement('b'); b.textContent = fromN; b.style.color = chatColor(m.n); ln.appendChild(b); }
+            else if(part === '{a}'){ const b = document.createElement('b'); b.className = 'cg-a'; b.textContent = amt + ' points'; ln.appendChild(b); }
+            else ln.appendChild(document.createTextNode(part));
+          }
+          ev.querySelector('i').textContent = chatFmtTime(m.t);
+          if(fresh(m._k)) ev.classList.add('in');
+          body.appendChild(ev); continue;
+        }
         const ev = document.createElement('div'); ev.className = 'chat-gift' + (toMe ? ' to-me' : '');
         ev.innerHTML = '<span class="cg-i" aria-hidden="true">💸</span><div class="cg-t"><b class="cg-f"></b> sent <b class="cg-a"></b> to <b class="cg-to"></b><i></i></div>';
         ev.querySelector('.cg-f').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('.cg-f').style.color = chatColor(m.n);
@@ -22310,11 +22331,13 @@
       if(!chatValid(m)) return;
       m._k = key;
       if(!CHAT.msgs.has(key)){ CHAT.msgs.set(key, m); if(fresh) fresh.push(m); }
-      else CHAT.msgs.get(key).x = m.x;                                                  // (reactions changed)
+      else { const o = CHAT.msgs.get(key); o.x = m.x; o.d = m.d; }                        // (reactions changed, or a gift was declined)
     };
     // a change deeper inside a message: its reactions (…/x/<emoji>/<who>)
     const applyDeep = (parts, v) => {
-      const m = CHAT.msgs.get(parts[0]); if(!m || parts[1] !== 'x') return;
+      const m = CHAT.msgs.get(parts[0]); if(!m) return;
+      if(parts[1] === 'd' && parts.length === 2){ m.d = v === true ? true : undefined; return; }
+      if(parts[1] !== 'x') return;
       if(parts.length === 2){ m.x = v || null; return; }
       const x = m.x = chatReactObj(m.x), e = parts[2];
       if(parts.length === 3){ if(v) x[e] = Object.assign({}, v); else delete x[e]; return; }
@@ -23916,10 +23939,10 @@
     if(scBal() < amt){ toast(`You only have ${scBal()} points.`, 2000); return; }
     const btn = pop && pop.querySelector('.gp-send'); if(btn){ btn.disabled = true; btn.textContent = '…'; }
     const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
+    const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv, r: chatRoom() }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
     const note = `sent ${amt} point${amt === 1 ? '' : 's'} to ${bjName(name)}`.slice(0, chatMaxLen());
     let ok = chatBlock() ? null : await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, base)).catch(() => null);
-    if(!ok) ok = await bjPatch(base).catch(() => null);      // (if the chat won't take the notice, the points still go)
+    if(!ok){ const b2 = Object.assign({}, base); b2[`gifts/${uid}/${id}`] = Object.assign({}, base[`gifts/${uid}/${id}`]); delete b2[`gifts/${uid}/${id}`].r; ok = await bjPatch(b2).catch(() => null); }      // (if the chat won't take the notice, the points still go)
     if(ok){ SC.s += amt; gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
     else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
   }
@@ -23946,6 +23969,22 @@
       for(const [id, g] of Object.entries(d)) if(g && g.r !== true && g.a > 0 && !giftAsked.has(id)) giftAsk(id, g);
     }catch(e){}
     giftBusy = false;
+  }
+  // the chat card for a turned-down gift: one of these, picked the same way on everyone's screen
+  function giftNoChatLine(key, to, from, a){
+    const L = [
+      ['💸', "{to} doesn't want {from}'s pitiful {a}"],
+      ['🙅', '{to} looked at {from}\'s {a} and said "no thanks, I\'m good"'],
+      ['😤', "{to} is too proud for {from}'s {a}"],
+      ['🗑️', "{to} threw {from}'s {a} right back. Ouch"],
+      ['🤨', "{a}? {to} expected more from {from}"],
+      ['👑', "{to} is simply too rich for {from}'s {a}"],
+      ['😂', "{to} laughed at {from}'s {a} and sent them home"],
+      ['🚫', '{to} told {from} to keep their {a}'],
+      ['💔', "{to} rejected {from}'s {a}. It's not you, {from}… actually it is"],
+    ];
+    let h = 0; for(const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return L[h % L.length];
   }
   // when someone turns down your points (they come back to you), say so with a little sass
   function giftNoLine(n, a){
@@ -23982,7 +24021,7 @@
     no.addEventListener('click', async () => {
       yes.disabled = no.disabled = true; no.textContent = '…';
       const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`gifts/${g.f}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: g.a, t: bjSv, r: true } };
-      if(await bjPatch(body).catch(() => null)) done('Declined — sent back');
+      if(await bjPatch(body).catch(() => null)){ done('Declined — sent back'); if(typeof g.r === 'string' && g.r) bjPatch({ [`rooms/${g.r}/messages/${id}/d`]: true }).catch(() => {}); }
       else { yes.disabled = no.disabled = false; no.textContent = 'Decline'; toast("Couldn't decline — try again in a moment.", 2200); }
     });
     host.appendChild(c); giftAsked.set(id, c);

@@ -1,6 +1,6 @@
 {
-  "build": 61,
+  "build": 62,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "When someone turns down your points, you get a cheeky message about it (and your points back)."
+  "notes": "When someone declines your points, the gift card in the chat changes into a cheeky 'declined' line for everyone to see."
 }
