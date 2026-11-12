@@ -494,6 +494,14 @@
   .chat-jack .cj-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .chat-jack .cj-r{margin:0 !important;font-size:13px;}
   .chat-jack .cj-f i{display:inline !important;font-style:normal;font-size:10.5px;color:rgba(255,243,207,.65);opacity:1 !important;}
+
+  .tot-marks{position:fixed;inset:0;z-index:350;pointer-events:none;}
+  .tot-mark{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;}
+  .tot-mark i{position:absolute;left:50%;top:50%;width:calc(var(--r) * 2);height:calc(var(--r) * 2);transform:translate(-50%,-50%);border-radius:50%;
+    border:1.5px dashed rgba(255,138,31,.55);background:radial-gradient(circle, rgba(255,138,31,.10), rgba(255,138,31,0) 70%);animation:totMarkPulse 2.4s ease-in-out infinite;}
+  @keyframes totMarkPulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+  .tot-mark span{position:relative;font-size:30px;opacity:.85;filter:drop-shadow(0 0 10px rgba(255,138,31,.8));}
+  .tot-mark b{position:relative;margin-top:2px;padding:2px 8px;border-radius:999px;background:rgba(20,8,28,.82);border:1px solid rgba(255,138,31,.5);color:#ffd0a0;font:700 10.5px 'Inter',sans-serif;white-space:nowrap;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21100,7 +21108,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 59;                 // ← goes up by one with every published version
+  const SD_BUILD = 60;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22099,6 +22107,7 @@
         ev.querySelector('.ct-b').textContent = mine ? 'your' : chatMask(by); if(!mine) ev.querySelector('.ct-b').style.color = chatColor(by);
         if(mine) ev.querySelector('.ct-t').innerHTML = ev.querySelector('.ct-t').innerHTML.replace("'s Trick or Treat", ' Trick or Treat');
         ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(mine && totMine().some(x => x.k === m._k)){ totMineSave(totMine().filter(x => x.k !== m._k)); if(totMarksEl) totMarksShow(); }
         if(fresh(m._k)){ ev.classList.add('in'); if(mine && Date.now() + PRES.offset - (m.t || 0) < 60000 && !(CHAT.trickSeen || (CHAT.trickSeen = new Set())).has(m._k)){ CHAT.trickSeen.add(m._k); toast(`🎃 Your Trick or Treat got ${chatBadName(m.n) ? 'someone' : m.n}! 🦇`, 3400); } }
         body.appendChild(ev); continue;
       }
@@ -22269,6 +22278,7 @@
   function chatToggle(open){
     CHAT.open = open == null ? !CHAT.open : !!open;
     chatPanel.hidden = !CHAT.open;
+    try{ if(CHAT.open) totMarksSync(); else totMarksHide(); }catch(e){}
     if(!CHAT.open){ gameClose('casino'); gameClose('bj'); }
     if(CHAT.open){
       if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans(); chatPollInbox();
@@ -24037,16 +24047,60 @@
     let ok = null;
     for(const slot of ['s1', 's2']){
       ok = await bjPatch({ [`tricks/${M.uid}/${slot}`]: { u: me, n: chatName().slice(0, CHAT_NAME_MAX), x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000, t: bjSv, k }, [`inv/${me}/tot`]: SC.tot - 1 }).catch(() => null);
-      if(ok) break;
+      if(ok){ ok = Object.assign({}, ok, { __slot: slot }); break; }
     }
     M.planting = false;
     if(!ok){ await scLoad(); toast(`🎃 ${bjName(M.name)} already has 2 Trick or Treats waiting — you can't plant more until they find one.`, 3000); return; }
     SC.tot--; infHud();
+    try{ const mine = totMine(); mine.push({ v: M.uid, vn: M.name, slot: ok.__slot || null, k, x, y, t: Date.now() }); totMineSave(mine); }catch(e){}
     // (just for you: a pumpkin sinks into the spot)
     const pk = document.createElement('div'); pk.className = 'tot-plant'; pk.textContent = '🎃'; pk.style.left = px + 'px'; pk.style.top = py + 'px'; document.body.appendChild(pk);
     pk.animate([{ transform: 'translate(-50%,-50%) scale(1.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 }], { duration: 1400, easing: 'ease-in', fill: 'forwards' }).onfinish = () => pk.remove();
     toast(`🎃 Planted on ${bjName(M.name)}'s screen — ${SC.tot} left. It goes off when their mouse finds it.`, 2600);
   }
+  // ----- the Trick or Treats YOU planted (kept on this computer): shown as markers whenever the chat is open -----
+  const totMine = () => { try{ const a = JSON.parse(localStorage.getItem('sd.tot.mine') || '[]'); return Array.isArray(a) ? a.filter(x => x && x.k && Date.now() - x.t < 7 * 86400000) : []; }catch(e){ return []; } };
+  const totMineSave = (a) => { try{ localStorage.setItem('sd.tot.mine', JSON.stringify(a.slice(-20))); }catch(e){} };
+  let totMarksEl = null, totMarksT = 0;
+  // (is each one still waiting? you can read your own — gone means they found it, or it was cleared)
+  async function totMineRefresh(){
+    let mine = totMine(); if(!mine.length){ totMineSave([]); return mine; }
+    try{
+      const tok = await chatAuth();
+      const keep = [];
+      for(const m of mine){
+        if(CHAT.msgs && [...CHAT.msgs.values()].some(x => x && x.e === 'trick' && x._k === m.k)) continue;        // (it went off)
+        let alive = true;
+        for(const slot of (m.slot ? [m.slot] : ['s1', 's2'])){
+          const r = await fetch(`${CHAT_DB}/tricks/${encodeURIComponent(m.v)}/${slot}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).catch(() => null);
+          if(!r){ alive = true; break; }                                  // (no internet: keep it)
+          if(r.ok){ const d = await r.json().catch(() => null); alive = !!(d && d.k === m.k); if(alive){ m.slot = slot; break; } }
+          else alive = r.status === 401 || r.status === 403 ? false : true;   // (not yours to read = not there any more)
+        }
+        if(alive) keep.push(m);
+      }
+      mine = keep; totMineSave(mine);
+    }catch(e){}
+    return mine;
+  }
+  function totMarksShow(){
+    totMarksHide();
+    const mine = totMine(); if(!mine.length || !CHAT.open) return;
+    const L = document.createElement('div'); L.className = 'tot-marks'; totMarksEl = L;
+    for(const m of mine){
+      const d = document.createElement('div'); d.className = 'tot-mark'; d.style.left = (m.x * innerWidth) + 'px'; d.style.top = (m.y * innerHeight) + 'px';
+      d.style.setProperty('--r', TOT_R + 'px');
+      d.innerHTML = '<i></i><span>🎃</span><b></b>';
+      d.querySelector('b').textContent = `on ${bjName(m.vn)}'s screen`;
+      d.title = `Your Trick or Treat on ${bjName(m.vn)}'s screen — still waiting (planted ${new Date(m.t).toLocaleString()})`;
+      L.appendChild(d);
+    }
+    document.body.appendChild(L);
+  }
+  function totMarksHide(){ if(totMarksEl){ totMarksEl.remove(); totMarksEl = null; } }
+  async function totMarksSync(){ if(!CHAT.open){ totMarksHide(); return; } await totMineRefresh(); if(CHAT.open) totMarksShow(); else totMarksHide(); }
+  window.addEventListener('resize', () => { if(totMarksEl) totMarksShow(); });
+  setInterval(() => { if(CHAT.open && document.visibilityState === 'visible' && totMine().length) totMarksSync(); }, 30000);
   // your screen: tricks people left for you (checked when the chat starts, then every 15 s)
   async function trapCheck(){
     if(trapBusy || !chatName() || document.visibilityState !== 'visible') return; trapBusy = true;

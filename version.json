@@ -1,6 +1,6 @@
 {
-  "build": 59,
+  "build": 60,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The Trick or Treat jumpscare sound is a bit quieter."
+  "notes": "See where you planted your Trick or Treats: whenever the chat is open, each one still waiting shows as a pumpkin marker (with the area that sets it off) and whose screen it's on."
 }
