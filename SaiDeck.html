@@ -229,6 +229,63 @@
   .chat-modal-x svg{width:18px;height:18px;fill:currentColor;}
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
+
+  /* Online, Rooms, Arcade, Alerts and the Casino sit beside the chat (not over it), so you can keep typing */
+  @media (min-width: 900px){
+    .chat-who:not([hidden]), .chat-side:not([hidden]){left:calc((100vw - min(360px, calc(100vw - 32px)) - 16px) / 2);width:min(480px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px));}
+    .chat-casino:not([hidden]){width:min(1000px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px));}
+    .chat-modal-back{right:calc(min(360px, calc(100vw - 32px)) + 16px);}
+    .chat-modal-x{left:calc((100vw - min(360px, calc(100vw - 32px)) - 16px) / 2 + min(480px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px)) / 2 - 40px);}
+    .chat-panel.cas-open .chat-modal-x{left:calc((100vw - min(360px, calc(100vw - 32px)) - 16px) / 2 + min(1000px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px)) / 2 - 40px);}
+  }
+  .chat-who-r .chat-who-gift{all:unset;flex:none;cursor:pointer;font-size:13px;padding:2px 5px;border-radius:6px;opacity:.45;}
+  .chat-who-r:hover .chat-who-gift, .chat-who-gift:focus-visible{opacity:1;} .chat-who-gift:hover{background:rgba(255,255,255,.1);}
+  .gift-pop{position:fixed;z-index:8;width:280px;box-sizing:border-box;padding:12px 14px;border-radius:12px;background:#1f2030;border:1px solid rgba(125,255,178,.45);box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:6px;}
+  .gift-pop > b{font:700 13px 'Inter',sans-serif;color:var(--text);} .gift-pop em{font-style:normal;color:#7dffb2;font-weight:700;}
+  .gp-row{display:flex;gap:6px;align-items:center;} .gp-row > *{flex:none !important;}
+  .gp-row input{width:80px;padding:7px 6px;border-radius:8px;border:1px solid rgba(125,255,178,.45);background:#14151c;color:#7dffb2;font:800 14px 'Inter',sans-serif;text-align:center;}
+  .arc-cas-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .arc-cas-join.bj{background:linear-gradient(135deg,#7dffb2,#2fb37a);color:#06200f;box-shadow:0 6px 18px rgba(60,200,120,.3);}
+  .cas-sw{all:unset;flex:none;cursor:pointer;margin-left:auto;padding:7px 12px;border-radius:999px;font:700 12px 'Inter',sans-serif;color:#ffe08a;border:1px solid rgba(245,208,74,.5);background:rgba(245,208,74,.08);}
+  .cas-sw:hover{background:rgba(245,208,74,.18);} .cas-sw:focus-visible{outline:2px solid #fff;}
+  .chat-casbar .cb-join + .cb-join{margin-left:6px;} .chat-casbar .cb-bj{background:linear-gradient(135deg,#7dffb2,#2fb37a) !important;color:#06200f !important;}
+  /* Blackjack */
+  .chat-bj:not([hidden]){border-color:rgba(125,255,178,.5);background:radial-gradient(120% 80% at 50% 0%, #143a2a 0%, #1b1c25 62%);}
+  .bj-table{position:relative;border-radius:180px 180px 26px 26px / 120px 120px 26px 26px;padding:16px 16px 18px;background:radial-gradient(90% 90% at 50% 20%, #1f7a4f 0%, #145a3a 55%, #0e4029 100%);border:7px solid #6b4222;box-shadow:inset 0 0 0 2px rgba(255,220,140,.25), inset 0 0 40px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:10px;min-height:300px;}
+  .bj-dealer{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:150px;}
+  .bj-who{position:relative;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e9f7ee;}
+  .bj-av{width:34px !important;height:34px !important;font-size:14px !important;border:2px solid #0e4029;}
+  .bj-bot{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#2b3142;font-size:18px !important;}
+  .bj-hand{display:flex;justify-content:center;min-height:68px;padding:0 10px;}
+  .bj-hand.dim{opacity:.5;}
+  .bj-card{position:relative;width:46px;height:66px;margin-left:-18px;border-radius:7px;background:linear-gradient(160deg,#fff,#f1ece2);color:#16171d;box-shadow:0 3px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;}
+  .bj-card:first-child{margin-left:0;} .bj-card.red{color:#d42a3c;}
+  .bj-card b{position:absolute;top:3px;left:5px;font:800 12px 'Inter',sans-serif;line-height:1;} .bj-card b.bj-c2{top:auto;left:auto;bottom:3px;right:5px;transform:rotate(180deg);}
+  .bj-card i{font-style:normal;font-size:22px;}
+  .bj-tot{min-height:16px;font:800 12px 'Inter',sans-serif;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+  .bj-dctl{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:4px;}
+  .bj-msg{padding:5px 14px;border-radius:999px;background:rgba(0,0,0,.28);font:700 12.5px 'Inter',sans-serif;color:#ffe08a;text-align:center;min-height:16px;}
+  .bj-seats{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 18px;width:100%;}
+  .bj-seat{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:110px;padding:6px 6px 4px;border-radius:14px;transition:background .2s, box-shadow .2s;}
+  .bj-seat.turn{background:rgba(255,224,138,.12);box-shadow:0 0 0 2px rgba(255,224,138,.6);}
+  .bj-seat.me .bj-nm{text-decoration:underline;text-underline-offset:3px;}
+  .bj-chip{font:700 11px 'Inter',sans-serif;color:rgba(255,255,255,.7);padding:2px 9px;border-radius:999px;}
+  .bj-chip.on{background:radial-gradient(circle,#ffe08a 0 30%,#f5a524 31% 100%);color:#2a1a02;}
+  .bj-chip.win{background:#2fb37a;color:#fff;} .bj-chip.lose{background:#a83246;color:#fff;} .bj-chip.push{background:#5b6170;color:#fff;}
+  .bj-pl{position:relative;display:flex;align-items:center;gap:4px;}
+  .bj-gift{all:unset;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:6px;opacity:.55;} .bj-gift:hover, .bj-gift:focus-visible{opacity:1;background:rgba(255,255,255,.12);}
+  .bj-nm{font-size:11.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bj-say{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:3;max-width:180px;width:max-content;padding:6px 10px;border-radius:12px;background:#fff;color:#16171d;font:600 12px/1.3 'Inter',sans-serif;box-shadow:0 6px 16px rgba(0,0,0,.4);overflow-wrap:anywhere;pointer-events:none;}
+  .bj-say::after{content:'';position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;}
+  .bj-ctl{border-top-color:rgba(125,255,178,.25);}
+  .bj-betbox{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;} .bj-betbox[hidden], .bj-acts[hidden]{display:none;}
+  .bj-acts{display:flex;gap:8px;}
+  .bj-a{all:unset;cursor:pointer;padding:9px 18px;border-radius:999px;font:800 13px 'Manrope',sans-serif;color:#06200f;background:linear-gradient(135deg,#7dffb2,#2fb37a);box-shadow:0 5px 14px rgba(60,200,120,.3);}
+  .bj-a.bj-stand{background:linear-gradient(135deg,#ffd76a,#ff9a3c);color:#2a0d0d;} .bj-a.bj-dbl{background:linear-gradient(135deg,#c9a7ff,#8a5cff);color:#140a2a;}
+  .bj-a:disabled{opacity:.4;cursor:default;} .bj-a:active:not(:disabled){transform:scale(.95);} .bj-a:focus-visible{outline:2px solid #fff;}
+  .bj-l{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;font:700 11px 'Inter',sans-serif;color:#e9f7ee;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.2);}
+  .bj-l:hover{background:rgba(0,0,0,.35);} .bj-l.on{border-color:#ff7a8a;color:#ffb3bd;} .bj-l:focus-visible{outline:2px solid #fff;}
+  .bj-note{font-size:11.5px;color:var(--text-dim);}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -20835,7 +20892,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 47;                 // ← goes up by one with every published version
+  const SD_BUILD = 48;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21258,6 +21315,7 @@
         <div class="chat-side chat-arcade" hidden></div>
         <div class="chat-side chat-alerts" hidden></div>
         <div class="chat-side chat-casino" hidden></div>
+        <div class="chat-side chat-casino chat-bj" hidden></div>
         <div class="chat-modal-back" hidden></div>
         <button type="button" class="chat-modal-x" title="Close (Esc)" aria-label="Close" hidden>${ICON_X}</button>
         <div class="chat-pin" hidden></div>
@@ -21285,6 +21343,7 @@
       chatPanel.querySelector('.chat-arc').addEventListener('click', () => { chatSideTo('arcade'); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
+        if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
         const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
@@ -21323,7 +21382,7 @@
     chatRenderSide();
     chatRenderArcade();
     chatRenderAlerts();
-    casRender();
+    casRender(); bjRender();
     casBarRender();
     { const bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x'); if(bk) bk.hidden = !CHAT.side; if(x) x.hidden = !CHAT.side; }
     chatRenderPin();
@@ -21369,10 +21428,11 @@
     const was = CHAT.side;
     CHAT.side = CHAT.side === which ? null : which;
     if(was === 'casino' && CHAT.side !== 'casino') casLeave();       // (closing the casino gets you up from your seat)
-    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender(); casBarRender();
+    if(was === 'bj' && CHAT.side !== 'bj') bjLeave();
+    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender(); bjRender(); casBarRender();
     const open = !!CHAT.side, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
     if(bk) bk.hidden = !open; if(x) x.hidden = !open;
-    chatPanel.classList.toggle('cas-open', CHAT.side === 'casino');
+    chatPanel.classList.toggle('cas-open', CHAT.side === 'casino' || CHAT.side === 'bj');
   }
   // Esc closes the open window (before it would close the chat)
   window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.side && !chatPanel.hidden){ e.preventDefault(); e.stopImmediatePropagation(); chatSideTo(CHAT.side); } }, true);
@@ -22396,6 +22456,7 @@
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
+    if(BJ.on) bjLeave();
     CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0;
     if(CHAT.side !== 'casino') chatSideTo('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
@@ -22488,22 +22549,26 @@
   // the chat's casino bar: one line saying who's in the casino right now (never a pile of messages), with Join
   function casBarRender(){
     const el = chatPanel.querySelector('.chat-casbar'); if(!el) return;
-    const me = chatUid(), who = Object.entries(CAS.seats || {}).filter(([u, st]) => u !== me && casSeatLive(st) && !chatBanned(u)).map(([, st]) => chatBadName(st.n) ? 'someone' : st.n);
-    const show = who.length > 0 && !CAS.on;
+    const me = chatUid(), slots = Object.entries(CAS.seats || {}).filter(([u, st]) => u !== me && casSeatLive(st) && !chatBanned(u)).map(([, st]) => chatBadName(st.n) ? 'someone' : st.n);
+    const bjw = BJ.on ? [] : Object.entries(BJ.peek || {}).filter(([u, st]) => u !== me && bjLive(st) && !chatBanned(u)).map(([, st]) => bjName(st.n));
+    const who = [...new Set(slots.concat(bjw))];
+    const show = who.length > 0 && !CAS.on && !BJ.on;
     if(!show){ el.hidden = true; el.dataset.sig = ''; return; }
     const names = who.length === 1 ? who[0] : who.length === 2 ? `${who[0]} and ${who[1]}` : who.length === 3 ? `${who[0]}, ${who[1]} and ${who[2]}` : `${who[0]}, ${who[1]} and ${who.length - 2} others`;
-    const txt = `${names} ${who.length === 1 ? 'is' : 'are'} in the casino`;
+    const txt = `${names} ${who.length === 1 ? 'is' : 'are'} ${slots.length ? 'in the casino' : 'at the blackjack table'}`;
     if(el.dataset.sig === txt && !el.hidden) return;
     const fresh = el.hidden; el.hidden = false; el.dataset.sig = txt;
-    el.innerHTML = `<span aria-hidden="true">🎰</span><span class="cb-t"></span><button type="button" class="cb-join">Join</button>`;
+    el.innerHTML = `<span aria-hidden="true">${bjw.length && !slots.length ? '🃏' : '🎰'}</span><span class="cb-t"></span>${slots.length ? '<button type="button" class="cb-join">Slots</button>' : ''}${bjw.length ? '<button type="button" class="cb-join cb-bj">Blackjack</button>' : ''}`;
     el.querySelector('.cb-t').textContent = txt;
-    el.querySelector('.cb-join').addEventListener('click', () => casJoin());
+    el.querySelectorAll('.cb-join').forEach(b => b.addEventListener('click', () => b.classList.contains('cb-bj') ? bjJoin() : casJoin()));
     if(fresh) el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
   }
   // (who's sitting is checked every 10 s while the chat is open and you're not in the casino yourself)
   setInterval(async () => {
     if(!CHAT.open || CAS.on || !chatName() || document.visibilityState !== 'visible') return;
-    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`); if(r.ok && !CAS.on){ CAS.seats = (await r.json()) || {}; casBarRender(); } }catch(e){}
+    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`); if(r.ok && !CAS.on){ CAS.seats = (await r.json()) || {}; }
+      if(!BJ.on){ const b = await fetch(`${CHAT_DB}/bj/p.json?auth=${encodeURIComponent(tok)}`); if(b.ok) BJ.peek = (await b.json()) || {}; }
+      casBarRender(); }catch(e){}
   }, 10000);
   // the Casino window
   function casRender(){
@@ -22512,7 +22577,7 @@
     if(el.hidden){ if(el.dataset.built){ el.innerHTML = ''; el.dataset.built = ''; } return; }
     if(!el.dataset.built){
       el.dataset.built = '1';
-      el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><div class="cas-bal"><b></b><span>points</span></div></div>
+      el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj>🃏 Blackjack table</button><div class="cas-bal"><b></b><span>points</span></div></div>
         <div class="cas-floor"></div>
         <div class="cas-ctl"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
           <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
@@ -22527,6 +22592,7 @@
       el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(CAS.bet + Number(b.dataset.d)); });
       el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
       el.querySelector('.cas-spin').addEventListener('click', casSpin);
+      el.querySelector('[data-go-bj]').addEventListener('click', () => { CHAT.side = null; casLeave(); bjJoin(); });
       el.querySelector('.cas-leave').addEventListener('click', () => chatSideTo('casino'));
     }
     casSync(); casCtl();
@@ -22643,6 +22709,473 @@
     }
     sfxJackpot();
   }
+  // ----- Blackjack: one table everyone can join, with a bot dealer (or a player who takes the dealer's seat) -----
+  // bj/p/<id> = your seat: { n, t (heartbeat), j (joined), r (round you bet in), b (bet), k/h/a/v (cards, hard total, aces, best total),
+  //             lt (time of your last card), pe (card drawn, not counted yet), st ('p' playing, 's' stood, 'd' doubled), pd (round paid), c: {i: card time} }
+  // bj/d = the dealer's hand, the same way, plus u ('bot' or the player dealing), f (finished) and r (the round: its start time).
+  // bj/x = the last round's dealer hand (so a win can still be collected after the next round starts). bj/kick/<id> = a vote to kick the dealer.
+  // Every card is the server's clock at the moment it was drawn (nobody can pick it), and the database checks every total and every payout.
+  const BJ = { on: false, poll: 0, polling: false, hb: 0, d: null, x: null, p: {}, kick: {}, act: false, bet: Math.max(1, Math.min(500, Number(chatLS('bjBet')) || 10)),
+    betAt: {}, turn: null, skip: new Set(), doneAt: {}, dAct: 0, shown: {}, res: {}, joinedAt: 0 };
+  const BJ_RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'], BJ_SUITS = ['♠', '♥', '♦', '♣'];
+  const bjNow = () => Date.now() + (PRES.offset || 0);
+  const bjLive = (s) => s && typeof s.t === 'number' && !s.o && bjNow() - s.t < 30000;
+  const bjSv = { '.sv': 'timestamp' };
+  const bjName = (n) => chatBadName(n) ? 'someone' : (n || 'someone');
+  const bjBest = (h, a) => (a > 0 && h <= 11) ? h + 10 : h;
+  function bjCount(hand, T){       // what a card adds (the same sums the database checks)
+    const r = T % 13, h = hand.h + (r >= 9 ? 10 : r + 1), a = hand.a + (r === 0 ? 1 : 0);
+    return { k: hand.k + 1, h, a, v: bjBest(h, a) };
+  }
+  const bjCards = (hand) => { const c = (hand && hand.c) || {}, n = (hand.k | 0) + (hand.pe ? 1 : 0), out = []; for(let i = 0; i < n; i++) if(typeof c[i] === 'number') out.push(c[i]); return out; };
+  // how a hand did against the dealer: what it pays back (0 lost, bet = push, 2×, or 2.5× for a blackjack)
+  function bjPay(P, Dd){
+    const W = P.b | 0, pBJ = P.k === 2 && P.v === 21, dBJ = Dd.k === 2 && Dd.v === 21;
+    if(P.h > 21) return { amt: 0, lbl: 'Bust' };
+    if(pBJ && !dBJ) return { amt: (W * 5 - (W * 5) % 2) / 2, lbl: 'Blackjack!' };
+    if(pBJ && dBJ) return { amt: W, lbl: 'Push' };
+    if(dBJ) return { amt: 0, lbl: 'Dealer blackjack' };
+    if(Dd.h > 21 || P.v > Dd.v) return { amt: W * 2, lbl: 'Win' };
+    if(P.v === Dd.v) return { amt: W, lbl: 'Push' };
+    return { amt: 0, lbl: 'Lose' };
+  }
+  async function bjPatch(body){
+    const tok = await chatAuth();
+    const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }, 8000);
+    if(!r.ok) return null;
+    try{ return await r.json(); }catch(e){ return {}; }
+  }
+  // getting a seat
+  async function bjJoin(){
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(!SC.loaded) await scLoad();
+    if(CAS.on) casLeave();
+    BJ.on = true; BJ.joinedAt = Date.now(); BJ.skip = new Set(); BJ.shown = {};
+    if(CHAT.side !== 'bj') chatSideTo('bj');
+    const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
+    try{
+      const tok = await chatAuth();
+      const g = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 8000); const d = g.ok ? await g.json() : null;
+      if(d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; }
+      if(!BJ.p[me]) await bjPatch({ [`bj/p/${me}`]: { n: nm, t: bjSv, j: bjSv, r: 0, b: 0, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, st: 's', pd: 0, o: false } });
+      else await bjPatch({ [`bj/p/${me}/n`]: nm, [`bj/p/${me}/t`]: bjSv, [`bj/p/${me}/o`]: false });
+      if(!BJ.d) await bjPatch({ 'bj/d': { u: 'bot', n: 'Dealer', r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv } });
+    }catch(e){}
+    clearInterval(BJ.hb); BJ.hb = setInterval(bjBeat, 10000);
+    bjListen(); bjRender();
+  }
+  function bjBeat(){
+    if(!BJ.on) return;
+    const me = chatUid(), body = { [`bj/p/${me}/t`]: bjSv };
+    if(BJ.d && BJ.d.u === me) body['bj/d/ut'] = bjSv;         // (the player dealing says they're still here)
+    bjPatch(body).catch(() => {});
+  }
+  function bjLeave(){
+    if(!BJ.on) return;
+    const me = chatUid(), D = BJ.d;
+    BJ.on = false; clearInterval(BJ.hb); BJ.hb = 0; clearInterval(BJ.poll); BJ.poll = 0;
+    const body = { [`bj/p/${me}/o`]: true, [`bj/p/${me}/t`]: bjSv };
+    if(D && D.u === me){ body['bj/d/u'] = 'bot'; body['bj/d/n'] = 'Dealer'; body['bj/d/ut'] = bjSv; }
+    chatAuth().then(tok => fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', keepalive: true, body: JSON.stringify(body) })).catch(() => {});
+    gpClose();
+  }
+  window.addEventListener('pagehide', () => { if(BJ.on) bjLeave(); });
+  // (checked twice a second, like the slots)
+  function bjListen(){
+    if(BJ.poll) return;
+    const tick = async () => {
+      if(!BJ.on){ clearInterval(BJ.poll); BJ.poll = 0; return; }
+      if(BJ.polling) return; BJ.polling = true;
+      try{
+        const tok = await chatAuth();
+        const r = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+        const d = r.ok ? await r.json() : null;
+        if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjSync(); bjDrive(); }
+      }catch(e){}
+      BJ.polling = false;
+    };
+    tick(); BJ.poll = setInterval(tick, 500);
+  }
+  // who's at the table, in seat order; and who's playing this round
+  function bjSeats(){
+    const me = chatUid();
+    return Object.entries(BJ.p).filter(([u, s]) => (bjLive(s) || (u === me && BJ.on)) && !chatBanned(u)).map(([u, s]) => Object.assign({ u }, s)).sort((a, b) => (a.j || 0) - (b.j || 0));
+  }
+  const bjInRound = (s, D) => D && s.r === D.r && s.b > 0;
+  const bjHandDone = (s) => s.pe ? false : s.k < 2 ? false : s.st === 'd' ? s.k >= 3 : s.st === 's' || s.v >= 21;
+  function bjPlayers(){ const D = BJ.d; return bjSeats().filter(s => bjInRound(s, D) && s.u !== D.u); }
+  // whose turn it is (the first hand still being played), or null once everyone is done
+  function bjTurn(){
+    const D = BJ.d; if(!D || D.f || D.k !== 1 || D.pe) return null;
+    for(const s of bjPlayers()){ if(BJ.skip.has(s.u + ':' + D.r)) continue; if(!bjHandDone(s)) return s; }
+    return null;
+  }
+  function bjPhase(){
+    const D = BJ.d; if(!D) return 'wait';
+    if(D.f) return 'done';
+    if(D.k === 0 && !D.pe) return 'bet';
+    if(D.k === 1 && !D.pe && bjTurn()) return 'play';
+    return 'dealer';
+  }
+  // one action at a time from this computer
+  async function bjDo(fn){
+    if(BJ.act) return; BJ.act = true;
+    try{ await fn(); }catch(e){}
+    BJ.act = false;
+  }
+  // draw a card into a hand (yours, or the dealer's): the server stamps the card, then the totals are counted from it
+  async function bjDraw(path, hand, extra){
+    const body = Object.assign({ [`${path}/pe`]: true, [`${path}/lt`]: bjSv, [`${path}/c/${hand.k | 0}`]: bjSv }, extra || {});
+    const d = await bjPatch(body); if(!d) return false;
+    let T = d[`${path}/lt`];
+    if(typeof T !== 'number'){ const tok = await chatAuth(); const g = await casFetch(`${CHAT_DB}/${path}/lt.json?auth=${encodeURIComponent(tok)}`, {}, 6000); T = g.ok ? await g.json() : null; }
+    if(typeof T !== 'number') return false;
+    sfxCard();
+    return bjTally(path, Object.assign({}, hand, { lt: T, pe: true }), extra);
+  }
+  async function bjTally(path, hand, extra){
+    const n = bjCount(hand, hand.lt), body = { [`${path}/pe`]: false, [`${path}/k`]: n.k, [`${path}/h`]: n.h, [`${path}/a`]: n.a, [`${path}/v`]: n.v };
+    for(const k of Object.keys(extra || {})) if(/\/(ut|t)$/.test(k)) body[k] = bjSv;
+    return !!(await bjPatch(body));
+  }
+  // everything that has to happen next — each computer does its own hand; one of them runs the bot dealer
+  function bjDrive(){
+    if(!BJ.on || BJ.act) return;
+    const me = chatUid(), D = BJ.d, S = BJ.p[me], now = Date.now();
+    if(!D || !S) return;
+    const seats = bjSeats(), human = D.u !== 'bot', iDeal = D.u === me;
+    const driver = human ? iDeal : (seats[0] && seats[0].u === me);
+    const sNow = bjNow();
+    // 1) your winnings from a finished round
+    if(S.r > 0 && S.pd !== S.r && !S.pe){
+      const Dd = (D.r === S.r && D.f) ? D : (BJ.x && BJ.x.r === S.r ? BJ.x : null);
+      if(Dd){ bjDo(() => bjClaim(S, Dd)); return; }
+    }
+    // 2) a card that was drawn but not counted yet
+    if(S.pe){ bjDo(() => bjTally(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: 1 })); return; }
+    if(D.pe && (driver || iDeal || sNow - (D.ut || 0) > 3000)){ bjDo(() => bjTally('bj/d', D, { 'bj/d/ut': 1 })); return; }
+    // 3) a dealer who has gone quiet, or been voted out
+    if(human && !iDeal){
+      const others = seats.filter(s => s.u !== D.u), votes = others.filter(s => BJ.kick[s.u] === D.u).length, need = Math.floor(others.length / 2) + 1;
+      if((BJ.kick[me] === D.u && votes >= need) || sNow - (D.ut || 0) > 47000){
+        bjDo(async () => { if(await bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })) bjFeed(`${bjName(D.n)} was ${sNow - (D.ut || 0) > 47000 ? 'away too long' : 'voted out'} — the bot deals now`); });
+        return;
+      }
+    }
+    const ph = bjPhase(), R = D.r;
+    if(ph === 'bet'){
+      const players = bjPlayers(), waiting = seats.filter(s => s.u !== D.u && !bjInRound(s, D));
+      if(players.length && !BJ.betAt[R]) BJ.betAt[R] = now;
+      // (the bot deals once everyone sitting has bet, or 15 s after the first bet; a player dealing has 30 s to press Deal)
+      if(driver && players.length && (human ? now - BJ.betAt[R] > 30000 : (!waiting.length || now - BJ.betAt[R] > 15000)))
+        bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
+      return;
+    }
+    // (everyone playing gets their first two cards as soon as the dealer's up card is out)
+    if(D.k === 1 && !D.pe && !D.f && bjInRound(S, D) && S.k < 2 && D.u !== me){ bjDo(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); return; }
+    if(ph === 'play'){
+      const T = bjTurn();
+      if(!BJ.turn || BJ.turn.u !== T.u || BJ.turn.r !== R) BJ.turn = { u: T.u, r: R, at: now };
+      if(T.u === me){
+        if(S.st === 'p' && S.v >= 21){ bjDo(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); return; }
+        if(S.st === 'd' && S.k === 2){ bjDo(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); return; }
+        if(now - BJ.turn.at > 30000){ bjDo(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); toast('Too slow — you stood automatically.', 2200); return; }
+      } else if(driver && (now - BJ.turn.at > 40000 || !bjLive(BJ.p[T.u]))){
+        BJ.skip.add(T.u + ':' + R); BJ.turn = null;      // (someone who left or went quiet keeps the hand they have)
+      }
+      return;
+    }
+    if(ph === 'dealer'){
+      if(!BJ.doneAt[R]) BJ.doneAt[R] = now;
+      if(human || !driver || now - BJ.dAct < 750 || now - BJ.doneAt[R] < 700) return;
+      BJ.dAct = now;
+      if(D.k < 2 || D.v < 17) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
+      else bjDo(() => bjPatch({ 'bj/d/f': true, 'bj/d/ut': bjSv }));
+      return;
+    }
+    if(ph === 'done'){
+      if(!BJ.doneAt['f' + R]) BJ.doneAt['f' + R] = now;
+      // (results stay up for 7 s, then the next round opens for bets)
+      if((driver || (human && sNow - (D.ut || 0) > 9000 && seats[0] && seats[0].u === me)) && now - BJ.doneAt['f' + R] > 7000)
+        bjDo(() => bjPatch({ 'bj/d': { u: D.u, n: D.n, r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv }, 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v } }));
+    }
+  }
+  async function bjClaim(S, Dd){
+    const me = chatUid(), res = bjPay(S, Dd), body = { [`bj/p/${me}/pd`]: S.r };
+    if(res.amt > 0){ body[`scores/${me}/p`] = SC.p + res.amt; body[`scores/${me}/t`] = bjSv; }
+    let ok = await bjPatch(body);
+    if(!ok){ await scLoad(); if(res.amt > 0) body[`scores/${me}/p`] = SC.p + res.amt; ok = await bjPatch(body); }
+    if(ok){
+      if(res.amt > 0) SC.p += res.amt;
+      S.pd = S.r;
+      const net = res.amt - S.b;
+      BJ.res[S.r] = res;
+      if(Date.now() - BJ.joinedAt > 1500){
+        toast(net > 0 ? `🃏 ${res.lbl} — you won ${net} points!` : net === 0 ? `🃏 Push — you got your ${S.b} back.` : `🃏 ${res.lbl} — you lost ${S.b}.`, 2600);
+        sfxSlotResult(net > 0 ? (res.amt >= S.b * 2.5 ? 12 : 2) : net === 0 ? 1 : 0, 0.8);
+        bjFeed(`You ${net > 0 ? 'won ' + net : net === 0 ? 'pushed' : 'lost ' + S.b} (${S.v} vs dealer ${Dd.h > 21 ? 'bust' : Dd.v})`, net > 0);
+      }
+      chatRenderArcade(); bjCtl();
+    }
+  }
+  // your buttons
+  async function bjPlaceBet(){
+    const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
+    if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || D.u === me) return;
+    if(!(bet >= 1 && bet <= 500)){ toast('Bet between 1 and 500 points.', 2000); return; }
+    if(!SC.loaded) await scLoad();
+    if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
+    bjDo(async () => {
+      const body = { [`bj/p/${me}/r`]: D.r, [`bj/p/${me}/b`]: bet, [`bj/p/${me}/k`]: 0, [`bj/p/${me}/h`]: 0, [`bj/p/${me}/a`]: 0, [`bj/p/${me}/v`]: 0, [`bj/p/${me}/pe`]: false, [`bj/p/${me}/st`]: 'p', [`bj/p/${me}/c`]: null, [`bj/p/${me}/t`]: bjSv,
+        [`scores/${me}/s`]: SC.s + bet, [`scores/${me}/t`]: bjSv };
+      if(await bjPatch(body)){ SC.s += bet; Object.assign(S, { r: D.r, b: bet, k: 0, h: 0, a: 0, v: 0, pe: false, st: 'p', c: null }); sfxChip(); bjSync(); chatRenderArcade(); }
+      else { await scLoad(); toast("Couldn't place that bet — the cards may already be out.", 2400); }
+    });
+  }
+  function bjHit(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.v >= 21) return; bjDo(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); }
+  function bjStand(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p') return; bjDo(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); }
+  function bjDouble(){
+    const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.k !== 2) return;
+    if(scBal() < S.b){ toast(`You need ${S.b} more points to double.`, 2200); return; }
+    bjDo(async () => {
+      if(await bjPatch({ [`bj/p/${me}/st`]: 'd', [`bj/p/${me}/b`]: S.b * 2, [`scores/${me}/s`]: SC.s + S.b, [`scores/${me}/t`]: bjSv })){ SC.s += S.b; S.b *= 2; S.st = 'd'; sfxChip(); chatRenderArcade(); }
+      else await scLoad();
+    });
+  }
+  // the dealer's seat
+  function bjTakeDealer(){
+    const me = chatUid(), D = BJ.d, S = BJ.p[me];
+    if(!D || D.u !== 'bot' || !(D.f || D.k === 0) || (S && bjInRound(S, D))) { toast('You can take the dealer seat between rounds (and not after betting).', 2400); return; }
+    bjDo(async () => { if(await bjPatch({ 'bj/d/u': me, 'bj/d/n': chatName().slice(0, CHAT_NAME_MAX), 'bj/d/ut': bjSv })) bjFeed('You took the dealer seat', false); else toast("Couldn't take the dealer seat.", 2000); });
+  }
+  function bjDropDealer(){ bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
+  function bjVoteKick(){
+    const me = chatUid(), D = BJ.d; if(!D || D.u === 'bot' || D.u === me) return;
+    const on = BJ.kick[me] === D.u;
+    bjDo(async () => { if(await bjPatch({ [`bj/kick/${me}`]: on ? null : D.u })){ if(on) delete BJ.kick[me]; else BJ.kick[me] = D.u; bjSync(); } });
+  }
+  function bjDealerDeal(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'bet' && bjPlayers().length) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealerHit(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.v < 21) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealerStand(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.k >= 2) bjDo(() => bjPatch({ 'bj/d/f': true, 'bj/d/ut': bjSv })); }
+  // ----- the table window -----
+  function bjRender(){
+    const el = chatPanel.querySelector('.chat-bj'); if(!el) return;
+    el.hidden = CHAT.side !== 'bj';
+    if(el.hidden){ if(el.dataset.built){ el.innerHTML = ''; el.dataset.built = ''; } return; }
+    if(!el.dataset.built){
+      el.dataset.built = '1';
+      el.innerHTML = `<div class="cas-head"><div><b>🃏 Blackjack</b><span>Beat the dealer without going over 21. Blackjack pays 3 to 2, a win pays 2 to 1.</span></div><button type="button" class="cas-sw" data-go-slots>🎰 Slots</button><div class="cas-bal"><b></b><span>points</span></div></div>
+        <div class="bj-table">
+          <div class="bj-dealer"><div class="bj-who"></div><div class="bj-hand bj-dhand"></div><div class="bj-tot bj-dtot"></div><div class="bj-dctl"></div></div>
+          <div class="bj-msg"></div>
+          <div class="bj-seats"></div>
+        </div>
+        <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
+          <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
+          <button type="button" class="cas-spin bj-betb">BET</button></div>
+          <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button></div>
+          <span class="bj-note"></span>
+          <button type="button" class="cas-leave bj-leave">Leave</button></div>
+        <div class="cas-feed bj-feed"></div>`;
+      const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
+      const setBet = (v) => { BJ.bet = Math.max(1, Math.min(500, Math.round(v) || 1)); inp.value = BJ.bet; chatLS('bjBet', BJ.bet); bjCtl(); };
+      inp.addEventListener('change', () => setBet(Number(inp.value)));
+      inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); bjPlaceBet(); } });
+      el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(BJ.bet + Number(b.dataset.d)); });
+      el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
+      el.querySelector('.bj-betb').addEventListener('click', bjPlaceBet);
+      el.querySelector('[data-go-slots]').addEventListener('click', () => { CHAT.side = null; bjLeave(); casJoin(); });
+      el.querySelector('.bj-hit').addEventListener('click', bjHit);
+      el.querySelector('.bj-stand').addEventListener('click', bjStand);
+      el.querySelector('.bj-dbl').addEventListener('click', bjDouble);
+      el.querySelector('.bj-leave').addEventListener('click', () => chatSideTo('bj'));
+      el.querySelector('.bj-dealer').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-dact]'); if(!b) return; b.blur();
+        ({ take: bjTakeDealer, drop: bjDropDealer, kick: bjVoteKick, deal: bjDealerDeal, hit: bjDealerHit, stand: bjDealerStand })[b.dataset.dact]();
+      });
+      el.querySelector('.bj-seats').addEventListener('click', (e) => { const g = e.target.closest('[data-gift]'); if(g){ g.blur(); gpOpen(g.dataset.gift, g.dataset.n, g); } });
+    }
+    bjSync();
+  }
+  // a hand of cards, adding only the new ones (so each new card slides in from the shoe)
+  function bjHandEl(box, hand, hide){
+    const cards = bjCards(hand), key = (hand.r || 0) + '';
+    if(box.dataset.r !== key){ box.innerHTML = ''; box.dataset.r = key; }
+    while(box.children.length > cards.length) box.lastChild.remove();
+    for(let i = box.children.length; i < cards.length; i++){
+      const T = cards[i], r = T % 13, s = Math.floor(T / 13) % 4, red = s === 1 || s === 2;
+      const c = document.createElement('div'); c.className = 'bj-card' + (red ? ' red' : '');
+      c.innerHTML = `<b>${BJ_RANKS[r]}</b><i>${BJ_SUITS[s]}</i><b class="bj-c2">${BJ_RANKS[r]}</b>`;
+      box.appendChild(c);
+      const seen = BJ.shown[box.dataset.k + ':' + key + ':' + i]; BJ.shown[box.dataset.k + ':' + key + ':' + i] = 1;
+      if(!seen && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+        const shoe = box.closest('.bj-table').querySelector('.bj-dealer').getBoundingClientRect(), me = c.getBoundingClientRect();
+        c.animate([{ transform: `translate(${shoe.left + shoe.width / 2 - me.left}px, ${shoe.top - me.top}px) rotate(-20deg) scale(.6)`, opacity: 0 }, { opacity: 1, offset: .3 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      }
+    }
+    if(hide) box.classList.add('dim'); else box.classList.remove('dim');
+  }
+  const bjTotTxt = (h) => !h || !h.k ? '' : h.h > 21 ? `${h.h} · bust` : (h.k === 2 && h.v === 21) ? 'Blackjack' : (h.a > 0 && h.h <= 11) ? `${h.v} (or ${h.h})` : `${h.v}`;
+  function bjSync(){
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    const me = chatUid(), D = BJ.d, ph = bjPhase(), T = bjTurn();
+    // the dealer
+    const who = el.querySelector('.bj-who'), dh = el.querySelector('.bj-dhand'), dctl = el.querySelector('.bj-dctl');
+    if(D){
+      const human = D.u !== 'bot', sig = D.u + '|' + D.n;
+      if(who.dataset.sig !== sig){
+        who.dataset.sig = sig; who.innerHTML = '';
+        const av = human ? chatAv(D.u, D.n, false, false) : Object.assign(document.createElement('span'), { className: 'chat-av bj-bot', textContent: '🤖' });
+        av.classList.add('bj-av'); who.dataset.u = D.u;
+        const nm = document.createElement('b'); nm.textContent = human ? bjName(D.n) + (D.u === me ? ' (you)' : '') + ' · dealer' : 'Dealer bot';
+        if(human) nm.style.color = chatColor(D.n);
+        who.append(av, nm);
+      }
+      dh.dataset.k = 'd'; bjHandEl(dh, D, false);
+      el.querySelector('.bj-dtot').textContent = bjTotTxt(D);
+      const S = BJ.p[me], others = bjSeats().filter(s => s.u !== D.u), votes = others.filter(s => BJ.kick[s.u] === D.u).length, need = Math.floor(others.length / 2) + 1;
+      let c = '';
+      if(D.u === me){
+        if(ph === 'bet') c = `<button type="button" class="bj-a" data-dact="deal" ${bjPlayers().length ? '' : 'disabled'}>Deal</button>`;
+        else if(ph === 'dealer' && !D.f) c = `<button type="button" class="bj-a" data-dact="hit" ${D.v < 21 && !D.pe ? '' : 'disabled'}>Hit</button><button type="button" class="bj-a" data-dact="stand" ${D.k >= 2 && !D.pe ? '' : 'disabled'}>Stand</button>`;
+        c += `<button type="button" class="bj-l" data-dact="drop">Step down</button>`;
+      } else if(!human){
+        if((D.f || D.k === 0) && !(S && bjInRound(S, D))) c = `<button type="button" class="bj-l" data-dact="take">Be the dealer</button>`;
+      } else {
+        c = `<button type="button" class="bj-l${BJ.kick[me] === D.u ? ' on' : ''}" data-dact="kick">${BJ.kick[me] === D.u ? 'Undo kick vote' : 'Vote to kick'} · ${votes}/${need}</button>`;
+      }
+      if(dctl.dataset.sig !== c){ dctl.dataset.sig = c; dctl.innerHTML = c; }
+    }
+    // what's happening
+    let msg = '';
+    if(!D) msg = 'Setting up the table…';
+    else if(ph === 'bet'){
+      const pl = bjPlayers(), R = D.r, left = BJ.betAt[R] ? Math.max(0, Math.ceil(((D.u !== 'bot' ? 30000 : 15000) - (Date.now() - BJ.betAt[R])) / 1000)) : null;
+      msg = pl.length ? (D.u !== 'bot' ? `${pl.length} bet${pl.length === 1 ? '' : 's'} in — waiting for ${D.u === me ? 'you' : bjName(D.n)} to deal (${left}s)` : `${pl.length} bet${pl.length === 1 ? '' : 's'} in — dealing in ${left}s (or when everyone has bet)`) : 'Place your bets!';
+    } else if(ph === 'play') msg = T.u === me ? 'Your turn — Hit, Stand or Double' : `${bjName(T.n)}'s turn…`;
+    else if(ph === 'dealer') msg = D.u === me ? 'Your turn to deal: hit or stand' : 'Dealer plays…';
+    else if(ph === 'done') msg = D.h > 21 ? 'Dealer busts! Next round soon…' : `Dealer has ${D.v}. Next round soon…`;
+    const me2 = el.querySelector('.bj-msg'); if(me2.textContent !== msg) me2.textContent = msg;
+    // the players
+    const box = el.querySelector('.bj-seats'), seats = bjSeats().filter(s => !D || s.u !== D.u), want = new Set(seats.map(s => s.u));
+    for(const n of [...box.children]) if(!want.has(n.dataset.u)) n.remove();
+    seats.forEach((s, i) => {
+      let n = box.querySelector(`.bj-seat[data-u="${CSS.escape(s.u)}"]`);
+      if(!n){
+        n = document.createElement('div'); n.className = 'bj-seat' + (s.u === me ? ' me' : ''); n.dataset.u = s.u;
+        n.innerHTML = `<div class="bj-hand"></div><div class="bj-tot"></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b>`;
+        const av = chatAv(s.u, s.n, false, false); av.classList.add('bj-av'); n.querySelector('.bj-pl').append(av);
+        if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g); }
+        n.querySelector('.bj-nm').textContent = bjName(s.n) + (s.u === me ? ' (you)' : ''); n.querySelector('.bj-nm').style.color = chatColor(s.n);
+        n.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
+      }
+      if(box.children[i] !== n) box.insertBefore(n, box.children[i] || null);
+      const inR = D && bjInRound(s, D), hb = n.querySelector('.bj-hand'); hb.dataset.k = s.u;
+      if(inR) bjHandEl(hb, s, false); else { hb.innerHTML = ''; hb.dataset.r = ''; }
+      n.querySelector('.bj-tot').textContent = inR ? bjTotTxt(s) : '';
+      const chip = n.querySelector('.bj-chip');
+      let ct = inR ? `${s.b}${s.st === 'd' ? ' · doubled' : ''}` : (ph === 'bet' ? 'betting…' : 'sitting out');
+      let cls = 'bj-chip' + (inR ? ' on' : '');
+      if(inR && D.f){ const r = bjPay(s, D); const net = r.amt - s.b; ct = net > 0 ? `${r.lbl} +${net}` : net === 0 ? 'Push' : `${r.lbl} −${s.b}`; cls += net > 0 ? ' win' : net === 0 ? ' push' : ' lose'; }
+      if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
+      n.classList.toggle('turn', !!(T && T.u === s.u));
+    });
+    if(!seats.length){ if(!box.querySelector('.chat-side-p')) box.innerHTML = '<p class="chat-side-p">Nobody at the table yet.</p>'; }
+    else { const p = box.querySelector('.chat-side-p'); if(p) p.remove(); }
+    bjCtl();
+  }
+  function bjCtl(){
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    el.querySelector('.cas-bal b').textContent = SC.loaded ? scBal() : '…';
+    const me = chatUid(), D = BJ.d, S = BJ.p[me], ph = bjPhase(), T = bjTurn();
+    const dealer = D && D.u === me, inR = S && D && bjInRound(S, D);
+    const canBet = BJ.on && ph === 'bet' && !dealer && !inR && !BJ.act;
+    el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !dealer && !inR);
+    const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `BET · ${BJ.bet}`;
+    const my = !!(T && T.u === me && S && S.k >= 2 && !S.pe);
+    el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR);
+    el.querySelector('.bj-hit').disabled = !(my && S.st === 'p' && S.v < 21) || BJ.act;
+    el.querySelector('.bj-stand').disabled = !(my && S.st === 'p') || BJ.act;
+    el.querySelector('.bj-dbl').disabled = !(my && S.st === 'p' && S.k === 2 && scBal() >= S.b) || BJ.act;
+    const note = el.querySelector('.bj-note');
+    note.textContent = dealer ? "You're dealing — your buttons are by the dealer's cards." : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
+  }
+  function bjFeed(txt, big){
+    const el = chatPanel.querySelector('.chat-bj .bj-feed'); if(!el) return;
+    const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
+    el.prepend(d); while(el.children.length > 8) el.lastChild.remove();
+    d.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
+  }
+  // a chat message from someone at the table pops up as a bubble over their head
+  function bjSay(m){
+    if(!BJ.on || !m || m.e || !m.m || chatBanned(m.u)) return;
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    const D = BJ.d, host = (D && D.u === m.u) ? el.querySelector('.bj-who') : el.querySelector(`.bj-seat[data-u="${CSS.escape(m.u)}"] .bj-pl`);
+    if(!host) return;
+    host.querySelectorAll('.bj-say').forEach(x => x.remove());
+    const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(m.m).slice(0, 80);
+    host.appendChild(b);
+    b.animate([{ opacity: 0, transform: 'translate(-50%, 6px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.3,1.3)', fill: 'both' });
+    setTimeout(() => { if(b.isConnected) b.animate([{ opacity: 1 }, { opacity: 0, transform: 'translate(-50%, -8px)' }], { duration: 300, fill: 'both' }).onfinish = () => b.remove(); }, 5500);
+  }
+  // little sounds: a card snapping down, a chip clicking
+  function sfxCard(){ if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime; sfxNoiseHit(ac, t, 'highpass', 2600, 1800, 0.7, 0.07, 0.22); sfxNoiseHit(ac, t + 0.02, 'bandpass', 900, 500, 1.2, 0.05, 0.12); }
+  function sfxChip(){ if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime; sfxTone(ac, t, 'triangle', 2400, 2100, 0.06, 0.12); sfxTone(ac, t + 0.06, 'triangle', 2700, 2300, 0.07, 0.1); }
+  // ----- sending points to someone -----
+  // gifts/<to>/<id> = { f: from, n: their name, a: points, t } — paid from your points as it's sent, collected by them the next time SaiDeck checks
+  function gpClose(){ const g = chatPanel.querySelector('.gift-pop'); if(g) g.remove(); }
+  function gpOpen(uid, name, anchor){
+    gpClose();
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(uid === chatUid()) return;
+    const g = document.createElement('div'); g.className = 'gift-pop'; g.setAttribute('role', 'dialog');
+    g.innerHTML = `<b>Send points to <span></span></b><p class="chat-side-p">They come out of your points (you have <em>${SC.loaded ? scBal() : '…'}</em>).</p>
+      <div class="gp-row"><input type="number" min="1" max="5000" step="1" value="10" aria-label="Points to send"><button type="button" class="chat-pbtn gp-send">Send</button><button type="button" class="chat-sbtn gp-x">Cancel</button></div>`;
+    g.querySelector('b span').textContent = bjName(name); g.querySelector('b span').style.color = chatColor(name || '');
+    chatPanel.appendChild(g);
+    const r = anchor.getBoundingClientRect(), w = 280;
+    g.style.left = Math.max(12, Math.min(window.innerWidth - w - 12, r.left + r.width / 2 - w / 2)) + 'px';
+    g.style.top = Math.max(12, Math.min(window.innerHeight - 150, r.bottom + 8)) + 'px';
+    const inp = g.querySelector('input'); setTimeout(() => { inp.focus(); inp.select(); }, 30);
+    if(!SC.loaded) scLoad().then(() => { const e = g.querySelector('em'); if(e) e.textContent = scBal(); });
+    const send = () => giftSend(uid, name, Math.round(Number(inp.value)), g);
+    inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter') send(); if(e.key === 'Escape') gpClose(); });
+    g.querySelector('.gp-send').addEventListener('click', send);
+    g.querySelector('.gp-x').addEventListener('click', gpClose);
+    g.animate([{ opacity: 0, transform: 'translateY(-6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' });
+  }
+  async function giftSend(uid, name, amt, pop){
+    if(!(amt >= 1 && amt <= 5000)){ toast('Send between 1 and 5000 points.', 2000); return; }
+    if(!SC.loaded) await scLoad();
+    if(scBal() < amt){ toast(`You only have ${scBal()} points.`, 2000); return; }
+    const btn = pop && pop.querySelector('.gp-send'); if(btn){ btn.disabled = true; btn.textContent = '…'; }
+    const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const ok = await bjPatch({ [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv }).catch(() => null);
+    if(ok){ SC.s += amt; gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
+    else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
+  }
+  // collecting points people sent you (checked when the chat starts, then every 20 s)
+  let giftBusy = false;
+  async function giftCheck(){
+    if(giftBusy || !chatName() || document.visibilityState !== 'visible') return; giftBusy = true;
+    try{
+      const tok = await chatAuth(), me = chatUid();
+      const r = await fetch(`${CHAT_DB}/gifts/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`);
+      const d = r.ok ? await r.json() : null;
+      if(d && typeof d === 'object'){
+        await scLoad();
+        for(const [id, g] of Object.entries(d)){
+          if(!g || !(g.a > 0)) continue;
+          const body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+          if(await bjPatch(body)){ SC.p += g.a; toast(`💸 ${bjName(g.n)} sent you ${g.a} points!`, 3200); sfxChip(); }
+          else await scLoad();
+        }
+        chatRenderArcade(); bjCtl();
+      }
+    }catch(e){}
+    giftBusy = false;
+  }
+  setInterval(giftCheck, 20000); setTimeout(giftCheck, 4000);
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
@@ -22748,7 +23281,8 @@
       h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
         <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
         <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
-        <button type="button" class="arc-cas-join" data-cas-join>Join the casino</button></div>`;
+        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button></div>
+        <p class="chat-side-p">Blackjack: one table for everyone, with a bot dealer — or take the dealer's seat yourself. Blackjack pays 3 to 2, a win 2 to 1.</p></div>`;
       if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {
       const B = SC.board;
@@ -23077,6 +23611,7 @@
     row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
   }
   function chatIncoming(m){
+    try{ bjSay(m); }catch(e){}
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a) || m.e) return;   // (my own message coming back / someone banned)
     if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
     CHAT.unread++;
@@ -23287,7 +23822,10 @@
           const st = P.h ? ['away', 'in another tab'] : P.w ? ['idle', 'SaiDeck open · idle'] : ['on', 'on SaiDeck'];
           tail.className = 'chat-who-st ' + st[0]; tail.innerHTML = `<i></i>${st[1]}`;
         } else { tail.className = 'chat-who-t'; tail.textContent = sub; }
-        row.append(av, nm, tail); w.appendChild(row);
+        row.append(av, nm, tail);
+        if(!me && chatName()){ const g = document.createElement('button'); g.type = 'button'; g.className = 'chat-who-gift'; g.title = 'Send ' + n + ' some points'; g.setAttribute('aria-label', 'Send points to ' + n); g.textContent = '💸';
+          g.addEventListener('click', (e) => { e.stopPropagation(); gpOpen(uid, n, g); }); row.appendChild(g); }
+        w.appendChild(row);
       };
       for(const p of on) row1(p.uid, p.n, p.me, '', true);
       // everyone else who has a chat name, most recently seen first

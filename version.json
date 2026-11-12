@@ -1,6 +1,6 @@
 {
-  "build": 47,
+  "build": 48,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Idle now only counts clicks, typing and scrolling (not mouse movement), and switching to another tab or app makes you idle right away. The online list shows if each person is on SaiDeck, idle in SaiDeck, or in another tab."
+  "notes": "Blackjack in the casino: one table for everyone with a bot dealer (or take the dealer seat; others can vote to kick). Send points to anyone from the online list or the table. Chat messages pop up over your head at the table. Online / Arcade / Alerts / Casino windows now sit beside the chat so you can keep typing."
 }
