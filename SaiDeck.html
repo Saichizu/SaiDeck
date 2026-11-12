@@ -473,6 +473,10 @@
     background:linear-gradient(135deg,#ffd6f5,#c9b6ff);box-shadow:0 8px 26px rgba(180,140,255,.45);opacity:0;animation:sduIn .8s ease-out 1.8s forwards;}
   .sdw-go:hover{filter:brightness(1.06);transform:translateY(-1px);} .sdw-go:focus-visible{outline:2px solid #fff;outline-offset:3px;}
   .sd-welcome{cursor:default !important;}
+
+  .tot-face{position:absolute;inset:0;transform-origin:50% 45%;}
+  .tot-face svg{width:100%;height:100%;display:block;}
+  .tot-flash{position:absolute;inset:0;background:#fff;pointer-events:none;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21079,7 +21083,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 56;                 // ← goes up by one with every published version
+  const SD_BUILD = 57;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22523,6 +22527,7 @@
       const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ e, n: chatName().slice(0, CHAT_NAME_MAX), u: chatUid(), t: { '.sv': 'timestamp' } }) });
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
       toast(`${POKE_EMO[e]} sent to ${name}.`, 1600);
+      try{ sfxPoke(POKE_EMO[e], 0.45); }catch(e2){}
     }catch(err){ console.error(err); CHAT.lastPoke = 0; toast(chatBlock() || "Couldn't send it — check your internet connection.", 2600); }
   }
   // listening for my own pokes
@@ -23990,7 +23995,7 @@
   }
   // ----- 🎃 Trick or Treat: plant one on someone's screen while infiltrating (Space); it stays hidden until their mouse finds it -----
   // tricks/<them>/<id> = { u, n, x, y, t } (paid with one from your stock: inv/<you>/tot)
-  const TOT_PRICE = 100, TOT_R = 56;
+  const TOT_PRICE = 100, TOT_R = 130;
   const TRAPS = new Map(); let trapBusy = false;
   async function totBuy(){
     if(SC.busy) return; if(!SC.loaded) await scLoad();
@@ -24010,10 +24015,15 @@
     if((SC.tot | 0) < 1){ toast(`🎃 No Trick or Treats left — buy them in the shop (${TOT_PRICE} points each).`, 2600); return; }
     if(M.planting) return; M.planting = true;
     const x = Math.max(0, Math.min(1, M.px / innerWidth)), y = Math.max(0, Math.min(1, M.py / innerHeight)), px = M.px, py = M.py;
-    const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const ok = await bjPatch({ [`tricks/${M.uid}/${id}`]: { u: me, n: chatName().slice(0, CHAT_NAME_MAX), x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000, t: bjSv }, [`inv/${me}/tot`]: SC.tot - 1 }).catch(() => null);
+    // (each person has room for 2 waiting Trick or Treats in total, from anyone — a full screen takes no more, and costs you nothing)
+    const me = chatUid(), k = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    let ok = null;
+    for(const slot of ['s1', 's2']){
+      ok = await bjPatch({ [`tricks/${M.uid}/${slot}`]: { u: me, n: chatName().slice(0, CHAT_NAME_MAX), x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000, t: bjSv, k }, [`inv/${me}/tot`]: SC.tot - 1 }).catch(() => null);
+      if(ok) break;
+    }
     M.planting = false;
-    if(!ok){ await scLoad(); toast("Couldn't plant it — try again.", 2200); return; }
+    if(!ok){ await scLoad(); toast(`🎃 ${bjName(M.name)} already has 2 Trick or Treats waiting — you can't plant more until they find one.`, 3000); return; }
     SC.tot--; infHud();
     // (just for you: a pumpkin sinks into the spot)
     const pk = document.createElement('div'); pk.className = 'tot-plant'; pk.textContent = '🎃'; pk.style.left = px + 'px'; pk.style.top = py + 'px'; document.body.appendChild(pk);
@@ -24034,7 +24044,7 @@
   }
   setInterval(trapCheck, 15000); setTimeout(trapCheck, 5000);
   window.addEventListener('pointermove', (e) => {
-    if(!TRAPS.size || INF.me) return;
+    if(!TRAPS.size || INF.me || document.querySelector('.sd-welcome, .sd-upov')) return;     // (not while the opening screen or the update window is up)
     for(const [k, t] of TRAPS){
       if(t.firing) continue;
       const dx = e.clientX - t.x * innerWidth, dy = e.clientY - t.y * innerHeight;
@@ -24046,7 +24056,7 @@
     totScare(x, y, who);
     const me = chatUid(), base = { [`tricks/${me}/${id}`]: null };
     const msg = { n: chatName().slice(0, CHAT_NAME_MAX), m: `got tricked by ${who}`.slice(0, chatMaxLen()), t: bjSv, u: me, e: 'trick', v: t.u };
-    let ok = chatName() && !chatBlock() ? await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: msg }, base)).catch(() => null) : null;
+    let ok = chatName() && !chatBlock() && typeof t.k === 'string' ? await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${t.k}`]: msg }, base)).catch(() => null) : null;
     if(!ok) await bjPatch(base).catch(() => null);
     TRAPS.delete(id);
   }
@@ -24056,8 +24066,36 @@
     const L = document.createElement('div'); L.className = 'tot-scare'; document.body.appendChild(L);
     const fl = document.createElement('div'); fl.className = 'tot-dark'; fl.style.setProperty('--x', x + 'px'); fl.style.setProperty('--y', y + 'px'); L.appendChild(fl);
     fl.animate([{ opacity: 0 }, { opacity: 1, offset: .08 }, { opacity: .85, offset: .6 }, { opacity: 0 }], { duration: 2600, fill: 'forwards' });
-    const pk = document.createElement('div'); pk.className = 'tot-pk'; pk.textContent = '🎃'; pk.style.left = x + 'px'; pk.style.top = y + 'px'; L.appendChild(pk);
-    pk.animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-20deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(3.2) rotate(8deg)', opacity: 1, offset: .18 }, { transform: 'translate(-50%,-50%) scale(2.6) rotate(-4deg)', opacity: 1, offset: .5 }, { transform: 'translate(-50%,-50%) scale(4) rotate(0)', opacity: 0 }], { duration: 1600, easing: 'cubic-bezier(.2,.9,.3,1.2)', fill: 'forwards' });
+    // (no warning: the whole screen is a pumpkin face, right now)
+    const face = document.createElement('div'); face.className = 'tot-face';
+    face.innerHTML = `<svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><radialGradient id="totSkin" cx="50%" cy="42%" r="72%"><stop offset="0" stop-color="#ffa62b"/><stop offset=".5" stop-color="#f06400"/><stop offset="1" stop-color="#5a1800"/></radialGradient>
+        <radialGradient id="totFire" cx="50%" cy="55%" r="65%"><stop offset="0" stop-color="#fff6c0"/><stop offset=".35" stop-color="#ffcc33"/><stop offset=".75" stop-color="#ff5a00"/><stop offset="1" stop-color="#3a0600"/></radialGradient>
+        <radialGradient id="totVig" cx="50%" cy="48%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient></defs>
+      <rect width="160" height="100" fill="url(#totSkin)"/>
+      <g fill="none" stroke="#7a2400" stroke-opacity=".6" stroke-width="2.4"><path d="M80 -5 Q66 50 80 105"/><path d="M80 -5 Q94 50 80 105"/><path d="M80 -5 Q42 50 56 105"/><path d="M80 -5 Q118 50 104 105"/><path d="M80 -5 Q14 50 30 105"/><path d="M80 -5 Q146 50 130 105"/></g>
+      <g fill="#070100"><path d="M30 24 L75 40 L50 54 Z"/><path d="M130 24 L85 40 L110 54 Z"/></g>
+      <g class="tf-glow" fill="url(#totFire)"><path d="M41 31 L67 41 L51 48 Z"/><path d="M119 31 L93 41 L109 48 Z"/></g>
+      <path fill="#070100" d="M80 51 L72 63 L88 63 Z"/>
+      <path fill="#070100" d="M16 60 Q80 112 144 60 Q80 80 16 60 Z"/>
+      <path class="tf-glow" fill="url(#totFire)" opacity=".9" d="M30 66 Q80 100 130 66 Q80 82 30 66 Z"/>
+      <g fill="url(#totSkin)"><path d="M36 64 L44 66 L40 80 Z"/><path d="M56 70 L68 72 L61 90 Z"/><path d="M92 72 L104 70 L99 90 Z"/><path d="M116 66 L124 64 L120 80 Z"/>
+        <path d="M48 88 L55 76 L60 90 Z"/><path d="M74 93 L80 80 L86 93 Z"/><path d="M100 90 L105 76 L112 88 Z"/></g>
+      <rect width="160" height="100" fill="url(#totVig)"/>
+    </svg>`;
+    L.appendChild(face);
+    const flash = document.createElement('div'); flash.className = 'tot-flash'; L.appendChild(flash);
+    flash.animate([{ opacity: .95 }, { opacity: 0, offset: .12 }, { opacity: .6, offset: .2 }, { opacity: 0 }], { duration: 700, fill: 'forwards' });
+    if(still) face.animate([{ opacity: 1 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: 2200, fill: 'forwards' });
+    else {
+      // (it lunges at you, shakes, then rushes past into the bats)
+      face.animate([
+        { transform: 'scale(1.35)', opacity: 1 }, { transform: 'scale(1.02) translate(-2%, 1%) rotate(-2deg)', offset: .06 }, { transform: 'scale(1.06) translate(2%, -1%) rotate(2deg)', offset: .1 },
+        { transform: 'scale(1.03) translate(-1.5%, 1%) rotate(-1.5deg)', offset: .14 }, { transform: 'scale(1.07) translate(1.5%, 0) rotate(1.5deg)', offset: .18 }, { transform: 'scale(1.04) rotate(-1deg)', offset: .24 },
+        { transform: 'scale(1.06) rotate(.6deg)', offset: .32 }, { transform: 'scale(1.05)', offset: .62, opacity: 1 }, { transform: 'scale(2.6)', opacity: 0 }], { duration: 2200, easing: 'ease-in', fill: 'forwards' });
+      face.querySelectorAll('.tf-glow').forEach(gl => gl.animate([{ opacity: .9 }, { opacity: .2 }, { opacity: 1 }, { opacity: .35 }, { opacity: .95 }], { duration: 380, iterations: 6 }));
+      document.body.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-8px, 5px)' }, { transform: 'translate(7px, -6px)' }, { transform: 'translate(-5px, -3px)' }, { transform: 'translate(4px, 6px)' }, { transform: 'translate(0,0)' }], { duration: 420, iterations: 2 });
+    }
     const n = still ? 8 : 46;
     for(let i = 0; i < n; i++){
       const b = document.createElement('div'); b.className = 'tot-bat'; b.textContent = '🦇'; b.style.left = x + 'px'; b.style.top = y + 'px';
@@ -24068,21 +24106,40 @@
                  { transform: `translate(calc(-50% + ${ex * .25 + wob}px), calc(-50% + ${ey * .25 - wob * .4}px)) scale(1) rotate(${(Math.random() - .5) * 40}deg)`, opacity: 1, offset: .25 },
                  { transform: `translate(calc(-50% + ${ex * .65 - wob}px), calc(-50% + ${ey * .65 + wob * .3}px)) scale(1.3) rotate(${(Math.random() - .5) * 60}deg)`, opacity: 1, offset: .7 },
                  { transform: `translate(calc(-50% + ${ex}px), calc(-50% + ${ey}px)) scale(1.6)`, opacity: 0 }],
-        { duration: 1500 + Math.random() * 1200, delay: Math.random() * 380, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'both' });
+        { duration: 1500 + Math.random() * 1200, delay: 1100 + Math.random() * 420, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'both' });
     }
     const ban = document.createElement('div'); ban.className = 'tot-ban'; ban.innerHTML = '<b>TRICK!</b><span></span>';
     ban.querySelector('span').textContent = `${who} planted a Trick or Treat on your screen 🎃`; L.appendChild(ban);
-    ban.animate([{ opacity: 0, transform: 'translate(-50%, -30px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1.05)', offset: .12 }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)', offset: .85 }, { opacity: 0, transform: 'translate(-50%, -10px)' }], { duration: 4200, fill: 'forwards' });
+    ban.animate([{ opacity: 0, transform: 'translate(-50%, -30px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1.05)', offset: .12 }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)', offset: .85 }, { opacity: 0, transform: 'translate(-50%, -10px)' }], { duration: 4200, delay: 1300, fill: 'both' });
     sfxScare();
-    setTimeout(() => L.remove(), 4400);
+    setTimeout(() => L.remove(), 5800);
   }
   function sfxScare(){
     if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
-    sfxTone(ac, t, 'sawtooth', 90, 40, 0.5, 0.25);                       // the thump
-    sfxNoiseHit(ac, t, 'bandpass', 900, 3200, 4, 0.35, 0.3);              // the burst
-    for(let i = 0; i < 9; i++) sfxTone(ac, t + 0.12 + i * 0.07, 'square', 2600 + Math.random() * 1600, 1800 + Math.random() * 1200, 0.05, 0.035);   // the squeaks
-    sfxTone(ac, t + 0.05, 'triangle', 520, 140, 0.9, 0.12);               // the moan
+    const lim = ac.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = .002; lim.release.value = .2;
+    const out = ac.createGain(); out.gain.value = 1.0; lim.connect(out); out.connect(ac.destination);
+    // (a gritty distortion for the scream)
+    const ws = ac.createWaveShaper(), curve = new Float32Array(1024); for(let i = 0; i < 1024; i++){ const x = i / 512 - 1; curve[i] = Math.tanh(x * 6); } ws.curve = curve; ws.connect(lim);
+    const env = (node, at, peak, attack, hold, rel) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t + at); g.gain.exponentialRampToValueAtTime(peak, t + at + attack); g.gain.setValueAtTime(peak, t + at + attack + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + at + attack + hold + rel); node.connect(g); return g; };
+    // the slam: a huge low boom
+    { const o = ac.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(28, t + .6); env(o, 0, 1.0, .005, .05, .7).connect(lim); o.start(t); o.stop(t + 1); }
+    // the hit: a full burst of noise
+    { const n = ac.createBufferSource(); n.buffer = sfxNoise(ac); const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(9000, t); f.frequency.exponentialRampToValueAtTime(600, t + .5); n.connect(f); env(f, 0, .9, .003, .05, .45).connect(lim); n.start(t); n.stop(t + .7); }
+    // the scream: detuned saws sliding down, shaking, through the distortion
+    for(const det of [0, 7, -9, 13]){
+      const o = ac.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(1350 + det * 10, t + .02); o.frequency.exponentialRampToValueAtTime(520 + det * 4, t + 1.4);
+      const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 9 + Math.abs(det) * .3; lg.gain.value = 60; lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t + 1.6);
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = .7; o.connect(bp);
+      env(bp, .02, .35, .02, .55, .8).connect(ws); o.start(t + .02); o.stop(t + 1.6);
+    }
+    // the stinger: a nasty chord underneath
+    for(const f of [146.8, 155.6, 207.7, 220]){ const o = ac.createOscillator(); o.type = 'square'; o.frequency.value = f; const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400; o.connect(lp); env(lp, 0, .16, .01, .4, 1.1).connect(lim); o.start(t); o.stop(t + 1.8); }
+    // and the bats flapping out after it
+    for(let i = 0; i < 14; i++) sfxNoiseHit(ac, t + 1.1 + i * .06 + Math.random() * .04, 'bandpass', 2400 + Math.random() * 1500, 1600, 2, .04, .18, lim);
+    for(let i = 0; i < 8; i++) sfxTone(ac, t + 1.15 + i * .08, 'square', 3000 + Math.random() * 1800, 2000 + Math.random() * 1000, .05, .06, lim);
   }
+
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
@@ -24424,7 +24481,26 @@
   }
   setTimeout(() => { try{ artUI(); }catch(e){} }, 2500);
   let pokeFxLayer = null;
+  // each emoji has its own little sound (for whoever gets it, and a softer copy for whoever sent it)
+  function sfxPoke(em, vol){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return;
+    const t = ac.currentTime, v = vol == null ? 1 : vol, g = ac.createGain(); g.gain.value = v; g.connect(ac.destination);
+    const tone = (at, type, f0, f1, dur, pk) => sfxTone(ac, t + at, type, f0, f1, dur, pk, g);
+    const noise = (at, type, fa, fb, q, dur, pk) => sfxNoiseHit(ac, t + at, type, fa, fb, q, dur, pk, g);
+    switch(em){
+      case '👋': tone(0, 'sine', 520, 820, .12, .22); tone(.13, 'sine', 620, 980, .16, .2); break;                                   // "hey-hey!"
+      case '❤️': tone(0, 'sine', 90, 55, .14, .5); tone(.2, 'sine', 80, 50, .16, .42); tone(.38, 'triangle', 880, 880, .5, .07); tone(.38, 'triangle', 1320, 1320, .5, .05); break;   // heartbeat + chime
+      case '😂': [0, .1, .2, .3, .42].forEach((d, i) => tone(d, 'triangle', 720 - i * 60, 600 - i * 60, .08, .16)); break;            // ha-ha-ha
+      case '🔥': noise(0, 'bandpass', 300, 2600, 1.2, .55, .35); for(let i = 0; i < 6; i++) noise(.08 + Math.random() * .5, 'highpass', 3000, 2000, 1, .03, .2); break;   // whoosh + crackle
+      case '👏': for(let i = 0; i < 6; i++) noise(i * .09 + Math.random() * .03, 'bandpass', 1800, 1200, 1.5, .05, .4); break;       // claps
+      case '🎉': tone(0, 'sawtooth', 320, 640, .35, .12); tone(.02, 'square', 330, 650, .33, .05); for(let i = 0; i < 5; i++) noise(.3 + i * .06, 'highpass', 4000, 3000, 1, .03, .18); break;   // party horn + pops
+      case '😮': tone(0, 'sine', 300, 520, .25, .25); tone(.24, 'sine', 520, 260, .4, .22); break;                                     // "ooo-oh"
+      case '🎵': [523, 659, 784, 1047].forEach((f, i) => tone(i * .1, 'triangle', f, f, .22, .16)); break;                           // a little tune
+      default: tone(0, 'sine', 660, 990, .15, .2);
+    }
+  }
   function chatPokeShow(em, from){
+    try{ sfxPoke(em, 1); }catch(e){}
     if(!pokeFxLayer){ pokeFxLayer = document.createElement('div'); pokeFxLayer.className = 'poke-fx'; pokeFxLayer.setAttribute('aria-live', 'polite'); document.body.appendChild(pokeFxLayer); }
     const L = pokeFxLayer, still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const tag = document.createElement('div'); tag.className = 'poke-fx-tag'; tag.textContent = `${from} sent you ${em}`;

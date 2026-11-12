@@ -1,6 +1,6 @@
 {
-  "build": 56,
+  "build": 57,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The opening screen now thanks our testers: their names float in a glass capsule and you can knock them around with your mouse. 💜"
+  "notes": "Emoji reactions now make a sound (each emoji its own). The Trick or Treat jumpscare is much scarier and louder: a giant pumpkin face slams over the whole screen. Traps are easier to set off, at most 2 can wait on someone's screen at once, and they never go off during the opening screen."
 }
