@@ -1,6 +1,6 @@
 {
-  "build": 62,
+  "build": 63,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "When someone declines your points, the gift card in the chat changes into a cheeky 'declined' line for everyone to see."
+  "notes": "Declined gifts now show up as a 'declined' line in the chat more reliably (older gifts too)."
 }

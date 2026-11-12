@@ -21111,7 +21111,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 62;                 // ← goes up by one with every published version
+  const SD_BUILD = 63;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23942,7 +23942,12 @@
     const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv, r: chatRoom() }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
     const note = `sent ${amt} point${amt === 1 ? '' : 's'} to ${bjName(name)}`.slice(0, chatMaxLen());
     let ok = chatBlock() ? null : await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, base)).catch(() => null);
-    if(!ok){ const b2 = Object.assign({}, base); b2[`gifts/${uid}/${id}`] = Object.assign({}, base[`gifts/${uid}/${id}`]); delete b2[`gifts/${uid}/${id}`].r; ok = await bjPatch(b2).catch(() => null); }      // (if the chat won't take the notice, the points still go)
+    if(!ok){
+      // (the database might not know about the room field yet: the notice without it, then the points on their own)
+      const b2 = Object.assign({}, base); b2[`gifts/${uid}/${id}`] = Object.assign({}, base[`gifts/${uid}/${id}`]); delete b2[`gifts/${uid}/${id}`].r;
+      if(!chatBlock()) ok = await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, b2)).catch(() => null);
+      if(!ok) ok = await bjPatch(b2).catch(() => null);
+    }
     if(ok){ SC.s += amt; gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
     else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
   }
@@ -24021,7 +24026,12 @@
     no.addEventListener('click', async () => {
       yes.disabled = no.disabled = true; no.textContent = '…';
       const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`gifts/${g.f}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: g.a, t: bjSv, r: true } };
-      if(await bjPatch(body).catch(() => null)){ done('Declined — sent back'); if(typeof g.r === 'string' && g.r) bjPatch({ [`rooms/${g.r}/messages/${id}/d`]: true }).catch(() => {}); }
+      if(await bjPatch(body).catch(() => null)){
+        done('Declined — sent back');
+        // (turn the "sent" notice in the chat into a "declined" one — in its room, or wherever it might be)
+        const rooms = [...new Set([typeof g.r === 'string' && g.r ? g.r : null, chatRoom(), CHAT_ROOM].filter(Boolean))];
+        (async () => { for(const rm of rooms){ if(await bjPatch({ [`rooms/${rm}/messages/${id}/d`]: true }).catch(() => null)) break; } })();
+      }
       else { yes.disabled = no.disabled = false; no.textContent = 'Decline'; toast("Couldn't decline — try again in a moment.", 2200); }
     });
     host.appendChild(c); giftAsked.set(id, c);
