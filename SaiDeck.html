@@ -318,6 +318,146 @@
   .chat-games-m button{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;color:var(--text);}
   .chat-games-m button:hover, .chat-games-m button:focus-visible{background:rgba(255,255,255,.08);}
   .chat-games-m span{font-size:17px;} .chat-games-m b{font-weight:700;} .chat-games-m i{margin-left:auto;font-style:normal;font-size:10.5px;color:#7dffb2;}
+
+  /* the game windows: their own layer under Online/Arcade/Alerts; two of them sit side by side */
+  .chat-casino:not([hidden]){z-index:3;}
+  .chat-panel.pop-open .chat-casino:not([hidden]){filter:brightness(.6);}
+  .chat-side:not(.chat-casino):not([hidden]), .chat-who:not([hidden]){z-index:5;}
+  .chat-modal-x{z-index:6;}
+  .cas-x{all:unset;flex:none;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);}
+  .cas-x:hover{background:rgba(255,255,255,.1);color:var(--text);} .cas-x svg{width:18px;height:18px;fill:currentColor;} .cas-x:focus-visible{outline:2px solid #fff;}
+  .cas-head{padding-right:0 !important;} .cas-sw[hidden]{display:none;}
+  @media (min-width: 900px){
+    .chat-panel.two-games{--gw:calc((100vw - min(360px, calc(100vw - 32px)) - 16px - 48px) / 2);}
+    .chat-panel.two-games .chat-casino:not([hidden]){width:var(--gw);left:calc(16px + var(--gw) / 2);}
+    .chat-panel.two-games .chat-bj:not([hidden]){left:calc(32px + var(--gw) * 1.5);}
+    .chat-panel.two-games .cas-head > div:first-child span{display:none;}
+  }
+
+  /* Blackjack table: free seating, bigger totals, styles */
+  .bj-table{display:block !important;height:540px;min-height:0 !important;padding:0 !important;background-size:cover !important;background-position:center !important;}
+  .bj-table .bj-dealer{position:absolute;top:10px;left:50%;transform:translateX(-50%);min-height:0;}
+  .bj-table .bj-msg{position:absolute;top:196px;left:50%;transform:translateX(-50%);white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;}
+  .bj-table .bj-fast{position:absolute;top:234px;left:50%;transform:translateX(-50%);}
+  .bj-table .bj-seats{position:absolute;inset:0;display:block;pointer-events:none;}
+  .bj-table .bj-seat{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;transition:left .35s ease, top .35s ease, background .2s, box-shadow .2s;}
+  .bj-table .bj-seat.dragging{transition:none;z-index:4;opacity:.92;}
+  .bj-seat.me .bj-pl .bj-av{cursor:grab;touch-action:none;} .bj-seat.dragging .bj-av{cursor:grabbing;}
+  .bj-table .bj-specs{position:absolute;left:10px;right:10px;bottom:8px;}
+  .bj-tot{min-height:24px !important;display:inline-flex;align-items:center;justify-content:center;font:900 18px 'Manrope',sans-serif !important;color:#fff;padding:1px 11px;border-radius:999px;background:rgba(0,0,0,.5);letter-spacing:.02em;}
+  .bj-tot:empty{background:none;padding:0;}
+  .bj-dtot{font-size:20px !important;}
+  .bj-stake{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;font:800 12px 'Inter',sans-serif;background:radial-gradient(circle,#ffe08a 0 30%,#f5a524 31% 100%);color:#2a1a02;}
+  .bj-stake.none{background:rgba(0,0,0,.35);color:#ffe08a;font-weight:700;} .bj-stake.win{background:#2fb37a;color:#fff;} .bj-stake.lose{background:#a83246;color:#fff;}
+  /* chat bubbles go beside the picture, not over the cards */
+  .bj-say{bottom:auto !important;top:50%;left:calc(100% + 10px) !important;transform:translateY(-50%);}
+  .bj-say::after{top:50% !important;left:auto !important;right:100%;margin:-6px 0 0 !important;border:6px solid transparent !important;border-right-color:#fff !important;}
+  .bj-say.left{left:auto !important;right:calc(100% + 10px);}
+  .bj-say.left::after{right:auto;left:100% !important;border-right-color:transparent !important;border-left-color:#fff !important;}
+  .cas-seat{position:relative;}
+  /* felts */
+  .bj-table[data-felt="blue"]{background:radial-gradient(90% 90% at 50% 20%, #2a5fa8 0%, #1b4381 55%, #102a55 100%) !important;}
+  .bj-table[data-felt="red"]{background:radial-gradient(90% 90% at 50% 20%, #a8323f 0%, #7c1f2b 55%, #4f121a 100%) !important;}
+  .bj-table[data-felt="purple"]{background:radial-gradient(90% 90% at 50% 20%, #6b3fb0 0%, #4c2a84 55%, #2c1752 100%) !important;}
+  .bj-table[data-felt="black"]{background:radial-gradient(90% 90% at 50% 20%, #33363f 0%, #1f2128 55%, #111216 100%) !important;}
+  .bj-table[data-felt="wood"]{background:repeating-linear-gradient(95deg, #7a4a24 0 14px, #84522a 14px 22px, #6d401e 22px 40px) !important;}
+  .bj-table[data-felt="custom"]{background-color:#111 !important;}
+  /* card styles */
+  .bj-table.cards-dark .bj-card{background:linear-gradient(160deg,#2b2e38,#1b1d24);color:#e9ecf3;border:1px solid #444a58;} .bj-table.cards-dark .bj-card.red{color:#ff7a8a;}
+  .bj-table.cards-gold .bj-card{background:linear-gradient(160deg,#fff7df,#f1dfa8);border:2px solid #c9993b;} .bj-table.cards-gold .bj-card.red{color:#b0262f;}
+  .bj-table.cards-neon .bj-card{background:#0d0e14;color:#7df9ff;border:1.5px solid #7df9ff;box-shadow:0 0 10px rgba(125,249,255,.55), inset 0 0 8px rgba(125,249,255,.2);}
+  .bj-table.cards-neon .bj-card.red{color:#ff5ec8;border-color:#ff5ec8;box-shadow:0 0 10px rgba(255,94,200,.55), inset 0 0 8px rgba(255,94,200,.2);}
+  .bj-table.cards-pink .bj-card{background:linear-gradient(160deg,#ffe3f0,#ffc6df);color:#5a1a3a;border:1px solid #ff8fc0;} .bj-table.cards-pink .bj-card.red{color:#d4145a;}
+  .bj-theme{position:absolute;top:58px;right:60px;z-index:6;width:320px;max-width:calc(100% - 24px);padding:12px;border-radius:12px;background:#1f2030;border:1px solid rgba(125,255,178,.45);box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:8px;}
+  .bj-theme > b{font:700 12px 'Inter',sans-serif;color:var(--text);}
+  .bjt-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .bjt-felt, .bjt-card{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--text-dim);padding:4px;border-radius:8px;border:1px solid transparent;}
+  .bjt-felt.on, .bjt-card.on{border-color:#7dffb2;color:var(--text);} .bjt-felt:hover, .bjt-card:hover{background:rgba(255,255,255,.06);}
+  .bjt-felt i{width:38px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-style:normal;color:#fff;border:1px solid rgba(255,255,255,.15);}
+  .f-green{background:#1f7a4f;} .f-blue{background:#2a5fa8;} .f-red{background:#a8323f;} .f-purple{background:#6b3fb0;} .f-black{background:#26282f;}
+  .f-wood{background:repeating-linear-gradient(95deg,#7a4a24 0 5px,#84522a 5px 8px,#6d401e 8px 13px);} .f-up{background:rgba(255,255,255,.08);border-style:dashed !important;}
+  .bj-mini{width:26px;height:36px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 10px 'Inter',sans-serif;line-height:1;}
+  .bj-mini i{font-style:normal;font-size:13px;color:#d42a3c;}
+  .c-classic{background:#fff;color:#16171d;} .c-dark{background:#22252e;color:#e9ecf3;} .c-dark i{color:#ff7a8a;} .c-gold{background:#fbeec4;border:1.5px solid #c9993b;color:#16171d;}
+  .c-neon{background:#0d0e14;color:#7df9ff;border:1px solid #7df9ff;} .c-neon i{color:#ff5ec8;} .c-pink{background:#ffd3e7;color:#5a1a3a;} .c-pink i{color:#d4145a;}
+  .bjt-link{all:unset;cursor:pointer;font-size:11px;color:#ff9aa8;align-self:flex-start;} .bjt-link:hover{text-decoration:underline;}
+  .bjt-felt:focus-visible, .bjt-card:focus-visible, .bjt-link:focus-visible{outline:2px solid #7dffb2;}
+
+  /* windows you've dragged stay put; the top strip is the handle */
+  .chat-who.moved:not([hidden]), .chat-side.moved:not([hidden]){transform:none !important;animation:chatWinIn .2s ease-out both;}
+  @keyframes chatWinIn{from{opacity:0;}to{opacity:1;}}
+  .chat-who.dragging, .chat-side.dragging{animation:none !important;user-select:none;box-shadow:0 40px 100px rgba(0,0,0,.75) !important;}
+  @media (min-width: 900px){
+    .chat-side:not([hidden]) > .cas-head, .chat-side:not([hidden]) > .arc-top, .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{cursor:grab;}
+    .chat-side.dragging > *, .chat-who.dragging > *{cursor:grabbing !important;}
+  }
+  .gift-pop, .chat-games-m, .chat-poke{z-index:400 !important;}
+  .bj-table .bj-seats > .chat-side-p{position:absolute;left:0;right:0;top:70%;text-align:center;color:rgba(255,255,255,.7);}
+
+  /* top 3 on the leaderboard */
+  .chat-av.top1, .chat-av.top2, .chat-av.top3{position:relative;}
+  .chat-av.top1{animation:topGlow1 2.2s ease-in-out infinite;} .chat-av.top2{animation:topGlow2 2.4s ease-in-out infinite;} .chat-av.top3{animation:topGlow3 2.6s ease-in-out infinite;}
+  @keyframes topGlow1{0%,100%{filter:drop-shadow(0 0 3px rgba(255,215,90,.9)) drop-shadow(0 0 8px rgba(255,180,40,.6));}50%{filter:drop-shadow(0 0 6px rgba(255,230,120,1)) drop-shadow(0 0 16px rgba(255,190,60,.9));}}
+  @keyframes topGlow2{0%,100%{filter:drop-shadow(0 0 3px rgba(220,230,245,.85)) drop-shadow(0 0 7px rgba(170,190,220,.5));}50%{filter:drop-shadow(0 0 6px rgba(240,245,255,1)) drop-shadow(0 0 13px rgba(190,210,240,.8));}}
+  @keyframes topGlow3{0%,100%{filter:drop-shadow(0 0 3px rgba(225,150,90,.85)) drop-shadow(0 0 7px rgba(200,110,50,.5));}50%{filter:drop-shadow(0 0 6px rgba(245,170,110,1)) drop-shadow(0 0 13px rgba(215,120,60,.8));}}
+  .chat-av.top1::after, .chat-av.top2::after, .chat-av.top3::after{position:absolute;top:-9px;right:-7px;font-size:12px;line-height:1;filter:none;pointer-events:none;}
+  .chat-av.top1::after{content:'👑';} .chat-av.top2::after{content:'🥈';font-size:11px;} .chat-av.top3::after{content:'🥉';font-size:11px;}
+  .top-n{background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent !important;animation:topShine 2.6s linear infinite;}
+  .top-n1{background-image:linear-gradient(90deg,#ffd76a,#fff6c9,#ffb347,#ffd76a);} .top-n2{background-image:linear-gradient(90deg,#cfd8e6,#ffffff,#9fb1c9,#cfd8e6);} .top-n3{background-image:linear-gradient(90deg,#e09a62,#ffd2ad,#b8693a,#e09a62);}
+  @keyframes topShine{to{background-position:200% center;}}
+  .top-pops{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9750;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+  .top-pop{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 10px;border-radius:999px;background:linear-gradient(135deg,#3a2a08,#1f1a10);border:1.5px solid #ffd76a;box-shadow:0 10px 30px rgba(0,0,0,.5), 0 0 26px rgba(255,200,80,.35);font-size:12.5px;color:#fff3cf;}
+  .top-pop.r2{background:linear-gradient(135deg,#2c3240,#1b1e26);border-color:#cfd8e6;box-shadow:0 10px 30px rgba(0,0,0,.5), 0 0 22px rgba(200,215,240,.3);color:#eef2f8;}
+  .top-pop.r3{background:linear-gradient(135deg,#3a2414,#21170f);border-color:#e09a62;box-shadow:0 10px 30px rgba(0,0,0,.5), 0 0 22px rgba(225,150,90,.3);color:#fbe3cf;}
+  .top-pop.plain{background:#20222b;border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,.4);color:var(--text);padding:7px 14px 7px 8px;}
+  .top-pop.plain b{font-weight:700;}
+  .top-pop .chat-av{width:30px;height:30px;font-size:12px;} .top-pop.plain .chat-av{width:24px;height:24px;font-size:10px;}
+  .top-pop .tp-c{font-size:20px;} .top-pop b{font-weight:800;margin-right:4px;}
+  /* Trick or Treat */
+  .tot-plant{position:fixed;z-index:9650;font-size:40px;pointer-events:none;}
+  .tot-scare{position:fixed;inset:0;z-index:9900;pointer-events:none;overflow:hidden;}
+  .tot-dark{position:absolute;inset:0;background:radial-gradient(circle at var(--x) var(--y), rgba(255,120,20,.25) 0, rgba(20,6,30,.55) 140px, rgba(5,0,10,.85) 70%);}
+  .tot-pk{position:absolute;font-size:64px;filter:drop-shadow(0 0 22px rgba(255,140,30,.9));}
+  .tot-bat{position:absolute;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));}
+  .tot-ban{position:absolute;top:18%;left:50%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 26px;border-radius:18px;background:rgba(20,8,28,.9);border:2px solid #ff8a1f;box-shadow:0 0 40px rgba(255,120,20,.5);text-align:center;}
+  .tot-ban b{font:900 38px 'Manrope',sans-serif;letter-spacing:.08em;color:#ff8a1f;text-shadow:0 0 18px rgba(255,138,31,.8);}
+  .tot-ban span{font-size:14px;color:#f3e6ff;}
+  .chat-trick{align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:9px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(255,138,31,.16),rgba(120,50,180,.18));border:1px solid rgba(255,138,31,.5);font-size:12.5px;color:var(--text);}
+  .chat-trick.to-me{border-color:#ff8a1f;box-shadow:0 0 18px rgba(255,138,31,.2);}
+  .chat-trick .ct-i{font-size:20px;} .chat-trick .ct-t{flex:1;min-width:0;line-height:1.4;}
+  .chat-trick i{margin-left:6px;font-style:normal;font-size:10.5px;color:var(--text-faint);}
+  .chat-trick.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
+  .ih-tot i{font-size:9px !important;}
+
+  /* the update window (in the middle, over everything) */
+  .sd-upov{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgba(6,6,12,.78);backdrop-filter:blur(6px);animation:sduIn .25s ease-out;}
+  @keyframes sduIn{from{opacity:0;}to{opacity:1;}}
+  .sdu-card{width:min(420px, calc(100vw - 32px));display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 24px 22px;border-radius:20px;background:linear-gradient(160deg,#20212c,#16171e);border:1px solid rgba(180,140,255,.45);box-shadow:0 30px 90px rgba(0,0,0,.7), 0 0 60px rgba(180,140,255,.15);text-align:center;}
+  .sdu-logo{width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff5e7a,#b48cff);box-shadow:0 8px 24px rgba(180,140,255,.4);animation:sduPulse 1.6s ease-in-out infinite;}
+  .sdu-logo span{font:900 28px 'Manrope',sans-serif;color:#fff;}
+  @keyframes sduPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
+  .sdu-t{font:800 18px 'Manrope',sans-serif;color:var(--text);}
+  .sdu-s{font-size:13px;line-height:1.5;color:var(--text-dim);min-height:20px;}
+  .sdu-bar{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px;}
+  .sdu-bar i{display:block;height:100%;width:40%;border-radius:3px;background:linear-gradient(90deg,#ff5e7a,#b48cff,#35d0b8);animation:sduRun 1.2s ease-in-out infinite;}
+  @keyframes sduRun{from{transform:translateX(-100%);}to{transform:translateX(260%);}}
+  .sd-upov.err .sdu-bar{display:none;} .sd-upov.err .sdu-logo{animation:none;filter:saturate(.6);}
+  .sdu-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;} .sdu-acts:empty{display:none;}
+  .sdu-b{all:unset;cursor:pointer;padding:9px 16px;border-radius:10px;font:700 12.5px 'Inter',sans-serif;border:1px solid var(--border);color:var(--text-dim);}
+  .sdu-b.pri{background:#b48cff;border-color:#b48cff;color:#16102a;} .sdu-b:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  /* the welcome screen */
+  .sd-welcome{position:fixed;inset:0;z-index:2147482000;background:radial-gradient(80% 70% at 50% 40%, #2a1d4a 0%, #120d22 55%, #07060d 100%);display:flex;align-items:center;justify-content:center;cursor:pointer;animation:sduIn .5s ease-out;transition:opacity .7s ease, transform .7s ease;}
+  .sd-welcome.out{opacity:0;transform:scale(1.04);pointer-events:none;}
+  .sd-welcome canvas{position:absolute;inset:0;}
+  .sdw-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;}
+  .sdw-title{font:900 clamp(56px, 11vw, 140px)/1 'Manrope',sans-serif;letter-spacing:-.02em;display:flex;}
+  .sdw-title span{background:linear-gradient(180deg,#fff 0%,#ffd6f5 45%,#b48cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(200,170,255,.55));
+    display:inline-block;opacity:0;animation:sdwLetter .8s cubic-bezier(.2,.9,.3,1.3) forwards, sdwFloat 3.2s ease-in-out infinite;animation-delay:calc(var(--i) * 90ms + 200ms), calc(var(--i) * 140ms + 1s);}
+  @keyframes sdwLetter{from{opacity:0;transform:translateY(30px) scale(.6) rotate(-8deg);filter:blur(8px) drop-shadow(0 0 0 transparent);}to{opacity:1;transform:none;}}
+  @keyframes sdwFloat{0%,100%{translate:0 0;}50%{translate:0 -8px;}}
+  .sdw-sub{font:600 clamp(15px, 2vw, 20px) 'Inter',sans-serif;color:#e9ddff;opacity:0;animation:sduIn .8s ease-out 1s forwards;text-shadow:0 0 12px rgba(180,140,255,.6);}
+  .sdw-hint{font-size:12px;color:rgba(233,221,255,.55);opacity:0;animation:sduIn .8s ease-out 2s forwards;margin-top:8px;}
+  @media (prefers-reduced-motion: reduce){ .sdw-title span{animation:none;opacity:1;} }
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -1602,7 +1742,7 @@
     border-radius:8px;
     font-size:12.5px;
     box-shadow:0 6px 24px rgba(0,0,0,.4);
-    z-index:80;
+    z-index:9800;
     opacity:0;
     pointer-events:none;
     transition:opacity .25s ease, transform .25s ease;
@@ -20924,7 +21064,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 51;                 // ← goes up by one with every published version
+  const SD_BUILD = 55;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -20959,10 +21099,10 @@
   // the folder this SaiDeck file is in, with permission to write — and it has
   // to be *this* copy (same build as the one running), not another SaiDeck
   // with the same name somewhere else
-  async function sdAppFolder(name, newBuild){
+  async function sdAppFolder(name, newBuild, quiet){
     const fileBuild = async (d) => { try{ return sdBuildOf(await (await (await d.getFileHandle(name)).getFile()).text()); }catch(e){ return -1; } };
     const mine = async (d) => { const b = await fileBuild(d); return b === SD_BUILD || (newBuild && b >= newBuild) ? b : -1; };
-    const ok = async (d) => { try{ let p = await d.queryPermission({ mode: 'readwrite' }); if(p !== 'granted') p = await d.requestPermission({ mode: 'readwrite' }); return p === 'granted'; }catch(e){ return false; } };
+    const ok = async (d) => { try{ let p = await d.queryPermission({ mode: 'readwrite' }); if(p !== 'granted' && !quiet) p = await d.requestPermission({ mode: 'readwrite' }); return p === 'granted'; }catch(e){ return false; } };
     const tried = [];
     const cand = [projectFolderHandle, pendingProjectFolderHandle];
     try{ cand.push(await idbGet('saideckAppFolder')); }catch(e){}
@@ -20971,6 +21111,7 @@
       tried.push(d);
       if(await ok(d) && (await mine(d)) >= 0) return d;
     }
+    if(quiet) return null;
     if(!window.showDirectoryPicker) throw new Error("This browser can't save files — use Chrome or Edge.");
     toast(`Pick the folder that has this “${name}” in it (the one you opened) — SaiDeck saves the new version there.`, 5000);
     const d = await window.showDirectoryPicker({ id: 'saideck-app', mode: 'readwrite' });
@@ -20980,17 +21121,20 @@
     try{ await idbSet('saideckAppFolder', d); }catch(e){}
     return d;
   }
-  async function sdUpdate(v){
+  async function sdUpdate(v, opts){
+    opts = opts || {};
     const here = location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '';
-    if(!here){ location.reload(); return; }                      // (not a file on this computer: a reload gets the new one)
+    if(!here){ sdReloading = true; location.reload(); return; }   // (not a file on this computer: a reload gets the new one)
     sdBusy = true; sdBtn.classList.add('busy');
     try{
       const want = v.build | 0;
-      const dir = await sdAppFolder(here, want);
+      const dir = await sdAppFolder(here, want, !!opts.quiet);
+      if(!dir){ const e = new Error('needs a click'); e.needClick = true; throw e; }
+      if(opts.step) opts.step('Downloading the new SaiDeck…');
       // already written by an earlier try (but this page wasn't reloaded)?
       const cur = sdBuildOf(await (await (await dir.getFileHandle(here)).getFile()).text());
-      if(cur >= want){ sdPending = { build: cur, file: here, folder: dir.name }; sdAfterUpdate(v); return; }
-      toast('Downloading the new SaiDeck…', 2500);
+      if(cur >= want){ sdPending = { build: cur, file: here, folder: dir.name }; if(opts.auto) sdReload(); else sdAfterUpdate(v); return; }
+      if(!opts.auto) toast('Downloading the new SaiDeck…', 2500);
       const sha = v._sha || await sdLatestSha();
       const r = await fetch(`https://raw.githubusercontent.com/${SD_REPO}/${sha || 'main'}/${v.file || 'SaiDeck.html'}` + (sha ? '' : '?t=' + Date.now()), { cache: 'no-store' });
       if(!r.ok) throw new Error('GitHub answered ' + r.status);
@@ -21005,6 +21149,7 @@
         try{ const t = await (await h.getFile()).text(); const b = sdBuildOf(t); if(b && b < got && t.includes(`SD_REPO = '${SD_REPO}'`)) targets.push(nm); }catch(e){}
       }
       // (the old copy goes into an "Old versions" folder next to it, named by its build)
+      if(opts.step) opts.step('Installing…');
       const oldDir = await dir.getDirectoryHandle('Old versions', { create: true });
       for(const nm of targets){
         const fh = await dir.getFileHandle(nm), old = await (await fh.getFile()).text();
@@ -21016,8 +21161,10 @@
       const now = sdBuildOf(await (await (await dir.getFileHandle(here)).getFile()).text());
       if(now < got) throw new Error("The new version couldn't be written into the folder (is the file open somewhere else, or read-only?).");
       sdPending = { build: got, file: here, folder: dir.name };
+      if(opts.auto){ if(opts.step) opts.step('Done — starting the new SaiDeck…'); setTimeout(sdReload, 500); return; }
       sdAfterUpdate(v);
     }catch(err){
+      if(opts.auto) throw err;
       if(err && err.name === 'AbortError') toast('Update cancelled.', 1600);
       else { console.error(err); toast(`Couldn't update: ${err.message || err}`, 5200); }
     }finally{ sdBusy = false; sdBtn.classList.remove('busy'); }
@@ -21086,7 +21233,166 @@
   });
   sdMarkBtn();
   // a quiet check a few seconds after opening: the button lights up if there's a new one
-  setTimeout(() => { sdFetchLatest().then(v => { if((v.build | 0) > SD_BUILD) toast(`A new SaiDeck is ready (${v.version || 'build ' + v.build}) — click the glowing update button at the top to get it.`, 5000); }).catch(() => {}); }, 4000);
+  // ----- updating on its own -----
+  // When SaiDeck opens and a newer build is out, it updates itself before you start (a window in the middle says so).
+  // A SaiDeck that's already in use is left alone — unless the admin asks for a forced update, which waits until it's idle,
+  // saves the session as "Autosaved (N)" first (when there's anything open), then updates.
+  const SD_OPENED = Date.now();
+  let sdOv = null;
+  function sdOverlay(title, sub){
+    if(!sdOv){
+      sdOv = document.createElement('div'); sdOv.className = 'sd-upov'; sdOv.setAttribute('role', 'alertdialog'); sdOv.setAttribute('aria-modal', 'true');
+      sdOv.innerHTML = `<div class="sdu-card"><div class="sdu-logo"><span>S</span></div><b class="sdu-t"></b><span class="sdu-s"></span><div class="sdu-bar"><i></i></div><div class="sdu-acts"></div></div>`;
+      document.body.appendChild(sdOv);
+      sdOv.addEventListener('keydown', (e) => e.stopPropagation(), true);
+    }
+    sdOv.querySelector('.sdu-t').textContent = title; sdOv.querySelector('.sdu-s').textContent = sub || '';
+    sdOv.querySelector('.sdu-acts').innerHTML = ''; sdOv.classList.remove('err');
+    return sdOv;
+  }
+  function sdOverlayButtons(btns){
+    const a = sdOv.querySelector('.sdu-acts'); a.innerHTML = '';
+    for(const [label, fn, pri] of btns){ const b = document.createElement('button'); b.type = 'button'; b.className = 'sdu-b' + (pri ? ' pri' : ''); b.textContent = label; b.addEventListener('click', fn); a.appendChild(b); }
+    const f = a.querySelector('.pri'); if(f) f.focus();
+  }
+  function sdOverlayClose(){ if(sdOv){ sdOv.remove(); sdOv = null; } }
+  async function sdAutoRun(v, why){
+    const title = why === 'force' ? 'Updating SaiDeck for you' : 'Updating SaiDeck';
+    sdOverlay(title, `Getting build ${v.build}${v.version ? ' (' + v.version + ')' : ''} ready before you use SaiDeck…`);
+    const step = (t) => { if(sdOv) sdOv.querySelector('.sdu-s').textContent = t; };
+    const go = async (quiet) => {
+      try{ await sdUpdate(v, { auto: true, quiet, step }); }
+      catch(err){
+        if(!sdOv) sdOverlay(title, '');
+        if(err && err.needClick){
+          step('SaiDeck needs your OK to save the new version into its folder.'); sdOv.classList.add('err');
+          sdOverlayButtons([['Continue update', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true]]);
+        } else {
+          step(err && err.name === 'AbortError' ? 'The update was cancelled.' : `Couldn't update: ${(err && err.message) || err}`); sdOv.classList.add('err');
+          sdOverlayButtons([['Try again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true], ['Use this version for now', sdOverlayClose]]);
+        }
+      }
+    };
+    await go(true);
+  }
+  // (when SaiDeck has just opened)
+  setTimeout(async () => {
+    let v; try{ v = await Promise.race([sdFetchLatest(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 9000))]); }catch(e){ return; }
+    if(!((v.build | 0) > SD_BUILD)) return;
+    if(Date.now() - SD_OPENED < 30000 && !tracks.length && !projVideo && !sdBusy) sdAutoRun(v, 'open');
+    else toast(`A new SaiDeck is ready (${v.version || 'build ' + v.build}) — click the glowing update button at the top to get it.`, 5000);
+  }, 700);
+  // ----- forced updates from the admin -----
+  // config/force = { b, t } (everyone) and forceup/<you> = { b, t } (just you)
+  async function sdAutosave(){
+    const keep = sessionName;
+    try{
+      let folderOk = false;
+      if(projectFolderHandle){ try{ folderOk = (await projectFolderHandle.queryPermission({ mode: 'readwrite' })) === 'granted'; }catch(e){} }
+      let n = 1;
+      if(folderOk){
+        try{ const saves = await projectFolderHandle.getDirectoryHandle(SAVES_DIR, { create: true });
+          for await (const [nm] of saves.entries()){ const m = /^Autosaved \((\d+)\)\.trackdeck\.json$/i.exec(nm); if(m) n = Math.max(n, Number(m[1]) + 1); } }catch(e){}
+        sessionName = `Autosaved (${n})`;
+        await saveSessionToFolder();
+      } else {
+        sessionName = `Autosaved (${n})`;
+        await downloadSession(); await new Promise(r => setTimeout(r, 1800));
+      }
+      return sessionName;
+    } finally { sessionName = keep; }
+  }
+  let sdForceBusy = false;
+  async function sdForceCheck(){
+    if(sdForceBusy || sdBusy || sdOv) return;
+    let req = null;
+    const cf = CHAT && CHAT.cfg && CHAT.cfg.force; if(cf && typeof cf.t === 'number') req = cf;
+    try{
+      const tok = await chatAuth(), me = chatUid();
+      const r = await fetch(`${CHAT_DB}/forceup/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+      const d = r.ok ? await r.json() : null; if(d && typeof d.t === 'number' && (!req || d.t > req.t)) req = d;
+    }catch(e){}
+    if(!req) return;
+    let done = 0; try{ done = Number(localStorage.getItem('sd.force.done')) || 0; }catch(e){}
+    const nowS = Date.now() + (PRES.offset || 0);
+    if(req.t <= done || nowS - req.t > 6 * 3600000 || req.t < SD_OPENED - 6 * 3600000) return;
+    if((req.b | 0) && (req.b | 0) <= SD_BUILD){ try{ localStorage.setItem('sd.force.done', String(req.t)); }catch(e){} return; }
+    // (only once you've gone idle or are in another tab — nobody gets yanked out mid-edit)
+    const idle = document.visibilityState !== 'visible' || !document.hasFocus() || (PRES && PRES.away) || Date.now() - ((PRES && PRES.act) || SD_OPENED) > 60000;
+    if(!idle) return;
+    sdForceBusy = true;
+    try{
+      let v; try{ v = await sdFetchLatest(); }catch(e){ return; }
+      if(!((v.build | 0) > SD_BUILD)){ try{ localStorage.setItem('sd.force.done', String(req.t)); }catch(e){} return; }
+      try{ localStorage.setItem('sd.force.done', String(req.t)); }catch(e){}
+      if(tracks.length || projVideo){
+        sdOverlay('Updating SaiDeck for you', 'Saving your session first…');
+        try{ const nm = await sdAutosave(); sdOv.querySelector('.sdu-s').textContent = `Saved as “${nm}”. Updating…`; }
+        catch(err){
+          console.error(err); sdOv.classList.add('err');
+          sdOv.querySelector('.sdu-s').textContent = "Couldn't save your session, so SaiDeck didn't update. Save it yourself, then press Update.";
+          sdOverlayButtons([['OK', sdOverlayClose, true]]); return;
+        }
+      }
+      await sdAutoRun(v, 'force');
+    } finally { sdForceBusy = false; }
+  }
+  setInterval(() => { sdForceCheck().catch(() => {}); }, 20000);
+  // ----- the welcome screen (once a day) -----
+  (function sdWelcome(){
+    let day = ''; try{ day = new Date().toDateString(); if(localStorage.getItem('sd.welcome') === day) return; }catch(e){ return; }
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const W = document.createElement('div'); W.className = 'sd-welcome'; W.setAttribute('role', 'dialog'); W.setAttribute('aria-label', 'Welcome to SaiDeck');
+    W.innerHTML = `<canvas></canvas><div class="sdw-in"><div class="sdw-title" aria-label="SaiDeck">${'SaiDeck'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div><div class="sdw-sub">Welcome back${(() => { try{ const n = localStorage.getItem('sd.chat.name'); return n ? ', ' + escapeHtml(n) : ''; }catch(e){ return ''; } })()} ✨</div><div class="sdw-hint">click anywhere to start</div></div>`;
+    document.body.appendChild(W);
+    const cv = W.querySelector('canvas'), cx = cv.getContext('2d');
+    let w = 0, h = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const size = () => { w = innerWidth; h = innerHeight; cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px'; cx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    size(); window.addEventListener('resize', size);
+    // fairies: glowing dots that wander on curly paths, leaving sparkly trails
+    const COLS = ['#ffd6f5', '#c9b6ff', '#9ff3ff', '#fff3b0', '#ffc2e2'];
+    const fairies = Array.from({ length: still ? 0 : 7 }, (_, i) => ({ x: Math.random() * w, y: h * (0.2 + Math.random() * 0.6), a: Math.random() * 6.28, sp: 1.6 + Math.random() * 1.6, turn: (Math.random() - .5) * 0.06, c: COLS[i % COLS.length], ph: Math.random() * 6 }));
+    const dust = [];
+    let raf = 0, t0 = performance.now();
+    const tick = (now) => {
+      const t = (now - t0) / 1000;
+      cx.clearRect(0, 0, w, h);
+      for(const f of fairies){
+        f.turn += (Math.random() - .5) * 0.02; f.turn = Math.max(-0.08, Math.min(0.08, f.turn));
+        f.a += f.turn + Math.sin(t * 1.7 + f.ph) * 0.02;
+        // (drift towards the title now and then)
+        const tx = w / 2 + Math.cos(t * .6 + f.ph) * w * .28, ty = h * .42 + Math.sin(t * .9 + f.ph) * h * .16;
+        const want = Math.atan2(ty - f.y, tx - f.x); let d = want - f.a; d = Math.atan2(Math.sin(d), Math.cos(d)); f.a += d * 0.02;
+        f.x += Math.cos(f.a) * f.sp * 2; f.y += Math.sin(f.a) * f.sp * 2;
+        for(let k = 0; k < 3; k++) dust.push({ x: f.x + (Math.random() - .5) * 6, y: f.y + (Math.random() - .5) * 6, vx: (Math.random() - .5) * .6, vy: .3 + Math.random() * .8, life: 1, c: f.c, r: .8 + Math.random() * 1.8 });
+        const g = cx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 16); g.addColorStop(0, '#ffffff'); g.addColorStop(.25, f.c); g.addColorStop(1, 'rgba(255,255,255,0)');
+        cx.fillStyle = g; cx.beginPath(); cx.arc(f.x, f.y, 16, 0, 6.283); cx.fill();
+        // (little wings)
+        const fl = Math.abs(Math.sin(t * 22 + f.ph)) * 6 + 2;
+        cx.fillStyle = 'rgba(255,255,255,.45)'; cx.beginPath(); cx.ellipse(f.x - 4, f.y - 3, fl, 3, -0.6, 0, 6.283); cx.ellipse(f.x + 4, f.y - 3, fl, 3, 0.6, 0, 6.283); cx.fill();
+      }
+      for(let i = dust.length - 1; i >= 0; i--){
+        const p = dust[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.018;
+        if(p.life <= 0){ dust.splice(i, 1); continue; }
+        cx.globalAlpha = p.life; cx.fillStyle = p.c; cx.beginPath(); cx.arc(p.x, p.y, p.r * p.life + .3, 0, 6.283); cx.fill();
+        if(Math.random() < .03){ cx.strokeStyle = '#fff'; cx.lineWidth = .7; cx.beginPath(); cx.moveTo(p.x - 4, p.y); cx.lineTo(p.x + 4, p.y); cx.moveTo(p.x, p.y - 4); cx.lineTo(p.x, p.y + 4); cx.stroke(); }
+      }
+      cx.globalAlpha = 1;
+      if(dust.length > 900) dust.splice(0, dust.length - 900);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    let gone = false;
+    const close = () => {
+      if(gone) return; gone = true;
+      try{ localStorage.setItem('sd.welcome', day); }catch(e){}
+      W.classList.add('out');
+      setTimeout(() => { cancelAnimationFrame(raf); window.removeEventListener('resize', size); W.remove(); }, 700);
+    };
+    W.addEventListener('pointerdown', close);
+    window.addEventListener('keydown', function k(e){ if(!gone){ close(); } window.removeEventListener('keydown', k, true); }, true);
+    setTimeout(close, 6500);
+  })();
 
 
   // =====================================================================
@@ -21148,7 +21454,7 @@
   function chatMask(text){
     return String(text || '').replace(/[^\s]+/g, (tok) => chatBad(tok) ? '•'.repeat(Math.min(6, tok.length)) : tok);
   }
-  const CHAT = { es: null, msgs: new Map(), order: [], ready: false, open: false, unread: 0, status: 'off', retry: 0, cfg: {}, bans: {}, prof: new Map(), side: null };
+  const CHAT = { es: null, msgs: new Map(), order: [], ready: false, open: false, unread: 0, status: 'off', retry: 0, cfg: {}, bans: {}, prof: new Map(), side: null, gm: { casino: false, bj: false }, gmLast: null };
   const chatLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem('sd.chat.' + k); if(v === null) localStorage.removeItem('sd.chat.' + k); else localStorage.setItem('sd.chat.' + k, String(v)); }catch(e){ return null; } };
   // ----- the anonymous chat sign-in -----
   // A refresh token kept in this browser gives a fresh 1-hour pass whenever
@@ -21240,7 +21546,7 @@
       av.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') go(e); });
     }
     const p = chatProfile(uid);
-    if(uid && !official){ av.dataset.u = uid; const st = presStatus(uid); if(st) av.classList.add('st-' + st); }
+    if(uid && !official){ av.dataset.u = uid; const st = presStatus(uid); if(st) av.classList.add('st-' + st); const tr = topRank(uid); if(tr) av.classList.add('top' + tr); }
     if(official && !p){ av.classList.add('official'); av.textContent = 'S'; return av; }
     if(p){ av.classList.add('pic'); av.style.backgroundImage = `url("${p}")`; }
     else { av.style.background = chatColor(name); av.textContent = (name || '?').trim().charAt(0).toUpperCase(); }
@@ -21370,12 +21676,13 @@
       const rb = chatPanel.querySelector('.chat-rooms');
       rb.addEventListener('click', () => chatSideTo('rooms'));
       chatPanel.querySelector('.chat-bell').addEventListener('click', () => chatSideTo('alerts'));
-      chatPanel.querySelector('.chat-modal-back').addEventListener('click', () => chatSideTo(CHAT.side));
+      chatPanel.querySelector('.chat-modal-back').addEventListener('click', () => { if(CHAT.side) chatSideTo(CHAT.side); });
       chatPanel.querySelector('.chat-modal-x').addEventListener('click', () => chatSideTo(CHAT.side));
       chatPanel.querySelector('.chat-arc').addEventListener('click', () => { chatSideTo('arcade'); if(CHAT.side === 'arcade'){ scLoad(); SC.boardAt = 0; } });
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
+        { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
         const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
@@ -21416,7 +21723,7 @@
     chatRenderAlerts();
     casRender(); bjRender();
     casBarRender();
-    { const bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x'); if(bk) bk.hidden = !CHAT.side; if(x) x.hidden = !CHAT.side; }
+    chatBackSync();
     chatRenderPin();
     chatRenderMessages();
     chatRenderReply();
@@ -21457,17 +21764,107 @@
   // the rooms list (Everyone + your group chats + join / make one)
   // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
   function chatSideTo(which){
-    const was = CHAT.side;
+    if(which === 'casino' || which === 'bj'){ if(CHAT.gm[which]) gameClose(which); else gameOpen(which); return; }
     CHAT.side = CHAT.side === which ? null : which;
-    if(was === 'casino' && CHAT.side !== 'casino') casLeave();       // (closing the casino gets you up from your seat)
-    if(was === 'bj' && CHAT.side !== 'bj') bjLeave();
-    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casRender(); bjRender(); casBarRender();
-    const open = !!CHAT.side, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
-    if(bk) bk.hidden = !open; if(x) x.hidden = !open;
-    chatPanel.classList.toggle('cas-open', CHAT.side === 'casino' || CHAT.side === 'bj');
+    chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casBarRender();
+    chatBackSync();
+  }
+  // the games: Slots and Blackjack can both be open at once, side by side (you sit at both)
+  function gameOpen(g){
+    if(CHAT.side) { CHAT.side = null; chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); }
+    CHAT.gm[g] = true; CHAT.gmLast = g;
+    casRender(); bjRender(); casBarRender(); chatBackSync();
+  }
+  function gameClose(g){
+    if(!CHAT.gm[g]) return;
+    CHAT.gm[g] = false;
+    if(g === 'casino') casLeave(); else bjLeave();               // (closing a game gets you up from your seat)
+    casRender(); bjRender(); casBarRender(); chatBackSync();
+  }
+  // ----- the windows (games, Arcade, Online, Rooms, Alerts) can be dragged by their top strip and kept where you put them -----
+  // They never go over the chat box, and the one you press comes to the front.
+  const WIN_SEL = '.chat-who, .chat-side';
+  let winZ = 10;
+  const winKey = (el) => el.classList.contains('chat-bj') ? 'bj' : el.classList.contains('chat-casino') ? 'casino' : el.classList.contains('chat-arcade') ? 'arcade' : el.classList.contains('chat-alerts') ? 'alerts' : el.classList.contains('chat-who') ? 'who' : 'rooms';
+  function winClamp(el, x, y){
+    const r = el.getBoundingClientRect(), pr = chatPanel.hidden ? null : chatPanel.getBoundingClientRect();
+    const maxR = pr ? pr.left - 8 : innerWidth - 8;
+    x = Math.min(x, maxR - r.width); x = Math.max(8, x);
+    y = Math.max(8, Math.min(innerHeight - 56, y));
+    return [x, y];
+  }
+  function winPlace(el, x, y){
+    const [cx, cy] = winClamp(el, x, y);
+    el.classList.add('moved'); el.style.left = cx + 'px'; el.style.top = cy + 'px';
+    if(el.classList.contains('chat-casino') === false) winXSync();
+  }
+  // put a window where it was left last time (once it's showing)
+  function winRestore(el){
+    if(!el || el.hidden || innerWidth < 900) return;
+    const v = chatLS('win:' + winKey(el)); if(!v){ el.classList.remove('moved'); el.style.left = el.style.top = ''; return; }
+    const [x, y] = v.split(',').map(Number); if(isFinite(x) && isFinite(y)) requestAnimationFrame(() => winPlace(el, x, y));
+  }
+  function winFront(el){ el.style.zIndex = String(++winZ); if(winZ > 300){ winZ = 10; } }
+  // the shared ✕ follows Online/Rooms/Arcade/Alerts if they've been moved
+  function winXSync(){
+    const x = chatPanel.querySelector('.chat-modal-x'); if(!x) return;
+    const w = [...chatPanel.querySelectorAll(WIN_SEL)].find(e => !e.hidden && !e.classList.contains('chat-casino'));
+    if(!w){ x.style.left = x.style.top = ''; x.style.zIndex = ''; return; }
+    x.style.zIndex = String((Number(w.style.zIndex) || 5) + 1);
+    if(!w.classList.contains('moved')){ x.style.left = x.style.top = ''; return; }
+    const r = w.getBoundingClientRect(); x.style.left = (r.right - 40) + 'px'; x.style.top = (r.top + 10) + 'px'; x.style.zIndex = String((Number(w.style.zIndex) || 5) + 1);
+  }
+  chatPanel.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest(WIN_SEL); if(!el || el.hidden) return;
+    winFront(el); if(!el.classList.contains('chat-casino')) winXSync();
+    if(e.button !== 0 || innerWidth < 900) return;
+    const r = el.getBoundingClientRect();
+    if(e.clientY - r.top > 46) return;                                                        // (only the top strip drags)
+    if(e.target.closest('button, input, textarea, select, a, label, [data-tab], .bj-av, .chat-av.poke')) return;
+    e.preventDefault();
+    const ox = e.clientX - r.left, oy = e.clientY - r.top;
+    el.classList.add('moved', 'dragging'); el.style.left = r.left + 'px'; el.style.top = r.top + 'px';
+    const move = (ev) => winPlace(el, ev.clientX - ox, ev.clientY - oy);
+    const up = () => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+      el.classList.remove('dragging');
+      const rr = el.getBoundingClientRect(); chatLS('win:' + winKey(el), Math.round(rr.left) + ',' + Math.round(rr.top));
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  });
+  // double-click the top strip to put a window back in its usual spot
+  chatPanel.addEventListener('dblclick', (e) => {
+    const el = e.target.closest(WIN_SEL); if(!el || el.hidden) return;
+    const r = el.getBoundingClientRect(); if(e.clientY - r.top > 46 || e.target.closest('button, input')) return;
+    chatLS('win:' + winKey(el), null); el.classList.remove('moved'); el.style.left = el.style.top = ''; winXSync();
+  });
+  window.addEventListener('resize', () => { for(const el of chatPanel.querySelectorAll(WIN_SEL)) if(!el.hidden && el.classList.contains('moved')){ const r = el.getBoundingClientRect(); winPlace(el, r.left, r.top); } });
+  // (a window that just opened: back to where you left it, and in front)
+  const winSeen = new WeakSet();
+  function winOpened(){
+    for(const el of chatPanel.querySelectorAll(WIN_SEL)){
+      if(el.hidden){ winSeen.delete(el); continue; }
+      if(!winSeen.has(el)){ winSeen.add(el); winFront(el); winRestore(el); }
+    }
+    winXSync();
+  }
+  function chatBackSync(){
+    const games = CHAT.gm.casino || CHAT.gm.bj, bk = chatPanel.querySelector('.chat-modal-back'), x = chatPanel.querySelector('.chat-modal-x');
+    if(bk) bk.hidden = !(CHAT.side || games); if(x) x.hidden = !CHAT.side;
+    chatPanel.classList.toggle('two-games', !!(CHAT.gm.casino && CHAT.gm.bj));
+    chatPanel.classList.toggle('game-open', !!games);
+    chatPanel.classList.toggle('pop-open', !!CHAT.side);
+    for(const b of chatPanel.querySelectorAll('[data-go-bj]')) b.hidden = !!CHAT.gm.bj;
+    for(const b of chatPanel.querySelectorAll('[data-go-slots]')) b.hidden = !!CHAT.gm.casino;
+    winOpened();
   }
   // Esc closes the open window (before it would close the chat)
-  window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.side && !chatPanel.hidden){ e.preventDefault(); e.stopImmediatePropagation(); chatSideTo(CHAT.side); } }, true);
+  window.addEventListener('keydown', (e) => {
+    if(e.key !== 'Escape' || chatPanel.hidden) return;
+    if(CHAT.side){ e.preventDefault(); e.stopImmediatePropagation(); chatSideTo(CHAT.side); return; }
+    const g = (CHAT.gmLast && CHAT.gm[CHAT.gmLast]) ? CHAT.gmLast : CHAT.gm.bj ? 'bj' : CHAT.gm.casino ? 'casino' : null;
+    if(g && !(e.target && e.target.closest && e.target.closest('.chat-compose'))){ e.preventDefault(); e.stopImmediatePropagation(); gameClose(g); }
+  }, true);
   // the Alerts window: infiltrations and swats, once they're more than 5 minutes old (newest first)
   const CHAT_EV_LIVE = 5 * 60 * 1000;
   function chatRenderAlerts(){
@@ -21590,6 +21987,18 @@
         if(fresh(m._k)) ev.classList.add('in');
         body.appendChild(ev); continue;
       }
+      if(m.e === 'trick'){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+        const by = String(m.m || '').replace(/^got tricked by /, ''), mine = typeof m.v === 'string' && chatIsMe(m.v), meV = chatIsMe(m.u);
+        const ev = document.createElement('div'); ev.className = 'chat-trick' + (mine || meV ? ' to-me' : '');
+        ev.innerHTML = '<span class="ct-i" aria-hidden="true">🎃</span><div class="ct-t"><b class="ct-v"></b> got tricked by <b class="ct-b"></b>\'s Trick or Treat! 🦇<i></i></div>';
+        ev.querySelector('.ct-v').textContent = meV ? 'You' : (chatBadName(m.n) ? 'someone' : m.n); if(!meV) ev.querySelector('.ct-v').style.color = chatColor(m.n);
+        ev.querySelector('.ct-b').textContent = mine ? 'your' : chatMask(by); if(!mine) ev.querySelector('.ct-b').style.color = chatColor(by);
+        if(mine) ev.querySelector('.ct-t').innerHTML = ev.querySelector('.ct-t').innerHTML.replace("'s Trick or Treat", ' Trick or Treat');
+        ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)){ ev.classList.add('in'); if(mine && Date.now() + PRES.offset - (m.t || 0) < 60000 && !(CHAT.trickSeen || (CHAT.trickSeen = new Set())).has(m._k)){ CHAT.trickSeen.add(m._k); toast(`🎃 Your Trick or Treat got ${chatBadName(m.n) ? 'someone' : m.n}! 🦇`, 3400); } }
+        body.appendChild(ev); continue;
+      }
       if(m.e === 'gift'){
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const mm = /^sent (\d+) points? to (.+)$/.exec(String(m.m || '')), toMe = typeof m.v === 'string' && chatIsMe(m.v);
@@ -21638,6 +22047,7 @@
       const bub = document.createElement('div'); bub.className = 'chat-bub';
       const meta = document.createElement('div'); meta.className = 'chat-meta';
       const nb = document.createElement('b'); nb.textContent = off ? 'SaiDeck' : chatBadName(m.n) ? 'someone' : m.n; if(!off) nb.style.color = chatColor(m.n);
+      { const tr = off ? 0 : topRank(m.u); if(tr){ nb.classList.add('top-n', 'top-n' + tr); nb.textContent = ['👑 ', '🥈 ', '🥉 '][tr - 1] + nb.textContent; } }
       meta.appendChild(nb);
       if(off){ const tag = document.createElement('i'); tag.className = 'chat-offtag' + (m.mine ? ' you' : ''); tag.textContent = m.mine ? 'just for you' : 'official'; meta.appendChild(tag); }
       const tm = document.createElement('span'); tm.textContent = chatFmtTime(m.t);
@@ -21756,7 +22166,7 @@
   function chatToggle(open){
     CHAT.open = open == null ? !CHAT.open : !!open;
     chatPanel.hidden = !CHAT.open;
-    if(!CHAT.open && CHAT.side === 'casino'){ CHAT.side = null; casLeave(); }
+    if(!CHAT.open){ gameClose('casino'); gameClose('bj'); }
     if(CHAT.open){
       if(CHAT.pollCfg) CHAT.pollCfg(); if(CHAT.pollBans) CHAT.pollBans(); chatPollInbox();
       CHAT.unread = 0; chatLS('seen:' + chatRoom(), Date.now());
@@ -22154,11 +22564,12 @@
   function infHud(){
     const M = INF.me; if(!M || !M.hud) return;
     const cur = ammoNow();
-    M.hud.innerHTML = `<span class="ih-t">Right-click to shoot</span>` + AMMO.map((a, i) => `<span class="ih-a${a.k === cur ? ' on' : ''}${ammoOwned(a.k) ? '' : ' locked'}"><i>${i + 1}</i>${a.em}</span>`).join('');
+    M.hud.innerHTML = `<span class="ih-t">Right-click to shoot</span><span class="ih-a ih-tot${SC.tot ? '' : ' locked'}"><i>Space</i>🎃×${SC.tot | 0}</span>` + AMMO.map((a, i) => `<span class="ih-a${a.k === cur ? ' on' : ''}${ammoOwned(a.k) ? '' : ' locked'}"><i>${i + 1}</i>${a.em}</span>`).join('');
   }
   function infEat(e){ if(INF.eatClick){ e.preventDefault(); e.stopPropagation(); INF.eatClick = false; window.removeEventListener('click', infEat, true); } }
   function infKey(e){
     if(!INF.me) return;
+    if(e.code === 'Space' || e.key === ' '){ e.preventDefault(); e.stopImmediatePropagation(); if(!e.repeat) totPlant(); return; }
     if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); infStop('click'); return; }
     const n = /^[1-6]$/.test(e.key) ? Number(e.key) - 1 : -1;
     if(n >= 0){ e.preventDefault(); e.stopImmediatePropagation(); const a = AMMO[n];
@@ -22506,9 +22917,8 @@
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
-    if(BJ.on) bjLeave();
     CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0;
-    if(CHAT.side !== 'casino') chatSideTo('casino');
+    if(!CHAT.gm.casino) gameOpen('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
   }
@@ -22623,11 +23033,11 @@
   // the Casino window
   function casRender(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el) return;
-    el.hidden = CHAT.side !== 'casino';
+    el.hidden = !CHAT.gm.casino;
     if(el.hidden){ if(el.dataset.built){ el.innerHTML = ''; el.dataset.built = ''; } return; }
     if(!el.dataset.built){
       el.dataset.built = '1';
-      el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj>🃏 Blackjack table</button><div class="cas-bal"><b></b><span>points</span></div></div>
+      el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj title="Open Blackjack next to the slots">＋ 🃏 Blackjack</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the slots" aria-label="Leave the slots">${ICON_X}</button></div>
         <div class="cas-floor"></div>
         <div class="cas-ctl"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
           <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
@@ -22642,8 +23052,9 @@
       el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(CAS.bet + Number(b.dataset.d)); });
       el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
       el.querySelector('.cas-spin').addEventListener('click', casSpin);
-      el.querySelector('[data-go-bj]').addEventListener('click', () => { CHAT.side = null; casLeave(); bjJoin(); });
-      el.querySelector('.cas-leave').addEventListener('click', () => chatSideTo('casino'));
+      el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
+      el.querySelector('.cas-leave').addEventListener('click', () => gameClose('casino'));
+      el.querySelector('.cas-x').addEventListener('click', () => gameClose('casino'));
     }
     casSync(); casCtl();
   }
@@ -22799,9 +23210,8 @@
   async function bjJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
-    if(CAS.on) casLeave();
     BJ.on = true; BJ.watch = false; BJ.joinedAt = Date.now(); BJ.skip = new Set(); BJ.shown = {}; BJ.sess = { hands: 0, bet: 0, won: 0 };
-    if(CHAT.side !== 'bj') chatSideTo('bj');
+    if(!CHAT.gm.bj) gameOpen('bj');
     const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
     try{
       const tok = await chatAuth();
@@ -22810,6 +23220,7 @@
       if(!BJ.p[me]) await bjPatch({ [`bj/p/${me}`]: { n: nm, t: bjSv, j: bjSv, r: 0, b: 0, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, st: 's', pd: 0, o: false } });
       else await bjPatch({ [`bj/p/${me}/n`]: nm, [`bj/p/${me}/t`]: bjSv, [`bj/p/${me}/o`]: false });
       if(!BJ.d) await bjPatch({ 'bj/d': { u: 'bot', n: 'Dealer', r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv } });
+      if(SC.loaded && scBal() < 1){ BJ.watch = true; await bjPatch({ [`bj/p/${me}/o`]: true, [`bj/p/${me}/t`]: bjSv }); toast("You've got no points to bet — you're watching. Get some and press Sit back down.", 3400); }
     }catch(e){}
     clearInterval(BJ.hb); BJ.hb = setInterval(bjBeat, 10000);
     bjListen(); bjRender();
@@ -22870,6 +23281,8 @@
     return 'dealer';
   }
   // one action at a time from this computer
+  // (a button press waits for whatever this computer is already doing, instead of being dropped)
+  async function bjUser(fn){ for(let i = 0; i < 50 && BJ.act; i++) await new Promise(r => setTimeout(r, 100)); return bjDo(fn); }
   async function bjDo(fn){
     if(BJ.act) return; BJ.act = true;
     try{ await fn(); }catch(e){}
@@ -22906,6 +23319,14 @@
     // 2) a card that was drawn but not counted yet
     if(S.pe){ bjDo(() => bjTally(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: 1 })); return; }
     if(D.pe && (driver || iDeal || sNow - (D.ut || 0) > 3000)){ bjDo(() => bjTally('bj/d', D, { 'bj/d/ut': 1 })); return; }
+    // (a vote to kick a dealer who's no longer dealing is taken back)
+    if(BJ.kick[me] && (D.u === 'bot' || BJ.kick[me] !== D.u) && !BJ.kclr){ BJ.kclr = true; bjDo(async () => { await bjPatch({ [`bj/kick/${me}`]: null }); delete BJ.kick[me]; BJ.kclr = false; }); return; }
+    // (no points left: you watch instead of playing or dealing)
+    if(!BJ.watch && SC.loaded && scBal() < 1 && !bjInRound(S, D) && bjPhase() === 'bet'){
+      if(iDeal) bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv }));
+      else { toast("You're out of points — watching for now. Win some back or get sent some to play again.", 3200); bjWatchToggle(); }
+      return;
+    }
     // 3) a dealer who has gone quiet, or been voted out
     if(human && !iDeal){
       const others = seats.filter(s => s.u !== D.u), votes = others.filter(s => BJ.kick[s.u] === D.u).length, need = Math.floor(others.length / 2) + 1;
@@ -22918,8 +23339,13 @@
     if(ph === 'bet'){
       const players = bjPlayers(), waiting = seats.filter(s => s.u !== D.u && !bjInRound(s, D));
       if(players.length && !BJ.betAt[R]) BJ.betAt[R] = now;
-      // (the bot deals once everyone sitting has bet, or 15 s after the first bet; a player dealing has 30 s to press Deal)
-      if(driver && players.length && (human ? now - BJ.betAt[R] > 30000 : (!waiting.length || now - BJ.betAt[R] > 15000)))
+      // (the bot deals once everyone sitting has bet, or 15 s after the first bet; a player dealing has 30 s to stake and press Deal)
+      if(human){
+        if(iDeal && players.length && now - BJ.betAt[R] > 30000){
+          if(!bjInRound(S, D) && BJ.noStake !== D.r){ if(scBal() >= 1){ BJ.bet = Math.min(BJ.bet, scBal(), 500); bjPlaceBet(); } else bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
+          else bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
+        }
+      } else if(driver && players.length && (!waiting.length || now - BJ.betAt[R] > 15000))
         bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
       return;
     }
@@ -22952,8 +23378,18 @@
         bjNextRound();
     }
   }
+  // the dealer's stake pays on their own final hand: 17 half back, 18 stake back, 19 ×1.5, 20–21 ×2, bust or under 17 nothing
+  function bjDealerPay(Dd, W){
+    const half = (W - W % 2) / 2;
+    if(Dd.h > 21) return { amt: 0, lbl: 'Bust' };
+    if(Dd.v >= 20) return { amt: W * 2, lbl: Dd.v === 21 ? '21!' : '20' };
+    if(Dd.v === 19) return { amt: W + half, lbl: '19' };
+    if(Dd.v === 18) return { amt: W, lbl: '18' };
+    if(Dd.v === 17) return { amt: half, lbl: '17' };
+    return { amt: 0, lbl: 'Under 17' };
+  }
   async function bjClaim(S, Dd){
-    const me = chatUid(), res = bjPay(S, Dd), body = { [`bj/p/${me}/pd`]: S.r };
+    const me = chatUid(), res = Dd.u === me ? bjDealerPay(Dd, S.b) : bjPay(S, Dd), body = { [`bj/p/${me}/pd`]: S.r };
     if(res.amt > 0){ body[`scores/${me}/p`] = SC.p + res.amt; body[`scores/${me}/t`] = bjSv; }
     let ok = await bjPatch(body);
     if(!ok){ await scLoad(); if(res.amt > 0) body[`scores/${me}/p`] = SC.p + res.amt; ok = await bjPatch(body); }
@@ -22966,7 +23402,7 @@
       if(Date.now() - BJ.joinedAt > 1500){
         toast(net > 0 ? `🃏 ${res.lbl} — you won ${net} points!` : net === 0 ? `🃏 Push — you got your ${S.b} back.` : `🃏 ${res.lbl} — you lost ${S.b}.`, 2600);
         sfxSlotResult(net > 0 ? (res.amt >= S.b * 2.5 ? 12 : 2) : net === 0 ? 1 : 0, 0.8);
-        bjFeed(`You ${net > 0 ? 'won ' + net : net === 0 ? 'pushed' : 'lost ' + S.b} (${S.v} vs dealer ${Dd.h > 21 ? 'bust' : Dd.v})`, net > 0);
+        bjFeed(Dd.u === me ? `Dealing: you ${net > 0 ? 'won ' + net : net === 0 ? 'broke even' : 'lost ' + (S.b - res.amt)} (${Dd.h > 21 ? 'bust' : Dd.v})` : `You ${net > 0 ? 'won ' + net : net === 0 ? 'pushed' : 'lost ' + S.b} (${S.v} vs dealer ${Dd.h > 21 ? 'bust' : Dd.v})`, net > 0);
       }
       chatRenderArcade(); bjCtl();
     }
@@ -22974,23 +23410,24 @@
   // your buttons
   async function bjPlaceBet(){
     const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
-    if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || D.u === me) return;
+    if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || BJ.watch) return;
     if(!(bet >= 1 && bet <= 500)){ toast('Bet between 1 and 500 points.', 2000); return; }
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
-    bjDo(async () => {
+    bjUser(async () => {
       const body = { [`bj/p/${me}/r`]: D.r, [`bj/p/${me}/b`]: bet, [`bj/p/${me}/k`]: 0, [`bj/p/${me}/h`]: 0, [`bj/p/${me}/a`]: 0, [`bj/p/${me}/v`]: 0, [`bj/p/${me}/pe`]: false, [`bj/p/${me}/st`]: 'p', [`bj/p/${me}/c`]: null, [`bj/p/${me}/t`]: bjSv,
         [`scores/${me}/s`]: SC.s + bet, [`scores/${me}/t`]: bjSv };
       if(await bjPatch(body)){ SC.s += bet; Object.assign(S, { r: D.r, b: bet, k: 0, h: 0, a: 0, v: 0, pe: false, st: 'p', c: null }); sfxChip(); bjSync(); chatRenderArcade(); }
+      else if(D.u === me){ BJ.noStake = D.r; await scLoad(); bjSync(); }
       else { await scLoad(); toast("Couldn't place that bet — the cards may already be out.", 2400); }
     });
   }
-  function bjHit(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.v >= 21) return; bjDo(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); }
-  function bjStand(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p') return; bjDo(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); }
+  function bjHit(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.v >= 21) return; bjUser(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); }
+  function bjStand(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p') return; bjUser(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); }
   function bjDouble(){
     const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.k !== 2) return;
     if(scBal() < S.b){ toast(`You need ${S.b} more points to double.`, 2200); return; }
-    bjDo(async () => {
+    bjUser(async () => {
       if(await bjPatch({ [`bj/p/${me}/st`]: 'd', [`bj/p/${me}/b`]: S.b * 2, [`scores/${me}/s`]: SC.s + S.b, [`scores/${me}/t`]: bjSv })){ SC.s += S.b; S.b *= 2; S.st = 'd'; sfxChip(); chatRenderArcade(); }
       else await scLoad();
     });
@@ -22998,36 +23435,38 @@
   // the dealer's seat
   function bjTakeDealer(){
     const me = chatUid(), D = BJ.d, S = BJ.p[me];
+    if(BJ.watch || scBal() < 1){ toast('You need points to deal — the dealer stakes a bet each round too.', 2600); return; }
     if(!D || D.u !== 'bot' || !(D.f || D.k === 0) || (S && bjInRound(S, D))) { toast('You can take the dealer seat between rounds (and not after betting).', 2400); return; }
-    bjDo(async () => { if(await bjPatch({ 'bj/d/u': me, 'bj/d/n': chatName().slice(0, CHAT_NAME_MAX), 'bj/d/ut': bjSv })) bjFeed('You took the dealer seat', false); else toast("Couldn't take the dealer seat.", 2000); });
+    bjUser(async () => { if(await bjPatch({ 'bj/d/u': me, 'bj/d/n': chatName().slice(0, CHAT_NAME_MAX), 'bj/d/ut': bjSv })) bjFeed('You took the dealer seat', false); else toast("Couldn't take the dealer seat.", 2000); });
   }
   // stop playing but keep watching the table (a hand you already bet on still plays out and pays)
   function bjWatchToggle(){
     const me = chatUid(), D = BJ.d, sit = BJ.watch;
-    bjDo(async () => {
+    if(sit && SC.loaded && scBal() < 1){ toast('You need points to sit down and play.', 2200); return; }
+    bjUser(async () => {
       const body = { [`bj/p/${me}/o`]: !sit, [`bj/p/${me}/t`]: bjSv };
       if(!sit && D && D.u === me){ body['bj/d/u'] = 'bot'; body['bj/d/n'] = 'Dealer'; body['bj/d/ut'] = bjSv; }
       if(await bjPatch(body)){ BJ.watch = !sit; if(BJ.p[me]) BJ.p[me].o = !sit; bjFeed(sit ? 'You sat back down' : "You're watching — sit back down any time", false); bjSync(); }
       else toast("Couldn't do that — check your connection.", 2000);
     });
   }
-  function bjDropDealer(){ bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
+  function bjDropDealer(){ bjUser(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
   function bjVoteKick(){
     const me = chatUid(), D = BJ.d; if(!D || D.u === 'bot' || D.u === me) return;
     const on = BJ.kick[me] === D.u;
-    bjDo(async () => { if(await bjPatch({ [`bj/kick/${me}`]: on ? null : D.u })){ if(on) delete BJ.kick[me]; else BJ.kick[me] = D.u; bjSync(); } });
+    bjUser(async () => { if(await bjPatch({ [`bj/kick/${me}`]: on ? null : D.u })){ if(on) delete BJ.kick[me]; else BJ.kick[me] = D.u; bjSync(); } });
   }
-  function bjDealerDeal(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'bet' && bjPlayers().length) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
-  function bjDealerHit(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.v < 21) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
-  function bjDealerStand(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.k >= 2) bjDo(() => bjPatch({ 'bj/d/f': true, 'bj/d/ut': bjSv })); }
+  function bjDealerDeal(){ const D = BJ.d, S = BJ.p[chatUid()]; if(!(D && D.u === chatUid() && bjPhase() === 'bet')) return; if(!(S && bjInRound(S, D)) && BJ.noStake !== D.r){ toast('Stake your bet first (below), then deal.', 2200); return; } bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealerHit(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.v < 21) bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealerStand(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.k >= 2) bjUser(() => bjPatch({ 'bj/d/f': true, 'bj/d/ut': bjSv })); }
   // ----- the table window -----
   function bjRender(){
     const el = chatPanel.querySelector('.chat-bj'); if(!el) return;
-    el.hidden = CHAT.side !== 'bj';
+    el.hidden = !CHAT.gm.bj;
     if(el.hidden){ if(el.dataset.built){ el.innerHTML = ''; el.dataset.built = ''; } return; }
     if(!el.dataset.built){
       el.dataset.built = '1';
-      el.innerHTML = `<div class="cas-head"><div><b>🃏 Blackjack</b><span>Beat the dealer without going over 21. Blackjack pays 3 to 2, a win pays 2 to 1.</span></div><button type="button" class="cas-sw" data-go-slots>🎰 Slots</button><div class="cas-bal"><b></b><span>points</span></div></div>
+      el.innerHTML = `<div class="cas-head"><div><b>🃏 Blackjack</b><span>Beat the dealer without going over 21. Blackjack pays 3 to 2, a win pays 2 to 1.</span></div><button type="button" class="cas-sw" data-go-slots title="Open the slots next to Blackjack">＋ 🎰 Slots</button><button type="button" class="cas-sw bj-theme-b" title="Table and card style">🎨</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the table" aria-label="Leave the table">${ICON_X}</button></div>
         <div class="bj-table">
           <div class="bj-dealer"><div class="bj-who"></div><div class="bj-hand bj-dhand"></div><div class="bj-tot bj-dtot"></div><div class="bj-dctl"></div></div>
           <div class="bj-msg"></div><div class="bj-fast"></div>
@@ -23050,11 +23489,14 @@
       el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
       el.querySelector('.bj-betb').addEventListener('click', bjPlaceBet);
       el.querySelector('.bj-fast').addEventListener('click', (e) => { const b = e.target.closest('[data-fast]'); if(!b) return; b.blur(); b.disabled = true; if(b.dataset.fast === 'next') bjNextRound(); else bjDealNow(); });
-      el.querySelector('[data-go-slots]').addEventListener('click', () => { CHAT.side = null; bjLeave(); casJoin(); });
+      el.querySelector('[data-go-slots]').addEventListener('click', () => casJoin());
+      el.querySelector('.bj-theme-b').addEventListener('click', (e) => { e.currentTarget.blur(); bjThemeMenu(el); });
+      bjThemeApply(el);
       el.querySelector('.bj-hit').addEventListener('click', bjHit);
       el.querySelector('.bj-stand').addEventListener('click', bjStand);
       el.querySelector('.bj-dbl').addEventListener('click', bjDouble);
-      el.querySelector('.bj-leave').addEventListener('click', () => chatSideTo('bj'));
+      el.querySelector('.bj-leave').addEventListener('click', () => gameClose('bj'));
+      el.querySelector('.cas-x').addEventListener('click', () => gameClose('bj'));
       el.querySelector('.bj-sit').addEventListener('click', (e) => { e.currentTarget.blur(); bjWatchToggle(); });
       el.querySelector('.bj-dealer').addEventListener('click', (e) => {
         const b = e.target.closest('[data-dact]'); if(!b) return; b.blur();
@@ -23063,6 +23505,50 @@
       el.querySelector('.bj-seats').addEventListener('click', (e) => { const g = e.target.closest('[data-gift]'); if(g){ g.blur(); gpOpen(g.dataset.gift, g.dataset.n, g); } });
     }
     bjSync();
+  }
+  // ----- your table and card style (only on this computer) -----
+  const BJ_FELTS = [['green', 'Green'], ['blue', 'Blue'], ['red', 'Red'], ['purple', 'Purple'], ['black', 'Black'], ['wood', 'Wood']];
+  const BJ_CARDS = [['classic', 'Classic'], ['dark', 'Dark'], ['gold', 'Gold'], ['neon', 'Neon'], ['pink', 'Pink']];
+  function bjThemeApply(el){
+    const t = el && el.querySelector('.bj-table'); if(!t) return;
+    const felt = chatLS('bjFelt') || 'green', card = chatLS('bjCard') || 'classic', bg = felt === 'custom' ? chatLS('bjBg') : null;
+    t.dataset.felt = bg ? 'custom' : (BJ_FELTS.some(f => f[0] === felt) ? felt : 'green');
+    t.style.backgroundImage = bg ? `linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,.28)), url("${bg}")` : '';
+    for(const [k] of BJ_CARDS) t.classList.toggle('cards-' + k, k === card);
+  }
+  function bjThemeMenu(el){
+    const old = el.querySelector('.bj-theme'); if(old){ old.remove(); return; }
+    const m = document.createElement('div'); m.className = 'bj-theme';
+    const felt = chatLS('bjFelt') || 'green', card = chatLS('bjCard') || 'classic', hasBg = !!chatLS('bjBg');
+    m.innerHTML = `<b>Table</b><div class="bjt-row">${BJ_FELTS.map(([k, n]) => `<button type="button" class="bjt-felt${felt === k ? ' on' : ''}" data-felt="${k}" title="${n}"><i class="f-${k}"></i>${n}</button>`).join('')}
+        <button type="button" class="bjt-felt${felt === 'custom' ? ' on' : ''}" data-up><i class="f-up">＋</i>${hasBg ? 'Your picture' : 'Upload…'}</button></div>
+      ${hasBg ? '<button type="button" class="bjt-link" data-rmbg>Remove your picture</button>' : ''}
+      <b>Cards</b><div class="bjt-row">${BJ_CARDS.map(([k, n]) => `<button type="button" class="bjt-card${card === k ? ' on' : ''}" data-card="${k}"><span class="bj-mini c-${k}">A<i>♥</i></span>${n}</button>`).join('')}</div>
+      <p class="chat-side-p">Only you see your style — it's saved on this computer.</p><input type="file" accept="image/*" hidden>`;
+    el.appendChild(m);
+    m.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 160 });
+    const file = m.querySelector('input');
+    m.addEventListener('click', (e) => {
+      const f = e.target.closest('[data-felt]'), c = e.target.closest('[data-card]');
+      if(f){ chatLS('bjFelt', f.dataset.felt); bjThemeApply(el); m.remove(); bjThemeMenu(el); return; }
+      if(c){ chatLS('bjCard', c.dataset.card); bjThemeApply(el); m.remove(); bjThemeMenu(el); return; }
+      if(e.target.closest('[data-up]')){ if(hasBg && felt !== 'custom'){ chatLS('bjFelt', 'custom'); bjThemeApply(el); m.remove(); bjThemeMenu(el); } else file.click(); return; }
+      if(e.target.closest('[data-rmbg]')){ chatLS('bjBg', null); if(chatLS('bjFelt') === 'custom') chatLS('bjFelt', 'green'); bjThemeApply(el); m.remove(); bjThemeMenu(el); }
+    });
+    file.addEventListener('change', async () => {
+      const f = file.files && file.files[0]; if(!f) return;
+      try{
+        const img = await createImageBitmap(f), k = Math.min(1, 1600 / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        let url = cv.toDataURL('image/jpeg', 0.85); if(url.length > 2500000) url = cv.toDataURL('image/jpeg', 0.6);
+        chatLS('bjBg', url);
+        if(chatLS('bjBg') !== url){ toast("That picture is too big to save — try a smaller one.", 2600); return; }
+        chatLS('bjFelt', 'custom'); bjThemeApply(el); m.remove(); bjThemeMenu(el);
+      }catch(err){ toast("Couldn't open that picture.", 2200); }
+    });
+    const out = (e) => { if(!m.isConnected){ document.removeEventListener('pointerdown', out, true); return; } if(!m.contains(e.target) && !e.target.closest('.bj-theme-b')){ m.remove(); document.removeEventListener('pointerdown', out, true); } };
+    setTimeout(() => document.addEventListener('pointerdown', out, true), 0);
   }
   // a hand of cards, adding only the new ones (so each new card slides in from the shoe)
   function bjHandEl(box, hand, hide){
@@ -23081,6 +23567,28 @@
       }
     }
     if(hide) box.classList.add('dim'); else box.classList.remove('dim');
+  }
+  const bjClampX = (x) => Math.max(0.07, Math.min(0.93, x)), bjClampY = (y) => Math.max(0.6, Math.min(0.8, y));
+  // drag your own picture to move your seat around the table (everyone sees where you sit)
+  function bjDragSetup(seat, handle){
+    handle.addEventListener('pointerdown', (e) => {
+      if(e.button !== 0) return;
+      const table = seat.closest('.bj-table'); if(!table) return;
+      e.preventDefault(); handle.setPointerCapture(e.pointerId);
+      const tr = table.getBoundingClientRect(), sr = seat.getBoundingClientRect();
+      const offX = (sr.left + sr.width / 2) - e.clientX, offY = (sr.top + sr.height / 2) - e.clientY;
+      BJ.drag = true; seat.classList.add('dragging');
+      const pos = (ev) => ({ x: bjClampX((ev.clientX + offX - tr.left) / tr.width), y: bjClampY((ev.clientY + offY - tr.top) / tr.height) });
+      const move = (ev) => { const q = pos(ev); seat.style.left = (q.x * 100) + '%'; seat.style.top = (q.y * 100) + '%'; };
+      const up = (ev) => {
+        handle.removeEventListener('pointermove', move); handle.removeEventListener('pointerup', up); handle.removeEventListener('pointercancel', up);
+        seat.classList.remove('dragging'); BJ.drag = false;
+        const q = pos(ev), me = chatUid(), x = Math.round(q.x * 1000) / 1000, y = Math.round(q.y * 1000) / 1000;
+        if(BJ.p[me]){ BJ.p[me].x = x; BJ.p[me].y = y; }
+        bjPatch({ [`bj/p/${me}/x`]: x, [`bj/p/${me}/y`]: y }).catch(() => {});
+      };
+      handle.addEventListener('pointermove', move); handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
+    });
   }
   const bjTotTxt = (h) => !h || !h.k ? '' : h.h > 21 ? `${h.h} · bust` : (h.k === 2 && h.v === 21) ? 'Blackjack' : (h.a > 0 && h.h <= 11) ? `${h.v} (or ${h.h})` : `${h.v}`;
   function bjSync(){
@@ -23103,13 +23611,15 @@
       const S = BJ.p[me], others = bjSeats().filter(s => s.u !== D.u), votes = others.filter(s => BJ.kick[s.u] === D.u).length, need = Math.floor(others.length / 2) + 1;
       let c = '';
       if(D.u === me){
-        if(ph === 'bet') c = `<button type="button" class="bj-a" data-dact="deal" ${bjPlayers().length ? '' : 'disabled'}>Deal</button>`;
-        else if(ph === 'dealer' && !D.f) c = `<button type="button" class="bj-a" data-dact="hit" ${D.v < 21 && !D.pe ? '' : 'disabled'}>Hit</button><button type="button" class="bj-a" data-dact="stand" ${D.k >= 2 && !D.pe ? '' : 'disabled'}>Stand</button>`;
+        if(ph === 'bet') c = (S && bjInRound(S, D)) ? `<span class="bj-stake">Stake ${S.b}</span><button type="button" class="bj-a" data-dact="deal">Deal</button>` : BJ.noStake === D.r ? `<button type="button" class="bj-a" data-dact="deal">Deal</button>` : `<span class="bj-stake none">Stake a bet below to deal</span>`;
+        else if(S && bjInRound(S, D)){ const dp = D.f ? bjDealerPay(D, S.b).amt : -1; c = `<span class="bj-stake${dp < 0 ? '' : dp > S.b ? ' win' : dp === S.b ? '' : ' lose'}">Stake ${S.b}${dp >= 0 ? ' → ' + dp : ''}</span>`; }
+        if(ph === 'dealer' && !D.f) c += `<button type="button" class="bj-a" data-dact="hit" ${D.v < 21 && !D.pe ? '' : 'disabled'}>Hit</button><button type="button" class="bj-a" data-dact="stand" ${D.k >= 2 && !D.pe ? '' : 'disabled'}>Stand</button>`;
         c += `<button type="button" class="bj-l" data-dact="drop">Step down</button>`;
       } else if(!human){
-        if((D.f || D.k === 0) && !(S && bjInRound(S, D))) c = `<button type="button" class="bj-l" data-dact="take">Be the dealer</button>`;
+        if((D.f || D.k === 0) && !(S && bjInRound(S, D)) && !BJ.watch) c = `<button type="button" class="bj-l" data-dact="take">Be the dealer</button>`;
       } else {
-        c = `<button type="button" class="bj-l${BJ.kick[me] === D.u ? ' on' : ''}" data-dact="kick">${BJ.kick[me] === D.u ? 'Undo kick vote' : 'Vote to kick'} · ${votes}/${need}</button>`;
+        const ds = BJ.p[D.u]; if(ds && bjInRound(ds, D)) c = `<span class="bj-stake">Stake ${ds.b}${D.f ? ' → ' + bjDealerPay(D, ds.b).amt : ''}</span>`;
+        if(!BJ.watch) c += `<button type="button" class="bj-l${BJ.kick[me] === D.u ? ' on' : ''}" data-dact="kick">${BJ.kick[me] === D.u ? 'Undo kick vote' : 'Vote to kick'} · ${votes}/${need}</button>`;
       }
       if(dctl.dataset.sig !== c){ dctl.dataset.sig = c; dctl.innerHTML = c; }
     }
@@ -23138,9 +23648,15 @@
         const av = chatAv(s.u, s.n, false, false); av.classList.add('bj-av'); n.querySelector('.bj-pl').append(av);
         if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g); }
         n.querySelector('.bj-nm').textContent = bjName(s.n) + (s.u === me ? ' (you)' : ''); n.querySelector('.bj-nm').style.color = chatColor(s.n);
-        n.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'ease-out' });
+        if(s.u === me){ av.title = 'Drag to move your seat'; bjDragSetup(n, av); }
+        n.animate([{ opacity: 0, transform: 'translate(-50%, calc(-50% + 14px))' }, { opacity: 1, transform: 'translate(-50%, -50%)' }], { duration: 300, easing: 'ease-out' });
       }
-      if(box.children[i] !== n) box.insertBefore(n, box.children[i] || null);
+      if(n.parentNode !== box) box.appendChild(n);
+      if(!(BJ.drag && s.u === me)){
+        const k = seats.length, t = k === 1 ? 0.5 : i / (k - 1);
+        const px = typeof s.x === 'number' ? s.x : 0.14 + 0.72 * t, py = typeof s.y === 'number' ? s.y : 0.79 - 0.07 * Math.sin(Math.PI * t);
+        n.style.left = (bjClampX(px) * 100) + '%'; n.style.top = (bjClampY(py) * 100) + '%';
+      }
       const inR = D && bjInRound(s, D), hb = n.querySelector('.bj-hand'); hb.dataset.k = s.u;
       if(inR) bjHandEl(hb, s, false); else { hb.innerHTML = ''; hb.dataset.r = ''; }
       n.querySelector('.bj-tot').textContent = inR ? bjTotTxt(s) : '';
@@ -23175,17 +23691,17 @@
     el.querySelector('.cas-bal b').textContent = SC.loaded ? scBal() : '…';
     const me = chatUid(), D = BJ.d, S = BJ.p[me], ph = bjPhase(), T = bjTurn();
     const dealer = D && D.u === me, inR = S && D && bjInRound(S, D);
-    const canBet = BJ.on && ph === 'bet' && !dealer && !inR && !BJ.act;
-    el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !dealer && !inR) || !!BJ.watch;
+    const canBet = BJ.on && ph === 'bet' && !inR && !BJ.act && !BJ.watch;
+    el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !inR) || !!BJ.watch || (dealer && BJ.noStake === D.r);
     const sit = el.querySelector('.bj-sit'); sit.textContent = BJ.watch ? '🪑 Sit back down' : '👀 Sit out & watch'; sit.classList.toggle('on', !!BJ.watch);
-    const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `BET · ${BJ.bet}`;
+    const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `${dealer ? 'STAKE' : 'BET'} · ${BJ.bet}`;
     const my = !!(T && T.u === me && S && S.k >= 2 && !S.pe);
-    el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR);
+    el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR) || dealer;
     el.querySelector('.bj-hit').disabled = !(my && S.st === 'p' && S.v < 21) || BJ.act;
     el.querySelector('.bj-stand').disabled = !(my && S.st === 'p') || BJ.act;
     el.querySelector('.bj-dbl').disabled = !(my && S.st === 'p' && S.k === 2 && scBal() >= S.b) || BJ.act;
     const note = el.querySelector('.bj-note');
-    note.textContent = BJ.watch ? "You're watching — you won't be dealt in." : dealer ? "You're dealing — your buttons are by the dealer's cards." : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
+    note.textContent = BJ.watch ? (SC.loaded && scBal() < 1 ? "You're out of points — watching." : "You're watching — you won't be dealt in.") : dealer ? (ph === 'bet' && !inR ? 'You deal this round — stake a bet: 17 pays half back, 18 your stake, 19 ×1.5, 20–21 ×2, bust loses.' : "You're dealing — your buttons are by the dealer's cards.") : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
   }
   function bjFeed(txt, big){
     const el = chatPanel.querySelector('.chat-bj .bj-feed'); if(!el) return;
@@ -23209,8 +23725,8 @@
     setTimeout(() => document.addEventListener('pointerdown', out, true), 0);
     m.addEventListener('click', (e) => {
       const b = e.target.closest('[data-g]'); if(!b) return; close();
-      if(b.dataset.g === 'slots'){ if(CHAT.side === 'casino') return; if(CHAT.side) chatSideTo(CHAT.side); casJoin(); }
-      else if(b.dataset.g === 'bj'){ if(CHAT.side === 'bj') return; if(CHAT.side) chatSideTo(CHAT.side); bjJoin(); }
+      if(b.dataset.g === 'slots'){ if(!CAS.on) casJoin(); }
+      else if(b.dataset.g === 'bj'){ if(!BJ.on) bjJoin(); }
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
@@ -23226,20 +23742,33 @@
   // skip the wait: deal now (once you've bet), or start the next round once the results are in
   function bjNextRound(){
     const D = BJ.d; if(!D || !D.f) return;
-    bjDo(() => bjPatch({ 'bj/d': { u: D.u, n: D.n, r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv }, 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v } }));
+    const nd = () => ({ u: D.u, n: D.n, r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv });
+    bjUser(async () => { if(!(await bjPatch({ 'bj/d': nd(), 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v, u: D.u } }))) await bjPatch({ 'bj/d': nd(), 'bj/x': { r: D.r, k: D.k, h: D.h, a: D.a, v: D.v } }); });
   }
-  function bjDealNow(){ const D = BJ.d; if(D && D.u === 'bot' && bjPhase() === 'bet' && bjPlayers().length) bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealNow(){ const D = BJ.d; if(D && D.u === 'bot' && bjPhase() === 'bet' && bjPlayers().length) bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
   // a chat message from someone at the table pops up as a bubble over their head
   function bjSay(m){
     if(!BJ.on || !m || m.e || !m.m || chatBanned(m.u)) return;
     const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
     const D = BJ.d, host = (D && D.u === m.u) ? el.querySelector('.bj-who') : (el.querySelector(`.bj-seat[data-u="${CSS.escape(m.u)}"] .bj-pl`) || el.querySelector(`.bj-spec[data-u="${CSS.escape(m.u)}"]`));
     if(!host) return;
+    gameSay(host, m.m);
+  }
+  function gameSay(host, txt){
     host.querySelectorAll('.bj-say').forEach(x => x.remove());
-    const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(m.m).slice(0, 80);
+    const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(txt).slice(0, 80);
     host.appendChild(b);
-    b.animate([{ opacity: 0, transform: 'translate(-50%, 6px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.3,1.3)', fill: 'both' });
-    setTimeout(() => { if(b.isConnected) b.animate([{ opacity: 1 }, { opacity: 0, transform: 'translate(-50%, -8px)' }], { duration: 300, fill: 'both' }).onfinish = () => b.remove(); }, 5500);
+    // (it goes on whichever side of the picture has more room)
+    const box = host.closest('.chat-casino'), hr = host.getBoundingClientRect(), br = box ? box.getBoundingClientRect() : { left: 0, right: innerWidth };
+    if(br.right - hr.right < 190 && hr.left - br.left > br.right - hr.right) b.classList.add('left');
+    b.animate([{ opacity: 0, transform: 'translateY(-50%) scale(.8)' }, { opacity: 1, transform: 'translateY(-50%) scale(1)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.3,1.3)', fill: 'both' });
+    setTimeout(() => { if(b.isConnected) b.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(calc(-50% - 8px))' }], { duration: 300, fill: 'both' }).onfinish = () => b.remove(); }, 5500);
+  }
+  // someone sitting at a slot machine says something
+  function casSay(m){
+    if(!CAS.on || !m || m.e || !m.m || chatBanned(m.u)) return;
+    const host = chatPanel.querySelector(`.chat-casino:not(.chat-bj) .cas-m[data-u="${CSS.escape(m.u)}"] .cas-seat`);
+    if(host) gameSay(host, m.m);
   }
   // little sounds: a card snapping down, a chip clicking
   function sfxCard(){ if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime; sfxNoiseHit(ac, t, 'highpass', 2600, 1800, 0.7, 0.07, 0.22); sfxNoiseHit(ac, t + 0.02, 'bandpass', 900, 500, 1.2, 0.05, 0.12); }
@@ -23331,6 +23860,147 @@
     sfxChip();
   }
   setInterval(giftCheck, 20000); setTimeout(giftCheck, 4000);
+  // ----- the top 3 on the leaderboard: a glow and a crown wherever their picture shows, and a banner when they come online -----
+  var TOP = { r: {}, at: 0, init: false, prevOn: null };
+  async function topLoad(){
+    if(!chatName()) return;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=8&auth=${encodeURIComponent(tok)}`);
+      const d = r.ok ? await r.json() : null; if(!d) return;
+      const list = Object.entries(d).map(([u, v]) => ({ u, p: (v && v.p) | 0 })).filter(x => x.p > 0 && !chatBanned(x.u)).sort((a, b) => b.p - a.p).slice(0, 3);
+      const nr = {}; list.forEach((x, i) => { nr[x.u] = i + 1; });
+      const changed = JSON.stringify(nr) !== JSON.stringify(TOP.r);
+      TOP.r = nr; TOP.at = Date.now(); TOP.init = true;
+      if(changed){ topApply(); if(CHAT.open) chatRenderMessages(); }
+    }catch(e){}
+  }
+  function topRank(uid){ return (uid && TOP && TOP.r && TOP.r[uid]) || 0; }
+  function topApply(root){
+    for(const av of (root || document).querySelectorAll('.chat-av[data-u]')){
+      const r = topRank(av.dataset.u);
+      av.classList.toggle('top1', r === 1); av.classList.toggle('top2', r === 2); av.classList.toggle('top3', r === 3);
+      if(r) av.title = (av.title ? av.title + ' · ' : '') + `#${r} on the leaderboard`;
+    }
+  }
+  setInterval(topLoad, 60000); setTimeout(topLoad, 2500);
+  // (a top-3 player who wasn't online a moment ago)
+  // (anyone who wasn't online a moment ago gets a little notice — a plain one, or a shiny one for the top 3)
+  const TOP_T0 = Date.now();
+  function topOnlineCheck(onList){
+    const now = new Set(onList.filter(p => !p.me).map(p => p.uid));
+    if(TOP.prevOn && Date.now() - TOP_T0 > 8000 && chatName()){
+      for(const u of now) if(!TOP.prevOn.has(u)){ const p = onList.find(x => x.uid === u); topOnlinePop(u, p ? p.n : 'Someone', topRank(u)); }
+    }
+    TOP.prevOn = now;
+  }
+  function topOnlinePop(uid, name, r){
+    if(chatBanned(uid)) return;
+    let host = document.querySelector('.top-pops'); if(!host){ host = document.createElement('div'); host.className = 'top-pops'; document.body.appendChild(host); }
+    const c = document.createElement('div'); c.className = r ? 'top-pop r' + r : 'top-pop plain'; c.setAttribute('role', 'status');
+    c.innerHTML = r ? `<span class="tp-c">${['👑', '🥈', '🥉'][r - 1]}</span><div><b class="tp-n"></b><span>#${r} on the leaderboard is online!</span></div>` : `<div><b class="tp-n"></b><span> is online</span></div>`;
+    const av = chatAv(uid, name, false, false); c.prepend(av); topApply(c);
+    c.querySelector('.tp-n').textContent = chatBadName(name) ? 'Someone' : name;
+    host.appendChild(c); while(host.children.length > 3) host.firstChild.remove();
+    c.animate([{ opacity: 0, transform: 'translateY(-16px) scale(.9)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.2,.9,.3,1.3)' });
+    if(r && sfxOn()){ const ac = sfxCtx(); if(ac){ const t = ac.currentTime; [784, 988, 1319].forEach((f, i) => sfxTone(ac, t + i * 0.09, 'triangle', f, f, 0.22, 0.09)); } }
+    setTimeout(() => { if(c.isConnected) c.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)' }], { duration: 300, fill: 'forwards' }).onfinish = () => c.remove(); }, r ? 6000 : 3500);
+  }
+  // ----- 🎃 Trick or Treat: plant one on someone's screen while infiltrating (Space); it stays hidden until their mouse finds it -----
+  // tricks/<them>/<id> = { u, n, x, y, t } (paid with one from your stock: inv/<you>/tot)
+  const TOT_PRICE = 100, TOT_R = 56;
+  const TRAPS = new Map(); let trapBusy = false;
+  async function totBuy(){
+    if(SC.busy) return; if(!SC.loaded) await scLoad();
+    if(scBal() < TOT_PRICE){ toast(`🎃 Trick or Treat costs ${TOT_PRICE} points — you have ${scBal()}.`, 2600); return; }
+    SC.busy = true;
+    try{
+      const me = chatUid(), ok = await bjPatch({ [`scores/${me}/s`]: SC.s + TOT_PRICE, [`scores/${me}/t`]: bjSv, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`inv/${me}/tot`]: (SC.tot | 0) + 1 });
+      if(!ok) throw new Error('no');
+      SC.s += TOT_PRICE; SC.tot = (SC.tot | 0) + 1; SC._justBought = 'tot';
+      toast(`🎃 Trick or Treat bought — you have ${SC.tot}. Press Space while infiltrating someone to plant one.`, 3200); sfxChip();
+    }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
+    SC.busy = false; chatRenderArcade(); infHud();
+  }
+  async function totPlant(){
+    const M = INF.me; if(!M) return;
+    if(!SC.loaded) await scLoad();
+    if((SC.tot | 0) < 1){ toast(`🎃 No Trick or Treats left — buy them in the shop (${TOT_PRICE} points each).`, 2600); return; }
+    if(M.planting) return; M.planting = true;
+    const x = Math.max(0, Math.min(1, M.px / innerWidth)), y = Math.max(0, Math.min(1, M.py / innerHeight)), px = M.px, py = M.py;
+    const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const ok = await bjPatch({ [`tricks/${M.uid}/${id}`]: { u: me, n: chatName().slice(0, CHAT_NAME_MAX), x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000, t: bjSv }, [`inv/${me}/tot`]: SC.tot - 1 }).catch(() => null);
+    M.planting = false;
+    if(!ok){ await scLoad(); toast("Couldn't plant it — try again.", 2200); return; }
+    SC.tot--; infHud();
+    // (just for you: a pumpkin sinks into the spot)
+    const pk = document.createElement('div'); pk.className = 'tot-plant'; pk.textContent = '🎃'; pk.style.left = px + 'px'; pk.style.top = py + 'px'; document.body.appendChild(pk);
+    pk.animate([{ transform: 'translate(-50%,-50%) scale(1.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 }], { duration: 1400, easing: 'ease-in', fill: 'forwards' }).onfinish = () => pk.remove();
+    toast(`🎃 Planted on ${bjName(M.name)}'s screen — ${SC.tot} left. It goes off when their mouse finds it.`, 2600);
+  }
+  // your screen: tricks people left for you (checked when the chat starts, then every 15 s)
+  async function trapCheck(){
+    if(trapBusy || !chatName() || document.visibilityState !== 'visible') return; trapBusy = true;
+    try{
+      const tok = await chatAuth(), me = chatUid();
+      const r = await fetch(`${CHAT_DB}/tricks/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`);
+      const d = (r.ok ? await r.json() : null) || {};
+      for(const k of [...TRAPS.keys()]) if(!d[k] && !TRAPS.get(k).firing) TRAPS.delete(k);
+      for(const [k, v] of Object.entries(d)) if(v && typeof v.x === 'number' && typeof v.y === 'number' && !TRAPS.has(k) && !chatBanned(v.u)) TRAPS.set(k, v);
+    }catch(e){}
+    trapBusy = false;
+  }
+  setInterval(trapCheck, 15000); setTimeout(trapCheck, 5000);
+  window.addEventListener('pointermove', (e) => {
+    if(!TRAPS.size || INF.me) return;
+    for(const [k, t] of TRAPS){
+      if(t.firing) continue;
+      const dx = e.clientX - t.x * innerWidth, dy = e.clientY - t.y * innerHeight;
+      if(dx * dx + dy * dy < TOT_R * TOT_R){ t.firing = true; trapFire(k, t); break; }
+    }
+  }, { passive: true });
+  async function trapFire(id, t){
+    const x = t.x * innerWidth, y = t.y * innerHeight, who = chatBadName(t.n) ? 'Someone' : t.n;
+    totScare(x, y, who);
+    const me = chatUid(), base = { [`tricks/${me}/${id}`]: null };
+    const msg = { n: chatName().slice(0, CHAT_NAME_MAX), m: `got tricked by ${who}`.slice(0, chatMaxLen()), t: bjSv, u: me, e: 'trick', v: t.u };
+    let ok = chatName() && !chatBlock() ? await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: msg }, base)).catch(() => null) : null;
+    if(!ok) await bjPatch(base).catch(() => null);
+    TRAPS.delete(id);
+  }
+  // the jumpscare: a pumpkin bursts and bats pour out of the spot across the whole screen
+  function totScare(x, y, who){
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const L = document.createElement('div'); L.className = 'tot-scare'; document.body.appendChild(L);
+    const fl = document.createElement('div'); fl.className = 'tot-dark'; fl.style.setProperty('--x', x + 'px'); fl.style.setProperty('--y', y + 'px'); L.appendChild(fl);
+    fl.animate([{ opacity: 0 }, { opacity: 1, offset: .08 }, { opacity: .85, offset: .6 }, { opacity: 0 }], { duration: 2600, fill: 'forwards' });
+    const pk = document.createElement('div'); pk.className = 'tot-pk'; pk.textContent = '🎃'; pk.style.left = x + 'px'; pk.style.top = y + 'px'; L.appendChild(pk);
+    pk.animate([{ transform: 'translate(-50%,-50%) scale(.2) rotate(-20deg)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(3.2) rotate(8deg)', opacity: 1, offset: .18 }, { transform: 'translate(-50%,-50%) scale(2.6) rotate(-4deg)', opacity: 1, offset: .5 }, { transform: 'translate(-50%,-50%) scale(4) rotate(0)', opacity: 0 }], { duration: 1600, easing: 'cubic-bezier(.2,.9,.3,1.2)', fill: 'forwards' });
+    const n = still ? 8 : 46;
+    for(let i = 0; i < n; i++){
+      const b = document.createElement('div'); b.className = 'tot-bat'; b.textContent = '🦇'; b.style.left = x + 'px'; b.style.top = y + 'px';
+      const z = 22 + Math.random() * 46; b.style.fontSize = z + 'px'; L.appendChild(b);
+      const a = Math.random() * Math.PI * 2, d = Math.hypot(innerWidth, innerHeight) * (0.55 + Math.random() * 0.5);
+      const ex = Math.cos(a) * d, ey = Math.sin(a) * d, wob = (Math.random() - .5) * 260;
+      b.animate([{ transform: 'translate(-50%,-50%) scale(.2)', opacity: 0 },
+                 { transform: `translate(calc(-50% + ${ex * .25 + wob}px), calc(-50% + ${ey * .25 - wob * .4}px)) scale(1) rotate(${(Math.random() - .5) * 40}deg)`, opacity: 1, offset: .25 },
+                 { transform: `translate(calc(-50% + ${ex * .65 - wob}px), calc(-50% + ${ey * .65 + wob * .3}px)) scale(1.3) rotate(${(Math.random() - .5) * 60}deg)`, opacity: 1, offset: .7 },
+                 { transform: `translate(calc(-50% + ${ex}px), calc(-50% + ${ey}px)) scale(1.6)`, opacity: 0 }],
+        { duration: 1500 + Math.random() * 1200, delay: Math.random() * 380, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'both' });
+    }
+    const ban = document.createElement('div'); ban.className = 'tot-ban'; ban.innerHTML = '<b>TRICK!</b><span></span>';
+    ban.querySelector('span').textContent = `${who} planted a Trick or Treat on your screen 🎃`; L.appendChild(ban);
+    ban.animate([{ opacity: 0, transform: 'translate(-50%, -30px) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1.05)', offset: .12 }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)', offset: .85 }, { opacity: 0, transform: 'translate(-50%, -10px)' }], { duration: 4200, fill: 'forwards' });
+    sfxScare();
+    setTimeout(() => L.remove(), 4400);
+  }
+  function sfxScare(){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    sfxTone(ac, t, 'sawtooth', 90, 40, 0.5, 0.25);                       // the thump
+    sfxNoiseHit(ac, t, 'bandpass', 900, 3200, 4, 0.35, 0.3);              // the burst
+    for(let i = 0; i < 9; i++) sfxTone(ac, t + 0.12 + i * 0.07, 'square', 2600 + Math.random() * 1600, 1800 + Math.random() * 1200, 0.05, 0.035);   // the squeaks
+    sfxTone(ac, t + 0.05, 'triangle', 520, 140, 0.9, 0.12);               // the moan
+  }
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
@@ -23345,7 +24015,7 @@
         fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
         fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
       SC.p = (a && a.p) | 0; SC.s = (a && a.s) | 0;
-      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.bub = (b && b.bub) || {};
+      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0;
       SC.loaded = true;
     }catch(e){}
     chatRenderArcade(); artUI();
@@ -23417,6 +24087,8 @@
         h += `<div class="arc-item${on ? ' on' : ''}"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${i + 1} · ${escapeHtml(a.name)}</b><span>${escapeHtml(a.desc)}</span></div>
           <button type="button" class="arc-buy${own ? ' own' : ''}" data-fx="${a.k}" ${on ? 'disabled' : ''}>${on ? 'In use' : own ? 'Use' : a.price + ' pts'}</button></div>`;
       });
+      h += `<div class="chat-who-h" style="margin-top:6px">Halloween</div><p class="chat-side-p">Plant it on someone's screen while you infiltrate them (press Space). It hides there — even if they're offline — until their mouse touches it. Then: bats!</p>`;
+      h += `<div class="arc-item"><span class="arc-em">🎃</span><div class="arc-t"><b>Trick or Treat${SC.tot ? ` · you have ${SC.tot}` : ''}</b><span>Single use, stack as many as you like.</span></div><button type="button" class="arc-buy" data-tot>${TOT_PRICE} pts</button></div>`;
       const curB = bubNow();
       h += `<div class="chat-who-h" style="margin-top:6px">Chat bubbles</div><p class="chat-side-p">Your messages get their own colour, and everyone sees them arrive with the bubble's entrance. Click a bubble's picture to preview it.</p>`;
       h += `<div class="arc-item${!curB ? ' on' : ''}"><span class="arc-em bub-sw">💬</span><div class="arc-t"><b>Plain</b><span>The normal bubble.</span></div><button type="button" class="arc-buy own" data-bub="" ${!curB ? 'disabled' : ''}>${!curB ? 'In use' : 'Use'}</button></div>`;
@@ -23766,7 +24438,7 @@
     row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
   }
   function chatIncoming(m){
-    try{ bjSay(m); }catch(e){}
+    try{ bjSay(m); casSay(m); }catch(e){}
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a) || m.e) return;   // (my own message coming back / someone banned)
     if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
     CHAT.unread++;
@@ -23960,6 +24632,7 @@
   function presRender(){
     chatRingsUpdate();
     const on = presOnline();
+    try{ topOnlineCheck(on); }catch(e){}
     const nEl = chatPanel.querySelector('.chat-online-n'); if(nEl) nEl.textContent = on.length;
     const w = chatPanel.querySelector('.chat-who');
     if(w && !w.hidden){

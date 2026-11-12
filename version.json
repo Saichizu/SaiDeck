@@ -1,6 +1,6 @@
 {
-  "build": 51,
+  "build": 55,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Blackjack: new 'Sit out & watch' button. Stop playing but keep watching the table (and chatting), then 'Sit back down' any time. Watchers show in a 👀 Watching row."
+  "notes": "SaiDeck now updates itself when you open it. The admin can force an update for people who leave SaiDeck open (it waits until they're idle and saves their session as 'Autosaved (N)' first). A welcome screen with fairies once a day."
 }
