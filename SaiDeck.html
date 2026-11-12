@@ -477,6 +477,23 @@
   .tot-face{position:absolute;inset:0;transform-origin:50% 45%;}
   .tot-face svg{width:100%;height:100%;display:block;}
   .tot-flash{position:absolute;inset:0;background:#fff;pointer-events:none;}
+
+  /* the jackpot notice in the chat: an even gold card (no tilt), easy to read, nothing cut off */
+  .chat-jack{align-items:center !important;gap:12px !important;padding:12px 14px !important;border-radius:14px !important;color:#fff3cf !important;
+    background:linear-gradient(90deg,#3b2500 0%,#6a4300 50%,#3b2500 100%) !important;background-size:100% 100% !important;
+    border:1.5px solid #ffd76a !important;box-shadow:0 0 0 1px rgba(255,215,106,.15), 0 0 22px rgba(255,190,60,.35), inset 0 1px 0 rgba(255,240,190,.35) !important;}
+  .chat-jack, .chat-jack.in{animation:none !important;} .chat-jack.in{animation:chatEvIn .6s cubic-bezier(.2,.9,.3,1.4) both !important;}
+  .chat-jack .jp-shine{background:linear-gradient(90deg, transparent 0%, rgba(255,235,170,.0) 40%, rgba(255,235,170,.28) 50%, rgba(255,235,170,0) 60%, transparent 100%) !important;background-size:300% 100% !important;animation:jackSheen 3.2s ease-in-out infinite !important;}
+  @keyframes jackSheen{from{background-position:150% 0;}to{background-position:-150% 0;}}
+  .chat-jack .cj-i{flex:none;font-size:28px !important;line-height:1;}
+  .chat-jack .cj-b{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;line-height:1.35;}
+  .chat-jack .cj-h{font:900 15px 'Manrope',sans-serif !important;letter-spacing:.1em !important;background:linear-gradient(180deg,#fff6cf,#ffd34d 55%,#e89b00);-webkit-background-clip:text;background-clip:text;color:transparent !important;text-shadow:none !important;filter:drop-shadow(0 0 6px rgba(255,200,60,.6));}
+  .chat-jack .cj-w{font-size:13px;color:#fff3cf;overflow-wrap:anywhere;}
+  .chat-jack .cj-n{font-weight:800;color:#ffe08a !important;}
+  .chat-jack .cj-m{color:#fff;}
+  .chat-jack .cj-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .chat-jack .cj-r{margin:0 !important;font-size:13px;}
+  .chat-jack .cj-f i{display:inline !important;font-style:normal;font-size:10.5px;color:rgba(255,243,207,.65);opacity:1 !important;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21083,7 +21100,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 57;                 // ← goes up by one with every published version
+  const SD_BUILD = 58;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22066,7 +22083,7 @@
       if(m.e === 'jack'){
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const ev = document.createElement('div'); ev.className = 'chat-jack';
-        ev.innerHTML = '<div class="jp-shine"></div><span class="cj-i">🎰</span><div><b class="cj-h">JACKPOT</b> <b class="cj-n"></b> <span class="cj-m"></span><span class="cj-r">7️⃣7️⃣7️⃣</span><i></i></div>';
+        ev.innerHTML = '<div class="jp-shine"></div><span class="cj-i">🎰</span><div class="cj-b"><b class="cj-h">JACKPOT!</b><span class="cj-w"><b class="cj-n"></b> <span class="cj-m"></span></span><span class="cj-f"><span class="cj-r">7️⃣7️⃣7️⃣</span><i></i></span></div>';
         ev.querySelector('.cj-n').textContent = chatBadName(m.n) ? 'someone' : m.n;
         ev.querySelector('.cj-m').textContent = chatMask(String(m.m || '').replace(/^hit the JACKPOT and /, ''));
         ev.querySelector('i').textContent = chatFmtTime(m.t);
