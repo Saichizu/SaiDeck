@@ -524,6 +524,16 @@
   .chat-crate.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
   .crate-pop{position:fixed;z-index:9702;font-size:44px;pointer-events:none;}
   .crate-amt{position:fixed;z-index:9703;pointer-events:none;font:900 34px 'Manrope',sans-serif;color:#ffd34d;text-shadow:0 0 14px rgba(255,200,60,.8), 0 2px 0 #7a4a00;}
+
+  /* (the chat list never squeezes a card shorter than what's in it) */
+  .chat-body > *{flex-shrink:0;}
+  /* the crate, bigger */
+  .chat-crate{min-height:96px;padding:16px 16px !important;gap:14px !important;border-radius:18px !important;}
+  .chat-crate .ccr-i{font-size:44px !important;padding:4px;}
+  .chat-crate .ccr-h{font-size:20px !important;}
+  .chat-crate .ccr-m{font-size:14px !important;}
+  .chat-crate .ccr-s{font-size:12.5px !important;}
+  .chat-crate .ccr-open{padding:12px 20px !important;font-size:15px !important;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21130,7 +21140,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 65;                 // ← goes up by one with every published version
+  const SD_BUILD = 66;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22391,7 +22401,7 @@
         // the whole recent history (on connect / reconnect / after the room was cleared)
         const had = CHAT.ready, keep = new Set(Object.keys(d.data || {}));
         for(const k of [...CHAT.msgs.keys()]) if(!keep.has(k)) CHAT.msgs.delete(k);
-        if(d.data) for(const [k, m] of Object.entries(d.data)) apply(k, m, had ? fresh : null);
+        if(d.data) for(const [k, m] of Object.entries(d.data)){ if(k.includes('/')) applyDeep(k.split('/').filter(Boolean), m); else apply(k, m, had ? fresh : null); }
         if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && !m.e && !chatIsMe(m.u) && !chatBanned(m.u)).length; }
         CHAT.ready = true;
       } else {
@@ -22408,7 +22418,7 @@
       let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
       const fresh = [], parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
       if(parts.length){ for(const [k, v] of Object.entries(d.data || {})) applyDeep(parts.concat(k.split('/')), v); }
-      else for(const [k, m] of Object.entries(d.data || {})) apply(k, m, fresh);
+      else for(const [k, m] of Object.entries(d.data || {})){ if(k.includes('/')) applyDeep(k.split('/').filter(Boolean), m); else apply(k, m, fresh); }
       chatSort(); for(const m of fresh){ chatIncoming(m); if(m.e === 'jack' && Date.now() + PRES.offset - (m.t || 0) < 180000) chatJackPop(m); } chatUpdateBadge(); if(CHAT.open) chatRender();
     });
     es.addEventListener('cancel', () => { CHAT.status = 'err'; chatRenderStatus(); });
@@ -24015,6 +24025,15 @@
     }catch(e){}
     giftBusy = false;
   }
+  setInterval(async () => {
+    if(!CHAT.open || !CHAT.ready || document.visibilityState !== 'visible') return;
+    const recent = [...CHAT.msgs.values()].filter(m => m && m.e === 'gift' && m.d !== true && Date.now() + (PRES.offset || 0) - (m.t || 0) < 86400000).slice(-8);
+    let changed = false;
+    for(const m of recent){
+      try{ const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages/${encodeURIComponent(m._k)}/d.json`, { cache: 'no-store' }); if(r.ok && (await r.json()) === true){ m.d = true; changed = true; } }catch(e){}
+    }
+    if(changed) chatRenderMessages();
+  }, 20000);
   // the chat card for a turned-down gift: one of these, picked the same way on everyone's screen
   function giftNoChatLine(key, to, from, a){
     const L = [

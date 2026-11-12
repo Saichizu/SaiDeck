@@ -1,6 +1,6 @@
 {
-  "build": 65,
+  "build": 66,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Crates of points! The admin can drop a crate in the chat, and the first person to press Open! gets all the points inside."
+  "notes": "Fixed: declined gifts now change into the 'declined' line in everyone's chat. Crates are bigger and no longer get squashed (the jackpot notice too)."
 }
