@@ -259,6 +259,16 @@
   .jack-pop .jp-x:focus-visible{outline:2px solid #fff;}
   .jack-coin{position:fixed;z-index:9701;pointer-events:none;font-size:20px;}
   @media (prefers-reduced-motion: reduce){ .chat-jack, .jack-pop, .jp-shine, .jack-pop .jp-icon{animation:none !important;} }
+  .chat-cas{all:unset;box-sizing:border-box;align-self:stretch;display:flex;flex-direction:column;gap:4px;margin:2px 0;padding:9px 12px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(135deg, rgba(91,31,54,.9), rgba(44,20,36,.9));border:1px solid rgba(201,153,59,.7);box-shadow:inset 0 0 0 1px rgba(255,220,140,.08);font-size:12px;color:var(--text-dim);}
+  .chat-cas:hover{border-color:#ffd76a;box-shadow:0 0 14px rgba(255,200,90,.25);}
+  .chat-cas:focus-visible{outline:2px solid #ffd76a;}
+  .chat-cas .cc-h{font:800 12px 'Manrope',sans-serif;color:#ffe08a;display:flex;justify-content:space-between;gap:8px;}
+  .chat-cas .cc-h i{font:500 10.5px 'Inter',sans-serif;font-style:normal;color:var(--text-faint);}
+  .chat-cas .cc-rows{display:flex;flex-direction:column;gap:2px;}
+  .chat-cas .cc-r b{font-weight:700;}
+  .chat-cas .cc-r .w{color:#7dffb2;} .chat-cas .cc-r .l{color:#ff8f8f;}
+  .chat-cas .cc-join{font:700 10.5px 'Inter',sans-serif;color:#ffd76a;align-self:flex-end;}
   .chat-casbar{display:flex;align-items:center;gap:8px;margin:0 10px 8px;padding:7px 8px 7px 11px;border-radius:12px;background:linear-gradient(90deg, rgba(245,208,74,.14), rgba(255,94,138,.10));border:1px solid rgba(245,208,74,.45);font-size:12px;color:#ffe9b0;}
   .chat-casbar[hidden]{display:none;}
   .chat-casbar .cb-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -20781,7 +20791,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 41;                 // ← goes up by one with every published version
+  const SD_BUILD = 42;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21412,7 +21422,28 @@
     let lastDay = '';
     CHAT.alerts = []; CHAT.evNext = 0;
     const nowS = Date.now() + PRES.offset;
+    let casCard = null;      // (casino results in a row, with no chat between them, share one card)
     for(const m of shown){
+      if(m.e === 'cas'){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; casCard = null; }
+        if(!casCard){
+          const card = document.createElement('button'); card.type = 'button'; card.className = 'chat-cas'; casCard = card;
+          card.title = 'Join the casino';
+          card.innerHTML = '<span class="cc-h">🎰 Casino results <i></i></span><div class="cc-rows"></div><span class="cc-join">Join the casino →</span>';
+          card.addEventListener('click', () => { card.blur(); if(!CAS.on) casJoin(); });
+          body.appendChild(card);
+        }
+        const row = document.createElement('div'); row.className = 'cc-r';
+        const txt = String(m.m || ''), won = /^won /.test(txt), lost = /^lost /.test(txt);
+        row.innerHTML = '<b></b> <span></span>';
+        row.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; row.querySelector('b').style.color = chatColor(m.n);
+        const sp = row.querySelector('span'); sp.textContent = chatMask(txt); sp.className = won ? 'w' : lost ? 'l' : '';
+        casCard.querySelector('.cc-rows').appendChild(row);
+        casCard.querySelector('.cc-h i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)) row.animate([{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none' }], { duration: 300 });
+        continue;
+      }
+      casCard = null;
       if(m.e === 'jack'){
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const ev = document.createElement('div'); ev.className = 'chat-jack';
@@ -22321,7 +22352,7 @@
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
-    CAS.on = true; CAS.seen = {}; CAS.feed = [];
+    CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0;
     if(CHAT.side !== 'casino') chatSideTo('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
@@ -22332,7 +22363,9 @@
   }
   function casLeave(){
     if(!CAS.on) return;
-    CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0;
+    CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0; CAS.held = 0;
+    const S = CAS.sess; CAS.sess = null;
+    if(S && S.spins > 0) casSessionPost(S);
     clearInterval(CAS.poll); CAS.poll = 0;
     chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
   }
@@ -22387,6 +22420,7 @@
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
       const sp = { b: bet, t: T, c: false }; CAS.spins[me] = sp;
+      if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += bet * casMult(T); }
       CAS.seen[me] = T;
       const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
       if(myM) casShow(myM, sp, true, { n: chatName() });
@@ -22401,7 +22435,7 @@
         const tok = await chatAuth(), body = {};
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(r.ok){ SC.p += win; sp.c = true; return win; }
+        if(r.ok){ SC.p += win; sp.c = true; if(!sp.shown) CAS.held = (CAS.held || 0) + win; return win; }
         await scLoad();
       }catch(e){}
     }
@@ -22455,7 +22489,7 @@
   }
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
-    el.querySelector('.cas-bal b').textContent = SC.loaded ? scBal() : '…';
+    el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - (CAS.held || 0)) : '…';
     const sb = el.querySelector('.cas-spin'); sb.disabled = CAS.busy || !CAS.on || scBal() < CAS.bet; sb.textContent = CAS.busy ? '…' : `SPIN · ${CAS.bet}`;
   }
   const casSym = (i) => CAS_SYMS[i] || '❔';
@@ -22498,7 +22532,10 @@
     const done = () => {
       res.innerHTML = win > 0 ? `bet <b>${sp.b}</b> · won <b class="w">${win}</b>` : `bet <b>${sp.b}</b> · lost`;
       m.classList.toggle('won', win > 0); m.classList.toggle('big', win >= sp.b * 6);
+      sp.shown = true;
       if(roll){
+        sfxSlotResult(casMult(sp.t), m.classList.contains('me') ? 1 : 0.35);
+        if(m.classList.contains('me')){ CAS.held = Math.max(0, (CAS.held || 0) - win); casCtl(); }      // (the win shows in your points only now)
         if(win > 0) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
         casFeed(`${nm} bet ${sp.b} → ${R.map(casSym).join('')} ${win > 0 ? 'won ' + win : 'lost'}`, win >= sp.b * 6);
@@ -22509,6 +22546,7 @@
     };
     if(still){ strips.forEach((s, i) => { s.innerHTML = `<span>${casSym(R[i])}</span>`; s.style.transform = ''; }); done(); return; }
     res.textContent = `bet ${sp.b} · spinning…`; m.classList.remove('won', 'big');
+    sfxReels([900, 1280, 1660], m.classList.contains('me') ? 1 : 0.35);
     let left = 3;
     strips.forEach((s, i) => {
       const n = 14 + i * 5, syms = [];
@@ -22522,6 +22560,15 @@
         if(--left === 0) done();
       };
     });
+  }
+  // getting up from the casino: one notice in the chat with how it went (stays; clicking it joins the casino)
+  function casSessionPost(S){
+    if(!chatName() || chatBlock()) return;
+    const net = S.won - S.bet, sp = `${S.spins} spin${S.spins === 1 ? '' : 's'}`;
+    const txt = (net > 0 ? `won ${net} in the casino (${sp})` : net < 0 ? `lost ${-net} in the casino (${sp})` : `broke even in the casino (${sp})`).slice(0, chatMaxLen());
+    const tok = CHAT_AUTH.tok;
+    const post = (tk) => fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tk)}`, { method: 'POST', keepalive: true, body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: { '.sv': 'timestamp' }, u: chatUid(), e: 'cas' }) });
+    if(tok && CHAT_AUTH.exp > Date.now() + 5000) post(tok).catch(() => {}); else chatAuth().then(post).catch(() => {});
   }
   // a jackpot goes out to the whole room as a shiny notice that stays in the chat
   async function casJackpotPost(win){
@@ -22625,7 +22672,7 @@
     const btn = chatPanel.querySelector('.chat-arc'); if(btn) btn.setAttribute('aria-expanded', String(CHAT.side === 'arcade'));
     el.hidden = CHAT.side !== 'arcade';
     if(el.hidden){ el.innerHTML = ''; el._h = ''; el.dataset.fresh = ''; delete el.dataset.bal; delete el.dataset.tabx; return; }
-    const cur = ammoNow(), bal = scBal();
+    const cur = ammoNow(), bal = Math.max(0, scBal() - (CAS.held || 0));
     const freshKey = SC.tab + '|' + (SC.tab === 'board' ? !!SC.board : '');
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
@@ -23063,6 +23110,27 @@
     sfxNoiseHit(ac, t, 'lowpass', 1800, 250, 6, 0.24, 0.32);
     sfxTone(ac, t, 'sine', 210, 70, 0.2, 0.22);
     sfxNoiseHit(ac, t + 0.07, 'bandpass', 700, 300, 8, 0.16, 0.12);
+  }
+  // the slot machine: reels whirring with a click per symbol, a clunk as each one stops
+  function sfxReels(stops, vol){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    const out = ac.createGain(); out.gain.value = vol == null ? 1 : vol; out.connect(ac.destination);
+    const end = Math.max(...stops) / 1000;
+    for(let x = 0.02; x < end; x += 0.055 + 0.04 * (x / end)){
+      const live = stops.filter(ms => x < ms / 1000).length; if(!live) break;
+      sfxNoiseHit(ac, t + x, 'bandpass', 2600, 2200, 6, 0.025, 0.05 + 0.02 * live, out);
+    }
+    stops.forEach((ms, i) => { const at = t + ms / 1000; sfxTone(ac, at, 'triangle', 180 - i * 10, 90, 0.09, 0.25, out); sfxNoiseHit(ac, at, 'lowpass', 1600, 400, 1, 0.06, 0.15, out); });
+  }
+  // the result: a jingle for a win (bigger for three of a kind), a soft "womp" for nothing
+  function sfxSlotResult(mult, vol){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime + 0.05;
+    const out = ac.createGain(); out.gain.value = vol == null ? 1 : vol; out.connect(ac.destination);
+    if(mult >= 25){ out.disconnect(); sfxJackpot(); return; }
+    if(mult >= 6){ [523, 659, 784, 1047, 784, 1047].forEach((f, i) => sfxTone(ac, t + i * 0.09, 'square', f, f, 0.12, 0.07, out)); for(let i = 0; i < 6; i++) sfxTone(ac, t + 0.5 + i * 0.05, 'sine', 2000 + i * 300, 2400 + i * 300, 0.08, 0.05, out); return; }
+    if(mult >= 2){ [659, 784, 1047].forEach((f, i) => sfxTone(ac, t + i * 0.08, 'square', f, f, 0.11, 0.07, out)); return; }
+    if(mult >= 1){ sfxTone(ac, t, 'triangle', 660, 660, 0.1, 0.1, out); sfxTone(ac, t + 0.1, 'triangle', 880, 880, 0.14, 0.1, out); return; }
+    sfxTone(ac, t, 'sawtooth', 220, 150, 0.22, 0.05, out); sfxTone(ac, t + 0.24, 'sawtooth', 160, 90, 0.38, 0.05, out);
   }
   // a jackpot: a coin shower going up the scale
   function sfxJackpot(){

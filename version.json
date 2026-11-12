@@ -1,9 +1,10 @@
 {
-  "build": 41,
+  "build": 42,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Casino: hitting the 7️⃣7️⃣7️⃣ jackpot pops a shiny gold notice on everyone's screen (it stays until they close it) and a sparkling jackpot card stays in the chat.",
-    "Game sounds: an alarm when someone starts infiltrating you, a \"thwip\" and splat for every slime shot (each bullet sounds different), and a coin shower for jackpots. Turn them off with \"Game sounds\" in the chat."
+    "Casino: slot machine sounds — the reels whirr and clunk as each one stops, then a jingle for a win (bigger for three of a kind) or a sad \"womp\".",
+    "Casino: your points only go up once the reels stop, so the result isn't spoiled.",
+    "Casino: when you leave, the chat shows how your session went (won / lost / broke even). Results in a row share one card, and clicking it joins the casino."
   ]
 }
