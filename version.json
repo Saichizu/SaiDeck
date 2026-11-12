@@ -1,8 +1,6 @@
 {
-  "build": 46,
+  "build": 47,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": [
-    "Main groups fixed: everyone still harmonises together, but each Main group's harmony uses only its own tracks' colours (Main 1 glows in Main 1's colours, Main 3 in Main 3's) — so the groups never mix colours."
-  ]
+  "notes": "Idle now only counts clicks, typing and scrolling (not mouse movement), and switching to another tab or app makes you idle right away. The online list shows if each person is on SaiDeck, idle in SaiDeck, or in another tab."
 }

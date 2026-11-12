@@ -230,6 +230,11 @@
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
   .chat-bell{position:relative;}
+  .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
+  .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
+  .chat-who-st.on{color:#8ee9d9;}
+  .chat-who-st.idle i{background:#f5a524;} .chat-who-st.idle{color:#f5c77a;}
+  .chat-who-st.away i{background:#7a7d8c;}
   .vr-main-wrap{position:relative;display:inline-flex;}
   .vr-main-wrap > button{flex:1;}
   .vr-menu{position:absolute;top:calc(100% + 3px);left:0;z-index:30;display:none;flex-direction:column;gap:2px;min-width:86px;padding:4px;border-radius:8px;background:var(--bg-panel, #1b1c22);border:1px solid var(--border);box-shadow:0 8px 22px rgba(0,0,0,.45);}
@@ -20830,7 +20835,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 46;                 // ← goes up by one with every published version
+  const SD_BUILD = 47;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23216,7 +23221,7 @@
     try{
       const tok = await chatAuth(), uid = chatUid();
       if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
-      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true;
+      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true; if(document.visibilityState !== 'visible' || !document.hasFocus()) body.h = true;
       const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
@@ -23237,8 +23242,16 @@
   }
   // whether you're doing anything in SaiDeck: after 30 s of nothing you show as idle (others see the ring change)
   PRES.act = Date.now(); PRES.away = false;
-  const presActive = () => { PRES.act = Date.now(); if(PRES.away){ PRES.away = false; presBeat(); chatRingsUpdate(); } };
-  for(const ev of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, presActive, { passive: true, capture: true });
+  // (only clicking, typing, scrolling or touching counts — just moving the mouse over SaiDeck doesn't;
+  // and switching to another tab or app makes you idle straight away)
+  const presActive = () => { if(document.visibilityState !== 'visible') return; PRES.act = Date.now(); if(PRES.away){ PRES.away = false; presBeat(); chatRingsUpdate(); } };
+  for(const ev of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, presActive, { passive: true, capture: true });
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState !== 'visible'){ if(!PRES.away){ PRES.away = true; } presBeat(); chatRingsUpdate(); }
+    else presActive();
+  });
+  window.addEventListener('blur', () => { setTimeout(() => { if(!document.hasFocus() && !PRES.away){ PRES.away = true; presBeat(); chatRingsUpdate(); } }, 1500); });
+  window.addEventListener('focus', presActive);
   setInterval(() => {
     if(!PRES.away && Date.now() - PRES.act > 30000){ PRES.away = true; presBeat(); }
     chatRingsUpdate();
@@ -23268,7 +23281,12 @@
         const av = chatAv(uid, n, false, true);
         const nm = document.createElement('span'); nm.textContent = n + (me ? ' (you)' : '');
         const tail = document.createElement('span');
-        if(online) tail.className = 'chat-dot on'; else { tail.className = 'chat-who-t'; tail.textContent = sub; }
+        if(online){
+          // looking at SaiDeck, idle in SaiDeck, or in another tab / app
+          const P = me ? { h: document.visibilityState !== 'visible' || !document.hasFocus(), w: PRES.away } : (PRES.list[uid] || {});
+          const st = P.h ? ['away', 'in another tab'] : P.w ? ['idle', 'SaiDeck open · idle'] : ['on', 'on SaiDeck'];
+          tail.className = 'chat-who-st ' + st[0]; tail.innerHTML = `<i></i>${st[1]}`;
+        } else { tail.className = 'chat-who-t'; tail.textContent = sub; }
         row.append(av, nm, tail); w.appendChild(row);
       };
       for(const p of on) row1(p.uid, p.n, p.me, '', true);
@@ -23298,7 +23316,11 @@
       es.addEventListener('put', (e) => {
         let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
         if(d.path === '/') PRES.list = d.data || {};
-        else { const k = d.path.replace(/^\//, '').split('/')[0]; if(d.data == null) delete PRES.list[k]; else PRES.list[k] = Object.assign({}, PRES.list[k], d.data); }
+        else {
+          const parts = d.path.replace(/^\//, '').split('/'), k = parts[0];
+          if(parts.length === 1){ if(d.data == null) delete PRES.list[k]; else PRES.list[k] = d.data; }
+          else { const o = Object.assign({}, PRES.list[k]); if(d.data == null) delete o[parts[1]]; else o[parts[1]] = d.data; PRES.list[k] = o; }
+        }
         presRender();
       });
       es.addEventListener('patch', (e) => { let d; try{ d = JSON.parse(e.data); }catch(_){ return; } for(const [k, v] of Object.entries(d.data || {})){ if(v == null) delete PRES.list[k]; else PRES.list[k] = v; } presRender(); });
