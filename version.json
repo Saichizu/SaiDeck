@@ -1,6 +1,6 @@
 {
-  "build": 55,
+  "build": 56,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "SaiDeck now updates itself when you open it. The admin can force an update for people who leave SaiDeck open (it waits until they're idle and saves their session as 'Autosaved (N)' first). A welcome screen with fairies once a day."
+  "notes": "The opening screen now thanks our testers: their names float in a glass capsule and you can knock them around with your mouse. 💜"
 }

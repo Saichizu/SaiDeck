@@ -450,7 +450,7 @@
   .sd-welcome.out{opacity:0;transform:scale(1.04);pointer-events:none;}
   .sd-welcome canvas{position:absolute;inset:0;}
   .sdw-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;}
-  .sdw-title{font:900 clamp(56px, 11vw, 140px)/1 'Manrope',sans-serif;letter-spacing:-.02em;display:flex;}
+  .sdw-title{font:900 clamp(52px, min(11vw, 15vh), 140px)/1 'Manrope',sans-serif;letter-spacing:-.02em;display:flex;}
   .sdw-title span{background:linear-gradient(180deg,#fff 0%,#ffd6f5 45%,#b48cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(200,170,255,.55));
     display:inline-block;opacity:0;animation:sdwLetter .8s cubic-bezier(.2,.9,.3,1.3) forwards, sdwFloat 3.2s ease-in-out infinite;animation-delay:calc(var(--i) * 90ms + 200ms), calc(var(--i) * 140ms + 1s);}
   @keyframes sdwLetter{from{opacity:0;transform:translateY(30px) scale(.6) rotate(-8deg);filter:blur(8px) drop-shadow(0 0 0 transparent);}to{opacity:1;transform:none;}}
@@ -458,6 +458,21 @@
   .sdw-sub{font:600 clamp(15px, 2vw, 20px) 'Inter',sans-serif;color:#e9ddff;opacity:0;animation:sduIn .8s ease-out 1s forwards;text-shadow:0 0 12px rgba(180,140,255,.6);}
   .sdw-hint{font-size:12px;color:rgba(233,221,255,.55);opacity:0;animation:sduIn .8s ease-out 2s forwards;margin-top:8px;}
   @media (prefers-reduced-motion: reduce){ .sdw-title span{animation:none;opacity:1;} }
+
+  .sdw-cap{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:22px;opacity:0;animation:sduIn .8s ease-out 1.4s forwards;}
+  .sdw-cap-t{font:700 13px 'Inter',sans-serif;color:#e9ddff;letter-spacing:.02em;text-shadow:0 0 10px rgba(180,140,255,.6);}
+  .sdw-box{position:relative;width:min(760px, 90vw);height:170px;border-radius:999px;overflow:hidden;cursor:none;
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02) 40%, rgba(180,140,255,.08));border:1.5px solid rgba(220,200,255,.45);
+    box-shadow:inset 0 2px 12px rgba(255,255,255,.18), inset 0 -10px 30px rgba(120,80,220,.25), 0 0 40px rgba(180,140,255,.25), 0 20px 50px rgba(0,0,0,.4);backdrop-filter:blur(4px);}
+  .sdw-box::before{content:'';position:absolute;left:6%;right:6%;top:8px;height:28%;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,0));pointer-events:none;z-index:3;}
+  .sdw-nm{position:absolute;left:0;top:0;padding:8px 16px;border-radius:999px;font:800 15px 'Manrope',sans-serif;color:#1d1230;white-space:nowrap;will-change:transform;
+    box-shadow:0 0 16px var(--gl), inset 0 1px 0 rgba(255,255,255,.7), 0 4px 10px rgba(0,0,0,.3);user-select:none;pointer-events:none;}
+  .sdw-orb{position:absolute;left:0;top:0;width:40px;height:40px;border-radius:50%;opacity:0;pointer-events:none;transition:opacity .2s;z-index:2;
+    background:radial-gradient(circle at 35% 35%, #fff, #e9ddff 30%, rgba(180,140,255,.6) 60%, rgba(180,140,255,0) 72%);box-shadow:0 0 22px rgba(220,200,255,.9);}
+  .sdw-go{all:unset;pointer-events:auto;cursor:pointer;margin-top:18px;padding:11px 26px;border-radius:999px;font:800 14px 'Manrope',sans-serif;color:#1a0f33;
+    background:linear-gradient(135deg,#ffd6f5,#c9b6ff);box-shadow:0 8px 26px rgba(180,140,255,.45);opacity:0;animation:sduIn .8s ease-out 1.8s forwards;}
+  .sdw-go:hover{filter:brightness(1.06);transform:translateY(-1px);} .sdw-go:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+  .sd-welcome{cursor:default !important;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21064,7 +21079,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 55;                 // ← goes up by one with every published version
+  const SD_BUILD = 56;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21343,8 +21358,72 @@
     let day = ''; try{ day = new Date().toDateString(); if(localStorage.getItem('sd.welcome') === day) return; }catch(e){ return; }
     const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const W = document.createElement('div'); W.className = 'sd-welcome'; W.setAttribute('role', 'dialog'); W.setAttribute('aria-label', 'Welcome to SaiDeck');
-    W.innerHTML = `<canvas></canvas><div class="sdw-in"><div class="sdw-title" aria-label="SaiDeck">${'SaiDeck'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div><div class="sdw-sub">Welcome back${(() => { try{ const n = localStorage.getItem('sd.chat.name'); return n ? ', ' + escapeHtml(n) : ''; }catch(e){ return ''; } })()} ✨</div><div class="sdw-hint">click anywhere to start</div></div>`;
+    W.innerHTML = `<canvas></canvas><div class="sdw-in"><div class="sdw-title" aria-label="SaiDeck">${'SaiDeck'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</div><div class="sdw-sub">Welcome back${(() => { try{ const n = localStorage.getItem('sd.chat.name'); return n ? ', ' + escapeHtml(n) : ''; }catch(e){ return ''; } })()} ✨</div><div class="sdw-cap"><div class="sdw-cap-t">💜 Thank you to everyone who helped test SaiDeck</div><div class="sdw-box"><div class="sdw-orb"></div></div></div><button type="button" class="sdw-go">Start SaiDeck</button><div class="sdw-hint">move your mouse into the capsule to bump the names around</div></div>`;
     document.body.appendChild(W);
+    // ----- the testers' capsule: names float in zero-g; your cursor is a little orb that knocks them about -----
+    const TESTERS = ['Kurin', 'Kaitoe_ENT', 'Aly', 'Kurose', 'Kyan', 'David', 'Jayne', 'LuvlyARD'];
+    const TCOL = [['#ffd6f5', '#ff9ad5'], ['#c9b6ff', '#8f6bff'], ['#9ff3ff', '#3fc8e0'], ['#fff3b0', '#ffc94a'], ['#b8ffd9', '#3ed39a'], ['#ffc8b0', '#ff8a5c'], ['#d6e0ff', '#7f9cff'], ['#ffd0e8', '#ff6fae']];
+    const box = W.querySelector('.sdw-box'), orb = W.querySelector('.sdw-orb');
+    const bodies = TESTERS.map((n, i) => {
+      const el = document.createElement('div'); el.className = 'sdw-nm'; el.textContent = n;
+      el.style.background = `linear-gradient(135deg, ${TCOL[i % TCOL.length][0]}, ${TCOL[i % TCOL.length][1]})`; el.style.setProperty('--gl', TCOL[i % TCOL.length][1]);
+      box.appendChild(el);
+      return { el, x: 0, y: 0, vx: (Math.random() - .5) * 2.4, vy: (Math.random() - .5) * 2.4, w: 0, h: 0 };
+    });
+    const O = { x: -999, y: -999, px: -999, py: -999, r: 20, in: false, vx: 0, vy: 0 };
+    let BW = 0, BH = 0;
+    const capSize = () => {
+      BW = box.clientWidth; BH = box.clientHeight;
+      bodies.forEach((b, i) => { b.w = b.el.offsetWidth; b.h = b.el.offsetHeight; if(!b.x){ b.x = BW * (0.12 + 0.76 * (i + .5) / bodies.length); b.y = BH * (0.3 + 0.4 * Math.random()); } });
+    };
+    requestAnimationFrame(capSize); window.addEventListener('resize', capSize);
+    box.addEventListener('pointermove', (e) => { const r = box.getBoundingClientRect(); O.x = e.clientX - r.left; O.y = e.clientY - r.top; O.in = true; });
+    box.addEventListener('pointerleave', () => { O.in = false; O.x = O.y = -999; });
+    const bump = (b) => { if(b.el.getAnimations().length) return; b.el.animate([{ transform: `translate(${b.x - b.w / 2}px, ${b.y - b.h / 2}px) scale(1)` }, { transform: `translate(${b.x - b.w / 2}px, ${b.y - b.h / 2}px) scale(1.18)`, offset: .35 }, { transform: `translate(${b.x - b.w / 2}px, ${b.y - b.h / 2}px) scale(1)` }], { duration: 260, composite: 'replace' }); };
+    function capStep(){
+      if(!BW){ capSize(); if(!BW) return; }
+      // (the orb's own speed, so a fast swipe hits hard)
+      if(O.in){ O.vx = O.x - O.px; O.vy = O.y - O.py; } else { O.vx = O.vy = 0; }
+      O.px = O.x; O.py = O.y;
+      orb.style.opacity = O.in ? '1' : '0'; orb.style.transform = `translate(${O.x - O.r}px, ${O.y - O.r}px)`;
+      const R2 = BH / 2;
+      for(const b of bodies){
+        b.vx *= 0.995; b.vy *= 0.995;
+        const sp = Math.hypot(b.vx, b.vy); if(sp < 0.35){ const a = Math.random() * 6.283; b.vx += Math.cos(a) * .05; b.vy += Math.sin(a) * .05; }
+        if(sp > 14){ b.vx *= 14 / sp; b.vy *= 14 / sp; }
+        b.x += b.vx; b.y += b.vy;
+        const hw = b.w / 2, hh = b.h / 2;
+        // walls: top/bottom, and the round ends of the capsule
+        if(b.y - hh < 4){ b.y = 4 + hh; b.vy = Math.abs(b.vy); } else if(b.y + hh > BH - 4){ b.y = BH - 4 - hh; b.vy = -Math.abs(b.vy); }
+        for(const side of [-1, 1]){
+          const capX = b.x + side * (hw - hh), cX = side < 0 ? R2 : BW - R2;
+          if(side < 0 ? capX < cX : capX > cX){
+            const dx = capX - cX, dy = b.y - R2, d = Math.hypot(dx, dy), lim = R2 - hh - 4;
+            if(d > lim){ const nx = dx / d, ny = dy / d; b.x -= nx * (d - lim); b.y -= ny * (d - lim); const dot = b.vx * nx + b.vy * ny; if(dot > 0){ b.vx -= 2 * dot * nx; b.vy -= 2 * dot * ny; } }
+          }
+        }
+        // the orb (a circle) against the name (a rounded box)
+        if(O.in){
+          const qx = Math.max(b.x - hw, Math.min(O.x, b.x + hw)), qy = Math.max(b.y - hh, Math.min(O.y, b.y + hh));
+          const dx = qx - O.x, dy = qy - O.y, d = Math.hypot(dx, dy);
+          if(d < O.r){
+            const nx = d ? dx / d : (b.x - O.x >= 0 ? 1 : -1), ny = d ? dy / d : 0, push = O.r - d;
+            b.x += nx * push; b.y += ny * push;
+            const kick = 1.2 + Math.max(0, O.vx * nx + O.vy * ny) * 0.9;
+            b.vx += nx * kick; b.vy += ny * kick; bump(b);
+          }
+        }
+      }
+      // names bounce off each other
+      for(let i = 0; i < bodies.length; i++) for(let j = i + 1; j < bodies.length; j++){
+        const a = bodies[i], c = bodies[j], ox = (a.w + c.w) / 2 - Math.abs(a.x - c.x), oy = (a.h + c.h) / 2 - Math.abs(a.y - c.y);
+        if(ox > 0 && oy > 0){
+          if(ox < oy){ const s1 = a.x < c.x ? -1 : 1; a.x += s1 * ox / 2; c.x -= s1 * ox / 2; const t = a.vx; a.vx = c.vx; c.vx = t; }
+          else { const s1 = a.y < c.y ? -1 : 1; a.y += s1 * oy / 2; c.y -= s1 * oy / 2; const t = a.vy; a.vy = c.vy; c.vy = t; }
+        }
+      }
+      for(const b of bodies) if(!b.el.getAnimations().length) b.el.style.transform = `translate(${b.x - b.w / 2}px, ${b.y - b.h / 2}px)`;
+    }
     const cv = W.querySelector('canvas'), cx = cv.getContext('2d');
     let w = 0, h = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
     const size = () => { w = innerWidth; h = innerHeight; cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px'; cx.setTransform(dpr, 0, 0, dpr, 0, 0); };
@@ -21379,6 +21458,7 @@
       }
       cx.globalAlpha = 1;
       if(dust.length > 900) dust.splice(0, dust.length - 900);
+      try{ capStep(); }catch(e){}
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -21389,9 +21469,11 @@
       W.classList.add('out');
       setTimeout(() => { cancelAnimationFrame(raf); window.removeEventListener('resize', size); W.remove(); }, 700);
     };
-    W.addEventListener('pointerdown', close);
-    window.addEventListener('keydown', function k(e){ if(!gone){ close(); } window.removeEventListener('keydown', k, true); }, true);
-    setTimeout(close, 6500);
+    W.addEventListener('pointerdown', (e) => { if(!e.target.closest('.sdw-box')) close(); });
+    W.querySelector('.sdw-go').addEventListener('click', close);
+    window.addEventListener('keydown', function k(e){ if(gone){ window.removeEventListener('keydown', k, true); return; } if(e.key === 'Enter' || e.key === 'Escape' || e.key === ' '){ e.preventDefault(); close(); window.removeEventListener('keydown', k, true); } }, true);
+    setTimeout(() => { if(!O.in) close(); else { const t = setInterval(() => { if(!O.in || gone){ clearInterval(t); close(); } }, 1500); } }, 30000);
+    setTimeout(() => { const g = W.querySelector('.sdw-go'); if(g) g.focus({ preventScroll: true }); }, 900);
   })();
 
 
