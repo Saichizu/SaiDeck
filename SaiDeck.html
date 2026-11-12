@@ -230,6 +230,15 @@
   .chat-modal-x:focus-visible{outline:2px solid #b48cff;}
   .chat-who:not([hidden]) > .chat-who-h:first-child, .chat-side:not([hidden]) > .chat-who-h:first-child{font-size:13px;padding-right:34px;}
   .chat-bell{position:relative;}
+  .vr-main-wrap{position:relative;display:inline-flex;}
+  .vr-main-wrap > button{flex:1;}
+  .vr-menu{position:absolute;top:calc(100% + 3px);left:0;z-index:30;display:none;flex-direction:column;gap:2px;min-width:86px;padding:4px;border-radius:8px;background:var(--bg-panel, #1b1c22);border:1px solid var(--border);box-shadow:0 8px 22px rgba(0,0,0,.45);}
+  .vr-main-wrap:hover .vr-menu, .vr-main-wrap:focus-within .vr-menu{display:flex;}
+  .vr-menu::before{content:'';position:absolute;left:0;right:0;top:-6px;height:6px;}
+  .vr-menu button{all:unset;cursor:pointer;padding:5px 9px;border-radius:6px;font:600 11.5px 'Inter',sans-serif;color:var(--text);}
+  .vr-menu button:hover{background:rgba(255,255,255,.08);}
+  .vr-menu button.on{background:var(--accent, #e5484d);color:#fff;}
+  .vr-menu button:focus-visible{outline:2px solid #fff;}
   /* jackpots: a shiny notice in the chat (stays), and a pop-up on everyone's screen until closed */
   .chat-jack{position:relative;overflow:hidden;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:10px 12px;border-radius:14px;
     background:linear-gradient(120deg,#5a3a00,#b8860b 30%,#ffd76a 50%,#b8860b 70%,#5a3a00);background-size:250% 100%;animation:jackBg 4s linear infinite;border:1px solid #ffe08a;box-shadow:0 0 18px rgba(255,200,80,.45);color:#2a1800;font-size:12.5px;}
@@ -3753,6 +3762,7 @@
         <div class="rec-row rs" data-rec-row="lyricBounce" data-hl="lyrics"><span>Bounce</span><input type="range" min="0" max="100" step="5" data-rec="lyricBounce"><span class="rec-val" data-rec-val="lyricBounce"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Position</span><div class="seg" data-rec="lyricPos"><button type="button" data-value="top">Top</button><button type="button" data-value="middle">Middle</button><button type="button" data-value="bottom">Bottom</button><button type="button" data-value="video">On video</button><button type="button" data-value="custom" title="Where you dragged them to — drag the lyrics on the preview">Dragged</button></div></div>
         <div class="rec-row rs" data-rec-row="lyricNudge" data-hl="lyrics"><span>Move up / down</span><input type="range" min="-400" max="400" step="5" data-rec="lyricNudge"><span class="rec-val" data-rec-val="lyricNudge"></span></div>
+        <div class="rec-row rs" data-rec-row="lyricNudgeX" data-hl="lyrics"><span>Move left / right</span><input type="range" min="-500" max="500" step="5" data-rec="lyricNudgeX"><span class="rec-val" data-rec-val="lyricNudgeX"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Word colour</span><div class="seg" id="lyrColorModeSeg"><button type="button" data-v="singer" title="Each word in the colour of whoever sings it (a flowing gradient when several do)">Singers</button><button type="button" data-v="all" title="Every word flows through the colours of all your tracks">All tracks</button><button type="button" data-v="custom" title="Your own gradient colours whenever the tracks harmonise (singer colours the rest of the time)">Custom</button><button type="button" data-v="single" title="One colour for every word">One colour</button></div></div>
         <div class="rec-row lyr-grad-row" data-rec-row="lyricGrad" data-hl="lyrics" hidden><span>Harmony colours</span><div class="lyr-grad" id="lyrGradList"></div></div>
         <div class="rec-row" data-rec-row="lyricColor" data-hl="lyrics"><span>Text colour</span><input type="color" data-rec="lyricColor"></div>
@@ -5328,7 +5338,7 @@
       for(let k = 0; k <= hold; k++){ if(harmonyRawAtStep(g - k).has(t)){ on.push(t); break; } }
     }
     // two or more different people (connected tracks are one person, so
-    // they never harmonise with each other)
+    // they never harmonise with each other). (Main groups only split the colours — see harmonyWeightedPal.)
     v = new Set(new Set(on.map(linkRoot)).size >= 2 ? on : []);
     if(harmCache.size > 6000) harmCache.clear();
     harmCache.set(g, v);
@@ -5367,7 +5377,7 @@
     v = null;
     for(let k = 0; k <= HARM_BACK; k++){
       const set = harmonySetAtStep(g - k);
-      if(set.has(t)){ v = tracks.filter(x => set.has(x)); break; }
+      if(set.has(t)){ const gk = harmGroupOf(t); v = tracks.filter(x => set.has(x) && harmGroupOf(x) === gk); break; }
     }
     if(m.size > 12000) m.clear();
     m.set(g, v);
@@ -5388,7 +5398,8 @@
     if(!recSettings.harmonyGlow || (!harmManual() && !isSinger(t))) return null;
     const set = harmonySetAtStep(Math.round(T / HARM_STEP));
     if(!set.has(t)) return null;
-    return tracks.filter(x => set.has(x)).map(x => x.trailEffect || trailEffect);
+    const gk = harmGroupOf(t);
+    return tracks.filter(x => set.has(x) && harmGroupOf(x) === gk).map(x => x.trailEffect || trailEffect);
   }
   function pickTrailEffect(pool, own){
     return pool ? pool[Math.floor(Math.random() * pool.length)] : own;
@@ -5414,16 +5425,25 @@
   // always the same length, so its speed never changes either.
   const HARM_PAT = 4;                            // pattern length, in bands
   let harmWPalMemo = { T: null, v: null };
-  function harmonyWeightedPal(T){
-    if(harmWPalMemo.T === T) return harmWPalMemo.v;
+  function harmonyWeightedPal(T, grp){
+    grp = grp || 1;
+    if(harmWPalMemo.T === T && harmWPalMemo.g === grp) return harmWPalMemo.v;
     const cols = [], ws = [];
+    let top = 0;
     for(const r of renderPeople()){
+      if(harmGroupOf(r) !== grp) continue;
       let w = 0;
       for(const m of linkMembers(r)){ const l = harmonyLevel(m, T); if(l > w) w = l; }
-      if(w > 0.01){ cols.push(r.color); ws.push(w); }
+      if(w > 0.01){ cols.push(r.color); ws.push(w); top = Math.max(top, w); }
+    }
+    // (only one of this group in the harmony: its colours come from the whole group, at that strength)
+    if(top > 0.01 && new Set(cols).size < 2){
+      const all = [];
+      for(const r of tracks) if(isSinger(r) && harmGroupOf(r) === grp && !all.includes(r.color)) all.push(r.color);
+      if(all.length >= 2){ cols.length = 0; ws.length = 0; for(const c of all){ cols.push(c); ws.push(top); } }
     }
     const v = cols.length >= 2 && new Set(cols).size >= 2 ? { weighted: true, cols, ws, sum: ws.reduce((a, b) => a + b, 0) } : null;
-    harmWPalMemo = { T, v };
+    harmWPalMemo = { T, g: grp, v };
     return v;
   }
   // pattern length (px) for a palette with bands of B px
@@ -5461,7 +5481,7 @@
     const cur = harmonyMembersAt(t, g);
     const st = recSettings.harmonyStyle || 'color';
     if(st !== 'gradient') return [{ pal: palFromMembers(t, cur), w: 1 }];
-    return [{ pal: harmonyWeightedPal(T), w: 1 }];
+    return [{ pal: harmonyWeightedPal(T, harmGroupOf(t)), w: 1 }];
     const xs = Math.ceil(HARM_XFADE / HARM_STEP);
     for(let k = 1; k <= xs; k++){
       const prev = harmonyMembersAt(t, g - k);
@@ -12395,6 +12415,7 @@
     lyricPos: 'bottom',     // 'top' / 'middle' / 'bottom' / 'video' (centre of the video box) / 'custom' (dragged)
     lyricX: 0.5, lyricY: 0.8,   // where they were dragged to (frame fractions, with lyricPos 'custom')
     lyricNudge: 0,          // px up (-) / down (+) from there
+    lyricNudgeX: 0,         // px left (-) / right (+)
     lyricBySinger: true,    // words take their singer's colour (gradient when harmonising)
     lyricAllTracks: false,  // ...or flow through every track's colour
     lyricCustomGrad: false, // ...or your own colours while tracks harmonise
@@ -14794,17 +14815,9 @@
     }
     // who has the voice (worked out from the song time, in step with the lanes)
     const W = personWeights(root, pt);
-    // Lanes right on top of each other (nothing in between): the image always
-    // sits in the middle of them, whoever is singing. Only when another track
-    // separates them does it follow the voice. Blended by how far apart the
-    // rows are while they slide, so it never jumps.
-    if(ms.length > 1){
-      const rowsAt = ms.map(m => lanes.get(m).row).sort((p1, p2) => p1 - p2);
-      let gapMax = 0; for(let i = 1; i < rowsAt.length; i++) gapMax = Math.max(gapMax, rowsAt[i] - rowsAt[i - 1]);
-      let adj = Math.max(0, Math.min(1, 2 - gapMax));            // 1 = touching, 0 = a whole track between
-      adj = adj * adj * (3 - 2 * adj);
-      if(adj > 0) for(const m of ms) W.set(m, (W.get(m) || 0) * (1 - adj) + adj / ms.length);
-    }
+    // The image sits with whoever has the voice: one singer, on their lane; several, in the middle of
+    // just those lanes (the quiet ones, even right next to them, don't pull it away) — and when they all
+    // go quiet it stays where it was. (personWeights does the timing, so it glides rather than jumps.)
     let sw = 0, leftX = 0, rightX = 0, v = 0, ay = 0;
     for(const m of ms){ const w = W.get(m) || 0, sp = spot.get(m); if(w <= 1e-4) continue; sw += w; leftX += sp.leftX * w; rightX += sp.rightX * w; v += sp.v * w; ay += sp.y * w; }
     if(sw <= 1e-4) return;
@@ -14921,6 +14934,16 @@
     return m;
   }
   function vocalRoleOf(t, m){ const r = (m || vocalRolesMap())[t.name || '']; return r === 'backup' || r === 'fixed' ? r : 'main'; }
+  // Main tracks can be split into Main 1, Main 2, Main 3…: each harmonises (and takes its harmony colours)
+  // only with the others in its own group. Backup and Fixed tracks go with Main 1.
+  var harmGrpMemo = { src: null, m: null };      // (var: harmony can be worked out during startup, before this line)
+  function harmGroupOf(t){
+    const src = recSettings.vocalRoles || '';
+    if(harmGrpMemo.src !== src){ harmGrpMemo = { src, m: vocalRolesMap() }; }
+    const r = harmGrpMemo.m[(linkRoot(t) || t).name || ''], mm = /^main(\d+)$/.exec(r || '');
+    return mm ? Math.max(1, Number(mm[1]) || 1) : 1;
+  }
+  function vocalMainNum(t, m){ const r = (m || vocalRolesMap())[t.name || ''], mm = /^main(\d+)$/.exec(r || ''); return mm ? Math.max(1, Number(mm[1]) || 1) : 1; }
   function vocalLanePositions(T){
     const S = recSettings;
     const rows = tracks;
@@ -15121,7 +15144,7 @@
     const box = $('vocalRoleList'); if(!box) return;
     const roles = vocalRolesMap();
     const mics = renderPeople().filter(personSinger);
-    const sig = mics.map(t => (t.name || '') + '=' + vocalRoleOf(t, roles)).join('|');
+    const sig = mics.map(t => (t.name || '') + '=' + vocalRoleOf(t, roles) + vocalMainNum(t, roles)).join('|');
     if(box.dataset.sig !== sig){
       box.dataset.sig = sig;
       box.innerHTML = mics.length ? '' : '<div class="vocal-roles-hint">No singing (mic) tracks yet.</div>';
@@ -15129,23 +15152,39 @@
         const row = document.createElement('div'); row.className = 'vocal-role-row';
         const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = t.name || 'Track'; nm.title = t.name || '';
         const seg = document.createElement('div'); seg.className = 'seg';
-        const cur = vocalRoleOf(t, roles);
-        for(const [v, lbl] of [['main', 'Main'], ['backup', 'Backup'], ['fixed', 'Fixed']]){
+        const cur = vocalRoleOf(t, roles), num = vocalMainNum(t, roles);
+        const setRole = (v) => {
+          const m = vocalRolesMap(); m[t.name || ''] = v;
+          recSettings.vocalMain = '';
+          recSettings.vocalRoles = JSON.stringify(m);
+          resetHarmonyCache(); saveRecSettings(); syncRecControls();
+        };
+        for(const [v, lbl] of [['main', num > 1 ? 'Main ' + num : 'Main'], ['backup', 'Backup'], ['fixed', 'Fixed']]){
           const b2 = document.createElement('button'); b2.type = 'button'; b2.textContent = lbl;
           b2.classList.toggle('active', v === cur);
-          b2.addEventListener('click', () => {
-            const m = vocalRolesMap(); m[t.name || ''] = v;
-            recSettings.vocalMain = '';
-            recSettings.vocalRoles = JSON.stringify(m);
-            b2.blur(); saveRecSettings(); syncRecControls();
-          });
+          if(v === 'main'){
+            // hover (or long-press) Main: pick which Main group — each group harmonises only with itself
+            b2.title = 'Main vocal — hover to pick Main 1, 2, 3… (each Main group harmonises and mixes its colours only with itself)';
+            b2.classList.add('vr-main');
+            const menu = document.createElement('div'); menu.className = 'vr-menu';
+            for(let n = 1; n <= 5; n++){
+              const o = document.createElement('button'); o.type = 'button'; o.textContent = 'Main ' + n; o.classList.toggle('on', cur === 'main' && num === n);
+              o.addEventListener('click', (e) => { e.stopPropagation(); o.blur(); setRole(n === 1 ? 'main' : 'main' + n); });
+              menu.appendChild(o);
+            }
+            const wrapB = document.createElement('span'); wrapB.className = 'vr-main-wrap';
+            b2.addEventListener('click', () => { b2.blur(); setRole(num > 1 ? 'main' + num : 'main'); });
+            wrapB.append(b2, menu); seg.appendChild(wrapB);
+            continue;
+          }
+          b2.addEventListener('click', () => { b2.blur(); setRole(v); });
           seg.appendChild(b2);
         }
         row.appendChild(nm); row.appendChild(seg); box.appendChild(row);
       }
     }
     const wrap = recPanel.querySelector('[data-rec-row="vocalRoles"]');
-    if(wrap) wrap.classList.toggle('disabled', !recSettings.vocalReorder);
+    if(wrap) wrap.classList.remove('disabled');      // (the roles also set the harmony groups, so they always work)
     { const r = recPanel.querySelector('[data-rec-row="vocalOverflow"]'); if(r){ r.hidden = !recSettings.vocalReorder; r.classList.toggle('disabled', !!recSettings.fillFrame); } }
   }
   // ----- cached waveform tiles (render / preview) -----
@@ -20595,7 +20634,7 @@
     'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale',
     'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
     'dimUnplayed', 'showPlayhead', 'fps', 'quality', 'audioKbps', 'rangeMode',
-    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
+    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
   const BUILTIN_RENDER_PRESETS = [
     { name: 'Default - Saichizu', builtin: true, format: 'tiktok', settings: {
       widthMode: 'zoom', zoom: 140, trackHeight: 150, fillFrame: false, gap: 5, marginTop: 160, marginBottom: 440,
@@ -20791,7 +20830,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 42;                 // ← goes up by one with every published version
+  const SD_BUILD = 46;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23306,7 +23345,7 @@
   // show it, and its look lives in recSettings' lyric* keys while it's
   // selected); the video draws every visible one, each in its own look, so
   // two singers' overlapping lines can show at the same time.
-  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricX', 'lyricY', 'lyricBySinger', 'lyricAllTracks',
+  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricBySinger', 'lyricAllTracks',
     'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper'];
   function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], cuts: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
   function lyrStyleNow(){ const o = {}; for(const k of LYR_STYLE_KEYS) o[k] = recSettings[k]; return o; }
@@ -23389,7 +23428,7 @@
     // the two lines don't sit on top of each other
     const st = Object.assign({}, cur.style || lyrStyleNow());
     st.lyricPos = st.lyricPos === 'top' ? 'bottom' : 'top';
-    st.lyricNudge = 0;
+    st.lyricNudge = 0; st.lyricNudgeX = 0;
     lyrTracks.push({ name: 'Lyrics ' + n, on: true, lyr: lyrNewData(cur.lyr.mode), style: st });
     lyrActive = lyrTracks.length - 1;
     lyrApplyActive();
@@ -24514,6 +24553,13 @@
   }
   // where the words go, given the frame layout
   function lyricAnchor(L){
+    const a = lyricAnchor0(L), S = recSettings, dx = (Number(S.lyricNudgeX) || 0) * L.u;
+    if(!dx) return a;
+    // moved left / right: the line stays inside the frame (it gets narrower near an edge)
+    const x = Math.max(RENDER_W * 0.08, Math.min(RENDER_W * 0.92, a.x + dx));
+    return Object.assign({}, a, { x, maxW: Math.max(RENDER_W * 0.25, Math.min(a.maxW, 2 * Math.min(x, RENDER_W - x) - 24 * L.u)) });
+  }
+  function lyricAnchor0(L){
     const S = recSettings, u = L.u;
     let y, maxW = RENDER_W * 0.88;
     if(S.lyricPos === 'custom' && isFinite(S.lyricY)){

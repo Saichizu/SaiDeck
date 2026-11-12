@@ -1,10 +1,8 @@
 {
-  "build": 42,
+  "build": 46,
   "version": "V18",
   "file": "SaiDeck.html",
   "notes": [
-    "Casino: slot machine sounds — the reels whirr and clunk as each one stops, then a jingle for a win (bigger for three of a kind) or a sad \"womp\".",
-    "Casino: your points only go up once the reels stop, so the result isn't spoiled.",
-    "Casino: when you leave, the chat shows how your session went (won / lost / broke even). Results in a row share one card, and clicking it joins the casino."
+    "Main groups fixed: everyone still harmonises together, but each Main group's harmony uses only its own tracks' colours (Main 1 glows in Main 1's colours, Main 3 in Main 3's) — so the groups never mix colours."
   ]
 }
