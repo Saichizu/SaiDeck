@@ -1,6 +1,6 @@
 {
-  "build": 63,
+  "build": 65,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Declined gifts now show up as a 'declined' line in the chat more reliably (older gifts too)."
+  "notes": "Crates of points! The admin can drop a crate in the chat, and the first person to press Open! gets all the points inside."
 }

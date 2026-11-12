@@ -505,6 +505,25 @@
 
   .chat-gift.declined{background:linear-gradient(135deg,rgba(255,77,94,.13),rgba(120,60,160,.12));border-color:rgba(255,120,130,.45);}
   .chat-gift.declined .cg-a{color:#ff9aa8;text-decoration:line-through;text-decoration-thickness:2px;}
+
+  .chat-crate{position:relative;overflow:hidden;align-self:stretch;display:flex;align-items:center;gap:12px;margin:3px 0;padding:12px 14px;border-radius:16px;color:#fff;
+    background:linear-gradient(135deg,#4b1d7a,#7a2f9e 45%,#b8478f);border:1.5px solid #ffd76a;box-shadow:0 0 22px rgba(200,120,255,.35), inset 0 1px 0 rgba(255,255,255,.25);}
+  .chat-crate .cc-shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg, transparent 40%, rgba(255,255,255,.22) 50%, transparent 60%);background-size:300% 100%;animation:jackSheen 2.6s ease-in-out infinite;}
+  .chat-crate .ccr-i{position:relative;font-size:32px;line-height:1;animation:crateWiggle 1.6s ease-in-out infinite;transform-origin:50% 80%;}
+  @keyframes crateWiggle{0%,70%,100%{transform:rotate(0);}75%{transform:rotate(-12deg);}80%{transform:rotate(10deg);}85%{transform:rotate(-8deg);}90%{transform:rotate(5deg);}}
+  .chat-crate .ccr-t{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.35;}
+  .chat-crate .ccr-h{font:900 16px 'Manrope',sans-serif;background:linear-gradient(180deg,#fff6cf,#ffd34d);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .chat-crate .ccr-m{font-size:12.5px;overflow-wrap:anywhere;}
+  .chat-crate .ccr-s{font-size:11.5px;color:rgba(255,255,255,.8);}
+  .chat-crate .ccr-open{all:unset;position:relative;flex:none;cursor:pointer;padding:9px 16px;border-radius:999px;font:900 13px 'Manrope',sans-serif;color:#2a1600;background:linear-gradient(135deg,#ffe58a,#ffb22e);box-shadow:0 4px 14px rgba(255,180,40,.5);animation:cratePulse 1.2s ease-in-out infinite;}
+  .chat-crate .ccr-open:disabled{animation:none;opacity:.7;cursor:default;} .chat-crate .ccr-open:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  @keyframes cratePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
+  .chat-crate.opened{background:linear-gradient(135deg,#2c2440,#3a2c52);border-color:rgba(255,215,106,.4);box-shadow:none;}
+  .chat-crate.opened .ccr-i, .chat-crate.opened .cc-shine{animation:none;} .chat-crate.opened .cc-shine{display:none;}
+  .chat-crate.mine{border-color:#7dffb2;box-shadow:0 0 16px rgba(125,255,178,.25);}
+  .chat-crate.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
+  .crate-pop{position:fixed;z-index:9702;font-size:44px;pointer-events:none;}
+  .crate-amt{position:fixed;z-index:9703;pointer-events:none;font:900 34px 'Manrope',sans-serif;color:#ffd34d;text-shadow:0 0 14px rgba(255,200,60,.8), 0 2px 0 #7a4a00;}
   .chat-bell{position:relative;}
   .chat-who-st{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
   .chat-who-st i{width:7px;height:7px;border-radius:50%;background:#35d0b8;flex:none;}
@@ -21111,7 +21130,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 63;                 // ← goes up by one with every published version
+  const SD_BUILD = 65;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22098,6 +22117,27 @@
         ev.querySelector('.cj-n').textContent = chatBadName(m.n) ? 'someone' : m.n;
         ev.querySelector('.cj-m').textContent = chatMask(String(m.m || '').replace(/^hit the JACKPOT and /, ''));
         ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)) ev.classList.add('in');
+        body.appendChild(ev); continue;
+      }
+      if(m.e === 'crate' && m.a === true){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+        const c = CRATES.get(m._k), mine = !!(c && c.w && chatIsMe(c.w)), old = Date.now() + PRES.offset - (m.t || 0) > 86400000;
+        const ev = document.createElement('div'); ev.className = 'chat-crate' + (c && c.w ? ' opened' : old ? ' opened' : '') + (mine ? ' mine' : '');
+        ev.innerHTML = `<div class="cc-shine"></div><span class="ccr-i" aria-hidden="true">${c && c.w ? '🎉' : '🎁'}</span><div class="ccr-t"><b class="ccr-h"></b><span class="ccr-m"></span><span class="ccr-s"></span></div>`;
+        ev.querySelector('.ccr-h').textContent = c ? `${c.a.toLocaleString()} points` : 'A crate of points';
+        ev.querySelector('.ccr-m').textContent = chatMask(String(m.m || ''));
+        const st = ev.querySelector('.ccr-s');
+        if(c && c.w){ st.innerHTML = mine ? '<b>You</b> grabbed it!' : '<b></b> grabbed it!'; if(!mine){ st.querySelector('b').textContent = chatBadName(c.wn) ? 'someone' : c.wn; st.querySelector('b').style.color = chatColor(c.wn || ''); } }
+        else if(old) st.textContent = 'Nobody opened it in time.';
+        else {
+          st.textContent = 'First to open it gets everything inside!';
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'ccr-open'; b.textContent = 'Open!';
+          b.addEventListener('click', (e) => { e.stopPropagation(); crateOpen(m._k, b); });
+          ev.appendChild(b);
+        }
+        if(!c && !CRATES.has('?' + m._k)){ CRATES.set('?' + m._k, 1); crateFetch(m._k).then(d => { CRATES.delete('?' + m._k); if(d) chatRenderMessages(); }); }
+        ev.querySelector('.ccr-i').title = 'From SaiDeck';
         if(fresh(m._k)) ev.classList.add('in');
         body.appendChild(ev); continue;
       }
@@ -23939,12 +23979,12 @@
     if(scBal() < amt){ toast(`You only have ${scBal()} points.`, 2000); return; }
     const btn = pop && pop.querySelector('.gp-send'); if(btn){ btn.disabled = true; btn.textContent = '…'; }
     const me = chatUid(), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv, r: chatRoom() }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
+    const base = { [`gifts/${uid}/${id}`]: { f: me, n: chatName().slice(0, CHAT_NAME_MAX), a: amt, t: bjSv, rm: chatRoom() }, [`scores/${me}/s`]: SC.s + amt, [`scores/${me}/t`]: bjSv };
     const note = `sent ${amt} point${amt === 1 ? '' : 's'} to ${bjName(name)}`.slice(0, chatMaxLen());
     let ok = chatBlock() ? null : await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, base)).catch(() => null);
     if(!ok){
       // (the database might not know about the room field yet: the notice without it, then the points on their own)
-      const b2 = Object.assign({}, base); b2[`gifts/${uid}/${id}`] = Object.assign({}, base[`gifts/${uid}/${id}`]); delete b2[`gifts/${uid}/${id}`].r;
+      const b2 = Object.assign({}, base); b2[`gifts/${uid}/${id}`] = Object.assign({}, base[`gifts/${uid}/${id}`]); delete b2[`gifts/${uid}/${id}`].rm;
       if(!chatBlock()) ok = await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, b2)).catch(() => null);
       if(!ok) ok = await bjPatch(b2).catch(() => null);
     }
@@ -24029,7 +24069,7 @@
       if(await bjPatch(body).catch(() => null)){
         done('Declined — sent back');
         // (turn the "sent" notice in the chat into a "declined" one — in its room, or wherever it might be)
-        const rooms = [...new Set([typeof g.r === 'string' && g.r ? g.r : null, chatRoom(), CHAT_ROOM].filter(Boolean))];
+        const rooms = [...new Set([typeof g.rm === 'string' && g.rm ? g.rm : null, chatRoom(), CHAT_ROOM].filter(Boolean))];
         (async () => { for(const rm of rooms){ if(await bjPatch({ [`rooms/${rm}/messages/${id}/d`]: true }).catch(() => null)) break; } })();
       }
       else { yes.disabled = no.disabled = false; no.textContent = 'Decline'; toast("Couldn't decline — try again in a moment.", 2200); }
@@ -24276,6 +24316,69 @@
     for(let i = 0; i < 8; i++) sfxTone(ac, t + 1.15 + i * .08, 'square', 3000 + Math.random() * 1800, 2000 + Math.random() * 1000, .05, .06, lim);
   }
 
+  // ----- crates of points from the admin: first to open one gets everything inside -----
+  // crates/<id> = { a: points, t, m, w: who opened it, wn: their name }; the chat notice has the same id
+  const CRATES = new Map(); let crateBusy = false;
+  async function crateFetch(id){
+    try{ const r = await fetch(`${CHAT_DB}/crates/${encodeURIComponent(id)}.json`, { cache: 'no-store' }); const d = r.ok ? await r.json() : null; if(d){ d._at = Date.now(); CRATES.set(id, d); } return d; }catch(e){ return null; }
+  }
+  // (unopened crates in the chat are re-checked every 3 s while the chat is open)
+  setInterval(async () => {
+    if(!CHAT.open || document.visibilityState !== 'visible') return;
+    const want = [...CHAT.msgs.values()].filter(m => m && m.e === 'crate' && m.a === true && (!CRATES.get(m._k) || !CRATES.get(m._k).w) && Date.now() + (PRES.offset || 0) - (m.t || 0) < 86400000);
+    let changed = false;
+    const sig = (c) => c ? [c.a, c.w || '', c.wn || ''].join('|') : '';
+    for(const m of want.slice(-5)){ const before = sig(CRATES.get(m._k)); await crateFetch(m._k); if(sig(CRATES.get(m._k)) !== before) changed = true; }
+    if(changed) chatRenderMessages();
+  }, 3000);
+  async function crateOpen(id, btn){
+    if(crateBusy) return;
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(chatBanned(chatUid())) return;
+    crateBusy = true; if(btn){ btn.disabled = true; btn.textContent = 'Opening…'; }
+    try{
+      const c = CRATES.get(id) || await crateFetch(id);
+      if(!c){ toast("Couldn't find that crate.", 2000); return; }
+      if(c.w){ toast(c.w === chatUid() ? 'You already opened this one!' : `Too slow! ${bjName(c.wn)} got it first 😭`, 2600); chatRenderMessages(); return; }
+      await scLoad();
+      const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
+      const ok = await bjPatch({ [`crates/${id}/w`]: me, [`crates/${id}/wn`]: nm, [`scores/${me}/p`]: SC.p + c.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/k`]: id, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv }).catch(() => null);
+      if(ok){
+        SC.p += c.a; c.w = me; c.wn = nm; CRATES.set(id, c);
+        crateBurst(btn, c.a); toast(`🎁 You grabbed the crate — +${c.a} points!`, 3200);
+        chatRenderArcade();
+      } else {
+        const d = await crateFetch(id);
+        toast(d && d.w ? `Too slow! ${bjName(d.wn)} got it first 😭` : "Couldn't open it — try again.", 2600);
+      }
+      chatRenderMessages();
+    } finally { crateBusy = false; }
+  }
+  // the crate bursts open: coins and sparkles fly out of it
+  function crateBurst(anchor, amt){
+    const r = anchor && anchor.isConnected ? anchor.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if(!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+      const box = document.createElement('div'); box.className = 'crate-pop'; box.textContent = '🎁'; box.style.left = cx + 'px'; box.style.top = cy + 'px'; document.body.appendChild(box);
+      box.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(1.5) rotate(-12deg)', offset: .2 }, { transform: 'translate(-50%,-50%) scale(1.3) rotate(12deg)', offset: .4 }, { transform: 'translate(-50%,-50%) scale(2.4)', opacity: 0 }], { duration: 700, easing: 'ease-out', fill: 'forwards' }).onfinish = () => box.remove();
+      for(let i = 0; i < 34; i++){
+        const b = document.createElement('div'); b.className = 'jack-coin'; b.textContent = i % 4 === 0 ? '✨' : i % 4 === 1 ? '💎' : '🪙';
+        b.style.left = cx + 'px'; b.style.top = cy + 'px'; document.body.appendChild(b);
+        const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 240;
+        b.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d - 60}px)) rotate(${Math.random() * 720 - 360}deg) scale(1.1)`, opacity: 1, offset: .6 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d * 1.1}px), calc(-50% + ${Math.sin(a) * d + 140}px)) scale(.8)`, opacity: 0 }], { duration: 1200 + Math.random() * 600, delay: 120, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'both' }).onfinish = () => b.remove();
+      }
+      const t = document.createElement('div'); t.className = 'crate-amt'; t.textContent = `+${amt}`; t.style.left = cx + 'px'; t.style.top = cy + 'px'; document.body.appendChild(t);
+      t.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-130%) scale(1.3)', opacity: 1, offset: .3 }, { transform: 'translate(-50%,-260%) scale(1)', opacity: 0 }], { duration: 1600, easing: 'ease-out', fill: 'forwards' }).onfinish = () => t.remove();
+    }
+    if(sfxOn()){ const ac = sfxCtx(); if(ac){ const t0 = ac.currentTime; sfxNoiseHit(ac, t0, 'lowpass', 2000, 300, 1, .18, .35); [784, 988, 1175, 1568].forEach((f, i) => sfxTone(ac, t0 + .1 + i * .07, 'triangle', f, f, .25, .14)); for(let i = 0; i < 8; i++) sfxTone(ac, t0 + .2 + Math.random() * .5, 'sine', 2400 + Math.random() * 1600, 2400, .08, .05); } }
+  }
+  // a crate just dropped (even with the chat closed): a little shout about it
+  function crateAnnounce(m){
+    if(chatBanned(chatUid())) return;
+    toast('🎁 A crate of points just dropped in the chat — first to open it wins!', 4200);
+    if(sfxOn()){ const ac = sfxCtx(); if(ac){ const t0 = ac.currentTime; [523, 659, 784, 1047, 1319].forEach((f, i) => sfxTone(ac, t0 + i * .06, 'triangle', f, f, .2, .12)); } }
+    crateFetch(m._k).then(() => { if(CHAT.open) chatRenderMessages(); });
+  }
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
@@ -24733,6 +24836,7 @@
   }
   function chatIncoming(m){
     try{ bjSay(m); casSay(m); }catch(e){}
+    if(m && m.e === 'crate' && m.a === true){ try{ crateAnnounce(m); }catch(e){} return; }
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a) || m.e) return;   // (my own message coming back / someone banned)
     if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
     CHAT.unread++;
