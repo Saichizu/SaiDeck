@@ -647,6 +647,7 @@
   /* picture rings: using SaiDeck now (cyan), idle 30 s+ (amber), offline (none) */
   .chat-av.st-on{box-shadow:0 0 0 2px #17181f, 0 0 0 4px #35d0b8;}
   .chat-av.st-idle{box-shadow:0 0 0 2px #17181f, 0 0 0 4px #f5a524;}
+  .arc-head{position:sticky;top:-16px;z-index:3;margin:-16px -18px 0;padding:16px 18px 9px;background:#1b1c25;border-radius:16px 16px 0 0;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 12px -10px rgba(0,0,0,.7);border-bottom:1px solid rgba(255,255,255,.06);}
   .arc-top{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:2px 38px 4px 0;}
   .arc-pts{display:flex;align-items:baseline;gap:6px;}
   .arc-pts b{font:800 24px 'Manrope',sans-serif;color:#f5d04a;line-height:1;}
@@ -21226,7 +21227,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 68;                 // ← goes up by one with every published version
+  const SD_BUILD = 69;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21912,7 +21913,7 @@
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
         { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
-        const t = e.target.closest('[data-tab]'); if(t){ SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
+        const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
         const pv = e.target.closest('[data-prev]'); if(pv){ pv.blur(); chatBubbleFx(pv, pv.dataset.prev, false); return; }
@@ -24763,8 +24764,8 @@
     const freshKey = SC.tab + '|' + (SC.tab === 'board' ? !!SC.board : '');
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
-    let h = `<div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
-      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests${questUnfinished() ? '<i class="q-dot"></i>' : ''}</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div>`;
+    let h = `<div class="arc-head"><div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
+      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests${questUnfinished() ? '<i class="q-dot"></i>' : ''}</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div></div>`;
     if(SC.tab === 'shop'){
       h += `<div class="chat-who-h">Bullets</div><p class="chat-side-p">Right-click while infiltrating to shoot. Press 1–6 to switch to any you own.</p>`;
       AMMO.forEach((a, i) => {
