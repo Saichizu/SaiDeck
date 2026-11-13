@@ -1,6 +1,6 @@
 {
-  "build": 83,
+  "build": 84,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Fixed: the chat's top banner no longer gets stuck or shows two slides on top of each other."
+  "notes": "Crates are now mystery crates: nobody knows what's inside until the first person opens it \u2014 it might be points\u2026 or a jumpscare \ud83c\udf83."
 }
