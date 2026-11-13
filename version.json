@@ -1,6 +1,6 @@
 {
-  "build": 77,
+  "build": 78,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New: Rock Paper Scissors battles for points (click someone's picture), an emoji picker with search, drag the chat's left edge to make it wider, everyone's points beside the time on messages, and easier-to-read bought chat bubbles."
+  "notes": "New: type :name for emoji suggestions (:happy: turns into \ud83d\ude0a), messages sent in a row join into one bubble, emoji-only messages show big, and the bought chat bubbles have way cooler entrances (fireworks, holograms, loop-the-loops, lightning storms\u2026)."
 }
