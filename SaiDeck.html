@@ -21464,7 +21464,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 82;                 // ← goes up by one with every published version
+  const SD_BUILD = 83;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22240,25 +22240,40 @@
     const items = chatTickerItems();
     el.hidden = !items.length;
     if(!items.length){ el.innerHTML = ''; TICK.sig = ''; return; }
-    const sig = items.map(x => x.k + (x.k === 'pot' ? '' : x.h.length)).join('|');
-    if(sig !== TICK.sig || !el.querySelector('.tk-it')){ TICK.sig = sig; TICK.i = Math.min(TICK.i, items.length - 1); chatTickerShow(el, items, false); }
-    else if(items[TICK.i] && items[TICK.i].k === 'pot'){ const v = el.querySelector('.tk-it .cp-v'); if(v && CAS.pot != null && Number(v.dataset.v) !== CAS.pot){ v.dataset.v = CAS.pot; v.textContent = CAS.pot.toLocaleString(); } }
-    if(!TICK.timer) TICK.timer = setInterval(() => { const e = chatPanel.querySelector('.chat-pin'); if(!e || e.hidden || !CHAT.open) return; const it = chatTickerItems(); if(it.length < 2) return; TICK.i = (TICK.i + 1) % it.length; chatTickerShow(e, it, true); }, 5000);
+    const keys = items.map(x => x.k).join('|');
+    if(TICK.i >= items.length) TICK.i = 0;
+    const cur = el.querySelector('.tk-it:not(.out)');
+    if(keys !== TICK.sig || !cur || cur.dataset.k !== items[TICK.i].k){ TICK.sig = keys; chatTickerShow(el, items, false); }
+    else if(cur.dataset.h !== items[TICK.i].h){ chatTickerFill(cur, items[TICK.i]); }          // (same slide, newer text: just update it)
+    if(!TICK.timer) TICK.timer = setInterval(() => {
+      const e = chatPanel.querySelector('.chat-pin'); if(!e || e.hidden || !CHAT.open || document.visibilityState !== 'visible') return;
+      const it = chatTickerItems(); if(it.length < 2) return;
+      TICK.i = (TICK.i + 1) % it.length; TICK.sig = it.map(x => x.k).join('|'); chatTickerShow(e, it, true);
+    }, 5000);
+  }
+  function chatTickerFill(n, it){
+    n.dataset.k = it.k; n.dataset.h = it.h; n.className = 'tk-it ' + (it.cls || ''); n.innerHTML = it.h;
+    const go = n.querySelector('.tk-go'); if(go) go.addEventListener('click', () => casJoin());
   }
   function chatTickerShow(el, items, slide){
     const it = items[TICK.i] || items[0];
-    const old = el.querySelector('.tk-it');
-    const n = document.createElement('div'); n.className = 'tk-it ' + (it.cls || ''); n.innerHTML = it.h;
-    const go = n.querySelector('.tk-go'); if(go) go.addEventListener('click', () => casJoin());
+    // (anything still sliding out goes now; only the one showing slides away)
+    el.querySelectorAll('.tk-it.out').forEach(x => x.remove());
+    const olds = [...el.querySelectorAll('.tk-it')];
+    const n = document.createElement('div'); chatTickerFill(n, it);
     el.className = 'chat-pin tk ' + (it.cls || '');
     el.appendChild(n);
-    { const dots = el.querySelector('.tk-dots') || el.appendChild(Object.assign(document.createElement('div'), { className: 'tk-dots' })); dots.innerHTML = items.length > 1 ? items.map((x, i) => `<i class="${i === TICK.i ? 'on' : ''}"></i>`).join('') : ''; }
-    if(old){
-      if(slide && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    let dots = el.querySelector('.tk-dots'); if(!dots){ dots = document.createElement('div'); dots.className = 'tk-dots'; el.appendChild(dots); }
+    dots.innerHTML = items.length > 1 ? items.map((x, i) => `<i class="${i === TICK.i ? 'on' : ''}"></i>`).join('') : '';
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    olds.forEach((old, k) => {
+      if(slide && !still && k === olds.length - 1){
+        old.classList.add('out');
         old.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-100%)', opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).onfinish = () => old.remove();
-        n.animate([{ transform: 'translateY(100%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)' });
+        setTimeout(() => { if(old.isConnected) old.remove(); }, 600);
       } else old.remove();
-    }
+    });
+    if(slide && !still && olds.length) n.animate([{ transform: 'translateY(100%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)' });
   }
   // the rooms list (Everyone + your group chats + join / make one)
   // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
