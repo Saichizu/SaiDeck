@@ -1,6 +1,6 @@
 {
-  "build": 72,
+  "build": 73,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New: chat throws! Buy cream pies, slime, snowballs and more in the shop, then throw them at messages from the reaction button \u2014 pile on with friends to drown a message. The shop is bigger (three columns), and windows can't be dragged over the round buttons."
+  "notes": "New: Split in blackjack \u2014 got a pair? Split it into two hands (same bet again) and play them one after the other. Fixed: betting all your points no longer sends you to watch before the hand is even played."
 }

@@ -893,6 +893,16 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  /* blackjack splits: two hands side by side, the one being played lit up */
+  .bj-hands{display:flex;gap:6px;align-items:flex-start;justify-content:center;}
+  .bj-h1, .bj-h2{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:12px;padding:2px;transition:background .2s, box-shadow .2s;}
+  .bj-h2{display:none;}
+  .bj-seat.split .bj-h2{display:flex;}
+  .bj-seat.split .bj-hand{padding:0 2px;}
+  .bj-seat.split .bj-h1.act, .bj-seat.split .bj-h2.act{background:rgba(255,215,106,.14);box-shadow:0 0 0 2px rgba(255,215,106,.55);}
+  .bj-a.bj-split{background:linear-gradient(135deg,#7dffb2,#2fbf8a);color:#06261a;}
+  .bj-a.bj-split[hidden]{display:none;}
+
   /* the arcade: bigger, and the shop in two columns */
   @media (min-width: 900px){
     .chat-who:not([hidden]), .chat-side:not([hidden]){left:calc((100vw - min(360px, calc(100vw - 32px)) - 16px - 66px) / 2);width:min(480px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px - 66px));}
@@ -21280,7 +21290,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 72;                 // ← goes up by one with every published version
+  const SD_BUILD = 73;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23546,8 +23556,8 @@
   }
   const bjCards = (hand) => { const c = (hand && hand.c) || {}, n = (hand.k | 0) + (hand.pe ? 1 : 0), out = []; for(let i = 0; i < n; i++) if(typeof c[i] === 'number') out.push(c[i]); return out; };
   // how a hand did against the dealer: what it pays back (0 lost, bet = push, 2×, or 2.5× for a blackjack)
-  function bjPay(P, Dd){
-    const W = P.b | 0, pBJ = P.k === 2 && P.v === 21, dBJ = Dd.k === 2 && Dd.v === 21;
+  function bjPay(P, Dd, noBJ){
+    const W = P.b | 0, pBJ = !noBJ && P.k === 2 && P.v === 21, dBJ = Dd.k === 2 && Dd.v === 21;
     if(P.h > 21) return { amt: 0, lbl: 'Bust' };
     if(pBJ && !dBJ) return { amt: (W * 5 - (W * 5) % 2) / 2, lbl: 'Blackjack!' };
     if(pBJ && dBJ) return { amt: W, lbl: 'Push' };
@@ -23621,7 +23631,20 @@
     return Object.entries(BJ.p).filter(([u, s]) => (bjLive(s) || (u === me && BJ.on && !BJ.watch)) && !chatBanned(u) && !(u === me && BJ.watch)).map(([u, s]) => Object.assign({ u }, s)).sort((a, b) => (a.j || 0) - (b.j || 0));
   }
   const bjInRound = (s, D) => D && s.r === D.r && s.b > 0;
-  const bjHandDone = (s) => s.pe ? false : s.k < 2 ? false : s.st === 'd' ? s.k >= 3 : s.st === 's' || s.v >= 21;
+  // a split: the round's second hand lives in q (played after the first)
+  const bjIsSplit = (s) => !!(s && s.sp === s.r && s.q && s.q.r === s.r);
+  const bjMainDone = (s) => s.pe ? false : s.k < 2 ? false : s.st === 'd' ? s.k >= 3 : s.st === 's' || s.v >= 21;
+  const bjQDone = (q) => !q.pe && q.k >= 2 && (q.st === 's' || q.v >= 21);
+  const bjHandDone = (s) => bjMainDone(s) && (!bjIsSplit(s) || bjQDone(s.q));
+  const bjOnQ = (s) => bjIsSplit(s) && bjMainDone(s);
+  const bjCardVal = (T) => { const r = T % 13; return r >= 9 ? 10 : r + 1; };
+  // two cards of the same value, not split yet this round, and the first card is on record
+  function bjCanSplit(S){
+    if(!S || S.st !== 'p' || S.k !== 2 || S.pe || S.sp === S.r || typeof S.f1 !== 'number') return false;
+    const cs = bjCards(S); if(cs.length < 2) return false;
+    const v1 = S.f1 >= 9 ? 10 : S.f1 + 1;
+    return S.h === v1 * 2 && bjCardVal(cs[0]) === bjCardVal(cs[1]);
+  }
   function bjPlayers(){ const D = BJ.d; return bjSeats().filter(s => bjInRound(s, D) && s.u !== D.u); }
   // whose turn it is (the first hand still being played), or null once everyone is done
   function bjTurn(){
@@ -23656,6 +23679,7 @@
   }
   async function bjTally(path, hand, extra){
     const n = bjCount(hand, hand.lt), body = { [`${path}/pe`]: false, [`${path}/k`]: n.k, [`${path}/h`]: n.h, [`${path}/a`]: n.a, [`${path}/v`]: n.v };
+    if(/^bj\/p\/[^/]+$/.test(path) && (hand.k | 0) === 0) body[`${path}/f1`] = hand.lt % 13;
     for(const k of Object.keys(extra || {})) if(/\/(ut|t)$/.test(k)) body[k] = bjSv;
     return !!(await bjPatch(body));
   }
@@ -23672,13 +23696,23 @@
       const Dd = (D.r === S.r && D.f) ? D : (BJ.x && BJ.x.r === S.r ? BJ.x : null);
       if(Dd){ bjDo(() => bjClaim(S, Dd)); return; }
     }
+    if(bjIsSplit(S) && S.pd === S.r && S.q.pd !== S.q.r && !S.q.pe){
+      const Dd = (D.r === S.r && D.f) ? D : (BJ.x && BJ.x.r === S.r ? BJ.x : null);
+      if(Dd){ bjDo(() => bjClaimQ(S, Dd)); return; }
+    }
+    if(bjIsSplit(S) && S.q.pe){ bjDo(() => bjTally(`bj/p/${me}/q`, S.q, { [`bj/p/${me}/t`]: 1 })); return; }
     // 2) a card that was drawn but not counted yet
     if(S.pe){ bjDo(() => bjTally(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: 1 })); return; }
     if(D.pe && (driver || iDeal || sNow - (D.ut || 0) > 3000)){ bjDo(() => bjTally('bj/d', D, { 'bj/d/ut': 1 })); return; }
     // (a vote to kick a dealer who's no longer dealing is taken back)
     if(BJ.kick[me] && (D.u === 'bot' || BJ.kick[me] !== D.u) && !BJ.kclr){ BJ.kclr = true; bjDo(async () => { await bjPatch({ [`bj/kick/${me}`]: null }); delete BJ.kick[me]; BJ.kclr = false; }); return; }
     // (no points left: you watch instead of playing or dealing)
-    if(!BJ.watch && SC.loaded && scBal() < 1 && !bjInRound(S, D) && bjPhase() === 'bet'){
+    // (only once it's certain: not right after you bet everything, and not while winnings are still being paid)
+    const broke = !BJ.watch && SC.loaded && scBal() < 1 && !bjInRound(S, D) && bjPhase() === 'bet' && BJ.betR !== D.r
+      && !(S.r > 0 && S.pd !== S.r) && !(bjIsSplit(S) && S.q.pd !== S.q.r) && !BJ.act;
+    if(!broke) BJ.brokeAt = 0; else if(!BJ.brokeAt) BJ.brokeAt = now;
+    if(broke && now - BJ.brokeAt > 3000){
+      BJ.brokeAt = 0;
       if(iDeal) bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv }));
       else { toast("You're out of points — watching for now. Win some back or get sent some to play again.", 3200); bjWatchToggle(); }
       return;
@@ -23710,6 +23744,14 @@
     if(ph === 'play'){
       const T = bjTurn();
       if(!BJ.turn || BJ.turn.u !== T.u || BJ.turn.r !== R) BJ.turn = { u: T.u, r: R, at: now };
+      if(T.u === me && bjOnQ(S)){
+        const Q = S.q;
+        if(Q.k < 2){ bjDo(() => bjDraw(`bj/p/${me}/q`, Q, { [`bj/p/${me}/t`]: bjSv })); return; }
+        if(Q.st === 'p' && Q.v >= 21){ bjDo(() => bjPatch({ [`bj/p/${me}/q/st`]: 's' })); return; }
+        if(!BJ.qAt || BJ.qAt.r !== R){ BJ.qAt = { r: R, at: now }; }
+        if(now - BJ.qAt.at > 30000){ bjDo(() => bjPatch({ [`bj/p/${me}/q/st`]: 's' })); toast('Too slow — your second hand stood automatically.', 2200); return; }
+        return;
+      }
       if(T.u === me){
         if(S.st === 'p' && S.v >= 21){ bjDo(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); return; }
         if(S.st === 'd' && S.k === 2){ bjDo(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); return; }
@@ -23745,7 +23787,7 @@
     return { amt: 0, lbl: 'Under 17' };
   }
   async function bjClaim(S, Dd){
-    const me = chatUid(), res = Dd.u === me ? bjDealerPay(Dd, S.b) : bjPay(S, Dd), body = { [`bj/p/${me}/pd`]: S.r };
+    const me = chatUid(), res = Dd.u === me ? bjDealerPay(Dd, S.b) : bjPay(S, Dd, bjIsSplit(S)), body = { [`bj/p/${me}/pd`]: S.r };
     if(res.amt > 0){ body[`scores/${me}/p`] = SC.p + res.amt; body[`scores/${me}/t`] = bjSv; }
     let ok = await bjPatch(body);
     if(!ok){ await scLoad(); if(res.amt > 0) body[`scores/${me}/p`] = SC.p + res.amt; ok = await bjPatch(body); }
@@ -23764,6 +23806,25 @@
       chatRenderArcade(); bjCtl();
     }
   }
+  // the second hand of a split pays on its own
+  async function bjClaimQ(S, Dd){
+    const me = chatUid(), Q = S.q, res = bjPay(Q, Dd, true), body = { [`bj/p/${me}/q/pd`]: Q.r };
+    if(res.amt > 0){ body[`scores/${me}/p`] = SC.p + res.amt; body[`scores/${me}/t`] = bjSv; }
+    let ok = await bjPatch(body);
+    if(!ok){ await scLoad(); if(res.amt > 0) body[`scores/${me}/p`] = SC.p + res.amt; ok = await bjPatch(body); }
+    if(ok){
+      if(res.amt > 0) SC.p += res.amt;
+      Q.pd = Q.r;
+      const net = res.amt - Q.b;
+      if(BJ.sess){ BJ.sess.hands++; BJ.sess.bet += Q.b; BJ.sess.won += res.amt; }
+      try{ questEv('bj'); if(res.amt > Q.b) questEv('bjwin'); }catch(e){}
+      if(Date.now() - BJ.joinedAt > 1500){
+        toast(net > 0 ? `🃏 Second hand: ${res.lbl} — you won ${net} points!` : net === 0 ? `🃏 Second hand: push — you got your ${Q.b} back.` : `🃏 Second hand: ${res.lbl} — you lost ${Q.b}.`, 2600);
+        bjFeed(`Second hand: you ${net > 0 ? 'won ' + net : net === 0 ? 'pushed' : 'lost ' + Q.b} (${Q.v} vs dealer ${Dd.h > 21 ? 'bust' : Dd.v})`, net > 0);
+      }
+      chatRenderArcade(); bjCtl();
+    }
+  }
   // your buttons
   async function bjPlaceBet(){
     const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
@@ -23772,15 +23833,38 @@
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
     bjUser(async () => {
-      const body = { [`bj/p/${me}/r`]: D.r, [`bj/p/${me}/b`]: bet, [`bj/p/${me}/k`]: 0, [`bj/p/${me}/h`]: 0, [`bj/p/${me}/a`]: 0, [`bj/p/${me}/v`]: 0, [`bj/p/${me}/pe`]: false, [`bj/p/${me}/st`]: 'p', [`bj/p/${me}/c`]: null, [`bj/p/${me}/t`]: bjSv,
+      const body = { [`bj/p/${me}/r`]: D.r, [`bj/p/${me}/b`]: bet, [`bj/p/${me}/k`]: 0, [`bj/p/${me}/h`]: 0, [`bj/p/${me}/a`]: 0, [`bj/p/${me}/v`]: 0, [`bj/p/${me}/pe`]: false, [`bj/p/${me}/st`]: 'p', [`bj/p/${me}/c`]: null, [`bj/p/${me}/f1`]: null, [`bj/p/${me}/t`]: bjSv,
         [`scores/${me}/s`]: SC.s + bet, [`scores/${me}/t`]: bjSv };
-      if(await bjPatch(body)){ SC.s += bet; Object.assign(S, { r: D.r, b: bet, k: 0, h: 0, a: 0, v: 0, pe: false, st: 'p', c: null }); sfxChip(); bjSync(); chatRenderArcade(); }
+      if(await bjPatch(body)){ BJ.betR = D.r; SC.s += bet; Object.assign(S, { r: D.r, b: bet, k: 0, h: 0, a: 0, v: 0, pe: false, st: 'p', c: null }); sfxChip(); bjSync(); chatRenderArcade(); }
       else if(D.u === me){ BJ.noStake = D.r; await scLoad(); bjSync(); }
       else { await scLoad(); toast("Couldn't place that bet — the cards may already be out.", 2400); }
     });
   }
-  function bjHit(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.v >= 21) return; bjUser(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv })); }
-  function bjStand(){ const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p') return; bjUser(() => bjPatch({ [`bj/p/${me}/st`]: 's' })); }
+  function bjHit(){
+    const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me) return;
+    if(bjOnQ(S)){ const Q = S.q; if(Q.st !== 'p' || Q.v >= 21 || Q.k < 2) return; bjUser(() => bjDraw(`bj/p/${me}/q`, Q, { [`bj/p/${me}/t`]: bjSv })); return; }
+    if(S.st !== 'p' || S.v >= 21) return; bjUser(() => bjDraw(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: bjSv }));
+  }
+  function bjStand(){
+    const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me) return;
+    if(bjOnQ(S)){ if(S.q.st !== 'p') return; bjUser(() => bjPatch({ [`bj/p/${me}/q/st`]: 's' })); return; }
+    if(S.st !== 'p') return; bjUser(() => bjPatch({ [`bj/p/${me}/st`]: 's' }));
+  }
+  // split a pair into two hands (the second bet is the same as the first)
+  function bjSplit(){
+    const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || !bjCanSplit(S)) return;
+    if(scBal() < S.b){ toast(`You need ${S.b} more points to split.`, 2200); return; }
+    const h = S.h / 2, a = S.a / 2, v = bjBest(h, a), cs = bjCards(S);
+    bjUser(async () => {
+      const body = { [`bj/p/${me}/k`]: 1, [`bj/p/${me}/h`]: h, [`bj/p/${me}/a`]: a, [`bj/p/${me}/v`]: v, [`bj/p/${me}/sp`]: S.r, [`bj/p/${me}/c/1`]: null,
+        [`bj/p/${me}/q`]: { r: S.r, b: S.b, k: 1, h, a, v, lt: 0, pe: false, st: 'p', pd: 0, c: { 0: cs[1] } },
+        [`bj/p/${me}/t`]: bjSv, [`scores/${me}/s`]: SC.s + S.b, [`scores/${me}/t`]: bjSv };
+      if(await bjPatch(body)){
+        SC.s += S.b; Object.assign(S, { k: 1, h, a, v, sp: S.r, c: { 0: cs[0] }, q: { r: S.r, b: S.b, k: 1, h, a, v, lt: 0, pe: false, st: 'p', pd: 0, c: { 0: cs[1] } } });
+        sfxChip(); bjFeed('You split your pair into two hands', false); bjSync(); chatRenderArcade();
+      } else { await scLoad(); toast("Couldn't split — try again.", 2200); }
+    });
+  }
   function bjDouble(){
     const me = chatUid(), S = BJ.p[me]; const T = bjTurn(); if(!T || T.u !== me || S.st !== 'p' || S.k !== 2) return;
     if(scBal() < S.b){ toast(`You need ${S.b} more points to double.`, 2200); return; }
@@ -23833,7 +23917,7 @@
         <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
           <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
           <button type="button" class="cas-spin bj-betb">BET</button></div>
-          <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button></div>
+          <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button><button type="button" class="bj-a bj-split">Split</button></div>
           <span class="bj-note"></span>
           <button type="button" class="cas-leave bj-sit">👀 Sit out &amp; watch</button>
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
@@ -23852,6 +23936,7 @@
       el.querySelector('.bj-hit').addEventListener('click', bjHit);
       el.querySelector('.bj-stand').addEventListener('click', bjStand);
       el.querySelector('.bj-dbl').addEventListener('click', bjDouble);
+      el.querySelector('.bj-split').addEventListener('click', bjSplit);
       el.querySelector('.bj-leave').addEventListener('click', () => gameClose('bj'));
       el.querySelector('.cas-x').addEventListener('click', () => gameClose('bj'));
       el.querySelector('.bj-sit').addEventListener('click', (e) => { e.currentTarget.blur(); bjWatchToggle(); });
@@ -23986,7 +24071,7 @@
     else if(ph === 'bet'){
       const pl = bjPlayers(), R = D.r, left = BJ.betAt[R] ? Math.max(0, Math.ceil(((D.u !== 'bot' ? 30000 : 15000) - (Date.now() - BJ.betAt[R])) / 1000)) : null;
       msg = pl.length ? (D.u !== 'bot' ? `${pl.length} bet${pl.length === 1 ? '' : 's'} in — waiting for ${D.u === me ? 'you' : bjName(D.n)} to deal (${left}s)` : `${pl.length} bet${pl.length === 1 ? '' : 's'} in — dealing in ${left}s (or when everyone has bet)`) : 'Place your bets!';
-    } else if(ph === 'play') msg = T.u === me ? 'Your turn — Hit, Stand or Double' : `${bjName(T.n)}'s turn…`;
+    } else if(ph === 'play') msg = T.u === me ? (bjOnQ(BJ.p[me]) ? 'Your second hand — Hit or Stand' : bjIsSplit(BJ.p[me]) ? 'Your first hand — Hit, Stand or Double' : bjCanSplit(BJ.p[me]) ? 'Your turn — Hit, Stand, Double or Split' : 'Your turn — Hit, Stand or Double') : `${bjName(T.n)}'s turn…`;
     else if(ph === 'dealer') msg = D.u === me ? 'Your turn to deal: hit or stand' : 'Dealer plays…';
     else if(ph === 'done') msg = D.h > 21 ? 'Dealer busts! Next round soon…' : `Dealer has ${D.v}. Next round soon…`;
     const me2 = el.querySelector('.bj-msg'); if(me2.textContent !== msg) me2.textContent = msg;
@@ -24001,7 +24086,7 @@
       let n = box.querySelector(`.bj-seat[data-u="${CSS.escape(s.u)}"]`);
       if(!n){
         n = document.createElement('div'); n.className = 'bj-seat' + (s.u === me ? ' me' : ''); n.dataset.u = s.u;
-        n.innerHTML = `<div class="bj-hand"></div><div class="bj-tot"></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b>`;
+        n.innerHTML = `<div class="bj-hands"><div class="bj-h1"><div class="bj-hand"></div><div class="bj-tot"></div></div><div class="bj-h2"><div class="bj-hand bj-hand2"></div><div class="bj-tot bj-tot2"></div></div></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b>`;
         const av = chatAv(s.u, s.n, false, false); av.classList.add('bj-av'); n.querySelector('.bj-pl').append(av);
         if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g); }
         n.querySelector('.bj-nm').textContent = bjName(s.n) + (s.u === me ? ' (you)' : ''); n.querySelector('.bj-nm').style.color = chatColor(s.n);
@@ -24016,11 +24101,20 @@
       }
       const inR = D && bjInRound(s, D), hb = n.querySelector('.bj-hand'); hb.dataset.k = s.u;
       if(inR) bjHandEl(hb, s, false); else { hb.innerHTML = ''; hb.dataset.r = ''; }
-      n.querySelector('.bj-tot').textContent = inR ? bjTotTxt(s) : '';
+      const spl = !!(inR && bjIsSplit(s)), hb2 = n.querySelector('.bj-hand2'); hb2.dataset.k = s.u + ':q';
+      n.classList.toggle('split', spl);
+      if(spl){ bjHandEl(hb2, s.q, false); n.querySelector('.bj-tot2').textContent = bjTotTxt(Object.assign({}, s.q, { k: s.q.k + 9 * 0 })).replace('Blackjack', '21'); }
+      else { hb2.innerHTML = ''; hb2.dataset.r = ''; n.querySelector('.bj-tot2').textContent = ''; }
+      { const tn = !!(T && T.u === s.u); n.querySelector('.bj-h1').classList.toggle('act', spl && tn && !bjOnQ(s)); n.querySelector('.bj-h2').classList.toggle('act', spl && tn && bjOnQ(s)); }
+      n.querySelector('.bj-tot').textContent = inR ? (spl ? bjTotTxt(s).replace('Blackjack', '21') : bjTotTxt(s)) : '';
       const chip = n.querySelector('.bj-chip');
-      let ct = inR ? `${s.b}${s.st === 'd' ? ' · doubled' : ''}` : (ph === 'bet' ? 'betting…' : 'sitting out');
+      let ct = inR ? (spl ? `${s.b} + ${s.q.b} · split${s.st === 'd' ? ' · doubled' : ''}` : `${s.b}${s.st === 'd' ? ' · doubled' : ''}`) : (ph === 'bet' ? 'betting…' : 'sitting out');
       let cls = 'bj-chip' + (inR ? ' on' : '');
-      if(inR && D.f){ const r = bjPay(s, D); const net = r.amt - s.b; ct = net > 0 ? `${r.lbl} +${net}` : net === 0 ? 'Push' : `${r.lbl} −${s.b}`; cls += net > 0 ? ' win' : net === 0 ? ' push' : ' lose'; }
+      if(inR && D.f){
+        const r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 }, net = r.amt + r2.amt - s.b - (spl ? s.q.b : 0);
+        ct = spl ? (net > 0 ? `Split +${net}` : net === 0 ? 'Split · even' : `Split −${-net}`) : net > 0 ? `${r.lbl} +${net}` : net === 0 ? 'Push' : `${r.lbl} −${s.b}`;
+        cls += net > 0 ? ' win' : net === 0 ? ' push' : ' lose';
+      }
       if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
       n.classList.toggle('turn', !!(T && T.u === s.u));
     });
@@ -24052,11 +24146,13 @@
     el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !inR) || !!BJ.watch || (dealer && BJ.noStake === D.r);
     const sit = el.querySelector('.bj-sit'); sit.textContent = BJ.watch ? '🪑 Sit back down' : '👀 Sit out & watch'; sit.classList.toggle('on', !!BJ.watch);
     const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `${dealer ? 'STAKE' : 'BET'} · ${BJ.bet}`;
-    const my = !!(T && T.u === me && S && S.k >= 2 && !S.pe);
+    const onQ = !!(S && bjOnQ(S)), H = onQ ? S.q : S;
+    const my = !!(T && T.u === me && H && H.k >= 2 && !H.pe);
     el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR) || dealer;
-    el.querySelector('.bj-hit').disabled = !(my && S.st === 'p' && S.v < 21) || BJ.act;
-    el.querySelector('.bj-stand').disabled = !(my && S.st === 'p') || BJ.act;
-    el.querySelector('.bj-dbl').disabled = !(my && S.st === 'p' && S.k === 2 && scBal() >= S.b) || BJ.act;
+    el.querySelector('.bj-hit').disabled = !(my && H.st === 'p' && H.v < 21) || BJ.act;
+    el.querySelector('.bj-stand').disabled = !(my && H.st === 'p') || BJ.act;
+    el.querySelector('.bj-dbl').disabled = !(my && !onQ && S.st === 'p' && S.k === 2 && scBal() >= S.b) || BJ.act;
+    { const sb = el.querySelector('.bj-split'), can = my && !onQ && bjCanSplit(S); sb.hidden = !can; sb.disabled = !can || scBal() < S.b || BJ.act; sb.textContent = `Split · ${S && S.b ? S.b : ''}`; }
     const note = el.querySelector('.bj-note');
     note.textContent = BJ.watch ? (SC.loaded && scBal() < 1 ? "You're out of points — watching." : "You're watching — you won't be dealt in.") : dealer ? (ph === 'bet' && !inR ? 'You deal this round — stake a bet: 17 pays half back, 18 your stake, 19 ×1.5, 20–21 ×2, bust loses.' : "You're dealing — your buttons are by the dealer's cards.") : (inR && ph === 'bet') ? `Bet ${S.b} placed — waiting for the deal` : (inR && ph !== 'play' && !D.f) ? 'Waiting for the dealer…' : '';
   }
