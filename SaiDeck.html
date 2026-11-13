@@ -894,6 +894,14 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  /* notices in the chat (shop buys, masterpieces, gifts, crates…): a tidy width, centred, however wide the chat is */
+  .chat-body > .chat-rwd, .chat-body > .chat-gift, .chat-body > .chat-trick, .chat-body > .chat-crate, .chat-body > .chat-jack, .chat-body > .chat-cas{align-self:center !important;width:100%;max-width:440px;box-sizing:border-box;}
+  /* unsend */
+  .chat-tools .chat-unsend{color:#ff9aa8;}
+  .chat-tools .chat-unsend.sure{width:auto !important;padding:0 8px !important;background:#ff4d5e !important;color:#fff !important;border-radius:8px;}
+  .chat-tools .chat-unsend.sure::after{content:attr(data-lab);font:700 11px 'Inter',sans-serif;margin-left:4px;}
+  .chat-tools .chat-unsend.sure svg{width:13px;height:13px;}
+
   .bubfx-big{font-size:38px;}
   .bubfx-bit{position:absolute;border-radius:50%;}
   .bubfx-bit.bubfx-conf{border-radius:2px;}
@@ -21401,7 +21409,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 78;                 // ← goes up by one with every published version
+  const SD_BUILD = 79;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22342,6 +22350,23 @@
     }
   }
   // a message that's only emojis (up to 8) shows them big
+  // take back one of your own messages (press twice: the first press asks)
+  async function chatUnsend(k, btn){
+    const m = CHAT.msgs.get(k); if(!m || !chatIsMe(m.u) || m.e) return;
+    if(!btn.classList.contains('sure')){
+      btn.classList.add('sure'); btn.title = 'Click again to unsend'; btn.dataset.lab = 'Unsend?';
+      setTimeout(() => { if(btn.isConnected){ btn.classList.remove('sure'); btn.title = 'Unsend'; } }, 3000);
+      return;
+    }
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages/${encodeURIComponent(k)}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' });
+      if(!r.ok) throw new Error(r.status);
+      const row = chatPanel.querySelector(`.chat-msg[data-k="${CSS.escape(k)}"]`);
+      const go = () => { CHAT.msgs.delete(k); chatSort(); chatRenderMessages(); };
+      if(row) row.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.9)' }], { duration: 200, easing: 'ease-in' }).onfinish = go; else go();
+    }catch(e){ toast("Couldn't unsend that — try again.", 2200); }
+  }
   function chatEmojiOnly(t){
     t = String(t || '').trim(); if(!t || t.length > 60) return false;
     if(!/\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]/u.test(t)) return false;
@@ -22562,6 +22587,12 @@
           pb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>';
           pb.addEventListener('click', (ev) => { ev.stopPropagation(); chatStartReply(m); });
           tools.appendChild(pb);
+        }
+        if(mine && !m.e && !off){
+          const ub = document.createElement('button'); ub.type = 'button'; ub.className = 'chat-unsend'; ub.title = 'Unsend'; ub.setAttribute('aria-label', 'Unsend this message');
+          ub.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7zm4 2v8h1.5v-8zm3 0v8h1.5v-8z"/></svg>';
+          ub.addEventListener('click', (ev) => { ev.stopPropagation(); chatUnsend(m._k, ub); });
+          tools.appendChild(ub);
         }
         col.appendChild(tools);                 // (on the bubble's own corner, however short the message)
         if(!mine) bub.addEventListener('dblclick', (ev) => { ev.preventDefault(); window.getSelection && window.getSelection().removeAllRanges(); chatStartReply(m); });

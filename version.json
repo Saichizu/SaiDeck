@@ -1,6 +1,6 @@
 {
-  "build": 78,
+  "build": 79,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New: type :name for emoji suggestions (:happy: turns into \ud83d\ude0a), messages sent in a row join into one bubble, emoji-only messages show big, and the bought chat bubbles have way cooler entrances (fireworks, holograms, loop-the-loops, lightning storms\u2026)."
+  "notes": "New: unsend your own messages (hover \u2192 \ud83d\uddd1 \u2192 click again). Chat notices (shop buys, masterpieces, gifts, crates) now stay a tidy width in the middle of a widened chat."
 }
