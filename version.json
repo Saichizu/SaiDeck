@@ -1,6 +1,6 @@
 {
-  "build": 66,
+  "build": 67,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Fixed: declined gifts now change into the 'declined' line in everyone's chat. Crates are bigger and no longer get squashed (the jackpot notice too)."
+  "notes": "Fixed: on Macs, a video in the render no longer freezes \u2014 if the fast video reader gets stuck, SaiDeck switches to a safer way of reading frames automatically."
 }

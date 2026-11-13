@@ -19448,6 +19448,14 @@
     v.src = url;
     return v;
   }
+  // the video used for rendering sits (invisibly) in the page: Safari doesn't decode frames for a detached one
+  function makeExportVideoEl(url){
+    const v = makeVideoEl(url);
+    v.setAttribute('aria-hidden', 'true');
+    v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none;z-index:-1;';
+    try{ document.body.appendChild(v); }catch(e){}
+    return v;
+  }
   function waitVideo(v, level){
     return new Promise((res, rej) => {
       if(v.readyState >= level) return res();
@@ -19603,7 +19611,7 @@
     if(!projVideo) return;
     for(const v of [projVideo.preview, projVideo.exporter]){
       if(!v) continue;
-      try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){}
+      try{ v.pause(); v.removeAttribute('src'); v.load(); if(v.parentNode) v.remove(); }catch(e){}
     }
     URL.revokeObjectURL(projVideo.url);
     if(projVideo.img && projVideo.img.close) try{ projVideo.img.close(); }catch(e){}
@@ -19906,6 +19914,11 @@
         }
         if(src.frames.length) break;              // the frame after t is out, so cur is right
         if(src.next < info.N){
+          // fed well past t and nothing has come out: the decoder has stalled (seen on some Macs)
+          if(info.pts[src.next] > t + 4 && !src.frames.length){
+            if(!src.stallTry){ src.stallTry = true; try{ await Promise.race([src.dec.flush(), new Promise(r => setTimeout(r, 1500))]); }catch(e){} continue; }
+            src.failed = true; return null;
+          }
           if(src.dec.decodeQueueSize >= 4){ await waitAny(); continue; }
           const i = src.next++;
           const data = await sampleData(i);
@@ -19917,6 +19930,10 @@
         break;                                     // end of the video: hold the last frame
       }
       if(!src.cur && src.frames.length){ src.cur = src.frames.shift(); }
+      src.stallTry = false;
+      // the frame we have is far from the time asked for while the video still has frames there: it's stuck
+      const lastPts = info.pts[info.N - 1];
+      if(!src.cur || (t < lastPts - 0.2 && Math.abs(tUs - src.cur.timestamp) > 2.5e6)){ src.failed = true; return null; }
       return src.cur;
     };
     src.close = () => { dropAll(); try{ src.dec.close(); }catch(e){} };
@@ -19933,14 +19950,23 @@
       const fs = await createMp4FrameSource(projVideo.file);
       if(fs){
         // check the first frame actually decodes before trusting it
-        const f = await fs.frameAt(Math.max(0, Math.min(videoStartSec, projVideo.dur - 0.001)));
-        if(f && !fs.failed){ projVideo.frameSrc = fs; projVideo.exportVia = 'decoder'; return true; }
+        const t0 = Math.max(0, Math.min(videoStartSec, projVideo.dur - 0.001));
+        let f = await fs.frameAt(t0), ok = !!(f && !fs.failed);
+        // …and that it really moves on (some Macs hand back the same frame for ever)
+        if(ok && projVideo.dur - t0 > 1.2){
+          const ts0 = f.timestamp, f2 = await fs.frameAt(t0 + 1);
+          ok = !!(f2 && !fs.failed && f2.timestamp > ts0);
+          if(ok){ f = await fs.frameAt(t0); ok = !!(f && !fs.failed); }
+        }
+        if(ok){ projVideo.frameSrc = fs; projVideo.exportVia = 'decoder'; return true; }
         fs.close();
       }
     }
     try{
-      if(!projVideo.exporter) projVideo.exporter = makeVideoEl(projVideo.url);
+      if(!projVideo.exporter) projVideo.exporter = makeExportVideoEl(projVideo.url);
       await waitVideo(projVideo.exporter, 2);
+      // Safari only paints frames for a video that has played once
+      try{ await projVideo.exporter.play(); }catch(e){}
       projVideo.exporter.pause();
       projVideo.exportVia = 'seek';
       return true;
@@ -19955,11 +19981,17 @@
     projVideo.exportFrame = null;
   }
   function seekVideoExact(v, t){
+    if(Math.abs(v.currentTime - t) < 1e-4 && !v.seeking) return Promise.resolve();
     return new Promise(res => {
       let done = false;
-      const fin = () => { if(done) return; done = true; v.removeEventListener('seeked', fin); clearTimeout(to); res(); };
+      const fin = () => { if(done) return; done = true; v.removeEventListener('seeked', onSeeked); clearTimeout(to); res(); };
+      // after the seek, wait until the new frame is really painted (Safari otherwise hands back the old one)
+      const onSeeked = () => {
+        if(typeof v.requestVideoFrameCallback === 'function'){ v.requestVideoFrameCallback(() => fin()); setTimeout(fin, 300); }
+        else setTimeout(fin, 30);
+      };
       const to = setTimeout(fin, 4000);
-      v.addEventListener('seeked', fin);
+      v.addEventListener('seeked', onSeeked);
       v.currentTime = t;
     });
   }
@@ -19973,7 +20005,7 @@
       if(f && !projVideo.frameSrc.failed){ projVideo.exportFrame = f; return; }
       // decoder gave up part-way: carry on by seeking the element instead
       projVideo.frameSrc.close(); projVideo.frameSrc = null; projVideo.exportFrame = null;
-      if(!projVideo.exporter){ projVideo.exporter = makeVideoEl(projVideo.url); try{ await waitVideo(projVideo.exporter, 2); }catch(e){ return; } }
+      if(!projVideo.exporter){ projVideo.exporter = makeExportVideoEl(projVideo.url); try{ await waitVideo(projVideo.exporter, 2); try{ await projVideo.exporter.play(); }catch(e){} projVideo.exporter.pause(); }catch(e){ return; } }
     }
     if(projVideo.exporter) await seekVideoExact(projVideo.exporter, t);
   }
@@ -21140,7 +21172,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 66;                 // ← goes up by one with every published version
+  const SD_BUILD = 67;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
