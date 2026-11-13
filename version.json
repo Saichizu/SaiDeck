@@ -1,6 +1,6 @@
 {
-  "build": 73,
+  "build": 76,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New: Split in blackjack \u2014 got a pair? Split it into two hands (same bet again) and play them one after the other. Fixed: betting all your points no longer sends you to watch before the hand is even played."
+  "notes": "The blackjack Dealer bot has a voice now: robot babble when it talks, and a mocking laugh when it gloats (turn off with Game sounds)."
 }

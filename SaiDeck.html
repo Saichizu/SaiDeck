@@ -21290,7 +21290,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 73;                 // ← goes up by one with every published version
+  const SD_BUILD = 76;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24133,6 +24133,7 @@
           }
         }
       } }
+    try{ bjBotTalk(); }catch(e){}
     if(!seats.length){ if(!box.querySelector('.chat-side-p')) box.innerHTML = '<p class="chat-side-p">Nobody at the table yet.</p>'; }
     else { const p = box.querySelector('.chat-side-p'); if(p) p.remove(); }
     bjCtl();
@@ -24206,6 +24207,79 @@
     const D = BJ.d, host = (D && D.u === m.u) ? el.querySelector('.bj-who') : (el.querySelector(`.bj-seat[data-u="${CSS.escape(m.u)}"] .bj-pl`) || el.querySelector(`.bj-spec[data-u="${CSS.escape(m.u)}"]`));
     if(!host) return;
     gameSay(host, m.m);
+    try{ bjBotReply(m); }catch(e){}
+  }
+  // the bot dealer gloats when people lose (everyone at the table sees the same line: it's picked from the round and the player)
+  const BOT_TAUNTS = {
+    lose: ['Thanks for the {x} points, {n} 💅', '{n}, the house says thank you 🙏', 'Ouch. {x} points gone, {n}. Again?', 'Was that the plan, {n}? 😂',
+      "{n} really thought they had it 💀", "I'd say good game, {n}, but… 🤭", 'Skill issue, {n} 🤷', 'Another {x} for my collection. Cheers, {n}!',
+      "Don't cry, {n}. It's only {x} points 😌", '{n}, maybe try the slots? They\'re nicer than me 🎰', 'Easy money. Thanks {n} 🤑', 'Bold strategy, {n}. Losing. 👏',
+      'Imagine losing to a bot, {n} 🤖', 'Your points look better on my side, {n} ✨', '{n} donating {x} points to the house. So generous 💸', 'Calculated. Unlike you, {n} 🧠'],
+    bust: ['Bust! 💥 Greedy, {n}?', '{n} went over 21. Classic 😂', 'Too many cards, {n}. Math is hard huh 🧮', '{n} flew too close to 21 ☀️', 'Hit me, they said. It hit back, {n} 💀', 'Bye bye points, {n} 👋'],
+    big: ['{x} POINTS?! {n}, you okay? 😭', 'Rent money gone, {n}? 🏠💸', '{n} going all in and losing it all. Iconic 💀', 'That was a lot of points, {n}. Was. 😌'],
+  };
+  function bjTaunt(kind, n, x, seed){
+    const L = BOT_TAUNTS[kind] || BOT_TAUNTS.lose; let h = 0; const k = String(seed); for(let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0;
+    return L[Math.abs(h) % L.length].replace(/\{n\}/g, bjName(n)).replace(/\{x\}/g, x);
+  }
+  // the bot dealer answers what people say at the table (ready-made lines, picked by what they wrote;
+  // everyone sees the same answer because it's chosen from the message itself)
+  const BOT_REPLIES = [
+    [/\b(rigged|scam|cheat(ing|er)?|hack(ed|er)?|unfair|fix(ed)?)\b/, ['rigged?? nah {n} ur just bad 💀', 'skill issue tbh', 'the cards are fair {n}, ur luck just isnt 😌', 'cope harder {n} 😭', "it's not rigged if i'm just better 🤷", 'L + ratio + the house always wins']],
+    [/\b(stupid|dumb|trash|noob|bad|useless|idiot|loser)\b.*\b(bot|dealer)\b|\b(bot|dealer)\b.*\b(stupid|dumb|trash|noob|bad|useless|idiot|loser)\b/, ['says the one losing to a bot 💀', 'bro got cooked by a bot and is mad about it', "i'm literally a bot and i'm still winning lmaooo", 'keep talking {n}, ur points are mine anyway', 'aight bet. next hand ur going broke 😤']],
+    [/\b(bot|dealer)\b/, ['yea?? 👀', 'talking about me? i\'m flattered {n}', 'the dealer is listening 👁️👄👁️', 'what u want {n}', 'i see everything 👀']],
+    [/\b(lets ?go+|let'?s go+|ez+|easy|gg|w+ ?|won|win(ning)?|yes+|w)\b|🔥|🎉/, ['enjoy it while it lasts {n} 😌', 'beginners luck fr', "ok ok {n} i see u… doesn't matter tho", 'calm down its one hand 💀', "i let u win that one dw", 'next hand is mine, mark my words']],
+    [/\b(l+mf?a+o+|lo+l|ha(ha)+|he(he)+|xd|sksk\w*)\b|💀|😂|🤣/, ['LMAOOO', 'why u laughing ur down bad 💀', 'lmao fr', 'ok that was kinda funny ngl', 'HAHAHAHA', 'laugh now cry later {n}']],
+    [/😭|😢|:\(|\b(sad|cry(ing)?|noo+|why+|pain|help)\b/, ['dont cry {n} 😭', 'its ok its only points… ur points… that i have now', 'there there 🫶 bet again', 'the pain is temporary, my profits are forever', 'aww 🥺 anyway, place ur bets']],
+    [/\b(broke|poor|money|points?|pts|economy|bankrupt|gambl\w*)\b/, ['broke?? just win lol', 'gambling isnt a joke 😤 (it is for me tho)', 'in this economy?? 💀', 'ur points r safe with me {n} 😌', 'all in, no regrets. thats the spirit', 'should of saved them for chat bubbles fr']],
+    [/\b(hit|stand|double|split|card|cards|deal)\b/, ['go on, hit. i dare u 😏', 'stand if ur scared {n}', 'double it. trust 😈', 'decisions decisions… choose wrong pls', 'the cards dont lie {n}']],
+    [/\b(ily|love|luv|<3|cute)\b|❤️|🥰|😘/, ['ily too… ur points specifically 💕', 'awww 🥺 still taking ur money tho', 'flirting with the dealer wont save u {n}', 'stop it 😳 ur still losing']],
+    [/\b(hi+|hello+|hey+|yo+|sup|wassup|morning|mornign|gm)\b/, ['yo {n} 👋 ready to lose?', 'welcome back {n}, missed ur points', 'heyyy {n} place ur bets', 'sup {n} 😎', 'look who showed up 👀']],
+    [/\b(gn|bye+|cya|sleep|leaving|ima go|imma go|brb)\b/, ['leaving already?? coward 😭', 'gn {n}, thx for the points', 'cya {n}, come back with more points', 'running away huh 🏃']],
+    [/\b(bruh|bro|wtf|wth|huh|what)\b/, ['bruh 💀', 'yea what about it', 'bro really said that', 'WHAT 😭', 'huh??']],
+  ];
+  const BOT_GENERIC = ['less talking more betting {n}', 'focus on ur cards {n} 💀', 'mhm sure', 'real', 'interesting… anyway', 'ok and? bet', 'fr fr', 'lowkey true', 'no way 😭', 'say that again after this hand'];
+  function bjBotReply(m){
+    const D = BJ.d; if(!D || D.u !== 'bot' || !m || m.e || !m.m || m.a) return;
+    if(Date.now() + (PRES.offset || 0) - (m.t || 0) > 30000) return;
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    const host = el.querySelector('.bj-who'); if(!host) return;
+    BJ.replied = BJ.replied || {}; const key = m._k || (m.u + ':' + m.t); if(BJ.replied[key]) return; BJ.replied[key] = 1;
+    let h = 0; for(let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0; h = Math.abs(h);
+    const txt = String(m.m).toLowerCase();
+    let lines = null; for(const [re, L] of BOT_REPLIES) if(re.test(txt)){ lines = L; break; }
+    if(!lines){ if(h % 10 >= 4) return; lines = BOT_GENERIC; }        // (it answers most things, not everything)
+    const line = lines[(h >> 4) % lines.length].replace(/\{n\}/g, bjName(m.n));
+    setTimeout(() => { if(host.isConnected){ gameSay(host, line); try{ sfxBotVoice(line); }catch(e){} } }, 1100 + (h % 900));
+  }
+  function bjBotTalk(){
+    if(!BJ.on || BJ.botQuiet) return;
+    const D = BJ.d; if(!D || D.u !== 'bot') return;
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    const host = el.querySelector('.bj-who'); if(!host) return;
+    BJ.taunted = BJ.taunted || {};
+    const say = (key, txt, delay) => { if(BJ.taunted[key]) return; BJ.taunted[key] = 1; setTimeout(() => { if(host.isConnected){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){} } }, delay || 0); };
+    const ph = bjPhase();
+    // someone just went bust
+    if(ph === 'play' || ph === 'dealer'){
+      for(const s of bjPlayers()){
+        if(s.h > 21 && !s.pe) say('b:' + D.r + ':' + s.u, bjTaunt('bust', s.n, s.b, D.r + s.u + 'b'), 500);
+        if(bjIsSplit(s) && s.q.h > 21 && !s.q.pe) say('bq:' + D.r + ':' + s.u, bjTaunt('bust', s.n, s.q.b, D.r + s.u + 'q'), 500);
+      }
+    }
+    // the round's over: rub it in for whoever lost the most
+    if(ph === 'done'){
+      let worst = null;
+      for(const s of bjPlayers()){
+        const spl = bjIsSplit(s), r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 }, lost = s.b + (spl ? s.q.b : 0) - r.amt - r2.amt;
+        if(lost > 0 && (!worst || lost > worst.lost)) worst = { s, lost };
+      }
+      if(worst){
+        const all = worst.lost >= 200;
+        say('d:' + D.r, bjTaunt(all ? 'big' : 'lose', worst.s.n, worst.lost, D.r + worst.s.u), 900);
+      }
+    }
+    for(const k of Object.keys(BJ.taunted)) if(Object.keys(BJ.taunted).length > 60) delete BJ.taunted[k];
   }
   function gameSay(host, txt){
     host.querySelectorAll('.bj-say').forEach(x => x.remove());
@@ -25469,6 +25543,33 @@
     return (sfxNoiseBuf = b);
   }
   const sfxEnv = (ac, t0, peak, att, dec, out) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + att); g.gain.exponentialRampToValueAtTime(0.0001, t0 + att + dec); g.connect(out || ac.destination); return g; };
+  // the dealer bot's voice: robot babble for each line, and a mocking laugh when it's gloating
+  function sfxBotVoice(txt){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return;
+    const t = ac.currentTime + 0.02, T = String(txt || '');
+    let h = 0; for(let i = 0; i < T.length; i++) h = (h * 31 + T.charCodeAt(i)) | 0;
+    const rnd = () => { h = (h * 1103515245 + 12345) | 0; return ((h >>> 8) & 1023) / 1023; };
+    const laugh = /l+m+f?a+o+|ha(ha)+|he(he)+|💀|😂|🤣|😭|😈|😏|💅|lol|L \+/i.test(T) || /thanks for|thx for|my profits|house|ur points|going broke|coward|skill issue|imagine losing/i.test(T);
+    // babble: a little blip per syllable-ish, wobbling around a robot pitch
+    const n = Math.max(3, Math.min(12, Math.round(T.replace(/[^a-z]/gi, '').length / 3)));
+    let at = t;
+    for(let i = 0; i < n; i++){
+      const f = 330 + rnd() * 260, d = 0.045 + rnd() * 0.04;
+      sfxTone(ac, at, 'square', f, f * (0.85 + rnd() * 0.3), d, 0.035);
+      sfxTone(ac, at, 'sine', f * 2, f * 2 * (0.9 + rnd() * 0.2), d, 0.02);
+      at += d + 0.018 + rnd() * 0.03;
+    }
+    if(laugh){
+      // "ha-ha-ha-ha": quick falling bursts with a buzzy edge
+      at += 0.08;
+      for(let i = 0; i < 5; i++){
+        const f = 620 - i * 55;
+        sfxTone(ac, at, 'sawtooth', f, f * 0.72, 0.075, 0.032);
+        sfxTone(ac, at, 'square', f / 2, f / 2 * 0.72, 0.075, 0.02);
+        at += 0.11;
+      }
+    }
+  }
   function sfxTone(ac, t0, type, f0, f1, dur, peak, out){
     const o = ac.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t0); if(f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
     o.connect(sfxEnv(ac, t0, peak, 0.01, dur, out)); o.start(t0); o.stop(t0 + dur + 0.05);
