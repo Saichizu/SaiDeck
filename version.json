@@ -1,6 +1,6 @@
 {
-  "build": 80,
+  "build": 82,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Chat notices now have their icon and text centred too, so they look tidier."
+  "notes": "Slots: every spin is 50 now, with way better odds of winning something back. Everything lost goes into a growing JACKPOT (starts at 1000) \u2014 hit 7\ufe0f\u20e37\ufe0f\u20e37\ufe0f\u20e3 to take it all. The chat's top banner now slides between announcements, jackpot winners and the current jackpot."
 }

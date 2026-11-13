@@ -894,6 +894,54 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  /* the slots jackpot */
+  .cas-pot{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin:2px auto 6px;padding:8px 18px;border-radius:14px;
+    background:radial-gradient(120% 140% at 50% 0%, rgba(255,215,106,.28), rgba(120,60,10,.25));border:1px solid rgba(255,215,106,.7);box-shadow:0 0 22px rgba(255,190,60,.25), inset 0 0 18px rgba(255,215,106,.15);}
+  .cas-pot .cp-l{font:900 13px 'Manrope',sans-serif;letter-spacing:.12em;color:#ffe08a;}
+  .cas-pot .cp-v{font:900 30px 'Manrope',sans-serif;color:#fff3b0;text-shadow:0 0 14px rgba(255,200,70,.9), 0 2px 0 rgba(120,60,0,.6);font-variant-numeric:tabular-nums;}
+  .cas-pot .cp-s{flex-basis:100%;text-align:center;font:600 11px 'Inter',sans-serif;color:rgba(255,236,190,.75);}
+  /* the chat's top banner: sliding announcements, jackpot winners and the jackpot */
+  .chat-pin.tk{position:relative;overflow:hidden;min-height:52px;padding:0;display:block;}
+  .chat-pin.tk div.tk-it{position:absolute;inset:0;display:flex;flex-direction:row;align-items:center;gap:9px;padding:8px 22px 8px 12px;}
+  .chat-pin.tk div.tk-it > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+  .chat-pin.tk div.tk-dots{position:absolute;right:8px;top:50%;transform:translateY(-50%);flex:none;display:flex;flex-direction:column;gap:3px;z-index:2;}
+  .chat-pin.tk .tk-it b{font:800 11px 'Inter',sans-serif;color:#f5d04a;letter-spacing:.04em;}
+  .chat-pin.tk .tk-it span:not(.tk-i){font-size:12.5px;line-height:1.35;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .chat-pin.tk .tk-it em{font-style:normal;font-weight:800;}
+  .chat-pin.tk .tk-i{font-size:22px;flex:none;}
+  .chat-pin.tk .tk-it .cp-v{color:#fff3b0;text-shadow:0 0 10px rgba(255,200,70,.8);font-size:14px;}
+  .chat-pin.tk.jack{background:linear-gradient(90deg, rgba(255,190,40,.28), rgba(255,90,170,.2), rgba(255,190,40,.28));background-size:200% 100%;animation:tkShine 3s linear infinite;border-bottom-color:rgba(255,215,106,.8);}
+  .chat-pin.tk.pot{background:linear-gradient(90deg, rgba(255,215,106,.14), rgba(255,160,40,.12));}
+  @keyframes tkShine{to{background-position:200% 0;}}
+  .tk-go{all:unset;flex:none;cursor:pointer;padding:5px 11px;border-radius:999px;background:linear-gradient(135deg,#ffd76a,#ff9a3c);color:#2a0d0d;font:800 11.5px 'Inter',sans-serif;}
+  .tk-go:hover{filter:brightness(1.1);}
+  .tk-dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);} .tk-dots i.on{background:#f5d04a;}
+
+  /* no up/down arrows on number boxes anywhere: just type */
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+  /* blackjack: casino chips to build your bet */
+  .bj-betin input{width:74px;font-size:16px;}
+  .bj-chiprow{display:flex;align-items:center;gap:7px;}
+  .bj-chipbtn{all:unset;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;
+    border:4px dashed rgba(255,255,255,.85);box-shadow:0 3px 0 rgba(0,0,0,.45), 0 6px 12px rgba(0,0,0,.35), inset 0 0 0 3px rgba(0,0,0,.18);transition:transform .12s;}
+  .bj-chipbtn span{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.92);font:900 10.5px 'Inter',sans-serif;color:#222;}
+  .bj-chipbtn:hover{transform:translateY(-3px);} .bj-chipbtn:active{transform:translateY(1px) scale(.95);}
+  .bj-chipbtn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .bj-chipbtn.c5, .bj-c.c5{background-color:#d8263a;} .bj-chipbtn.c10, .bj-c.c10{background-color:#2563d9;} .bj-chipbtn.c25, .bj-c.c25{background-color:#1f9d55;}
+  .bj-chipbtn.c50, .bj-c.c50{background-color:#e07b12;} .bj-chipbtn.c100, .bj-c.c100{background-color:#1b1b22;} .bj-chipbtn.c100{border-color:rgba(245,208,74,.9);} .bj-chipbtn.c100 span{background:#f5d04a;}
+  .bj-c.c1{background-color:#e9e9ee;}
+  .bj-clr{all:unset;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.07);font:700 12px 'Inter',sans-serif;color:var(--text);}
+  .bj-clr:hover{background:rgba(255,255,255,.14);}
+  /* the piles on the table */
+  .bj-pile{position:absolute;right:calc(100% + 22px);bottom:4px;width:0;height:0;pointer-events:none;transition:transform .6s cubic-bezier(.4,0,.6,1), opacity .6s;}
+  .bj-c{position:absolute;width:30px;height:12px;margin-left:-15px;border-radius:50%;box-sizing:border-box;border:2px dashed rgba(255,255,255,.85);box-shadow:0 2px 0 rgba(0,0,0,.45), 0 3px 5px rgba(0,0,0,.35);}
+  .bj-c.c100{border-color:rgba(245,208,74,.95);}
+  .bj-pile.won .bj-c{box-shadow:0 2px 0 rgba(0,0,0,.45), 0 0 10px rgba(255,215,106,.9);}
+  .bj-pile.won{animation:bjWon .6s ease-out 2;}
+  @keyframes bjWon{50%{transform:translateY(-6px) scale(1.1);}}
+  .bj-pile.lost{transform:translate(-40px,-120px) scale(.6);opacity:0;}
+
   /* …and their contents centred too */
   .chat-body > .chat-rwd, .chat-body > .chat-gift, .chat-body > .chat-trick{justify-content:center;text-align:center;}
   .chat-body > .chat-rwd .cr-t, .chat-body > .chat-gift .cg-t, .chat-body > .chat-trick .ct-t{flex:0 1 auto;}
@@ -21416,7 +21464,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 80;                 // ← goes up by one with every published version
+  const SD_BUILD = 82;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22176,11 +22224,41 @@
     if(note){ note.hidden = !why; note.textContent = why; }
     if(ta){ ta.disabled = !!why; if(CHAT._grow) CHAT._grow(); }
   }
-  function chatRenderPin(){
-    const el = chatPanel.querySelector('.chat-pin'); if(!el) return;
+  function chatRenderPin(){ chatTickerSync(); }
+  const TICK = { i: 0, timer: 0, sig: '' };
+  function chatTickerItems(){
+    const out = [], now = Date.now() + (PRES.offset || 0);
     const p = CHAT.cfg && CHAT.cfg.pinned;
-    el.hidden = !(p && p.m);
-    if(p && p.m) el.innerHTML = `${ICON_PIN}<div><b>SaiDeck</b><span>${escapeHtml(p.m)}</span></div>`;
+    if(p && p.m) out.push({ k: 'pin', h: `${ICON_PIN}<div><b>SaiDeck</b><span>${escapeHtml(p.m)}</span></div>` });
+    const jacks = [...CHAT.msgs.values()].filter(m => m && m.e === 'jack' && now - (m.t || 0) < 86400000 && !chatBanned(m.u)).sort((a, b) => b.t - a.t).slice(0, 2);
+    for(const m of jacks) out.push({ k: 'j' + m._k, cls: 'jack', h: `<span class="tk-i">🎰</span><div><b>JACKPOT WINNER</b><span><em style="color:${chatColor(m.n)}">${escapeHtml(chatBadName(m.n) ? 'someone' : m.n)}</em> ${escapeHtml(String(m.m || '').replace(/^hit the JACKPOT and /, ''))} points! · ${chatAgo(m.t)}</span></div>` });
+    if(CAS.pot != null) out.push({ k: 'pot', cls: 'pot', h: `<span class="tk-i">💰</span><div><b>SLOTS JACKPOT</b><span><em class="cp-v" data-v="${CAS.pot}">${CAS.pot.toLocaleString()}</em> points up for grabs — hit 7️⃣7️⃣7️⃣ to take it all!</span></div><button type="button" class="tk-go">Spin</button>` });
+    return out;
+  }
+  function chatTickerSync(){
+    const el = chatPanel.querySelector('.chat-pin'); if(!el) return;
+    const items = chatTickerItems();
+    el.hidden = !items.length;
+    if(!items.length){ el.innerHTML = ''; TICK.sig = ''; return; }
+    const sig = items.map(x => x.k + (x.k === 'pot' ? '' : x.h.length)).join('|');
+    if(sig !== TICK.sig || !el.querySelector('.tk-it')){ TICK.sig = sig; TICK.i = Math.min(TICK.i, items.length - 1); chatTickerShow(el, items, false); }
+    else if(items[TICK.i] && items[TICK.i].k === 'pot'){ const v = el.querySelector('.tk-it .cp-v'); if(v && CAS.pot != null && Number(v.dataset.v) !== CAS.pot){ v.dataset.v = CAS.pot; v.textContent = CAS.pot.toLocaleString(); } }
+    if(!TICK.timer) TICK.timer = setInterval(() => { const e = chatPanel.querySelector('.chat-pin'); if(!e || e.hidden || !CHAT.open) return; const it = chatTickerItems(); if(it.length < 2) return; TICK.i = (TICK.i + 1) % it.length; chatTickerShow(e, it, true); }, 5000);
+  }
+  function chatTickerShow(el, items, slide){
+    const it = items[TICK.i] || items[0];
+    const old = el.querySelector('.tk-it');
+    const n = document.createElement('div'); n.className = 'tk-it ' + (it.cls || ''); n.innerHTML = it.h;
+    const go = n.querySelector('.tk-go'); if(go) go.addEventListener('click', () => casJoin());
+    el.className = 'chat-pin tk ' + (it.cls || '');
+    el.appendChild(n);
+    { const dots = el.querySelector('.tk-dots') || el.appendChild(Object.assign(document.createElement('div'), { className: 'tk-dots' })); dots.innerHTML = items.length > 1 ? items.map((x, i) => `<i class="${i === TICK.i ? 'on' : ''}"></i>`).join('') : ''; }
+    if(old){
+      if(slide && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+        old.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-100%)', opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).onfinish = () => old.remove();
+        n.animate([{ transform: 'translateY(100%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)' });
+      } else old.remove();
+    }
   }
   // the rooms list (Everyone + your group chats + join / make one)
   // Online, Rooms and the Arcade share one spot under the header: opening one closes the others
@@ -22768,7 +22846,7 @@
       const fresh = [], parts = d.path.replace(/^\//, '').split('/').filter(Boolean);
       if(parts.length){ for(const [k, v] of Object.entries(d.data || {})) applyDeep(parts.concat(k.split('/')), v); }
       else for(const [k, m] of Object.entries(d.data || {})){ if(k.includes('/')) applyDeep(k.split('/').filter(Boolean), m); else apply(k, m, fresh); }
-      chatSort(); for(const m of fresh){ chatIncoming(m); if(m.e === 'jack' && Date.now() + PRES.offset - (m.t || 0) < 180000) chatJackPop(m); } chatUpdateBadge(); if(CHAT.open) chatRender();
+      chatSort(); for(const m of fresh){ chatIncoming(m); if(m.e === 'jack' && Date.now() + (PRES.offset || 0) - (m.t || 0) < 180000){ chatJackPop(m); TICK.i = 0; TICK.sig = ''; CAS.pot = CAS_POT0; } } chatUpdateBadge(); if(CHAT.open) chatRender();
     });
     es.addEventListener('cancel', () => { CHAT.status = 'err'; chatRenderStatus(); });
     es.addEventListener('error', () => {
@@ -23515,15 +23593,23 @@
   // The reels come from the spin's server time (nobody can pick it), and the
   // database checks that the bet was paid and the winnings are exactly right.
   const CAS_SYMS = ['🍒', '🍋', '🍊', '🔔', '💎', '7️⃣'];
-  const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: Math.max(1, Math.min(500, Number(chatLS('casBet')) || 10)) };
+  const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: 50, pot: null };
   const casReels = (T) => [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
-  function casMult(T){
+  // a spin is always 50. What it pays (the database checks the same table): 7️⃣7️⃣7️⃣ the whole jackpot, 💎💎💎 600,
+  // any three 300, two 💎 or 7️⃣ 125, any two 50 (your bet back), one 7️⃣ 20 back. What you lose goes into the jackpot.
+  const CAS_BET = 50, CAS_POT0 = 1000;
+  const casIsJack = (T) => { const [a, b, c] = casReels(T); return a === 5 && b === 5 && c === 5; };
+  function casPayT(T){
     const [a, b, c] = casReels(T);
-    if(a === b && b === c) return a === 5 ? 25 : a === 4 ? 12 : 6;
-    if(a === b || a === c) return a >= 4 ? 2 : 1;
-    if(b === c) return b >= 4 ? 2 : 1;
-    return 0;
+    if(a === b && b === c) return a === 5 ? -1 : a === 4 ? 600 : 300;
+    const pair = a === b || a === c ? a : b === c ? b : -1;
+    if(pair >= 0) return pair >= 4 ? 125 : 50;
+    return (a === 5 || b === 5 || c === 5) ? 20 : 0;
   }
+  // what a spin paid out (a jackpot pays whatever the pot was)
+  function casWin(sp){ if(!sp || sp.b !== CAS_BET) return 0; const v = casPayT(sp.t); return v < 0 ? (sp.jp || CAS.pot || CAS_POT0) : v; }
+  // (for the sounds: how big a win it was)
+  function casMult(T){ const v = casPayT(T); return v < 0 ? 25 : v >= 600 ? 12 : v >= 300 ? 6 : v >= 125 ? 2 : v > 0 ? 1 : 0; }
   const casSeatLive = (st) => st && typeof st.t === 'number' && Date.now() + PRES.offset - st.t < 95000;
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
@@ -23559,6 +23645,7 @@
         const d = r.ok ? await r.json() : null;
         if(CAS.on){
           CAS.seats = (d && d.seats) || {};
+          CAS.pot = d && typeof d.pot === 'number' ? d.pot : CAS_POT0; casPotShow();
           const sp = (d && d.spin) || {}, me = chatUid();
           // (your own spin is shown the moment it's made — don't let an older copy undo it)
           if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t)) sp[me] = CAS.spins[me];
@@ -23578,8 +23665,7 @@
   // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
   async function casSpin(){
     if(!CAS.on || CAS.busy) return;
-    const bet = Math.round(CAS.bet);
-    if(!(bet >= 1 && bet <= 500)){ toast('Bet between 1 and 500 points.', 2000); return; }
+    const bet = CAS_BET;
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
     const last = CAS.spins[chatUid()];
@@ -23596,7 +23682,7 @@
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
       const sp = { b: bet, t: T, c: false }; CAS.spins[me] = sp;
-      if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += bet * casMult(T); }
+      if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += casWin({ b: bet, t: T }); }
       CAS.seen[me] = T;
       const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
       if(myM) casShow(myM, sp, true, { n: chatName() });
@@ -23605,13 +23691,20 @@
     CAS.busy = false; casCtl(); chatRenderArcade();
   }
   async function casClaim(sp){
-    const me = chatUid(), win = sp.b * casMult(sp.t);
-    for(let tries = 0; tries < 2; tries++){
+    const me = chatUid();
+    for(let tries = 0; tries < 4; tries++){
       try{
         const tok = await chatAuth(), body = {};
+        // (the jackpot as it is right now: a jackpot takes it all; a loss adds to it)
+        const pg = await casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+        const potNow = pg.ok ? await pg.json() : null, pot = typeof potNow === 'number' ? potNow : CAS_POT0;
+        const jack = sp.b === CAS_BET && casIsJack(sp.t);
+        if(jack) sp.jp = pot;
+        const win = casWin(sp), loss = sp.b === CAS_BET && !jack ? Math.max(0, CAS_BET - win) : 0;
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
+        if(jack) body['casino/pot'] = CAS_POT0; else if(loss) body['casino/pot'] = pot + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(r.ok){ SC.p += win; sp.c = true; if(!sp.shown) CAS.held = (CAS.held || 0) + win; return win; }
+        if(r.ok){ SC.p += win; sp.c = true; if(!sp.shown) CAS.held = (CAS.held || 0) + win; CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
         await scLoad();
       }catch(e){}
     }
@@ -23650,18 +23743,10 @@
       el.dataset.built = '1';
       el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj title="Open Blackjack next to the slots">＋ 🃏 Blackjack</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the slots" aria-label="Leave the slots">${ICON_X}</button></div>
         <div class="cas-floor"></div>
-        <div class="cas-ctl"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
-          <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
-          <button type="button" class="cas-spin">SPIN</button><button type="button" class="cas-leave">Leave</button></div>
-        <div class="cas-pays">Pays: 7️⃣7️⃣7️⃣ ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two = your bet back</div>
+        <div class="cas-pot"><span class="cp-l">💰 JACKPOT</span><b class="cp-v">…</b><span class="cp-s">grows with every losing spin — hit 7️⃣7️⃣7️⃣ to win it all</span></div>
+        <div class="cas-ctl"><button type="button" class="cas-spin">SPIN · 50</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-pays">Every spin is 50 · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 600 · any three 300 · two 💎 or 7️⃣ 125 · any two 50 back · one 7️⃣ 20 back</div>
         <div class="cas-feed"></div>`;
-      const inp = el.querySelector('.cas-bet input');
-      inp.value = CAS.bet;
-      const setBet = (v) => { CAS.bet = Math.max(1, Math.min(500, Math.round(v) || 1)); inp.value = CAS.bet; chatLS('casBet', CAS.bet); casCtl(); };
-      inp.addEventListener('change', () => setBet(Number(inp.value)));
-      inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); casSpin(); } });
-      el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(CAS.bet + Number(b.dataset.d)); });
-      el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
       el.querySelector('.cas-spin').addEventListener('click', casSpin);
       el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
       el.querySelector('.cas-leave').addEventListener('click', () => gameClose('casino'));
@@ -23672,9 +23757,29 @@
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
     el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - (CAS.held || 0)) : '…';
-    const sb = el.querySelector('.cas-spin'); sb.disabled = CAS.busy || !CAS.on || scBal() < CAS.bet; sb.textContent = CAS.busy ? '…' : `SPIN · ${CAS.bet}`;
+    const sb = el.querySelector('.cas-spin'); sb.disabled = CAS.busy || !CAS.on || scBal() < CAS_BET; sb.textContent = CAS.busy ? '…' : `SPIN · ${CAS_BET}`;
+    casPotShow();
   }
   const casSym = (i) => CAS_SYMS[i] || '❔';
+  // the jackpot counter (it rolls up when it grows)
+  function casPotShow(){
+    const v = CAS.pot == null ? null : CAS.pot;
+    for(const b of document.querySelectorAll('.cp-v')){
+      if(v == null){ b.textContent = '…'; continue; }
+      const from = Number(b.dataset.v); b.dataset.v = v;
+      if(!isFinite(from) || from === v || b.textContent === '…'){ b.textContent = v.toLocaleString(); continue; }
+      const t0 = performance.now(), dur = 700;
+      const step = (t) => { const u = Math.min(1, (t - t0) / dur); b.textContent = Math.round(from + (v - from) * (1 - Math.pow(1 - u, 3))).toLocaleString(); if(u < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+      if(v > from) b.parentElement.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 500 });
+    }
+    try{ chatTickerSync(); }catch(e){}
+  }
+  // (the jackpot is also checked now and then while the chat is open, for the banner)
+  setInterval(async () => {
+    if(!CHAT.open || CAS.on || !chatName() || document.visibilityState !== 'visible') return;
+    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`); if(r.ok){ const v = await r.json(); CAS.pot = typeof v === 'number' ? v : CAS_POT0; casPotShow(); } }catch(e){}
+  }, 15000);
   // the machines on the floor (one per person sitting), kept in place so the reels can roll
   function casSync(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
@@ -23708,21 +23813,21 @@
   }
   // a machine's reels: roll and land on the spin's result (or just show it)
   function casShow(m, sp, roll, w){
-    const R = casReels(sp.t), win = sp.b * casMult(sp.t), res = m.querySelector('.cas-res');
+    const R = casReels(sp.t), jackpot = sp.b === CAS_BET && casIsJack(sp.t), win = casWin(sp), res = m.querySelector('.cas-res');
     const strips = [...m.querySelectorAll('.cas-strip')];
     const still = !roll || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     const done = () => {
-      res.innerHTML = win > 0 ? `bet <b>${sp.b}</b> · won <b class="w">${win}</b>` : `bet <b>${sp.b}</b> · lost`;
-      m.classList.toggle('won', win > 0); m.classList.toggle('big', win >= sp.b * 6);
+      res.innerHTML = jackpot ? `<b class="w">💰 JACKPOT! ${sp.jp ? sp.jp.toLocaleString() : ''}</b>` : win > 0 ? `bet <b>${sp.b}</b> · won <b class="w">${win}</b>` : `bet <b>${sp.b}</b> · lost`;
+      m.classList.toggle('won', win > 0); m.classList.toggle('big', win >= 300);
       sp.shown = true;
       if(roll){
         sfxSlotResult(casMult(sp.t), m.classList.contains('me') ? 1 : 0.35);
         if(m.classList.contains('me')){ CAS.held = Math.max(0, (CAS.held || 0) - win); casCtl(); }      // (the win shows in your points only now)
         if(win > 0) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
-        casFeed(`${nm} bet ${sp.b} → ${R.map(casSym).join('')} ${win > 0 ? 'won ' + win : 'lost'}`, win >= sp.b * 6);
-        if(m.classList.contains('me') && win >= sp.b * 6) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win} points!`, 3000);
-        if(m.classList.contains('me') && casMult(sp.t) === 25) casJackpotPost(win);
+        casFeed(`${nm} → ${R.map(casSym).join('')} ${jackpot ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || jackpot);
+        if(m.classList.contains('me') && (win >= 300 || jackpot)) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win.toLocaleString()} points!`, 3600);
+        if(m.classList.contains('me') && jackpot) casJackpotPost(win);
         if(m.classList.contains('me')) chatRenderArcade();
       }
     };
@@ -23977,7 +24082,7 @@
       // (the bot deals once everyone sitting has bet, or 15 s after the first bet; a player dealing has 30 s to stake and press Deal)
       if(human){
         if(iDeal && players.length && now - BJ.betAt[R] > 30000){
-          if(!bjInRound(S, D) && BJ.noStake !== D.r){ if(scBal() >= 1){ BJ.bet = Math.min(BJ.bet, scBal(), 500); bjPlaceBet(); } else bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
+          if(!bjInRound(S, D) && BJ.noStake !== D.r){ if(scBal() >= 1){ BJ.bet = Math.max(1, Math.min(BJ.bet || 10, scBal(), 500)); bjPlaceBet(); } else bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
           else bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
         }
       } else if(driver && players.length && (!waiting.length || now - BJ.betAt[R] > 15000))
@@ -24159,8 +24264,8 @@
           <div class="bj-seats"></div>
           <div class="bj-specs"></div>
         </div>
-        <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−</button><input type="number" min="1" max="500" step="1" aria-label="Your bet"><button type="button" data-d="1">+</button><button type="button" data-d="10">+10</button></div>
-          <div class="cas-chips">${[5, 10, 25, 50, 100].map(v => `<button type="button" data-v="${v}">${v}</button>`).join('')}<button type="button" data-v="max">Max</button></div>
+        <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet bj-betin"><input type="number" min="0" max="500" step="1" aria-label="Your bet" placeholder="0"></div>
+          <div class="bj-chiprow">${[5, 10, 25, 50, 100].map(v => `<button type="button" class="bj-chipbtn c${v}" data-v="${v}" title="Add ${v}"><span>${v}</span></button>`).join('')}<button type="button" class="bj-clr" data-v="max">Max</button><button type="button" class="bj-clr" data-v="clear">Clear</button></div>
           <button type="button" class="cas-spin bj-betb">BET</button></div>
           <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button><button type="button" class="bj-a bj-split">Split</button></div>
           <span class="bj-note"></span>
@@ -24168,11 +24273,19 @@
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
         <div class="cas-feed bj-feed"></div>`;
       const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
-      const setBet = (v) => { BJ.bet = Math.max(1, Math.min(500, Math.round(v) || 1)); inp.value = BJ.bet; chatLS('bjBet', BJ.bet); bjCtl(); };
+      const setBet = (v) => { BJ.bet = Math.max(0, Math.min(500, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); };
+      inp.addEventListener('input', () => { const v = Math.max(0, Math.min(500, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); });
       inp.addEventListener('change', () => setBet(Number(inp.value)));
       inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); bjPlaceBet(); } });
-      el.querySelector('.cas-bet').addEventListener('click', (e) => { const b = e.target.closest('[data-d]'); if(b) setBet(BJ.bet + Number(b.dataset.d)); });
-      el.querySelector('.cas-chips').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if(b) setBet(b.dataset.v === 'max' ? Math.min(500, scBal()) : Number(b.dataset.v)); });
+      el.querySelector('.bj-chiprow').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-v]'); if(!b) return; b.blur();
+        if(b.dataset.v === 'clear'){ setBet(0); return; }
+        if(b.dataset.v === 'max'){ setBet(Math.min(500, scBal())); return; }
+        const v = Number(b.dataset.v), room = Math.min(500, scBal()) - BJ.bet;
+        if(room <= 0){ toast(BJ.bet >= 500 ? 'The table limit is 500.' : `You only have ${scBal()} points.`, 1600); return; }
+        setBet(BJ.bet + Math.min(v, room)); try{ sfxChip(); }catch(e2){}
+        b.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-6px) rotate(20deg)' }, { transform: 'none' }], { duration: 220 });
+      });
       el.querySelector('.bj-betb').addEventListener('click', bjPlaceBet);
       el.querySelector('.bj-fast').addEventListener('click', (e) => { const b = e.target.closest('[data-fast]'); if(!b) return; b.blur(); b.disabled = true; if(b.dataset.fast === 'next') bjNextRound(); else bjDealNow(); });
       el.querySelector('[data-go-slots]').addEventListener('click', () => casJoin());
@@ -24278,6 +24391,48 @@
     });
   }
   const bjTotTxt = (h) => !h || !h.k ? '' : h.h > 21 ? `${h.h} · bust` : (h.k === 2 && h.v === 21) ? 'Blackjack' : (h.a > 0 && h.h <= 11) ? `${h.v} (or ${h.h})` : `${h.v}`;
+  const BJ_DENOM = [100, 50, 25, 10, 5, 1];
+  const bjChipsOf = (n) => { const out = []; for(const d of BJ_DENOM){ while(n >= d && out.length < 14){ out.push(d); n -= d; } } return out; };
+  function bjPile(n, s, D, animate){
+    const pl = n.querySelector('.bj-pl'); if(!pl) return;
+    let pile = pl.querySelector('.bj-pile'); if(!pile){ pile = document.createElement('div'); pile.className = 'bj-pile'; pl.appendChild(pile); }
+    const inR = D && bjInRound(s, D), total = inR ? (s.b | 0) + (bjIsSplit(s) ? s.q.b | 0 : 0) : 0, key = inR ? s.r + ':' + total : '';
+    if(pile.dataset.key === key){
+      if(inR && D.f){ const spl = bjIsSplit(s), r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 }, net = r.amt + r2.amt - total; pile.classList.toggle('won', net > 0); pile.classList.toggle('lost', net < 0); }
+      return;
+    }
+    const prev = pile.querySelectorAll('.bj-c').length, sameRound = pile.dataset.key && pile.dataset.key.split(':')[0] === (inR ? String(s.r) : '');
+    pile.dataset.key = key; pile.classList.remove('won', 'lost');
+    if(!inR){ pile.innerHTML = ''; return; }
+    const chips = bjChipsOf(total);
+    if(!sameRound) pile.innerHTML = '';
+    const have = sameRound ? prev : 0;
+    // (stacks of the same chip side by side)
+    const cols = []; for(const c of chips){ let col = cols.find(x => x.d === c); if(!col){ col = { d: c, n: 0 }; cols.push(col); } col.n++; }
+    pile.innerHTML = ''; let i = 0;
+    cols.forEach((col, ci) => {
+      for(let k = 0; k < col.n; k++, i++){
+        const c = document.createElement('div'); c.className = 'bj-c c' + col.d;
+        const x = -(ci * 22) + ((i * 37) % 5 - 2) * .7, y = -k * 5;
+        c.style.left = x + 'px'; c.style.bottom = (-y) + 'px'; c.style.zIndex = String(10 + k);
+        pile.appendChild(c);
+        if(animate && i >= have && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+          // thrown from the player's picture: an arc under gravity, a couple of bounces, a little spin that settles
+          const delay = (i - have) * 90, sx = 46 + ci * 22 + Math.random() * 14, sy = 10 + Math.random() * 8, frames = [];
+          let px = sx, py = sy, vx = (0 - sx) / 0.5, vy = -300, rot = (Math.random() - .5) * 720, vr = (Math.random() - .5) * 900, t = 0, dt = 1 / 60, bounces = 0;
+          for(let f = 0; f < 90; f++){
+            vy += 1500 * dt; px += vx * dt; py += vy * dt; rot += vr * dt; t += dt;
+            if(py >= 0 && vy > 0){ py = 0; if(bounces < 2){ vy = -vy * .38; vx *= .5; vr *= .4; bounces++; try{ if(bounces === 1) setTimeout(() => sfxChip(), delay + t * 1000); }catch(e){} } else { vy = 0; vx *= .7; } }
+            if(bounces >= 2 && Math.abs(vy) < 1){ px *= .8; rot *= .8; }
+            frames.push({ transform: `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) rotate(${rot.toFixed(0)}deg)`, opacity: f === 0 ? 0 : 1 });
+            if(bounces >= 2 && f > 50) break;
+          }
+          frames.push({ transform: 'none', opacity: 1 });
+          c.animate(frames, { duration: frames.length * 1000 / 60, delay, fill: 'backwards', easing: 'linear' });
+        }
+      }
+    });
+  }
   function bjSync(){
     const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
     const me = chatUid(), D = BJ.d, ph = bjPhase(), T = bjTurn();
@@ -24315,7 +24470,7 @@
     if(!D) msg = 'Setting up the table…';
     else if(ph === 'bet'){
       const pl = bjPlayers(), R = D.r, left = BJ.betAt[R] ? Math.max(0, Math.ceil(((D.u !== 'bot' ? 30000 : 15000) - (Date.now() - BJ.betAt[R])) / 1000)) : null;
-      msg = pl.length ? (D.u !== 'bot' ? `${pl.length} bet${pl.length === 1 ? '' : 's'} in — waiting for ${D.u === me ? 'you' : bjName(D.n)} to deal (${left}s)` : `${pl.length} bet${pl.length === 1 ? '' : 's'} in — dealing in ${left}s (or when everyone has bet)`) : 'Place your bets!';
+      msg = pl.length ? (D.u !== 'bot' ? `${pl.length} bet${pl.length === 1 ? '' : 's'} in — waiting for ${D.u === me ? 'you' : bjName(D.n)} to deal${left != null ? ` (${left}s)` : ''}` : `${pl.length} bet${pl.length === 1 ? '' : 's'} in — dealing ${left != null ? `in ${left}s` : 'soon'} (or when everyone has bet)`) : 'Place your bets!';
     } else if(ph === 'play') msg = T.u === me ? (bjOnQ(BJ.p[me]) ? 'Your second hand — Hit or Stand' : bjIsSplit(BJ.p[me]) ? 'Your first hand — Hit, Stand or Double' : bjCanSplit(BJ.p[me]) ? 'Your turn — Hit, Stand, Double or Split' : 'Your turn — Hit, Stand or Double') : `${bjName(T.n)}'s turn…`;
     else if(ph === 'dealer') msg = D.u === me ? 'Your turn to deal: hit or stand' : 'Dealer plays…';
     else if(ph === 'done') msg = D.h > 21 ? 'Dealer busts! Next round soon…' : `Dealer has ${D.v}. Next round soon…`;
@@ -24362,7 +24517,9 @@
       }
       if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
       n.classList.toggle('turn', !!(T && T.u === s.u));
+      try{ bjPile(n, s, D, !!el.dataset.pilesReady); }catch(e){}
     });
+    el.dataset.pilesReady = '1';
     { const sp = el.querySelector('.bj-specs'), list = Object.entries(BJ.p).filter(([u, x]) => x && x.o === true && typeof x.t === 'number' && bjNow() - x.t < 30000 && !chatBanned(u) && (u !== me || BJ.watch))
         .concat(BJ.watch && !(BJ.p[me] && BJ.p[me].o) ? [[me, { n: chatName() }]] : []);
       const sig = list.map(([u, x]) => u + ':' + x.n).join('|');
@@ -24391,7 +24548,7 @@
     const canBet = BJ.on && ph === 'bet' && !inR && !BJ.act && !BJ.watch;
     el.querySelector('.bj-betbox').hidden = !(ph === 'bet' && !inR) || !!BJ.watch || (dealer && BJ.noStake === D.r);
     const sit = el.querySelector('.bj-sit'); sit.textContent = BJ.watch ? '🪑 Sit back down' : '👀 Sit out & watch'; sit.classList.toggle('on', !!BJ.watch);
-    const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || scBal() < BJ.bet; bb.textContent = `${dealer ? 'STAKE' : 'BET'} · ${BJ.bet}`;
+    const bb = el.querySelector('.bj-betb'); bb.disabled = !canBet || BJ.bet < 1 || scBal() < BJ.bet; bb.textContent = BJ.bet ? `${dealer ? 'STAKE' : 'BET'} · ${BJ.bet}` : 'Add chips';
     const onQ = !!(S && bjOnQ(S)), H = onQ ? S.q : S;
     const my = !!(T && T.u === me && H && H.k >= 2 && !H.pe);
     el.querySelector('.bj-acts').hidden = !(ph === 'play' && inR) || dealer;
