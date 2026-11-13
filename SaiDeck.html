@@ -893,6 +893,59 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  /* the arcade: bigger, and the shop in two columns */
+  @media (min-width: 900px){
+    .chat-who:not([hidden]), .chat-side:not([hidden]){left:calc((100vw - min(360px, calc(100vw - 32px)) - 16px - 66px) / 2);width:min(480px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px - 66px));}
+    .chat-casino:not([hidden]){width:min(1000px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px - 66px));}
+    .chat-arcade:not([hidden]){width:min(620px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px - 66px));max-height:min(86vh, 900px);}
+    .chat-arcade.wide:not([hidden]){width:min(900px, calc(100vw - min(360px, calc(100vw - 32px)) - 64px - 66px));display:grid;grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));align-content:start;}
+    .chat-arcade.wide > .arc-head, .chat-arcade.wide > .chat-who-h, .chat-arcade.wide > .chat-side-p{grid-column:1 / -1;}
+    .chat-arcade.wide > .arc-item{margin:0;}
+  }
+  /* chat throws */
+  .crp-throws{display:flex;align-items:center;gap:2px;flex-basis:100%;margin-top:4px;padding-top:5px;border-top:1px solid rgba(255,255,255,.08);}
+  .chat-react-pick{flex-wrap:wrap;}
+  .crp-lab{font:700 9.5px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);margin-right:3px;}
+  .crp-throw{all:unset;position:relative;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:17px;}
+  .crp-throw:hover, .crp-throw:focus-visible{background:rgba(255,255,255,.1);}
+  .crp-throw.none span{filter:grayscale(1);opacity:.4;}
+  .crp-throw b{position:absolute;right:-1px;bottom:-1px;min-width:13px;height:13px;padding:0 2px;box-sizing:border-box;border-radius:7px;background:#f5d04a;color:#1b1c25;font:800 8.5px/13px 'Inter',sans-serif;text-align:center;}
+  .chat-bub.fx-hit{position:relative;}
+  .fx-cover{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:1;}
+  .fx-cover i{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:.62;}
+  .fx-cover.fx-pie{background:rgba(255,248,232,.12);} .fx-cover.fx-pie i{opacity:.58;}
+  .fx-cover.fx-snow{background:linear-gradient(180deg,rgba(220,240,255,.25),rgba(255,255,255,.05));} .fx-cover.fx-snow i{opacity:.7;}
+  .fx-cover.fx-ink i{opacity:.45;} .fx-cover.fx-glitter i{opacity:.85;}
+  .fx-cover.pop i{animation:fxPop .38s cubic-bezier(.2,.9,.3,1.4) both;}
+  .fx-cover.pop i:nth-child(2){animation-delay:.05s;} .fx-cover.pop i:nth-child(3){animation-delay:.1s;}
+  @keyframes fxPop{from{scale:.2;opacity:0;}to{scale:1;}}
+  .chat-bub.fx-hit > div:not(.fx-cover){position:relative;z-index:2;text-shadow:0 1px 2px rgba(0,0,0,.55);}
+  .fx-proj{position:fixed;left:0;top:0;z-index:2147483000;font-size:30px;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));will-change:transform;}
+  .fx-bit{position:fixed;z-index:2147483000;width:8px;height:8px;border-radius:50%;pointer-events:none;background:#fff6e0;}
+  .fx-bit.fx-slime{background:#7ee04a;} .fx-bit.fx-snow{background:#e6f6ff;} .fx-bit.fx-paint{background:#ff6fae;} .fx-bit.fx-glitter{background:#ffd76a;} .fx-bit.fx-ink{background:#3a2458;}
+
+  /* the arcade's round buttons beside the chat */
+  .arc-dock{position:fixed;z-index:361;top:76px;right:calc(16px + min(360px, calc(100vw - 32px)) + 10px);display:flex;flex-direction:column;gap:10px;}
+  .arc-dock[hidden]{display:none;}
+  .arc-dock-b{all:unset;position:relative;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:21px;
+    background:#1f2030;border:1px solid rgba(180,140,255,.4);box-shadow:0 8px 22px rgba(0,0,0,.5);transition:transform .15s, background .15s, border-color .15s;animation:dockIn .35s cubic-bezier(.2,.9,.3,1.3) both;}
+  .arc-dock-b:nth-child(2){animation-delay:.04s;} .arc-dock-b:nth-child(3){animation-delay:.08s;} .arc-dock-b:nth-child(4){animation-delay:.12s;}
+  .arc-dock-b:hover{transform:scale(1.08);background:#2a2b40;}
+  .arc-dock-b:active{transform:scale(.94);}
+  .arc-dock-b:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
+  .arc-dock-b.on{background:linear-gradient(135deg,#5a3fa8,#3a2b70);border-color:#c9a8ff;box-shadow:0 0 0 3px rgba(180,140,255,.25),0 8px 22px rgba(0,0,0,.5);}
+  .arc-dock-b .dd{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#ff3b5c;border:2px solid #17181f;box-shadow:0 0 8px rgba(255,59,92,.8);transform:scale(0);transition:transform .25s cubic-bezier(.2,.9,.3,1.6);}
+  .arc-dock-b.dot .dd{transform:scale(1);animation:dockPing 1.8s ease-out infinite;}
+  @keyframes dockPing{0%{box-shadow:0 0 0 0 rgba(255,59,92,.7);}70%{box-shadow:0 0 0 8px rgba(255,59,92,0);}100%{box-shadow:0 0 0 0 rgba(255,59,92,0);}}
+  @keyframes dockIn{from{opacity:0;transform:translateX(14px) scale(.7);}to{opacity:1;transform:none;}}
+  .chat-panel .chat-arc{display:none !important;}
+  /* someone's Trick or Treat is hiding on your screen */
+  .trick-badge{display:inline-flex;align-items:center;gap:2px;margin-left:4px;padding:3px 8px;border-radius:999px;background:linear-gradient(135deg,rgba(255,138,31,.22),rgba(120,50,180,.25));border:1px solid rgba(255,138,31,.6);
+    font:800 11px 'Inter',sans-serif;color:#ffb36b;cursor:help;box-shadow:0 0 12px rgba(255,138,31,.25);}
+  .trick-badge .tb-p{font-size:16px;display:inline-block;animation:tbBob 1.6s ease-in-out infinite;}
+  @keyframes tbBob{0%,100%{transform:translateY(0) rotate(-6deg);}50%{transform:translateY(-2px) rotate(6deg);}}
+  @media (prefers-reduced-motion: reduce){ .trick-badge .tb-p, .arc-dock-b, .arc-dock-b.dot .dd{animation:none !important;} }
+
   /* rewards: masterpiece / shop / quest notices in the chat */
   .chat-rwd{position:relative;overflow:hidden;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:9px 12px;border-radius:12px;font-size:12.5px;color:var(--text);flex-shrink:0;
     background:linear-gradient(135deg,rgba(120,170,255,.14),rgba(180,140,255,.14));border:1px solid rgba(150,170,255,.4);}
@@ -21227,7 +21280,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 69;                 // ← goes up by one with every published version
+  const SD_BUILD = 72;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -21892,7 +21945,7 @@
         <div class="chat-foot">
           <div class="chat-note" hidden></div>
           <div class="chat-replying" hidden></div>
-          <div class="chat-compose"><button type="button" class="chat-games" title="Games — slots and blackjack" aria-label="Games" aria-expanded="false">🎮</button><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
+          <div class="chat-compose"><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
           <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
             <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
@@ -21913,9 +21966,10 @@
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
         { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
-        const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); return; }
+        const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); dockRender(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
+        const rxb = e.target.closest('[data-rx]'); if(rxb){ rxb.blur(); scBuy('rx', rxb.dataset.rx); return; }
         const pv = e.target.closest('[data-prev]'); if(pv){ pv.blur(); chatBubbleFx(pv, pv.dataset.prev, false); return; }
         const bb = e.target.closest('[data-bub]'); if(bb){ bb.blur(); const k = bb.dataset.bub; if(!k || bubOwned(k)){ chatLS('bubble', k); chatRenderArcade(); } else scBuy('bub', k); }
       });
@@ -21998,6 +22052,7 @@
     CHAT.side = CHAT.side === which ? null : which;
     chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); casBarRender();
     chatBackSync();
+    try{ dockRender(); }catch(e){}
   }
   // the games: Slots and Blackjack can both be open at once, side by side (you sit at both)
   function gameOpen(g){
@@ -22018,7 +22073,8 @@
   const winKey = (el) => el.classList.contains('chat-bj') ? 'bj' : el.classList.contains('chat-casino') ? 'casino' : el.classList.contains('chat-arcade') ? 'arcade' : el.classList.contains('chat-alerts') ? 'alerts' : el.classList.contains('chat-who') ? 'who' : 'rooms';
   function winClamp(el, x, y){
     const r = el.getBoundingClientRect(), pr = chatPanel.hidden ? null : chatPanel.getBoundingClientRect();
-    const maxR = pr ? pr.left - 8 : innerWidth - 8;
+    const dr = typeof arcDockEl !== 'undefined' && arcDockEl && !arcDockEl.hidden ? arcDockEl.getBoundingClientRect() : null;
+    const maxR = (dr ? Math.min(dr.left, pr ? pr.left : innerWidth) : pr ? pr.left : innerWidth) - 8;
     x = Math.min(x, maxR - r.width); x = Math.max(8, x);
     y = Math.max(8, Math.min(innerHeight - 56, y));
     return [x, y];
@@ -22041,7 +22097,6 @@
     const w = [...chatPanel.querySelectorAll(WIN_SEL)].find(e => !e.hidden && !e.classList.contains('chat-casino'));
     if(!w){ x.style.left = x.style.top = ''; x.style.zIndex = ''; return; }
     x.style.zIndex = String((Number(w.style.zIndex) || 5) + 1);
-    if(!w.classList.contains('moved')){ x.style.left = x.style.top = ''; return; }
     const r = w.getBoundingClientRect(); x.style.left = (r.right - 40) + 'px'; x.style.top = (r.top + 10) + 'px'; x.style.zIndex = String((Number(w.style.zIndex) || 5) + 1);
   }
   chatPanel.addEventListener('pointerdown', (e) => {
@@ -22347,6 +22402,7 @@
       bub.appendChild(meta);
       if(m.m){ const tx = document.createElement('div'); tx.textContent = off ? m.m : chatMask(m.m); bub.appendChild(tx); }
       if(off && m.f && m.f.id) bub.appendChild(chatFdChip(m.f, m.mine));
+      if(!off) try{ fxDecorate(m, bub); }catch(e){}
       const col = document.createElement('div'); col.className = 'chat-col'; col.appendChild(bub);
       // reactions
       const rx = chatReactObj(m.x), keys = Object.keys(rx).filter(e => CHAT_REACT[e] && Object.keys(rx[e] || {}).length);
@@ -22384,6 +22440,8 @@
     }
     if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
     chatRenderAlerts();
+    if(!body._fxScroll){ body._fxScroll = true; body.addEventListener('scroll', () => fxScan(), { passive: true }); }
+    fxScan();
     for(const [row, bk, mine] of fxQ){ const b = row.querySelector('.chat-bub'); if(b){ b.style.opacity = '0'; requestAnimationFrame(() => { b.style.opacity = ''; chatBubbleFx(b, bk, mine); }); } }
   }
   function chatRenderSetup(fromSettings){
@@ -22460,6 +22518,7 @@
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
     chatUpdateBadge();
+    try{ dockRender(); }catch(e){}
   }
   chatBtn.addEventListener('click', () => chatToggle());
   // ----- live connection -----
@@ -22480,12 +22539,14 @@
       if(!chatValid(m)) return;
       m._k = key;
       if(!CHAT.msgs.has(key)){ CHAT.msgs.set(key, m); if(fresh) fresh.push(m); }
-      else { const o = CHAT.msgs.get(key); o.x = m.x; o.d = m.d; }                        // (reactions changed, or a gift was declined)
+      else { const o = CHAT.msgs.get(key); o.x = m.x; o.d = m.d; o.fx = m.fx; o.fk = m.fk; }                        // (reactions changed, or a gift was declined)
     };
     // a change deeper inside a message: its reactions (…/x/<emoji>/<who>)
     const applyDeep = (parts, v) => {
       const m = CHAT.msgs.get(parts[0]); if(!m) return;
       if(parts[1] === 'd' && parts.length === 2){ m.d = v === true ? true : undefined; return; }
+      if(parts[1] === 'fk' && parts.length === 2){ m.fk = typeof v === 'string' ? v : undefined; return; }
+      if(parts[1] === 'fx'){ if(parts.length === 2) m.fx = v || null; else if(parts.length === 3){ m.fx = Object.assign({}, m.fx); if(v) m.fx[parts[2]] = v; else delete m.fx[parts[2]]; } else if(m.fx && m.fx[parts[2]]){ m.fx = Object.assign({}, m.fx); m.fx[parts[2]] = Object.assign({}, m.fx[parts[2]], { [parts[3]]: v }); } return; }
       if(parts[1] !== 'x') return;
       if(parts.length === 2){ m.x = v || null; return; }
       const x = m.x = chatReactObj(m.x), e = parts[2];
@@ -22560,7 +22621,7 @@
         if(!CHAT.open && chatPopsOn()) chatPopup({ n: 'SaiDeck', m: pin.m, a: true, pinned: true });
       }
       if((prevRooms === false) !== (CHAT.cfg.rooms === false) && CHAT.room && CHAT.room !== chatRoom()){ chatConnect(); chatPanel.innerHTML = ''; }
-      if(CHAT.open) chatRender();
+      if(CHAT.open){ chatRender(); try{ chatRenderArcade(); }catch(e){} }
     });
     if(chatName()) chatPollInbox();
     setTimeout(chatRegister, 3000);
@@ -23107,6 +23168,12 @@
     { k: 'cannon', name: 'Water cannon', em: '💦', price: 20, every: 2.5, hit: 0.75, desc: 'Sprays every 2.5 seconds — hits 3 times out of 4.', col: '#5ac8ff' },
     { k: 'laser', name: 'Laser turret', em: '🔴', price: 20, every: 1.5, hit: 0.5, desc: 'Fires every 1.5 seconds, but only half the shots land.', col: '#ff4d6d' },
   ];
+  function priceOf(kind, k, def){
+    const P = CHAT.cfg && CHAT.cfg.prices, v = P && P[kind] && P[kind][k];
+    return Number.isInteger(v) && v >= 0 ? v : def;
+  }
+  function priced(list, kind){ for(const it of list){ const def = it.price; Object.defineProperty(it, 'price', { get(){ return priceOf(kind, it.k, def); }, configurable: true }); } }
+  priced(AMMO, 'fx'); priced(ARTY, 'art');
   const SWAT_PTS = 10;                       // (the database only accepts exactly this many per swat)
   const ARTY_SHOTS = 10, ARTY_COOL = 5 * 60 * 1000;      // (each artillery swats up to 10 infiltrators, then 5 minutes' cooldown)
   const SC = { p: 0, s: 0, fx: {}, art: {}, bub: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
@@ -23123,6 +23190,7 @@
     { k: 'balloon', name: 'Balloon float', em: '🎈', price: 500, desc: 'Bubblegum pink. Your message floats up on balloons that pop.' },
     { k: 'zap', name: 'Thunder strike', em: '⚡', price: 500, desc: 'Electric purple. Lightning strikes and your message crackles in.' },
   ];
+  priced(BUBBLES, 'bub');
   const bubOwned = (k) => !!(SC.bub && SC.bub[k]);
   const bubNow = () => { const k = chatLS('bubble') || ''; return BUBBLES.some(b => b.k === k) && bubOwned(k) ? k : ''; };
   // the entrance: plays over the bubble that just arrived (el), inside the chat panel
@@ -24248,16 +24316,18 @@
   }
   // ----- 🎃 Trick or Treat: plant one on someone's screen while infiltrating (Space); it stays hidden until their mouse finds it -----
   // tricks/<them>/<id> = { u, n, x, y, t } (paid with one from your stock: inv/<you>/tot)
-  const TOT_PRICE = 100, TOT_R = 130;
+  const TOT_R = 130;
+  const totPrice = () => priceOf('tot', 'tot', 100);
   const TRAPS = new Map(); let trapBusy = false;
   async function totBuy(){
     if(SC.busy) return; if(!SC.loaded) await scLoad();
-    if(scBal() < TOT_PRICE){ toast(`🎃 Trick or Treat costs ${TOT_PRICE} points — you have ${scBal()}.`, 2600); return; }
+    try{ if(CHAT.pollCfg) await CHAT.pollCfg(); }catch(e){}
+    if(scBal() < totPrice()){ toast(`🎃 Trick or Treat costs ${totPrice()} points — you have ${scBal()}.`, 2600); return; }
     SC.busy = true;
     try{
-      const me = chatUid(), ok = await bjPatch({ [`scores/${me}/s`]: SC.s + TOT_PRICE, [`scores/${me}/t`]: bjSv, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`inv/${me}/tot`]: (SC.tot | 0) + 1 });
+      const me = chatUid(), ok = await bjPatch({ [`scores/${me}/s`]: SC.s + totPrice(), [`scores/${me}/t`]: bjSv, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`inv/${me}/tot`]: (SC.tot | 0) + 1 });
       if(!ok) throw new Error('no');
-      SC.s += TOT_PRICE; SC.tot = (SC.tot | 0) + 1; SC._justBought = 'tot';
+      SC.s += totPrice(); SC.tot = (SC.tot | 0) + 1; SC._justBought = 'tot';
       try{ questEv('buy'); buyPost('bought a Trick or Treat 🎃'); }catch(e){}
       toast(`🎃 Trick or Treat bought — you have ${SC.tot}. Press Space while infiltrating someone to plant one.`, 3200); sfxChip();
     }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
@@ -24365,7 +24435,7 @@
     if(!S || S.d !== day) S = { d: day, c: {}, u: {}, done: {} };
     return S;
   }
-  function questSave(S){ rwdLS('q', JSON.stringify(S)); }
+  function questSave(S){ rwdLS('q', JSON.stringify(S)); try{ if(arcDockEl) dockRender(); }catch(e){} }
   function questUnfinished(){ const S = questState(); return !S.done.x; }
   // something happened that a quest might count
   function questEv(k, who, amt){
@@ -24447,11 +24517,11 @@
     return SCALL.m && SCALL.m[uid] ? SCALL.m[uid].b : null;
   }
   // ----- the shop: everyone sees what you bought -----
-  function buyPost(txt){ rwdPost('buy', txt); }
+  function buyPost(txt){ const k = 'buyp:' + txt, last = Number(chatLS(k)) || 0; if(Date.now() - last < 600000) return; chatLS(k, Date.now()); rwdPost('buy', txt); }
   async function totPlant(){
     const M = INF.me; if(!M) return;
     if(!SC.loaded) await scLoad();
-    if((SC.tot | 0) < 1){ toast(`🎃 No Trick or Treats left — buy them in the shop (${TOT_PRICE} points each).`, 2600); return; }
+    if((SC.tot | 0) < 1){ toast(`🎃 No Trick or Treats left — buy them in the shop (${totPrice()} points each).`, 2600); return; }
     if(M.planting) return; M.planting = true;
     const x = Math.max(0, Math.min(1, M.px / innerWidth)), y = Math.max(0, Math.min(1, M.py / innerHeight)), px = M.px, py = M.py;
     // (each person has room for 2 waiting Trick or Treats in total, from anyone — a full screen takes no more, and costs you nothing)
@@ -24524,6 +24594,88 @@
       for(const [k, v] of Object.entries(d)) if(v && typeof v.x === 'number' && typeof v.y === 'number' && !TRAPS.has(k) && !chatBanned(v.u)) TRAPS.set(k, v);
     }catch(e){}
     trapBusy = false;
+    try{ trickBadge(); }catch(e){}
+  }
+  // ----- the arcade's buttons: round buttons floating beside the chat, each with a red dot when something's new -----
+  const DOCK = [
+    { tab: 'shop', em: '🛍️', t: 'Shop' },
+    { tab: 'quests', em: '🎯', t: 'Daily quests' },
+    { tab: 'board', em: '🏆', t: 'Leaderboard' },
+    { tab: 'casino', em: '🎰', t: 'Casino' },
+  ];
+  let arcDockEl = null;
+  function shopSig(){ return [...AMMO, ...BUBBLES, ...ARTY].map(x => x.k).join(',') + ',tot'; }
+  function questSig(){ const S = questState(); return S.d + '|' + ['a', 'b', 'c', 'x'].filter(k => S.done[k]).join(''); }
+  function boardSig(){
+    const B = SC.board; if(!B) return null;
+    const i = B.findIndex(x => x.u === chatUid());
+    return B.slice(0, 3).map(x => x.u).join(',') + '|' + i;
+  }
+  // what's new in each
+  function dockDots(){
+    const d = {};
+    if(chatName()){
+      const bal = SC.loaded ? Math.max(0, scBal()) : null, seenBal = Number(chatLS('dot.shopbal'));
+      d.shop = chatLS('dot.shopitems') !== shopSig() || (bal != null && isFinite(seenBal) && bal > seenBal && bal >= 20);
+      d.quests = chatLS('dot.quests') !== questSig();
+      const bs = boardSig(); d.board = bs != null && chatLS('dot.board') != null && chatLS('dot.board') !== bs;
+      d.casino = !CAS.on && !BJ.on && Object.values(CAS.seats || {}).some(x => { try{ return casSeatLive(x); }catch(e){ return false; } }) && chatLS('dot.casino') !== casSeatSig();
+    }
+    return d;
+  }
+  function casSeatSig(){ try{ return Object.entries(CAS.seats || {}).filter(([u, x]) => casSeatLive(x)).map(([u]) => u).sort().join(','); }catch(e){ return ''; } }
+  // looking at a tab clears its dot
+  function dockSeen(tab){
+    if(tab === 'shop'){ chatLS('dot.shopitems', shopSig()); if(SC.loaded) chatLS('dot.shopbal', Math.max(0, scBal())); }
+    else if(tab === 'quests') chatLS('dot.quests', questSig());
+    else if(tab === 'board'){ const s = boardSig(); if(s != null) chatLS('dot.board', s); }
+    else if(tab === 'casino') chatLS('dot.casino', casSeatSig());
+  }
+  function dockRender(){
+    if(!CHAT.open){ if(arcDockEl) arcDockEl.hidden = true; return; }
+    if(!arcDockEl){
+      arcDockEl = document.createElement('div'); arcDockEl.className = 'arc-dock';
+      arcDockEl.innerHTML = DOCK.map(b => `<button type="button" class="arc-dock-b" data-dock="${b.tab}" title="${b.t}" aria-label="${b.t}"><span>${b.em}</span><i class="dd"></i></button>`).join('');
+      arcDockEl.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-dock]'); if(!b) return; b.blur();
+        const tab = b.dataset.dock, open = CHAT.side === 'arcade';
+        if(open && SC.tab === tab){ chatSideTo('arcade'); dockRender(); return; }
+        if(SC.tab !== tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; }
+        SC.tab = tab; if(tab === 'board') SC.boardAt = 0;
+        if(!open){ chatSideTo('arcade'); scLoad(); } else chatRenderArcade();
+        dockRender();
+      });
+      document.body.appendChild(arcDockEl);
+    }
+    arcDockEl.hidden = false;
+    if(CHAT.side === 'arcade') dockSeen(SC.tab);
+    const d = dockDots();
+    for(const b of arcDockEl.querySelectorAll('[data-dock]')){
+      const tab = b.dataset.dock;
+      b.classList.toggle('on', CHAT.side === 'arcade' && SC.tab === tab);
+      b.classList.toggle('dot', !!d[tab] && !(CHAT.side === 'arcade' && SC.tab === tab));
+    }
+  }
+  // the leaderboard is checked now and then while the chat is open (for its dot)
+  setInterval(() => {
+    if(!CHAT.open || document.visibilityState !== 'visible' || !chatName()) return;
+    if(chatLS('dot.board') == null && SC.board){ const s = boardSig(); if(s) chatLS('dot.board', s); }
+    if(!SC.board || Date.now() - SC.boardAt > 90000){ SC.boardAt = 0; scBoard(); }
+    dockRender();
+  }, 6000);
+
+  // ----- a pumpkin by the File button when someone has planted a Trick or Treat on your screen -----
+  let trickBadgeEl = null;
+  function trickBadge(){
+    const n = [...TRAPS.values()].filter(t => !t.firing).length;
+    if(!n){ if(trickBadgeEl){ trickBadgeEl.remove(); trickBadgeEl = null; } return; }
+    if(!trickBadgeEl){
+      trickBadgeEl = document.createElement('span'); trickBadgeEl.className = 'trick-badge'; trickBadgeEl.setAttribute('role', 'status');
+      trickBadgeEl.innerHTML = '<span class="tb-p" aria-hidden="true">🎃</span><b></b>';
+      const host = document.querySelector('.topbar .file-btns'); if(host) host.appendChild(trickBadgeEl); else return;
+    }
+    trickBadgeEl.querySelector('b').textContent = n > 1 ? '×' + n : '';
+    trickBadgeEl.title = n > 1 ? `Someone planted ${n} Trick or Treats on your screen… careful where your mouse goes! 🦇` : 'Someone planted a Trick or Treat on your screen… careful where your mouse goes! 🦇';
   }
   setInterval(trapCheck, 15000); setTimeout(trapCheck, 5000);
   window.addEventListener('pointermove', (e) => {
@@ -24541,7 +24693,7 @@
     const msg = { n: chatName().slice(0, CHAT_NAME_MAX), m: `got tricked by ${who}`.slice(0, chatMaxLen()), t: bjSv, u: me, e: 'trick', v: t.u };
     let ok = chatName() && !chatBlock() && typeof t.k === 'string' ? await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${t.k}`]: msg }, base)).catch(() => null) : null;
     if(!ok) await bjPatch(base).catch(() => null);
-    TRAPS.delete(id);
+    TRAPS.delete(id); try{ trickBadge(); }catch(e){}
   }
   // the jumpscare: a pumpkin bursts and bats pour out of the spot across the whole screen
   function totScare(x, y, who){
@@ -24700,10 +24852,10 @@
         fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
         fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
       SC.p = (a && a.p) | 0; SC.s = (a && a.s) | 0;
-      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0;
+      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {};
       SC.loaded = true;
     }catch(e){}
-    chatRenderArcade(); artUI();
+    chatRenderArcade(); artUI(); try{ dockRender(); }catch(e){}
   }
   // a swat that counts: tell them, and take the points (the database checks they were really on your screen)
   async function scAward(victim, vname, how){
@@ -24723,8 +24875,9 @@
     return ok;
   }
   async function scBuy(kind, k){
-    const list = kind === 'fx' ? AMMO : kind === 'bub' ? BUBBLES : ARTY, it = list.find(x => x.k === k); if(!it || SC.busy) return;
+    const list = kind === 'fx' ? AMMO : kind === 'bub' ? BUBBLES : kind === 'rx' ? THROWS : ARTY, it = list.find(x => x.k === k); if(!it || SC.busy) return;
     if(!SC.loaded) await scLoad();
+    try{ if(CHAT.pollCfg) await CHAT.pollCfg(); }catch(e){}
     if(kind === 'fx' && SC.fx[k]){ chatLS('ammo', k); chatRenderArcade(); return; }
     if(kind === 'bub' && SC.bub[k]){ chatLS('bubble', k); chatRenderArcade(); return; }
     if(scBal() < it.price){ toast(`${it.name} costs ${it.price} points — you have ${scBal()}. Swat infiltrators to earn more.`, 2800); return; }
@@ -24732,13 +24885,14 @@
     try{
       const tok = await chatAuth(), me = chatUid(), body = {};
       body[`scores/${me}/s`] = SC.s + it.price; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
-      if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else if(kind === 'bub') body[`inv/${me}/bub/${k}`] = true; else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
+      if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else if(kind === 'bub') body[`inv/${me}/bub/${k}`] = true; else if(kind === 'rx') body[`inv/${me}/rx/${k}`] = (((SC.rx || {})[k] | 0) + 1); else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok) throw new Error('no');
       SC.s += it.price; SC._justBought = k;
-      try{ questEv('buy'); buyPost(kind === 'fx' ? `bought the ${it.name} bullet ${it.em}` : kind === 'bub' ? `bought the ${it.name} chat bubble ${it.em}` : `bought a ${it.name} ${it.em}`); }catch(e){}
+      try{ questEv('buy'); buyPost(kind === 'fx' ? `bought the ${it.name} bullet ${it.em}` : kind === 'bub' ? `bought the ${it.name} chat bubble ${it.em}` : kind === 'rx' ? `stocked up on ${it.name}s ${it.em}` : `bought a ${it.name} ${it.em}`); }catch(e){}
       if(kind === 'bub'){ SC.bub[k] = true; chatLS('bubble', k); toast(`${it.em} ${it.name} bubble unlocked — your messages use it now.`, 3000); }
       else if(kind === 'fx'){ SC.fx[k] = true; chatLS('ammo', k); toast(`${it.em} ${it.name} unlocked — it's your bullet now (switch any time with 1–6 while infiltrating).`, 3200); }
+      else if(kind === 'rx'){ SC.rx = SC.rx || {}; SC.rx[k] = (SC.rx[k] | 0) + 1; toast(`${it.em} ${it.name} bought — you have ${SC.rx[k]}. Throw it from a message's reaction button.`, 2600); }
       else { SC.art[k] = (SC.art[k] | 0) + 1; toast(`${it.em} ${it.name} bought — deploy it from the artillery button when someone infiltrates you.`, 3200); }
     }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
     SC.busy = false; chatRenderArcade(); artUI();
@@ -24759,13 +24913,14 @@
     const el = chatPanel.querySelector('.chat-arcade'); if(!el) return;
     const btn = chatPanel.querySelector('.chat-arc'); if(btn) btn.setAttribute('aria-expanded', String(CHAT.side === 'arcade'));
     el.hidden = CHAT.side !== 'arcade';
+    el.classList.toggle('wide', SC.tab === 'shop');
     if(el.hidden){ el.innerHTML = ''; el._h = ''; el.dataset.fresh = ''; delete el.dataset.bal; delete el.dataset.tabx; return; }
     const cur = ammoNow(), bal = Math.max(0, scBal() - (CAS.held || 0));
     const freshKey = SC.tab + '|' + (SC.tab === 'board' ? !!SC.board : '');
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
     let h = `<div class="arc-head"><div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
-      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests${questUnfinished() ? '<i class="q-dot"></i>' : ''}</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div></div>`;
+      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div></div>`;
     if(SC.tab === 'shop'){
       h += `<div class="chat-who-h">Bullets</div><p class="chat-side-p">Right-click while infiltrating to shoot. Press 1–6 to switch to any you own.</p>`;
       AMMO.forEach((a, i) => {
@@ -24773,8 +24928,13 @@
         h += `<div class="arc-item${on ? ' on' : ''}"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${i + 1} · ${escapeHtml(a.name)}</b><span>${escapeHtml(a.desc)}</span></div>
           <button type="button" class="arc-buy${own ? ' own' : ''}" data-fx="${a.k}" ${on ? 'disabled' : ''}>${on ? 'In use' : own ? 'Use' : a.price + ' pts'}</button></div>`;
       });
+      h += `<div class="chat-who-h" style="margin-top:6px">Chat throws</div><p class="chat-side-p">Use them as often as you like. Click a message's reaction button and pick one: your nearest message (no more than ${THROW_GAP} messages away) throws it, and their message stays splatted — everyone sees it fly. A message only takes one kind: others can pile on more of the same to drown it.</p>`;
+      for(const T of THROWS){
+        const n = (SC.rx || {})[T.k] | 0;
+        h += `<div class="arc-item"><span class="arc-em">${T.em}</span><div class="arc-t"><b>${escapeHtml(T.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(T.desc)}</span></div><button type="button" class="arc-buy" data-rx="${T.k}">${T.price} pts</button></div>`;
+      }
       h += `<div class="chat-who-h" style="margin-top:6px">Halloween</div><p class="chat-side-p">Plant it on someone's screen while you infiltrate them (press Space). It hides there — even if they're offline — until their mouse touches it. Then: bats!</p>`;
-      h += `<div class="arc-item"><span class="arc-em">🎃</span><div class="arc-t"><b>Trick or Treat${SC.tot ? ` · you have ${SC.tot}` : ''}</b><span>Single use, stack as many as you like.</span></div><button type="button" class="arc-buy" data-tot>${TOT_PRICE} pts</button></div>`;
+      h += `<div class="arc-item"><span class="arc-em">🎃</span><div class="arc-t"><b>Trick or Treat${SC.tot ? ` · you have ${SC.tot}` : ''}</b><span>Single use, stack as many as you like.</span></div><button type="button" class="arc-buy" data-tot>${totPrice()} pts</button></div>`;
       const curB = bubNow();
       h += `<div class="chat-who-h" style="margin-top:6px">Chat bubbles</div><p class="chat-side-p">Your messages get their own colour, and everyone sees them arrive with the bubble's entrance. Click a bubble's picture to preview it.</p>`;
       h += `<div class="arc-item${!curB ? ' on' : ''}"><span class="arc-em bub-sw">💬</span><div class="arc-t"><b>Plain</b><span>The normal bubble.</span></div><button type="button" class="arc-buy own" data-bub="" ${!curB ? 'disabled' : ''}>${!curB ? 'In use' : 'Use'}</button></div>`;
@@ -24818,7 +24978,9 @@
     const since = performance.now() - (el._freshAt || -1e9);
     if(since < 900){ let i = 0; for(const c of el.querySelectorAll('.arc-item, .arc-board li, .chat-who-h, .chat-side-p')){ c.classList.add('ani'); c.style.setProperty('--i', i++); if(since > 0) c.style.animationDelay = (i * 40 - 40 - since) + 'ms'; } }
     if(bump){ const b = el.querySelector('.arc-pts b'); if(b) b.classList.add('bump'); }
-    if(SC._justBought){ const it = el.querySelector(`[data-fx="${SC._justBought}"], [data-art="${SC._justBought}"]`); if(it) it.closest('.arc-item').classList.add('bought'); SC._justBought = null; }
+    try{ dockRender(); }catch(e){}
+    try{ winXSync(); setTimeout(winXSync, 320); }catch(e){}
+    if(SC._justBought){ const it = el.querySelector(`[data-fx="${SC._justBought}"], [data-art="${SC._justBought}"], [data-rx="${SC._justBought}"]`); if(it) it.closest('.arc-item').classList.add('bought'); SC._justBought = null; }
   }
   // ----- the splats -----
   const SPLAT = { img: {}, on: null, mine: null };
@@ -25115,10 +25277,27 @@
       b.addEventListener('click', () => { chatReactClose(); chatReact(k, e); });
       m.appendChild(b);
     }
+    { const tm = CHAT.msgs.get(k);
+      if(tm && !chatIsMe(tm.u) && !tm.a && chatName()){
+        const row = document.createElement('div'); row.className = 'crp-throws';
+        const lab = document.createElement('span'); lab.className = 'crp-lab'; lab.textContent = fxKindOf(tm) ? 'Pile on' : 'Throw'; row.appendChild(lab);
+        const lk = fxKindOf(tm);
+        for(const T of THROWS){
+          if(lk && T.k !== lk) continue;
+          const n = (SC.rx || {})[T.k] | 0;
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'crp-throw' + (n ? '' : ' none');
+          b.innerHTML = `<span>${T.em}</span>${n ? `<b>${n}</b>` : ''}`; b.title = (lk ? `Pile on more ${T.name.toLowerCase()}! ` : '') + (n ? `${T.name} — throw it at this message (${n} left)` : `${T.name} — buy them in the Shop (${T.price} pts)`);
+          b.setAttribute('aria-label', 'Throw ' + T.name);
+          b.addEventListener('click', () => { chatReactClose(); chatThrow(k, T.k); });
+          row.appendChild(b);
+        }
+        m.appendChild(row);
+      } }
     chatPanel.appendChild(m); reactPickEl = m;
     const pr = chatPanel.getBoundingClientRect(), r = anchor.getBoundingClientRect();
     m.style.left = Math.max(8, Math.min(pr.width - m.offsetWidth - 8, r.right - pr.left - m.offsetWidth)) + 'px';
     let y = r.top - pr.top - m.offsetHeight - 6; if(y < 50) y = r.bottom - pr.top + 6;
+    y = Math.max(50, Math.min(pr.height - m.offsetHeight - 8, y));
     m.style.top = y + 'px';
     setTimeout(() => { document.addEventListener('pointerdown', chatReactOutside, true); window.addEventListener('keydown', chatReactKey, true); const f = m.querySelector('button'); if(f) f.focus(); }, 0);
   }
@@ -25217,6 +25396,138 @@
     sfxNoiseHit(ac, t, 'bandpass', 3000, 900, 2, 0.09, 0.08);
   }
   // …and landing (each kind its own splat)
+  // ----- chat throws: buy them in the shop (20 points each), throw one at a message from the reaction button -----
+  // Your nearest message (no more than 3 messages, or a screen, away) throws it at theirs:
+  // it flies across and splats, and their message stays covered (still readable).
+  // Saved on their message as fx/<your id> = { k: kind, f: <your message>, t } — the database takes
+  // one of yours for it. Everyone else sees it fly the first time both messages are on their screen.
+  const THROWS = [
+    { k: 'pie', em: '🥧', name: 'Cream pie', desc: 'Splat! Their message gets a face full of cream.' },
+    { k: 'slime', em: '🟢', name: 'Slime ball', desc: 'Green goo oozes all over their message.' },
+    { k: 'snow', em: '❄️', name: 'Snowball', desc: 'Frosts their message over with snow.' },
+    { k: 'paint', em: '🎨', name: 'Paint bomb', desc: 'Bright paint splashes across their message.' },
+    { k: 'glitter', em: '✨', name: 'Glitter bomb', desc: 'Covers their message in sparkly glitter.' },
+    { k: 'ink', em: '🦑', name: 'Ink blob', desc: 'A squid-ink splat lands on their message.' },
+  ];
+  const THROW_GAP = 3;
+  THROWS.forEach(t => { t.price = 20; }); priced(THROWS, 'rx');
+  const throwOf = (k) => THROWS.find(t => t.k === k);
+  // a message takes one kind of throw: whatever landed on it first (more of the same pile on)
+  function fxKindOf(m){ if(!m) return null; if(m.fk && throwOf(m.fk)) return m.fk; let best = null; for(const f of Object.values(m.fx || {})) if(f && throwOf(f.k) && (!best || (f.t || 0) < (best.t || 0))) best = f; return best ? best.k : null; }
+  const FXS = { seen: null, fly: new Set(), pend: new Map(), scanQ: 0 };
+  function fxSeenSet(){ if(!FXS.seen){ let a = []; try{ a = JSON.parse(chatLS('fxseen') || '[]'); }catch(e){} FXS.seen = new Set(Array.isArray(a) ? a : []); } return FXS.seen; }
+  function fxMarkSeen(id){ const S = fxSeenSet(); S.add(id); const a = [...S].slice(-400); FXS.seen = new Set(a); chatLS('fxseen', JSON.stringify(a)); }
+  // the covering on a message (a few splats over the bubble; the words still show through)
+  function fxCover(bub, kind, id, pop){
+    if(!bub || bub.querySelector(`.fx-cover[data-id="${CSS.escape(id)}"]`)) return;
+    bub.classList.add('fx-hit');
+    const c = document.createElement('div'); c.className = 'fx-cover fx-' + kind + (pop ? ' pop' : ''); c.dataset.id = id; c.setAttribute('aria-hidden', 'true');
+    let h = 0; for(let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+    const R = (n) => { h = (h * 1103515245 + 12345) | 0; return ((h >>> 8) % 1000) / 1000 * n; };
+    const kindImg = kind === 'paint' ? 'paint' : kind;
+    for(let i = 0; i < 3; i++){
+      const s = document.createElement('i'); const sz = [58, 46, 38][i] + R(14);
+      s.style.width = s.style.height = sz + 'px';
+      s.style.left = (i === 0 ? 10 + R(30) : i === 1 ? 55 + R(35) : R(90)) + '%';
+      s.style.top = (i === 2 ? 70 + R(30) : R(60)) + '%';
+      s.style.backgroundImage = `url("${splatImg(kindImg, Math.floor(R(5)))}")`;
+      s.style.transform = `translate(-50%,-50%) rotate(${Math.round(R(360))}deg)`;
+      c.appendChild(s);
+    }
+    bub.appendChild(c);
+  }
+  // render: each throw on a message either shows its covering, or waits to fly when both messages are on screen
+  function fxDecorate(m, bub){
+    if(!m || !m._k || !m.fx || typeof m.fx !== 'object') return;
+    const lk = fxKindOf(m); let layer = 0;
+    for(const [uid, f] of Object.entries(m.fx).sort((x, y) => ((x[1] && x[1].t) || 0) - ((y[1] && y[1].t) || 0))){
+      if(!f || f.k !== lk || ++layer > 6) continue;
+      const id = m._k + '|' + uid;
+      if(FXS.fly.has(id)) continue;
+      const src = typeof f.f === 'string' ? CHAT.msgs.get(f.f) : null;
+      if(fxSeenSet().has(id) || !src){ fxCover(bub, f.k, id, false); FXS.pend.delete(id); }
+      else FXS.pend.set(id, { id, tgt: m._k, src: f.f, kind: f.k });
+    }
+  }
+  function fxRowOf(body, k){ return body.querySelector(`.chat-msg[data-k="${CSS.escape(k)}"]`); }
+  function fxScan(){
+    if(FXS.scanQ) return;
+    FXS.scanQ = requestAnimationFrame(() => {
+      FXS.scanQ = 0;
+      if(!CHAT.open || !FXS.pend.size) return;
+      const body = chatPanel.querySelector('.chat-body'); if(!body) return;
+      const V = body.getBoundingClientRect();
+      const inView = (el) => { const r = el.getBoundingClientRect(); return r.bottom > V.top + 6 && r.top < V.bottom - 6; };
+      for(const P of [...FXS.pend.values()]){
+        if(FXS.fly.has(P.id)) continue;
+        const t = fxRowOf(body, P.tgt), s = fxRowOf(body, P.src);
+        if(!t){ continue; }
+        if(!s){ FXS.pend.delete(P.id); fxMarkSeen(P.id); fxCover(t.querySelector('.chat-bub'), P.kind, P.id, false); continue; }
+        if(inView(t) && inView(s)){ FXS.pend.delete(P.id); fxFly(P, s, t); }
+      }
+    });
+  }
+  // the throw: from your message's bubble, in an arc, onto theirs
+  function fxFly(P, srcRow, tgtRow){
+    FXS.fly.add(P.id);
+    const a = (srcRow.querySelector('.chat-bub') || srcRow).getBoundingClientRect(), b = (tgtRow.querySelector('.chat-bub') || tgtRow).getBoundingClientRect();
+    const x0 = a.left + a.width / 2, y0 = a.top + a.height / 2, x1 = b.left + b.width / 2, y1 = b.top + b.height / 2;
+    const T = throwOf(P.kind), el = document.createElement('div'); el.className = 'fx-proj'; el.textContent = T ? T.em : '🥧';
+    document.body.appendChild(el);
+    const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const land = () => {
+      el.remove(); FXS.fly.delete(P.id); fxMarkSeen(P.id);
+      try{ sfxSplat(P.kind === 'paint' ? 'paint' : P.kind); }catch(e){}
+      const body = chatPanel.querySelector('.chat-body'), row = body && fxRowOf(body, P.tgt), bub = row && row.querySelector('.chat-bub');
+      if(!bub) return;
+      fxCover(bub, P.kind, P.id, true);
+      bub.animate([{ transform: 'scale(1)' }, { transform: 'scale(.93) rotate(-1.5deg)' }, { transform: 'scale(1.03)' }, { transform: 'none' }], { duration: 420, easing: 'ease-out' });
+      if(!still){
+        const r = bub.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        for(let i = 0; i < 10; i++){
+          const d = document.createElement('div'); d.className = 'fx-bit fx-' + P.kind; d.style.left = cx + 'px'; d.style.top = cy + 'px'; document.body.appendChild(d);
+          const an = Math.random() * Math.PI * 2, ds = 30 + Math.random() * 60;
+          d.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(an) * ds}px), calc(-50% + ${Math.sin(an) * ds + 20}px)) scale(.3)`, opacity: 0 }], { duration: 520 + Math.random() * 200, easing: 'cubic-bezier(.15,.7,.3,1)', fill: 'forwards' }).onfinish = () => d.remove();
+        }
+      }
+    };
+    if(still){ land(); return; }
+    const lift = Math.min(140, 50 + Math.abs(y1 - y0) * 0.35), dur = 520 + Math.min(500, Math.hypot(x1 - x0, y1 - y0) * 0.9);
+    const kf = []; for(let i = 0; i <= 12; i++){ const u = i / 12, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u - Math.sin(u * Math.PI) * lift; kf.push({ transform: `translate(${x}px, ${y}px) translate(-50%,-50%) rotate(${u * 540}deg) scale(${0.8 + 0.5 * Math.sin(u * Math.PI)})` }); }
+    el.animate(kf, { duration: dur, easing: 'cubic-bezier(.35,.1,.6,1)', fill: 'forwards' }).onfinish = land;
+  }
+  // you throwing one
+  async function chatThrow(k, kind){
+    const T = throwOf(kind), m = CHAT.msgs.get(k); if(!T || !m) return;
+    const why = chatBlock(); if(why){ toast(why, 2400); return; }
+    if(chatIsMe(m.u) || m.a){ toast("You can't throw at that message.", 2000); return; }
+    if(!SC.loaded) await scLoad();
+    if(!((SC.rx || {})[kind] > 0)){ toast(`${T.em} You don't have any ${T.name}s — get them in the Shop (${T.price} points each).`, 3200); SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); else chatRenderArcade(); return; }
+    const me = chatUid();
+    if(m.fx && m.fx[me]){ toast('You already got that message — pick another one!', 2200); return; }
+    { const lk = fxKindOf(m); if(lk && lk !== kind){ const L = throwOf(lk); toast(`That message is already covered in ${L ? L.name.toLowerCase() : lk} — only ${L ? L.em + ' ' + L.name + 's' : 'that'} can pile on.`, 3000); return; } }
+    // your nearest message, close enough to throw from
+    const body = chatPanel.querySelector('.chat-body'); if(!body) return;
+    const items = [...body.children].filter(el => !el.classList.contains('chat-day'));
+    const ti = items.findIndex(el => el.dataset && el.dataset.k === k); if(ti < 0) return;
+    const tr = items[ti].getBoundingClientRect();
+    let best = null;
+    items.forEach((el, i) => {
+      if(!el.classList.contains('chat-msg') || !el.classList.contains('me') || !el.dataset.k || el.dataset.k === k) return;
+      const d = Math.abs(i - ti), px = Math.abs(el.getBoundingClientRect().top - tr.top);
+      if(d <= THROW_GAP || px <= body.clientHeight){ if(!best || d < best.d) best = { k: el.dataset.k, d }; }
+    });
+    if(!best){ toast(`${T.em} Too far away! Send a chat near their message first (within ${THROW_GAP} messages) to bring them closer, then throw.`, 3800); return; }
+    try{
+      const body2 = { [`rooms/${chatRoom()}/messages/${k}/fx/${me}`]: { k: kind, f: best.k, t: bjSv }, [`inv/${me}/rx/${kind}`]: (SC.rx[kind] | 0) - 1 };
+      if(!fxKindOf(m)) body2[`rooms/${chatRoom()}/messages/${k}/fk`] = kind;
+      const ok = await bjPatch(body2);
+      if(!ok) throw new Error('no');
+      SC.rx[kind] = (SC.rx[kind] | 0) - 1;
+      m.fx = Object.assign({}, m.fx, { [me]: { k: kind, f: best.k, t: Date.now() } }); if(!m.fk) m.fk = kind;
+      chatRender();
+    }catch(e){ toast("Couldn't throw it — check your connection and try again.", 2600); await scLoad(); }
+  }
   function sfxSplat(kind){
     if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
     if(kind === 'glitter'){ for(let i = 0; i < 6; i++) sfxTone(ac, t + i * 0.035, 'sine', 2200 + Math.random() * 2200, 2600 + Math.random() * 2000, 0.12, 0.05); sfxNoiseHit(ac, t, 'highpass', 6000, 4000, 1, 0.25, 0.05); return; }
