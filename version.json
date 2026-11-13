@@ -1,6 +1,6 @@
 {
-  "build": 79,
+  "build": 80,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New: unsend your own messages (hover \u2192 \ud83d\uddd1 \u2192 click again). Chat notices (shop buys, masterpieces, gifts, crates) now stay a tidy width in the middle of a widened chat."
+  "notes": "Chat notices now have their icon and text centred too, so they look tidier."
 }

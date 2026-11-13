@@ -894,6 +894,13 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  /* …and their contents centred too */
+  .chat-body > .chat-rwd, .chat-body > .chat-gift, .chat-body > .chat-trick{justify-content:center;text-align:center;}
+  .chat-body > .chat-rwd .cr-t, .chat-body > .chat-gift .cg-t, .chat-body > .chat-trick .ct-t{flex:0 1 auto;}
+  .chat-body > .chat-crate, .chat-body > .chat-jack{justify-content:center;}
+  .chat-body > .chat-crate .ccr-t, .chat-body > .chat-jack .cj-b{flex:0 1 auto;text-align:center;align-items:center;}
+  .chat-body > .chat-cas{text-align:center;align-items:center;}
+
   /* notices in the chat (shop buys, masterpieces, gifts, crates…): a tidy width, centred, however wide the chat is */
   .chat-body > .chat-rwd, .chat-body > .chat-gift, .chat-body > .chat-trick, .chat-body > .chat-crate, .chat-body > .chat-jack, .chat-body > .chat-cas{align-self:center !important;width:100%;max-width:440px;box-sizing:border-box;}
   /* unsend */
@@ -21409,7 +21416,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 79;                 // ← goes up by one with every published version
+  const SD_BUILD = 80;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
