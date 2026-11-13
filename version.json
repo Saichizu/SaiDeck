@@ -1,6 +1,6 @@
 {
-  "build": 67,
+  "build": 68,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Fixed: on Macs, a video in the render no longer freezes \u2014 if the fast video reader gets stuck, SaiDeck switches to a safer way of reading frames automatically."
+  "notes": "New: daily quests (3 a day, 50 points each + 50 bonus for all three), 100 points for every 30 s of video you render, everyone's points in the online list and leaderboard, shop buys and masterpieces in the chat, and SaiDeck asks you to name your session when you add the first track."
 }

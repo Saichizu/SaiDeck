@@ -891,9 +891,44 @@
   .arc-pts b.bump{animation:chatBump .45s cubic-bezier(.2,.9,.3,1.6);display:inline-block;}
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
+
+  /* rewards: masterpiece / shop / quest notices in the chat */
+  .chat-rwd{position:relative;overflow:hidden;align-self:stretch;display:flex;align-items:center;gap:10px;margin:2px 0;padding:9px 12px;border-radius:12px;font-size:12.5px;color:var(--text);flex-shrink:0;
+    background:linear-gradient(135deg,rgba(120,170,255,.14),rgba(180,140,255,.14));border:1px solid rgba(150,170,255,.4);}
+  .chat-rwd .cr-i{font-size:20px;flex:none;} .chat-rwd .cr-t{flex:1;min-width:0;line-height:1.4;position:relative;}
+  .chat-rwd i{margin-left:6px;font-style:normal;font-size:10.5px;color:var(--text-faint);}
+  .chat-rwd .cr-p{color:#f5d04a;white-space:nowrap;}
+  .chat-rwd.mstr{background:linear-gradient(135deg,rgba(255,196,80,.2),rgba(255,90,170,.16) 55%,rgba(110,90,255,.2));border:1px solid rgba(255,206,110,.65);box-shadow:0 0 18px rgba(255,190,90,.15);}
+  .chat-rwd.mstr .cr-p{font-weight:900;text-shadow:0 0 10px rgba(255,210,90,.6);}
+  .chat-rwd.mstr .cr-shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-100%);animation:crShine 3.2s ease-in-out infinite;pointer-events:none;}
+  @keyframes crShine{0%,55%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+  .chat-rwd.buy{background:linear-gradient(135deg,rgba(53,208,184,.14),rgba(120,170,255,.12));border-color:rgba(80,220,200,.45);}
+  .chat-rwd.quest{background:linear-gradient(135deg,rgba(245,208,74,.16),rgba(125,255,178,.12));border-color:rgba(245,208,74,.55);}
+  .chat-rwd.to-me{box-shadow:0 0 0 1px rgba(255,255,255,.18), 0 0 16px rgba(255,210,120,.18);}
+  .chat-rwd.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
+  .chat-who-pts{flex:none;font:800 10.5px 'Inter',sans-serif;color:#f5d04a;background:rgba(245,208,74,.1);border:1px solid rgba(245,208,74,.3);border-radius:999px;padding:1px 7px;white-space:nowrap;}
+  .arc-board li .arc-now{flex:none;font:700 10.5px 'Inter',sans-serif;color:#f5e3a0;opacity:.85;}
+  .arc-tabs .q-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff5d7a;margin-left:4px;vertical-align:2px;box-shadow:0 0 6px #ff5d7a;}
+  .arc-item.quest .arc-t span:last-child{font-size:10.5px;color:var(--text-faint);}
+  .q-bar{display:block;height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:5px 0 3px;}
+  .q-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7d8cff,#f5d04a);transition:width .5s;}
+  .q-bar.big{height:9px;margin:2px 2px 8px;}
+  .arc-item.quest .q-pts{flex:none;font:800 12px 'Inter',sans-serif;color:#f5d04a;padding:4px 8px;border-radius:8px;background:rgba(245,208,74,.1);}
+  .arc-item.quest.done{opacity:.75;} .arc-item.quest.done .q-bar i{background:#7dffb2;} .arc-item.quest.done .q-pts{color:#7dffb2;background:rgba(125,255,178,.1);}
+  .arc-item.quest.bonus{border:1px dashed rgba(245,208,74,.4);}
+  .rwd-pop{position:fixed;left:50%;top:22%;transform:translate(-50%,-50%);z-index:2147483600;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 26px;border-radius:18px;
+    background:linear-gradient(135deg,rgba(40,24,70,.94),rgba(70,30,60,.94));border:1px solid rgba(255,214,120,.7);box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(255,190,90,.35);animation:rwdIn .55s cubic-bezier(.2,.9,.3,1.4) both;}
+  .rwd-pop b{font:900 20px 'Inter',sans-serif;color:#ffe08a;text-shadow:0 0 14px rgba(255,200,90,.7);position:relative;}
+  .rwd-pop span{font:600 12px 'Inter',sans-serif;color:#e9ddff;position:relative;}
+  .rwd-pop .rwd-glow{position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,200,90,.35),transparent);z-index:-1;}
+  .rwd-pop > i{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;background:#ffd76a;box-shadow:0 0 8px #ffd76a;animation:rwdSpark .9s ease-out both;}
+  .rwd-pop > i:nth-of-type(3n){background:#ff8ad0;box-shadow:0 0 8px #ff8ad0;} .rwd-pop > i:nth-of-type(3n+1){background:#9ad8ff;box-shadow:0 0 8px #9ad8ff;}
+  @keyframes rwdSpark{0%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(0) scale(1);opacity:1;}100%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--d) * 2.2)) scale(.2);opacity:0;}}
+  @keyframes rwdIn{from{transform:translate(-50%,-50%) scale(.4);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+  .rwd-pop.out{transition:opacity .45s, transform .45s;opacity:0;transform:translate(-50%,-70%) scale(.9);}
   .arc-tabs button{position:relative;z-index:1;transition:color .2s;}
   .arc-tabs button.on{background:transparent;}
-  .arc-tabs::before{content:'';position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px) / 3);border-radius:7px;background:rgba(180,140,255,.25);transition:transform .28s cubic-bezier(.2,.9,.3,1.1);transform:translateX(var(--tab-x, 0));}
+  .arc-tabs::before{content:'';position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px) / 4);border-radius:7px;background:rgba(180,140,255,.25);transition:transform .28s cubic-bezier(.2,.9,.3,1.1);transform:translateX(var(--tab-x, 0));}
   .arc-buy{transition:transform .12s, filter .12s;}
   .arc-buy:active:not(:disabled){transform:scale(.92);}
   .arc-item.bought{animation:chatBought .7s ease-out;}
@@ -8407,6 +8442,22 @@
   }
   async function addFilesInner(fileList){
     ensureCtx();
+    const wasEmpty = !tracks.length;
+    try{ await addFilesInner2(fileList); }
+    finally{ if(wasEmpty && tracks.length && (!sessionName || sessionName === 'Untitled session')) setTimeout(askFirstSessionName, 250); }
+  }
+  // the first track of a new session: name it (it's what the save and the rendered video are called)
+  let askingSessionName = false;
+  async function askFirstSessionName(){
+    if(askingSessionName || document.querySelector('.confirm-overlay')) return;
+    askingSessionName = true;
+    try{
+      const guess = tracks[0] && tracks[0].name ? String(tracks[0].name).slice(0, 60) : '';
+      const name = await askSaveAsName(guess, { title: 'Name this session', text: "Give your project a name — it's what your save and your rendered videos will be called. (You can change it any time by clicking the title.)", ok: 'Name it', cancel: 'Later', placeholder: 'e.g. Summer cover' });
+      if(name && sessionName === 'Untitled session'){ sessionName = name.slice(0, 80); updateSessionTitleUI(); scheduleHistoryCheck(0); toast(`Session named “${sessionName}”.`, 1800); }
+    } finally { askingSessionName = false; }
+  }
+  async function addFilesInner2(fileList){
     const files = Array.from(fileList).filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|flac|aac|webm)$/i.test(f.name));
     for(const file of files){
       try{
@@ -12592,23 +12643,25 @@
     }
     return `${base}(${n})`;
   }
-  function askSaveAsName(suggested){
+  function askSaveAsName(suggested, opt){
+    opt = opt || {};
     return new Promise(resolve => {
       const ov = document.createElement('div');
       ov.className = 'confirm-overlay';
       ov.innerHTML = `
         <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="saTitle">
           <div class="confirm-icon"><svg viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM6 5h9v4H6z"/></svg></div>
-          <div class="confirm-title" id="saTitle">Save as a new version</div>
-          <div class="confirm-text">Name the copy. "${escapeHtml(sessionName)}" stays as it was saved; you'll carry on working in the new one.</div>
+          <div class="confirm-title" id="saTitle">${opt.title || 'Save as a new version'}</div>
+          <div class="confirm-text">${opt.text || `Name the copy. "${escapeHtml(sessionName)}" stays as it was saved; you'll carry on working in the new one.`}</div>
           <input class="confirm-input" type="text" maxlength="80" spellcheck="false">
           <div class="confirm-actions">
-            <button type="button" class="cf-cancel">Cancel</button>
-            <button type="button" class="cf-primary">Save</button>
+            <button type="button" class="cf-cancel">${opt.cancel || 'Cancel'}</button>
+            <button type="button" class="cf-primary">${opt.ok || 'Save'}</button>
           </div>
         </div>`;
       const input = ov.querySelector('.confirm-input');
       input.value = suggested;
+      if(opt.placeholder) input.placeholder = opt.placeholder;
       const done = (v) => { window.removeEventListener('keydown', onKey, true); ov.remove(); resolve(v); };
       const ok = () => { const v = input.value.trim(); if(!v){ input.focus(); return; } done(v); };
       const onKey = (e) => {
@@ -18245,6 +18298,7 @@
     };
     // Offer it immediately too, same as clicking Save.
     renderDownloadBtn.onclick();
+    try{ renderReward(st.rangeEnd - st.rangeStart); }catch(e){}
 
     renderCloseBtn.onclick = () => {
       renderOverlay.classList.remove('open');
@@ -21172,7 +21226,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 67;                 // ← goes up by one with every published version
+  const SD_BUILD = 68;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22183,6 +22237,18 @@
         if(fresh(m._k)) ev.classList.add('in');
         body.appendChild(ev); continue;
       }
+      if(m.e === 'mstr' || m.e === 'buy' || m.e === 'quest'){
+        const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
+        const me2 = chatIsMe(m.u), txt = chatMask(String(m.m || '')), pm = /\s*(\+\d+ (?:Points|bonus))$/i.exec(txt);
+        const ev = document.createElement('div'); ev.className = 'chat-rwd ' + m.e + (me2 ? ' to-me' : '');
+        ev.innerHTML = `${m.e === 'mstr' ? '<div class="cr-shine"></div>' : ''}<span class="cr-i" aria-hidden="true">${m.e === 'mstr' ? '🎬' : m.e === 'buy' ? '🛍️' : '🏆'}</span><div class="cr-t"><b class="cr-n"></b> <span class="cr-m"></span> <b class="cr-p"></b><i></i></div>`;
+        ev.querySelector('.cr-n').textContent = me2 ? 'You' : (chatBadName(m.n) ? 'someone' : m.n); if(!me2) ev.querySelector('.cr-n').style.color = chatColor(m.n);
+        ev.querySelector('.cr-m').textContent = pm ? txt.slice(0, pm.index) : txt;
+        ev.querySelector('.cr-p').textContent = pm ? pm[1] : '';
+        ev.querySelector('i').textContent = chatFmtTime(m.t);
+        if(fresh(m._k)) ev.classList.add('in');
+        body.appendChild(ev); continue;
+      }
       if(m.e === 'trick'){
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const by = String(m.m || '').replace(/^got tricked by /, ''), mine = typeof m.v === 'string' && chatIsMe(m.v), meV = chatIsMe(m.u);
@@ -22659,6 +22725,7 @@
       const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ e, n: chatName().slice(0, CHAT_NAME_MAX), u: chatUid(), t: { '.sv': 'timestamp' } }) });
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
       toast(`${POKE_EMO[e]} sent to ${name}.`, 1600);
+      try{ questEv('poke'); questEv('react', uid); }catch(e3){}
       try{ sfxPoke(POKE_EMO[e], 0.45); }catch(e2){}
     }catch(err){ console.error(err); CHAT.lastPoke = 0; toast(chatBlock() || "Couldn't send it — check your internet connection.", 2600); }
   }
@@ -22755,6 +22822,7 @@
       try{ const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(uid)}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body }); if(r.ok){ slot = s; break; } }catch(e){}
     }
     if(!slot){ toast(chatBlock() || `Couldn't get in — ${name}'s screen already has 3 infiltrators (or they just switched it off).`, 3000); return; }
+    try{ questEv('infil', uid); }catch(e){}
     const el = infAvatar(chatUid(), chatName(), 'me'); document.body.appendChild(el);
     INF.me = { uid, name, slot, el, px: x0, py: y0, mx: x0, my: y0, ang: 0, sp: 0, lastMove: performance.now(), lastSend: 0, busy: false, dirty: false };
     document.body.classList.add('infil-mode');
@@ -23199,7 +23267,7 @@
       body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false };
       const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); toast(r.status === 401 ? 'Slow down a little — one spin every few seconds.' : "Couldn't spin — check your connection.", 2400); return; }
-      SC.s += bet;
+      SC.s += bet; try{ questEv('spin'); }catch(e){}
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
@@ -23618,6 +23686,7 @@
       const net = res.amt - S.b;
       BJ.res[S.r] = res;
       if(BJ.sess){ BJ.sess.hands++; BJ.sess.bet += S.b; BJ.sess.won += res.amt; }
+      try{ questEv('bj'); if(res.amt > S.b) questEv('bjwin'); }catch(e){}
       if(Date.now() - BJ.joinedAt > 1500){
         toast(net > 0 ? `🃏 ${res.lbl} — you won ${net} points!` : net === 0 ? `🃏 Push — you got your ${S.b} back.` : `🃏 ${res.lbl} — you lost ${S.b}.`, 2600);
         sfxSlotResult(net > 0 ? (res.amt >= S.b * 2.5 ? 12 : 2) : net === 0 ? 1 : 0, 0.8);
@@ -24030,7 +24099,7 @@
       if(!chatBlock()) ok = await bjPatch(Object.assign({ [`rooms/${chatRoom()}/messages/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: note, t: bjSv, u: me, e: 'gift', v: uid } }, b2)).catch(() => null);
       if(!ok) ok = await bjPatch(b2).catch(() => null);
     }
-    if(ok){ SC.s += amt; gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
+    if(ok){ SC.s += amt; try{ questEv('gift'); }catch(e){} gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
     else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
   }
   // points people sent you: a popup to accept or decline each one (checked when the chat starts, then every 20 s).
@@ -24188,10 +24257,196 @@
       const me = chatUid(), ok = await bjPatch({ [`scores/${me}/s`]: SC.s + TOT_PRICE, [`scores/${me}/t`]: bjSv, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`inv/${me}/tot`]: (SC.tot | 0) + 1 });
       if(!ok) throw new Error('no');
       SC.s += TOT_PRICE; SC.tot = (SC.tot | 0) + 1; SC._justBought = 'tot';
+      try{ questEv('buy'); buyPost('bought a Trick or Treat 🎃'); }catch(e){}
       toast(`🎃 Trick or Treat bought — you have ${SC.tot}. Press Space while infiltrating someone to plant one.`, 3200); sfxChip();
     }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
     SC.busy = false; chatRenderArcade(); infHud();
   }
+  // ----- rewards: points for rendering, and three daily quests -----
+  // Every 30 s of video you render (added up across renders) earns 100 points
+  // (rewards/<you>/r counts them; the database checks each claim adds exactly
+  // 100 per reward and that they're at least 10 s apart). Every day everyone
+  // gets the same 3 quests from the list below: 50 points each, and 50 more
+  // for finishing all three (rewards/<you>/q, reset each day).
+  const RWD_SEC = 30, RWD_PTS = 100, QUEST_PTS = 50;
+  const RWD = { busy: false, chain: Promise.resolve(), q: null, qAt: 0, retry: 0 };
+  const rwdLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem('sd.rwd.' + k); localStorage.setItem('sd.rwd.' + k, String(v)); }catch(e){ return null; } };
+  const rwdNow = () => Date.now() + (PRES.offset || 0);
+  const rwdDay = () => { const n = rwdNow(); return n - (n + 28800000) % 86400000; };      // (a new day at midnight, UTC+8)
+  const MSTR_LINES = ['finished a masterpiece', 'just dropped a banger', 'rendered pure art', 'cooked up something legendary', 'just made movie magic',
+    'delivered another hit', 'finished an epic edit', 'rendered a work of art', 'created something iconic', 'just premiered a blockbuster', 'made a cinematic gem', 'rendered a certified classic'];
+  function renderReward(sec){
+    if(!(sec > 0.5)) return;
+    try{ questEv('render', null, Math.round(sec)); }catch(e){}
+    let acc = (Number(rwdLS('acc')) || 0) + sec;
+    const n = Math.floor(acc / RWD_SEC + 1e-6); acc = Math.max(0, acc - n * RWD_SEC);
+    rwdLS('acc', acc.toFixed(2));
+    if(n > 0){ rwdLS('pend', (Number(rwdLS('pend')) || 0) + n); rwdClaimRender(); }
+    else setTimeout(() => toast(`🎬 ${Math.ceil(RWD_SEC - acc)} more seconds of rendering until your next +${RWD_PTS} points.`, 3000), 1200);
+  }
+  async function rwdClaimRender(){
+    if(RWD.busy) return;
+    let pend = Number(rwdLS('pend')) || 0; if(pend <= 0) return;
+    if(!chatName()){ toast(`🎬 You've earned ${pend * RWD_PTS} points for rendering! Open the chat and pick a name to collect them.`, 4200); return; }
+    if(chatBanned(chatUid())) return;
+    RWD.busy = true; clearTimeout(RWD.retry);
+    let wait = 0;
+    try{
+      const tok = await chatAuth(), me = chatUid();
+      await scLoad();
+      const g = await fetch(`${CHAT_DB}/rewards/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`);
+      const d = g.ok ? await g.json() : null;
+      const r0 = (d && d.r) | 0, rt0 = d && typeof d.rt === 'number' ? d.rt : 0;
+      let k = Math.min(pend, 10);
+      if(rt0){ const can = Math.floor((rwdNow() - rt0 - 1500) / 10000); if(can < k) k = can; }
+      if(k < 1){ wait = Math.max(3000, rt0 + 11500 - rwdNow()); }
+      else {
+        const nm = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
+        const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + k * RWD_PTS, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/r`]: r0 + k, [`rewards/${me}/rt`]: bjSv });
+        if(!ok) throw new Error('no');
+        SC.p += k * RWD_PTS; pend -= k; rwdLS('pend', pend);
+        const pts = k * RWD_PTS;
+        rwdCelebrate(`🎬 Masterpiece! +${pts} points`, `${scBal()} points to spend`);
+        try{ sfxChip(); }catch(e){}
+        rwdPost('mstr', `${MSTR_LINES[Math.floor(Math.random() * MSTR_LINES.length)]} +${pts} Points`);
+        chatRenderArcade(); artUI();
+        if(pend > 0) wait = Math.min(pend, 10) * 10000 + 2000;
+      }
+    }catch(e){ wait = 30000; }
+    RWD.busy = false;
+    if(wait) RWD.retry = setTimeout(rwdClaimRender, wait);
+  }
+  // a notice in the chat (masterpieces, shop buys, quests) — best effort
+  async function rwdPost(e, txt){
+    if(!chatName() || chatBlock()) return;
+    try{
+      const tok = await chatAuth();
+      await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: String(txt).slice(0, Math.min(50, chatMaxLen())), t: bjSv, u: chatUid(), e }) });
+    }catch(err){}
+  }
+  // a big golden "+points" moment
+  function rwdCelebrate(title, sub){
+    const c = document.createElement('div'); c.className = 'rwd-pop'; c.setAttribute('role', 'status');
+    c.innerHTML = '<div class="rwd-glow"></div><b></b><span></span>';
+    c.querySelector('b').textContent = title; c.querySelector('span').textContent = sub || '';
+    for(let i = 0; i < 18; i++){ const s = document.createElement('i'); s.style.setProperty('--a', (i / 18 * 360) + 'deg'); s.style.setProperty('--d', (60 + (i * 37) % 70) + 'px'); s.style.animationDelay = (i % 5) * 40 + 'ms'; c.appendChild(s); }
+    document.body.appendChild(c);
+    setTimeout(() => { c.classList.add('out'); setTimeout(() => c.remove(), 500); }, 3200);
+  }
+
+  // ----- daily quests -----
+  const QUESTS = [
+    { k: 'shoot', n: 5, em: '🔫', t: 'Shoot 5 times while infiltrating someone' },
+    { k: 'bj', n: 5, em: '🃏', t: 'Play 5 hands of blackjack' },
+    { k: 'spin', n: 10, em: '🎰', t: 'Spin the slots 10 times' },
+    { k: 'react', n: 3, em: '😄', t: 'Send reactions to 3 different people', u: true },
+    { k: 'chat', n: 10, em: '💬', t: 'Send 10 chat messages' },
+    { k: 'infil', n: 2, em: '🕵️', t: 'Infiltrate 2 different people', u: true },
+    { k: 'swat', n: 1, em: '💥', t: 'Swat an infiltrator off your screen' },
+    { k: 'render', n: 60, em: '🎬', t: 'Render 60 seconds of video' },
+    { k: 'gift', n: 1, em: '💸', t: 'Send points to a friend' },
+    { k: 'bjwin', n: 3, em: '🏆', t: 'Win 3 hands of blackjack' },
+    { k: 'buy', n: 1, em: '🛍️', t: 'Buy something from the shop' },
+    { k: 'poke', n: 5, em: '👉', t: 'Send 5 emoji pokes' },
+  ];
+  const Q_SLOTS = ['a', 'b', 'c'];
+  // today's three: the same for everyone (picked from the day's number)
+  function questToday(){
+    const day = rwdDay(), dn = Math.round((day + 28800000) / 86400000), idx = QUESTS.map((q, i) => i);
+    let seed = (dn * 2654435761) >>> 0;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for(let i = idx.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    return { day, list: idx.slice(0, 3).map(i => QUESTS[i]) };
+  }
+  function questState(){
+    const day = rwdDay();
+    let S = null; try{ S = JSON.parse(rwdLS('q') || 'null'); }catch(e){}
+    if(!S || S.d !== day) S = { d: day, c: {}, u: {}, done: {} };
+    return S;
+  }
+  function questSave(S){ rwdLS('q', JSON.stringify(S)); }
+  function questUnfinished(){ const S = questState(); return !S.done.x; }
+  // something happened that a quest might count
+  function questEv(k, who, amt){
+    const T = questToday(), i = T.list.findIndex(q => q.k === k); if(i < 0) return;
+    const q = T.list[i], S = questState();
+    if(q.u){ if(!who) return; const L = S.u[k] = S.u[k] || []; if(L.includes(who)) return; L.push(who); S.c[k] = L.length; }
+    else S.c[k] = (S.c[k] || 0) + (amt || 1);
+    questSave(S);
+    if(S.c[k] >= q.n && !S.done[Q_SLOTS[i]]) questClaim();
+    else if(CHAT.side === 'arcade' && SC.tab === 'quests') chatRenderArcade();
+  }
+  // collect whatever's finished and not yet paid (one at a time)
+  function questClaim(){ RWD.chain = RWD.chain.then(questClaimNow).catch(() => {}); return RWD.chain; }
+  async function questClaimNow(){
+    if(!chatName() || chatBanned(chatUid())) return;
+    const T = questToday(), S = questState();
+    const want = Q_SLOTS.filter((s, i) => !S.done[s] && (S.c[T.list[i].k] || 0) >= T.list[i].n);
+    const allDone = Q_SLOTS.every((s, i) => S.done[s] || (S.c[T.list[i].k] || 0) >= T.list[i].n);
+    if(!want.length && !(allDone && !S.done.x)) return;
+    const tok = await chatAuth(), me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
+    // the database's record of today (started fresh each day)
+    let q = null;
+    try{ const g = await fetch(`${CHAT_DB}/rewards/${encodeURIComponent(me)}/q.json?auth=${encodeURIComponent(tok)}`); q = g.ok ? await g.json() : null; }catch(e){ return; }
+    if(!q || q.d !== T.day){
+      const r = await fetch(`${CHAT_DB}/rewards/${encodeURIComponent(me)}/q.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ d: T.day }) }).catch(() => null);
+      if(!r || !r.ok) return;
+      q = { d: T.day };
+    }
+    for(const s of Q_SLOTS) if(q[s] === true) S.done[s] = true;
+    if(q.x === true) S.done.x = true;
+    for(const s of [...want, 'x']){
+      if(S.done[s]) continue;
+      if(s === 'x' && !Q_SLOTS.every(z => S.done[z])) continue;
+      await scLoad();
+      const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + QUEST_PTS, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/q/${s}`]: true }).catch(() => null);
+      if(!ok) break;
+      SC.p += QUEST_PTS; S.done[s] = true; questSave(S);
+      try{ sfxChip(); }catch(e){}
+      if(s === 'x'){ rwdCelebrate(`🏆 All daily quests done! +${QUEST_PTS} bonus`, 'New quests tomorrow'); rwdPost('quest', `finished all of today's quests +${QUEST_PTS} bonus`); }
+      else { const qq = T.list[Q_SLOTS.indexOf(s)]; rwdCelebrate(`${qq.em} Quest complete! +${QUEST_PTS}`, qq.t); }
+      await new Promise(r => setTimeout(r, 1400));
+    }
+    questSave(S); chatRenderArcade(); artUI();
+  }
+  function questHtml(){
+    const T = questToday(), S = questState();
+    const left = 86400000 - (rwdNow() - T.day), hh = Math.floor(left / 3600000), mm = Math.floor(left % 3600000 / 60000);
+    let h = `<div class="chat-who-h">Today's quests</div><p class="chat-side-p">Everyone gets the same three each day. ${QUEST_PTS} points each — and ${QUEST_PTS} more for finishing all three. New ones in ${hh}h ${mm}m.</p>`;
+    T.list.forEach((q, i) => {
+      const c = Math.min(q.n, S.c[q.k] || 0), done = !!S.done[Q_SLOTS[i]], full = c >= q.n;
+      h += `<div class="arc-item quest${done ? ' done' : ''}"><span class="arc-em">${done ? '✅' : q.em}</span><div class="arc-t"><b>${escapeHtml(q.t)}</b>
+        <span class="q-bar"><i style="width:${(c / q.n * 100).toFixed(1)}%"></i></span><span>${q.k === 'render' ? `${c} / ${q.n} s` : `${c} / ${q.n}`}</span></div>
+        <span class="q-pts">${done ? 'Done' : full ? '…' : '+' + QUEST_PTS}</span></div>`;
+    });
+    const nDone = Q_SLOTS.filter(s => S.done[s]).length;
+    h += `<div class="arc-item quest bonus${S.done.x ? ' done' : ''}"><span class="arc-em">${S.done.x ? '🏆' : '🎁'}</span><div class="arc-t"><b>Finish all three</b><span class="q-bar"><i style="width:${(nDone / 3 * 100).toFixed(1)}%"></i></span><span>${nDone} / 3</span></div><span class="q-pts">${S.done.x ? 'Done' : '+' + QUEST_PTS}</span></div>`;
+    const acc = Number(rwdLS('acc')) || 0;
+    h += `<div class="chat-who-h" style="margin-top:6px">Render rewards</div><p class="chat-side-p">Every ${RWD_SEC} seconds of video you render earns ${RWD_PTS} points (it adds up across renders). ${Math.ceil(RWD_SEC - acc)} s to go until the next.</p>
+      <div class="q-bar big"><i style="width:${(acc / RWD_SEC * 100).toFixed(1)}%"></i></div>`;
+    return h;
+  }
+
+  // ----- everyone's points right now (the online list and the leaderboard) -----
+  const SCALL = { m: null, at: 0, busy: false };
+  async function scAllLoad(force){
+    if(SCALL.busy || (!force && SCALL.m && Date.now() - SCALL.at < 30000)) return;
+    SCALL.busy = true;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`);
+      const d = r.ok ? await r.json() : null;
+      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
+    }catch(e){}
+    SCALL.at = Date.now(); SCALL.busy = false;
+    presRender(); if(CHAT.side === 'arcade' && SC.tab === 'board') chatRenderArcade();
+  }
+  function scOf(uid){
+    if(chatIsMe(uid) && SC.loaded) return Math.max(0, scBal());
+    return SCALL.m && SCALL.m[uid] ? SCALL.m[uid].b : null;
+  }
+  // ----- the shop: everyone sees what you bought -----
+  function buyPost(txt){ rwdPost('buy', txt); }
   async function totPlant(){
     const M = INF.me; if(!M) return;
     if(!SC.loaded) await scLoad();
@@ -24459,7 +24714,7 @@
       const body = {}; body[`pokes/${victim}/zs`] = { u: me, n: nm, t: sv };
       body[`scores/${me}`] = { n: nm, p: SC.p + SWAT_PTS, s: SC.s, v: victim, t: sv };
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-      if(r.ok){ ok = true; SC.p += SWAT_PTS; }
+      if(r.ok){ ok = true; SC.p += SWAT_PTS; try{ questEv('swat'); }catch(e){} }
       else { SC.loaded = false; setTimeout(scLoad, 1200); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(victim)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: me, n: nm, t: sv }) }); }
     }catch(e){}
     toast(`${how || 'You swatted'} ${vname} out!` + (ok ? `  +${SWAT_PTS} points · ${scBal()} to spend` : ''), 2200);
@@ -24480,6 +24735,7 @@
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok) throw new Error('no');
       SC.s += it.price; SC._justBought = k;
+      try{ questEv('buy'); buyPost(kind === 'fx' ? `bought the ${it.name} bullet ${it.em}` : kind === 'bub' ? `bought the ${it.name} chat bubble ${it.em}` : `bought a ${it.name} ${it.em}`); }catch(e){}
       if(kind === 'bub'){ SC.bub[k] = true; chatLS('bubble', k); toast(`${it.em} ${it.name} bubble unlocked — your messages use it now.`, 3000); }
       else if(kind === 'fx'){ SC.fx[k] = true; chatLS('ammo', k); toast(`${it.em} ${it.name} unlocked — it's your bullet now (switch any time with 1–6 while infiltrating).`, 3200); }
       else { SC.art[k] = (SC.art[k] | 0) + 1; toast(`${it.em} ${it.name} bought — deploy it from the artillery button when someone infiltrates you.`, 3200); }
@@ -24508,7 +24764,7 @@
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
     let h = `<div class="arc-top"><div class="arc-pts"><b>${SC.loaded ? bal : '…'}</b><span>points to spend</span></div><div class="arc-earned">${SC.p} earned all-time</div></div>
-      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div>`;
+      <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests${questUnfinished() ? '<i class="q-dot"></i>' : ''}</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div>`;
     if(SC.tab === 'shop'){
       h += `<div class="chat-who-h">Bullets</div><p class="chat-side-p">Right-click while infiltrating to shoot. Press 1–6 to switch to any you own.</p>`;
       AMMO.forEach((a, i) => {
@@ -24532,6 +24788,8 @@
         h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(a.desc)}</span></div>
           <button type="button" class="arc-buy" data-art="${a.k}">${a.price} pts</button></div>`;
       }
+    } else if(SC.tab === 'quests'){
+      h += questHtml();
     } else if(SC.tab === 'casino'){
       const here = Object.values(CAS.seats).filter(casSeatLive);
       h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
@@ -24544,14 +24802,15 @@
       const B = SC.board;
       if(!B){ h += `<p class="chat-side-p">Loading…</p>`; scBoard(); }
       else if(!B.length) h += `<p class="chat-side-p">Nobody has swatted anyone yet. Be the first!</p>`;
-      else { h += `<ol class="arc-board">` + B.map((x, i) => `<li class="${x.u === chatUid() ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><span>${x.p}</span></li>`).join('') + `</ol>`;
+      else { h += `<ol class="arc-board">` + B.map((x, i) => `<li class="${x.u === chatUid() ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><small class="arc-now" title="Points they have right now">${scOf(x.u) != null ? '🪙 ' + scOf(x.u).toLocaleString() : ''}</small><span title="Earned all-time">${x.p.toLocaleString()}</span></li>`).join('') + `</ol>`;
+        if(Date.now() - SCALL.at > 30000) scAllLoad();
         if(Date.now() - SC.boardAt > 20000) scBoard(); }
-      h += `<p class="chat-side-p">Points come from swatting infiltrators — by clicking them or with artillery.</p>`;
+      h += `<p class="chat-side-p">Ranked by points earned all-time; 🪙 is what each person has to spend right now. Points come from swatting infiltrators, games, daily quests and rendering videos.</p>`;
     }
     if(el._h === h && !isFresh) return;      // (nothing changed: leave it, so animations play out)
     el._h = h;
     el.innerHTML = h;
-    { const tb = el.querySelector('.arc-tabs'), x = SC.tab === 'board' ? '100%' : SC.tab === 'casino' ? '200%' : '0px';
+    { const tb = el.querySelector('.arc-tabs'), x = SC.tab === 'quests' ? '100%' : SC.tab === 'board' ? '200%' : SC.tab === 'casino' ? '300%' : '0px';
       if(el.dataset.tabx && el.dataset.tabx !== x){ tb.style.setProperty('--tab-x', el.dataset.tabx); void tb.offsetWidth; }
       tb.style.setProperty('--tab-x', x); el.dataset.tabx = x; }
     if(isFresh) el._freshAt = performance.now();
@@ -24648,6 +24907,7 @@
     const f = (v) => Math.round(v * 1000) / 1000;
     M.shots = (M.shots || []).concat([[M.shotN, AMMO.findIndex(a => a.k === kind), f(x0 / innerWidth), f(y0 / innerHeight), f(x1 / innerWidth), f(y1 / innerHeight)]]).slice(-4);
     M.dirty = true;
+    try{ questEv('shoot'); }catch(e){}
   }
   function infShotStr(M){ return (M.shots || []).map(s => s.join(',')).join(';'); }
   // their shots arriving on your screen
@@ -24833,6 +25093,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages/${encodeURIComponent(k)}/x/${e}/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`, had ? { method: 'DELETE' } : { method: 'PUT', body: 'true' });
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
+      if(!had && m.u && !chatIsMe(m.u)) try{ questEv('react', m.u); }catch(e2){}
     }catch(err){
       console.error(err);
       if(had){ x[e] = Object.assign({}, x[e], { [me]: true }); } else if(x[e]){ delete x[e][me]; if(!Object.keys(x[e]).length) delete x[e]; }
@@ -25015,6 +25276,7 @@
       if(r.status === 401 || r.status === 403){ toast(chatBlock() || "The chat didn't accept that message.", 3000); CHAT.lastSend = 0; return; }
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
       ta.value = ''; CHAT._scrollDown = true; grow(); chatStopReply();
+      try{ questEv('chat'); }catch(e){}
     }catch(err){ console.error(err); CHAT.lastSend = 0; toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
     finally{ if(send) send.disabled = !ta.value.trim() || !chatCanSend(); if(!ta.disabled) ta.focus(); }
   }
@@ -25086,6 +25348,7 @@
     const w = chatPanel.querySelector('.chat-who');
     if(w && !w.hidden){
       if(!CHAT.peopleAt || Date.now() - CHAT.peopleAt > 60000) chatLoadPeople();
+      if(Date.now() - SCALL.at > 30000) setTimeout(() => scAllLoad(), 0);
       w.innerHTML = '';
       const h = document.createElement('div'); h.className = 'chat-who-h'; h.textContent = on.length ? `Using SaiDeck now · ${on.length}` : 'Nobody else is on right now'; w.appendChild(h);
       const row1 = (uid, n, me, sub, online) => {
@@ -25099,7 +25362,9 @@
           const st = P.h ? ['away', 'in another tab'] : P.w ? ['idle', 'SaiDeck open · idle'] : ['on', 'on SaiDeck'];
           tail.className = 'chat-who-st ' + st[0]; tail.innerHTML = `<i></i>${st[1]}`;
         } else { tail.className = 'chat-who-t'; tail.textContent = sub; }
-        row.append(av, nm, tail);
+        const pts = scOf(uid); let pc = null;
+        if(pts != null){ pc = document.createElement('span'); pc.className = 'chat-who-pts'; pc.title = 'Points ' + (me ? 'you have' : n + ' has') + ' right now'; pc.textContent = '🪙 ' + pts.toLocaleString(); }
+        row.append(av, nm); if(pc) row.appendChild(pc); row.appendChild(tail);
         if(!me && chatName()){ const g = document.createElement('button'); g.type = 'button'; g.className = 'chat-who-gift'; g.title = 'Send ' + n + ' some points'; g.setAttribute('aria-label', 'Send points to ' + n); g.textContent = '💸';
           g.addEventListener('click', (e) => { e.stopPropagation(); gpOpen(uid, n, g); }); row.appendChild(g); }
         w.appendChild(row);
@@ -25150,7 +25415,7 @@
   // Esc closes the panel (when the focus isn't in a box that handles it)
   window.addEventListener('keydown', (e) => { if(e.key === 'Escape' && CHAT.open && !e.defaultPrevented && chatPanel.contains(document.activeElement)){ e.preventDefault(); chatToggle(false); } }, true);
   chatUpdateBadge();
-  setTimeout(() => { chatStartWatching(); if(chatName()){ chatConnect(); presStart(); } }, 1500);
+  setTimeout(() => { chatStartWatching(); if(chatName()){ chatConnect(); presStart(); setTimeout(() => { try{ rwdClaimRender(); questClaim(); }catch(e){} }, 6000); } }, 1500);
 
   // Ask before the tab is closed / reloaded while there's work on screen
   // (tracks loaded, a video added, or a render running). Browsers show
