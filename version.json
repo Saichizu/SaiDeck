@@ -1,6 +1,6 @@
 {
-  "build": 76,
+  "build": 77,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The blackjack Dealer bot has a voice now: robot babble when it talks, and a mocking laugh when it gloats (turn off with Game sounds)."
+  "notes": "New: Rock Paper Scissors battles for points (click someone's picture), an emoji picker with search, drag the chat's left edge to make it wider, everyone's points beside the time on messages, and easier-to-read bought chat bubbles."
 }
