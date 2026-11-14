@@ -1,6 +1,6 @@
 {
-  "build": 92,
+  "build": 93,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The little helper bots now head back as soon as you press Bet, and they don't hang around the table as long."
+  "notes": "Fixed the +100 update bonus: it works again for every new build, no need to open Chat Admin for it."
 }

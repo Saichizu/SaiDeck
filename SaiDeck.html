@@ -21511,7 +21511,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 92;                 // ← goes up by one with every published version
+  const SD_BUILD = 93;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22968,6 +22968,7 @@
     CHAT.pollCfg = chatPoll('config', (cfg) => {
       const prevPin = CHAT.cfg.pinned && CHAT.cfg.pinned.t, prevRooms = CHAT.cfg.rooms;
       CHAT.cfg = cfg || {};
+      try{ rwdLatestBump(); if(chatName()) rwdUpdateBonus(); }catch(e){}
       // a new pinned announcement pops up once (even with the chat closed)
       const pin = CHAT.cfg.pinned;
       if(pin && pin.m && pin.t && pin.t !== prevPin && String(pin.t) !== chatLS('pinseen')){
@@ -25709,11 +25710,25 @@
   }
   // a thank-you for updating: 100 points the first time each new build runs (the database only allows builds
   // up to the newest one published, once each)
+  // the admin's own SaiDeck tells the database which build is newest as soon as it runs it
+  // (everyone else's attempt is simply refused by the database rules)
+  async function rwdLatestBump(){
+    if(RWD.bumped || !CHAT.cfg || Number(CHAT.cfg.latest || 0) >= SD_BUILD || chatLS('notadmin') === String(SD_BUILD)) return;
+    RWD.bumped = true;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/config/latest.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: String(SD_BUILD) });
+      if(r.ok){ CHAT.cfg.latest = SD_BUILD; if(chatName()) rwdUpdateBonus(); }
+      else chatLS('notadmin', String(SD_BUILD));
+    }catch(e){ RWD.bumped = false; }
+  }
   async function rwdUpdateBonus(){
     if(!chatName() || chatBanned(chatUid()) || RWD.updBusy) return;
     const latest = CHAT.cfg && Number(CHAT.cfg.latest);
-    if(!(latest >= SD_BUILD)) return;
+    // (it has to be the newest build, or one of the two before it)
+    if(!(latest >= SD_BUILD && SD_BUILD >= latest - 2)) return;
     if(Number(rwdLS('ub')) >= SD_BUILD) return;
+    if((RWD.ubTries = (RWD.ubTries || 0) + 1) > 4) return;
     RWD.updBusy = true;
     try{
       const tok = await chatAuth(), me = chatUid();
