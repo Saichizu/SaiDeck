@@ -894,6 +894,8 @@
   @keyframes chatBump{0%{transform:scale(1);}35%{transform:scale(1.35);color:#fff3b0;}100%{transform:scale(1);}}
   .arc-tabs{position:relative;}
 
+  .chat-older{align-self:center;margin:4px 0 6px;padding:3px 12px;border-radius:999px;font:600 10.5px 'Inter',sans-serif;color:var(--text-faint);background:rgba(255,255,255,.04);}
+
   /* the slots jackpot */
   .cas-pot{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin:2px auto 6px;padding:8px 18px;border-radius:14px;
     background:radial-gradient(120% 140% at 50% 0%, rgba(255,215,106,.28), rgba(120,60,10,.25));border:1px solid rgba(255,215,106,.7);box-shadow:0 0 22px rgba(255,190,60,.25), inset 0 0 18px rgba(255,215,106,.15);}
@@ -21464,7 +21466,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 84;                 // ← goes up by one with every published version
+  const SD_BUILD = 86;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22467,6 +22469,27 @@
       if(row) row.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.9)' }], { duration: 200, easing: 'ease-in' }).onfinish = go; else go();
     }catch(e){ toast("Couldn't unsend that — try again.", 2200); }
   }
+  // scrolled to the top: bring in the 100 messages before the oldest one showing (and keep your place)
+  async function chatLoadOlder(){
+    if(CHAT.olderBusy || CHAT.olderDone || !CHAT.ready || !CHAT.order.length) return;
+    const room = chatRoom(), first = CHAT.msgs.get(CHAT.order[0]); if(!first || typeof first.t !== 'number') return;
+    CHAT.olderBusy = true; const tip = chatPanel.querySelector('.chat-older'); if(tip) tip.textContent = 'Loading older messages…';
+    try{
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&endAt=${first.t - 1}&limitToLast=100`, { cache: 'no-store' });
+      const d = r.ok ? await r.json() : null;
+      if(room !== chatRoom()) return;
+      const got = Object.entries(d || {}).filter(([k, m]) => chatValid(m) && !CHAT.msgs.has(k));
+      if(!got.length){ CHAT.olderDone = true; return; }
+      const body = chatPanel.querySelector('.chat-body'), fromBottom = body ? body.scrollHeight - body.scrollTop : 0;
+      CHAT._animSeen = CHAT._animSeen || new Set();
+      for(const [k, m] of got){ m._k = k; CHAT.msgs.set(k, m); CHAT._animSeen.add(k); }
+      CHAT.older = (CHAT.older || 0) + got.length;
+      if(got.length < 100) CHAT.olderDone = true;
+      chatSort(); chatRenderMessages();
+      if(body) body.scrollTop = body.scrollHeight - fromBottom;
+    }catch(e){}
+    finally{ CHAT.olderBusy = false; const t2 = chatPanel.querySelector('.chat-older'); if(t2) t2.textContent = CHAT.olderDone ? 'This is the start of the chat' : '↑ Scroll up for older messages'; }
+  }
   function chatEmojiOnly(t){
     t = String(t || '').trim(); if(!t || t.length > 60) return false;
     if(!/\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]/u.test(t)) return false;
@@ -22704,7 +22727,8 @@
     }
     if(atBottom || CHAT._scrollDown){ body.scrollTop = body.scrollHeight; CHAT._scrollDown = false; }
     chatRenderAlerts();
-    if(!body._fxScroll){ body._fxScroll = true; body.addEventListener('scroll', () => fxScan(), { passive: true }); }
+    if(!body._fxScroll){ body._fxScroll = true; body.addEventListener('scroll', () => { fxScan(); if(body.scrollTop < 120) chatLoadOlder(); }, { passive: true }); }
+    { let tip = body.querySelector('.chat-older'); if(CHAT.ready && CHAT.order.length){ if(!tip){ tip = document.createElement('div'); tip.className = 'chat-older'; body.prepend(tip); } tip.textContent = CHAT.olderBusy ? 'Loading older messages…' : CHAT.olderDone ? 'This is the start of the chat' : '↑ Scroll up for older messages'; } }
     fxScan();
     for(const [row, bk, mine] of fxQ){ const b = row.querySelector('.chat-bub'); if(b){ b.style.opacity = '0'; requestAnimationFrame(() => { b.style.opacity = ''; chatBubbleFx(b, bk, mine); }); } }
   }
@@ -22804,8 +22828,8 @@
   });
   chatGrip.addEventListener('dblclick', () => { chatLS('width', null); document.documentElement.style.removeProperty('--chat-w'); });
   // ----- live connection -----
-  function chatDisconnect(){ if(CHAT.es){ CHAT.es.close(); CHAT.es = null; } clearTimeout(CHAT.retryT); CHAT.msgs.clear(); CHAT.order = []; CHAT.ready = false; CHAT.status = 'off'; CHAT.unread = 0; chatUpdateBadge(); }
-  function chatSort(){ CHAT.order = [...CHAT.msgs.keys()].sort((a, b) => (CHAT.msgs.get(a).t - CHAT.msgs.get(b).t) || (a < b ? -1 : 1)); if(CHAT.order.length > 200){ for(const k of CHAT.order.slice(0, CHAT.order.length - 200)) CHAT.msgs.delete(k); CHAT.order = CHAT.order.slice(-200); } }
+  function chatDisconnect(){ CHAT.older = 0; CHAT.olderDone = false; CHAT.olderBusy = false; if(CHAT.es){ CHAT.es.close(); CHAT.es = null; } clearTimeout(CHAT.retryT); CHAT.msgs.clear(); CHAT.order = []; CHAT.ready = false; CHAT.status = 'off'; CHAT.unread = 0; chatUpdateBadge(); }
+  function chatSort(){ CHAT.order = [...CHAT.msgs.keys()].sort((a, b) => (CHAT.msgs.get(a).t - CHAT.msgs.get(b).t) || (a < b ? -1 : 1)); const cap = 200 + (CHAT.older || 0); if(CHAT.order.length > cap){ for(const k of CHAT.order.slice(0, CHAT.order.length - cap)) CHAT.msgs.delete(k); CHAT.order = CHAT.order.slice(-cap); } }
   function chatValid(m){ return m && typeof m.n === 'string' && typeof m.m === 'string' && typeof m.t === 'number'; }
   function chatConnect(){
     chatDisconnect();
@@ -22813,7 +22837,7 @@
     CHAT.room = room;
     CHAT.status = 'connecting'; chatRenderStatus();
     const seen = Number(chatLS('seen:' + room)) || 0;
-    const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22$key%22&limitToLast=100`);
+    const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=200`);      // (newest by time — ids made by SaiDeck itself don't sort by time)
     CHAT.es = es;
     es.addEventListener('open', () => { CHAT.status = 'on'; CHAT.retry = 0; chatRenderStatus(); });
     const apply = (key, m, fresh) => {

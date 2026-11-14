@@ -1,6 +1,6 @@
 {
-  "build": 84,
+  "build": 86,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Crates are now mystery crates: nobody knows what's inside until the first person opens it \u2014 it might be points\u2026 or a jumpscare \ud83c\udf83."
+  "notes": "Scroll up in the chat to load older messages \u2014 keep going and it loads more, all the way back to the start."
 }
