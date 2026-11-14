@@ -276,6 +276,9 @@
   .bj-pl{position:relative;display:flex;align-items:center;gap:4px;}
   .bj-gift{all:unset;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:6px;opacity:.55;} .bj-gift:hover, .bj-gift:focus-visible{opacity:1;background:rgba(255,255,255,.12);}
   .bj-nm{font-size:11.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bj-who.bj-walk{z-index:6;} .bj-who.bj-walk > b{opacity:0;transition:opacity .15s;}
+  .bj-pie{position:fixed;left:0;top:0;z-index:99999;font-size:26px;line-height:26px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));}
+  .bj-splat{position:absolute;width:62px;height:62px;z-index:4;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}
   .bj-say{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:3;max-width:180px;width:max-content;padding:6px 10px;border-radius:12px;background:#fff;color:#16171d;font:600 12px/1.3 'Inter',sans-serif;box-shadow:0 6px 16px rgba(0,0,0,.4);overflow-wrap:anywhere;pointer-events:none;}
   .bj-say::after{content:'';position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;}
   .bj-ctl{border-top-color:rgba(125,255,178,.25);}
@@ -1019,6 +1022,12 @@
   .chat-bub.jumbo{padding-bottom:4px;}
   /* ":name" suggestions */
   .emo-ac{position:absolute;left:10px;z-index:21;min-width:220px;max-width:calc(100% - 20px);padding:5px;border-radius:12px;background:#1f2030;border:1px solid rgba(255,215,106,.45);box-shadow:0 14px 40px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:1px;animation:chatItemIn .15s ease-out both;}
+  .chat-at{color:#9fc4ff;background:rgba(88,140,255,.18);border-radius:4px;padding:0 3px;font-weight:700;}
+  .chat-at.me{color:#ffe28a;background:rgba(255,200,60,.22);}
+  .chat-msg.mentioned{background:linear-gradient(90deg,rgba(255,200,60,.14),rgba(255,200,60,.03) 70%,transparent);box-shadow:inset 3px 0 0 #f5c542;border-radius:6px;}
+  .chat-pop.men{border-color:rgba(255,200,60,.7) !important;}
+  .emo-ac button.men b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;}
+  .men-dot{width:8px !important;height:8px;border-radius:50%;background:#5b5e6e;flex:none;} .men-dot.on{background:#3be38f;box-shadow:0 0 6px #3be38f;}
   .emo-ac-h{font:600 10.5px 'Inter',sans-serif;color:var(--text-faint);padding:3px 7px 4px;}
   .emo-ac-h b{color:#ffd76a;}
   .emo-ac button{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;padding:4px 8px;border-radius:8px;font-size:12.5px;color:var(--text);}
@@ -1200,8 +1209,11 @@
   .chat-msg.bub-heli .chat-bub{background:linear-gradient(135deg,#1e6fd9,#42b8f5);box-shadow:0 4px 14px rgba(66,184,245,.35);}
   .chat-msg.bub-rocket .chat-bub{background:linear-gradient(135deg,#ff5e3a,#ffb03a);box-shadow:0 4px 14px rgba(255,120,60,.4);}
   .chat-msg.bub-ufo .chat-bub{background:linear-gradient(135deg,#0f7a4a,#3be38f);box-shadow:0 0 16px rgba(59,227,143,.45);}
-  .chat-msg.bub-plane .chat-bub, .chat-msg.me.bub-plane .chat-bub{background:#fbfaf5 repeating-linear-gradient(0deg, transparent 0 17px, rgba(90,140,220,.22) 17px 18px);color:#1d2433;border-left:3px solid #ff7b7b;}
+  .chat-msg.bub-plane .chat-bub, .chat-msg.me.bub-plane .chat-bub{position:relative;background:linear-gradient(90deg, transparent 0 16px, rgba(255,110,110,.55) 16px 17.5px, transparent 17.5px), linear-gradient(180deg,#fffef9,#f6f2e6);color:#1d2433;border:1px solid #e4dcc6;border-left:none;padding-left:26px !important;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  .chat-msg.bub-plane .chat-bub::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:6px;background:radial-gradient(circle at 3px 3px,#c9c1ad 0 2.4px,transparent 2.8px) 0 0/6px 16px repeat-y;opacity:.9;pointer-events:none;}
   .chat-msg.bub-plane .chat-meta span, .chat-msg.bub-plane .chat-quote{color:#5b6475;}
+  .chat-msg.bub-plane .chat-at{color:#2456c8;background:rgba(36,86,200,.12);} .chat-msg.bub-plane .chat-at.me{color:#8a4b00;background:rgba(255,190,40,.4);}
+  .chat-msg.bub-plane .chat-meta .chat-mpts{color:#9a6a00 !important;opacity:1;}
   .chat-msg.bub-balloon .chat-bub{background:linear-gradient(135deg,#ff5fa2,#ffa3cf);box-shadow:0 4px 14px rgba(255,95,162,.4);}
   .chat-msg.bub-zap .chat-bub{background:linear-gradient(135deg,#4b1fa8,#9b5cff);box-shadow:0 0 0 1px rgba(200,170,255,.5), 0 0 18px rgba(155,92,255,.55);}
   .chat-msg[class*="bub-"]:not(.bub-plane) .chat-meta span{color:rgba(255,255,255,.75);}
@@ -21486,7 +21498,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 88;                 // ← goes up by one with every published version
+  const SD_BUILD = 89;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22701,7 +22713,7 @@
         bub.appendChild(q);
       }
       bub.appendChild(meta);
-      if(m.m){ const tx = document.createElement('div'); tx.textContent = off ? m.m : chatMask(m.m); if(!off && chatEmojiOnly(m.m)){ tx.className = 'chat-jumbo'; bub.classList.add('jumbo'); } bub.appendChild(tx); }
+      if(m.m){ const tx = document.createElement('div'); if(off) tx.textContent = m.m; else if(chatMenFill(tx, chatMask(m.m))) row.classList.add('mentioned'); if(!off && chatEmojiOnly(m.m)){ tx.className = 'chat-jumbo'; bub.classList.add('jumbo'); } bub.appendChild(tx); }
       if(off && m.f && m.f.id) bub.appendChild(chatFdChip(m.f, m.mine));
       if(!off) try{ fxDecorate(m, bub); }catch(e){}
       const col = document.createElement('div'); col.className = 'chat-col'; col.appendChild(bub);
@@ -23955,7 +23967,7 @@
   // bj/d = the dealer's hand, the same way, plus u ('bot' or the player dealing), f (finished) and r (the round: its start time).
   // bj/x = the last round's dealer hand (so a win can still be collected after the next round starts). bj/kick/<id> = a vote to kick the dealer.
   // Every card is the server's clock at the moment it was drawn (nobody can pick it), and the database checks every total and every payout.
-  const BJ = { on: false, poll: 0, polling: false, hb: 0, d: null, x: null, p: {}, kick: {}, act: false, bet: Math.max(1, Math.min(500, Number(chatLS('bjBet')) || 10)),
+  const BJ = { on: false, poll: 0, polling: false, hb: 0, d: null, x: null, p: {}, kick: {}, act: false, bet: Math.max(1, Number(chatLS('bjBet')) || 10),
     betAt: {}, turn: null, skip: new Set(), doneAt: {}, dAct: 0, shown: {}, res: {}, joinedAt: 0 };
   const BJ_RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'], BJ_SUITS = ['♠', '♥', '♦', '♣'];
   const bjNow = () => Date.now() + (PRES.offset || 0);
@@ -24145,7 +24157,7 @@
       // (the bot deals once everyone sitting has bet, or 15 s after the first bet; a player dealing has 30 s to stake and press Deal)
       if(human){
         if(iDeal && players.length && now - BJ.betAt[R] > 30000){
-          if(!bjInRound(S, D) && BJ.noStake !== D.r){ if(scBal() >= 1){ BJ.bet = Math.max(1, Math.min(BJ.bet || 10, scBal(), 500)); bjPlaceBet(); } else bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
+          if(!bjInRound(S, D) && BJ.noStake !== D.r){ if(scBal() >= 1){ BJ.bet = Math.max(1, Math.min(BJ.bet || 10, scBal())); bjPlaceBet(); } else bjDo(() => bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv })); }
           else bjDo(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
         }
       } else if(driver && players.length && (!waiting.length || now - BJ.betAt[R] > 15000))
@@ -24242,7 +24254,8 @@
   async function bjPlaceBet(){
     const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
     if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || BJ.watch) return;
-    if(!(bet >= 1 && bet <= 500)){ toast('Bet between 1 and 500 points.', 2000); return; }
+    if(!(bet >= 1 && bet <= 1000000)){ toast('Bet at least 1 point.', 2000); return; }
+    if(bet > scBal()){ toast(`You only have ${scBal()} points.`, 2000); return; }
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
     bjUser(async () => {
@@ -24327,7 +24340,7 @@
           <div class="bj-seats"></div>
           <div class="bj-specs"></div>
         </div>
-        <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet bj-betin"><input type="number" min="0" max="500" step="1" aria-label="Your bet" placeholder="0"></div>
+        <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet bj-betin"><input type="number" min="0" step="1" aria-label="Your bet" placeholder="0"></div>
           <div class="bj-chiprow">${[5, 10, 25, 50, 100].map(v => `<button type="button" class="bj-chipbtn c${v}" data-v="${v}" title="Add ${v}"><span>${v}</span></button>`).join('')}<button type="button" class="bj-clr" data-v="max">Max</button><button type="button" class="bj-clr" data-v="clear">Clear</button></div>
           <button type="button" class="cas-spin bj-betb">BET</button></div>
           <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button><button type="button" class="bj-a bj-split">Split</button></div>
@@ -24336,16 +24349,16 @@
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
         <div class="cas-feed bj-feed"></div>`;
       const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
-      const setBet = (v) => { BJ.bet = Math.max(0, Math.min(500, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); };
-      inp.addEventListener('input', () => { const v = Math.max(0, Math.min(500, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); });
+      const setBet = (v) => { BJ.bet = Math.max(0, Math.min(scBal(), 1000000, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); };
+      inp.addEventListener('input', () => { const v = Math.max(0, Math.min(scBal(), 1000000, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); });
       inp.addEventListener('change', () => setBet(Number(inp.value)));
       inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); bjPlaceBet(); } });
       el.querySelector('.bj-chiprow').addEventListener('click', (e) => {
         const b = e.target.closest('[data-v]'); if(!b) return; b.blur();
         if(b.dataset.v === 'clear'){ setBet(0); return; }
-        if(b.dataset.v === 'max'){ setBet(Math.min(500, scBal())); return; }
-        const v = Number(b.dataset.v), room = Math.min(500, scBal()) - BJ.bet;
-        if(room <= 0){ toast(BJ.bet >= 500 ? 'The table limit is 500.' : `You only have ${scBal()} points.`, 1600); return; }
+        if(b.dataset.v === 'max'){ setBet(scBal()); return; }
+        const v = Number(b.dataset.v), room = scBal() - BJ.bet;
+        if(room <= 0){ toast(`You only have ${scBal()} points.`, 1600); return; }
         setBet(BJ.bet + Math.min(v, room)); try{ sfxChip(); }catch(e2){}
         b.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-6px) rotate(20deg)' }, { transform: 'none' }], { duration: 220 });
       });
@@ -24599,6 +24612,7 @@
         }
       } }
     try{ bjBotTalk(); }catch(e){}
+    try{ bjPotFeed(); }catch(e){}
     if(!seats.length){ if(!box.querySelector('.chat-side-p')) box.innerHTML = '<p class="chat-side-p">Nobody at the table yet.</p>'; }
     else { const p = box.querySelector('.chat-side-p'); if(p) p.remove(); }
     bjCtl();
@@ -24681,6 +24695,12 @@
       "Don't cry, {n}. It's only {x} points 😌", '{n}, maybe try the slots? They\'re nicer than me 🎰', 'Easy money. Thanks {n} 🤑', 'Bold strategy, {n}. Losing. 👏',
       'Imagine losing to a bot, {n} 🤖', 'Your points look better on my side, {n} ✨', '{n} donating {x} points to the house. So generous 💸', 'Calculated. Unlike you, {n} 🧠'],
     bust: ['Bust! 💥 Greedy, {n}?', '{n} went over 21. Classic 😂', 'Too many cards, {n}. Math is hard huh 🧮', '{n} flew too close to 21 ☀️', 'Hit me, they said. It hit back, {n} 💀', 'Bye bye points, {n} 👋'],
+    group: ['{n} — thanks for the donations, all of you 💸', 'Look at {n}. A whole table of losers 😂', '{n}: the house thanks you for your service 🫡', 'Group project: losing to a bot. Great teamwork, {n} 👏'],
+    bettiny: ['{x} points? {n}, are we playing for crumbs? 🍞', 'Wow {n}, {x}. Big spender 🙄', '{x}?? My grandma bets more than that, {n} 👵', 'Scared, {n}? Put some real points down 🐔', '{n} betting {x} like it\'s their life savings 💀'],
+    betsmall: ['Only {x}, {n}? Playing it safe I see 😴', '{x} points… come on {n}, live a little 🎲', 'Bet more, coward. Just kidding. Unless? 👀', '{n}, {x} won\'t make you rich. Double it 😏'],
+    betmid: ['{x}, okay {n}, now we\'re talking 😤', 'Decent bet, {n}. Bet you won\'t double it though 🫵', "{x} points? I'll take them, {n} 😌", 'Feeling lucky with {x}, {n}? 🍀'],
+    betbig: ['{x}?! {n} came to play 🔥', 'Woah {n}, {x} points. Bold. I love it 🤑', "{n} putting {x} down. Don't cry later 😭", 'Big money {n}! Thanks in advance 💸'],
+    betall: ['ALL IN?! {n} you absolute legend 💀', '{n} put everything down. I respect it. I will also take it 😈', '{x} points, all of it. Bye bye, {n} 👋', '{n} going all in. Somebody record this 📸'],
     big: ['{x} POINTS?! {n}, you okay? 😭', 'Rent money gone, {n}? 🏠💸', '{n} going all in and losing it all. Iconic 💀', 'That was a lot of points, {n}. Was. 😌'],
   };
   function bjTaunt(kind, n, x, seed){
@@ -24732,23 +24752,114 @@
         if(bjIsSplit(s) && s.q.h > 21 && !s.q.pe) say('bq:' + D.r + ':' + s.u, bjTaunt('bust', s.n, s.q.b, D.r + s.u + 'q'), 500);
       }
     }
-    // the round's over: rub it in for whoever lost the most
-    if(ph === 'done'){
-      let worst = null;
+    // betting: look at what everyone put down and egg them on to bet more
+    if(ph === 'bet'){
+      let i = 0;
+      for(const s of bjPlayers()){
+        if(!(s.b > 0)) continue;
+        const key = 'bet:' + D.r + ':' + s.u; if(BJ.taunted[key]) { i++; continue; }
+        const left = scOf(s.u), tot = s.b + (left || 0), r = tot ? s.b / tot : 0;
+        const kind = left != null && left < 1 ? 'betall' : (s.b <= 10 || r < 0.05) ? 'bettiny' : r < 0.2 ? 'betsmall' : r < 0.5 ? 'betmid' : 'betbig';
+        say(key, bjTaunt(kind, s.n, s.b, D.r + s.u + 'bet'), 700 + i * 2600); i++;
+      }
+    }
+    // the round's over: walk up to everyone who lost and rub it in (biggest loser first), with a pie or two
+    if(ph === 'done' && !BJ.taunted['d:' + D.r]){
+      BJ.taunted['d:' + D.r] = 1;
+      const L = [];
       for(const s of bjPlayers()){
         const spl = bjIsSplit(s), r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 }, lost = s.b + (spl ? s.q.b : 0) - r.amt - r2.amt;
-        if(lost > 0 && (!worst || lost > worst.lost)) worst = { s, lost };
+        if(lost > 0) L.push({ s, lost });
       }
-      if(worst){
-        const all = worst.lost >= 200;
-        say('d:' + D.r, bjTaunt(all ? 'big' : 'lose', worst.s.n, worst.lost, D.r + worst.s.u), 900);
-      }
+      L.sort((x, y) => y.lost - x.lost || (x.s.u < y.s.u ? -1 : 1));
+      bjBotMock(el, host, L.slice(0, 3), D.r, L.length);
     }
     for(const k of Object.keys(BJ.taunted)) if(Object.keys(BJ.taunted).length > 60) delete BJ.taunted[k];
   }
+  // points lost to the dealer bot go into the slots jackpot (each loser adds their own, once per round)
+  async function bjPotFeed(){
+    const D = BJ.d, me = chatUid(); if(!D || !D.f || D.u !== 'bot' || !me) return;
+    const s = bjPlayers().find(x => x.u === me); if(!s) return;
+    BJ.potFed = BJ.potFed || {}; if(BJ.potFed[D.r]) return; BJ.potFed[D.r] = 1;
+    if(chatLS('bjpot') === String(D.r)) return;
+    const spl = bjIsSplit(s), r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 };
+    const lost = Math.min(s.b + (spl ? s.q.b : 0) - r.amt - r2.amt, 3 * s.b); if(!(lost > 0)) return;
+    const R = D.r;
+    for(let tries = 0; tries < 5; tries++){
+      await new Promise(ok => setTimeout(ok, 400 + Math.random() * 1800 + tries * 900));
+      try{
+        const tok = await chatAuth();
+        const pg = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+        const v = pg.ok ? await pg.json() : null, pot = typeof v === 'number' ? v : CAS_POT0;
+        const body = { 'casino/pot': pot + lost }; body[`casino/bjl/${me}`] = R;
+        const w = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+        if(w.ok){ chatLS('bjpot', String(R)); CAS.pot = pot + lost; try{ casPotShow(); chatTickerSync && chatTickerSync(); }catch(e){} return; }
+      }catch(e){}
+    }
+  }
+  // the bot walks over to each loser, says something, maybe throws a pie, and walks back
+  function bjBotMock(el, host, L, R, nAll){
+    const STEP = 3400; let t = 900;
+    const hseed = (k) => { let h = 0; for(let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h); };
+    L.forEach((x, i) => {
+      setTimeout(() => {
+        if(!host.isConnected || !BJ.d || BJ.d.r !== R || BJ.botQuiet) return;
+        const av = el.querySelector(`.bj-seat[data-u="${CSS.escape(x.s.u)}"] .bj-av`);
+        const txt = bjTaunt(x.lost >= 200 ? 'big' : 'lose', x.s.n, x.lost, R + x.s.u);
+        const pie = i === 0 || hseed(R + x.s.u + 'pie') % 2 === 0;
+        if(!av){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){} return; }
+        const hr = host.getBoundingClientRect(), ar = av.getBoundingClientRect();
+        // stop just above / beside their picture, not on top of it
+        const dx = ar.left + ar.width / 2 - (hr.left + 17) + (ar.left > hr.left ? -46 : 46), dy = ar.top - hr.top - 4;
+        host.classList.add('bj-walk');
+        const walk = host.animate([
+          { transform: 'translate(0,0)' },
+          { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 14}px) rotate(-6deg)`, offset: 0.09 },
+          { transform: `translate(${dx}px,${dy}px) rotate(0)`, offset: 0.18 },
+          { transform: `translate(${dx}px,${dy - 6}px)`, offset: 0.3 },
+          { transform: `translate(${dx}px,${dy}px)`, offset: 0.4 },
+          { transform: `translate(${dx}px,${dy}px)`, offset: 0.8 },
+          { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 14}px) rotate(6deg)`, offset: 0.9 },
+          { transform: 'translate(0,0)' }], { duration: STEP - 200, easing: 'ease-in-out' });
+        walk.onfinish = walk.oncancel = () => host.classList.remove('bj-walk');
+        setTimeout(() => { if(host.isConnected){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){}
+          // (the bubble goes on the open side of where the bot is standing now)
+          const bb = host.querySelector('.bj-say'), box = host.closest('.chat-casino'); if(bb && box){ const br = box.getBoundingClientRect(); bb.classList.toggle('left', ar.left + ar.width / 2 > br.left + br.width / 2); } } }, 650);
+        if(pie) setTimeout(() => { if(av.isConnected) bjPieAt(host.querySelector('.bj-av') || host, av, hseed(R + x.s.u) % 4); }, 1300);
+      }, t + i * STEP);
+    });
+    // more than one loser: one last line for all of them together
+    if(nAll >= 2) setTimeout(() => {
+      if(!host.isConnected || !BJ.d || BJ.d.r !== R || BJ.botQuiet) return;
+      const names = L.map(x => bjName(x.s.n)), list = names.length > 2 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join(' and ');
+      const txt = BOT_TAUNTS.group[hseed(R + 'grp') % BOT_TAUNTS.group.length].replace(/\{n\}/g, list);
+      gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){}
+    }, t + L.length * STEP + 200);
+  }
+  // a pie flies from the bot into someone's face and sticks there for a bit
+  function bjPieAt(fromEl, toEl, v){
+    const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+    const p = document.createElement('div'); p.className = 'bj-pie'; p.textContent = '🥧'; document.body.appendChild(p);
+    const x0 = a.left + a.width / 2 - 13, y0 = a.top + a.height / 2 - 13, x1 = b.left + b.width / 2 - 13, y1 = b.top + b.height / 2 - 13;
+    const fly = p.animate([
+      { transform: `translate(${x0}px,${y0}px) rotate(0) scale(.8)` },
+      { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 40}px) rotate(200deg) scale(1.2)`, offset: 0.5 },
+      { transform: `translate(${x1}px,${y1}px) rotate(380deg) scale(1)` }], { duration: 520, easing: 'cubic-bezier(.4,.1,.6,1)', fill: 'both' });
+    fly.onfinish = () => {
+      p.remove(); if(!toEl.isConnected) return;
+      try{ sfxSplat('pie'); }catch(e){}
+      const pl = toEl.closest('.bj-pl') || toEl.parentElement;
+      const sp = document.createElement('img'); sp.className = 'bj-splat'; sp.alt = ''; sp.src = splatImg('pie', v || 0);
+      sp.style.left = (toEl.offsetLeft - 14) + 'px'; sp.style.top = (toEl.offsetTop - 14) + 'px';
+      pl.appendChild(sp);
+      sp.animate([{ transform: 'scale(.3)', opacity: 0 }, { transform: 'scale(1.15)', opacity: 1, offset: 0.4 }, { transform: 'scale(1)', opacity: 1 }], { duration: 260, easing: 'ease-out' });
+      toEl.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px) rotate(-8deg)' }, { transform: 'translateX(4px) rotate(6deg)' }, { transform: 'none' }], { duration: 360 });
+      setTimeout(() => { if(sp.isConnected) sp.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(10px) scaleY(1.15)' }], { duration: 900, fill: 'both' }).onfinish = () => sp.remove(); }, 4200);
+    };
+  }
   function gameSay(host, txt){
     host.querySelectorAll('.bj-say').forEach(x => x.remove());
-    const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(txt).slice(0, 80);
+    const b = document.createElement('div'); b.className = 'bj-say'; b.textContent = String(txt).slice(0, 120);
     host.appendChild(b);
     // (it goes on whichever side of the picture has more room)
     const box = host.closest('.chat-casino'), hr = host.getBoundingClientRect(), br = box ? box.getBoundingClientRect() : { left: 0, right: innerWidth };
@@ -24995,7 +25106,7 @@
   function emoAcPut(ta, from, to, em){
     if(ta.value.length - (to - from) + em.length > chatMaxLen()){ toast(`Messages can be up to ${chatMaxLen()} characters.`, 1600); return; }
     ta.value = ta.value.slice(0, from) + em + ta.value.slice(to); ta.selectionStart = ta.selectionEnd = from + em.length;
-    const R = emoRecent().filter(x => x !== em); R.unshift(em); chatLS('emorecent', JSON.stringify(R.slice(0, 32)));
+    if(em[0] !== '@'){ const R = emoRecent().filter(x => x !== em); R.unshift(em); chatLS('emorecent', JSON.stringify(R.slice(0, 32))); }
     emoAcClose(); ta.dispatchEvent(new Event('input', { bubbles: true }));
   }
   function emoAcAttach(ta){
@@ -25005,7 +25116,19 @@
       const full = /(^|[\s(]):([a-z0-9_+\-]{2,30}):$/i.exec(before);
       if(full){ const f = emoAcFind(full[2]).find(x => x.r >= 4 || x.k === full[2].toLowerCase()); if(f){ emoAcPut(ta, at - full[2].length - 2, at, f.e); return; } }
       const m = /(^|[\s(]):([a-z0-9_+\-]{2,30})$/i.exec(before);
-      if(!m){ emoAcClose(); return; }
+      if(!m){
+        // "@na…" — suggest people to mention
+        const mm = /(^|[\s(])@([^\s@]{0,20})$/.exec(before);
+        if(!mm){ emoAcClose(); return; }
+        const q = mm[2].toLowerCase(), ppl = menPeople().filter(p => !q || p.n.toLowerCase().startsWith(q) || p.n.toLowerCase().includes(q)).sort((a, b) => (b.n.toLowerCase().startsWith(q) - a.n.toLowerCase().startsWith(q)) || (b.on - a.on)).slice(0, 8);
+        if(!ppl.length){ emoAcClose(); return; }
+        emoAcItems = ppl.map(p => ({ from: at - mm[2].length - 1, to: at, e: '@' + p.n + ' ', k: p.n, u: p.u, on: p.on, men: true })); emoAcSel = 0;
+        if(!emoAcEl){ emoAcEl = document.createElement('div'); emoAcEl.className = 'emo-ac'; emoAcEl.setAttribute('role', 'listbox'); chatPanel.appendChild(emoAcEl);
+          emoAcEl.addEventListener('pointerdown', (e) => { const b = e.target.closest('[data-i]'); if(b){ e.preventDefault(); const it = emoAcItems[Number(b.dataset.i)]; if(it) emoAcPut(ta, it.from, it.to, it.e); ta.focus(); } }); }
+        emoAcDraw(mm[2]);
+        emoAcEl.style.bottom = Math.max(60, chatPanel.getBoundingClientRect().bottom - ta.getBoundingClientRect().top + 6) + 'px';
+        return;
+      }
       const items = emoAcFind(m[2]); if(!items.length){ emoAcClose(); return; }
       emoAcItems = items.map(x => Object.assign({ from: at - m[2].length - 1, to: at }, x)); emoAcSel = 0;
       if(!emoAcEl){ emoAcEl = document.createElement('div'); emoAcEl.className = 'emo-ac'; emoAcEl.setAttribute('role', 'listbox'); chatPanel.appendChild(emoAcEl);
@@ -25023,9 +25146,61 @@
       else if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); emoAcClose(); }
     }, true);
   }
+  // ----- @mentions -----
+  function menPeople(){
+    const out = new Map(), add = (u, n, on) => { if(!u || !n || chatIsMe(u) || chatBadName(n) || chatBanned(u)) return; const k = n.toLowerCase(); const o = out.get(k); if(!o) out.set(k, { u, n, on: !!on }); else if(on) o.on = true; };
+    for(const [u, p] of Object.entries(PRES.list || {})) if(p && p.n) add(u, p.n, true);
+    for(const [u, p] of Object.entries(CHAT.people || {})) if(p && p.n) add(u, p.n, false);
+    for(const m of CHAT.msgs.values()) if(!m.e && !m.a) add(m.u, m.n, false);
+    return [...out.values()];
+  }
+  // every name worth highlighting (longest first so "@Sai Chi" beats "@Sai")
+  function menNames(){
+    const L = menPeople().map(p => p.n); const mine = chatName(); if(mine) L.push(mine);
+    return [...new Set(L)].sort((a, b) => b.length - a.length);
+  }
+  const reEsc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function chatMentionsMe(m){
+    const n = chatName(); if(!m || m.e || m.a || !m.m || !n || chatIsMe(m.u)) return false;
+    return new RegExp('(^|[^\\w])@' + reEsc(n) + '(?![\\w])', 'i').test(m.m) || /(^|\s)@(everyone|all)\b/i.test(m.m);
+  }
+  // writes the text into the bubble with @names picked out; true when it mentions me
+  function chatMenFill(tx, text){
+    if(!text.includes('@')){ tx.textContent = text; return false; }
+    const names = menNames(), me = (chatName() || '').toLowerCase(); let hit = false;
+    const parts = names.length ? names.map(reEsc).join('|') + '|everyone|all' : 'everyone|all';
+    const re = new RegExp('(^|[^\\w])@(' + parts + ')(?![\\w])', 'gi');
+    let last = 0, mm;
+    while((mm = re.exec(text))){
+      const st = mm.index + mm[1].length;
+      if(st > last) tx.appendChild(document.createTextNode(text.slice(last, st)));
+      const sp = document.createElement('span'); sp.className = 'chat-at'; sp.textContent = '@' + mm[2];
+      const nm = mm[2].toLowerCase();
+      if((me && nm === me) || nm === 'everyone' || nm === 'all'){ sp.classList.add('me'); hit = true; }
+      tx.appendChild(sp); last = st + 1 + mm[2].length; re.lastIndex = last;
+    }
+    if(last < text.length) tx.appendChild(document.createTextNode(text.slice(last)));
+    return hit;
+  }
+  function sfxMention(){
+    try{
+      chatAc = chatAc || new (window.AudioContext || window.webkitAudioContext)();
+      const ac = chatAc, t0 = ac.currentTime;
+      [[784, 0], [1175, 0.08], [1568, 0.16]].forEach(([f, d]) => {
+        const g = ac.createGain(), o = ac.createOscillator(), o2 = ac.createOscillator(); o.type = 'triangle'; o2.type = 'sine'; o.frequency.value = f; o2.frequency.value = f * 2;
+        g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.16, t0 + d + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.45);
+        const g2 = ac.createGain(); g2.gain.value = 0.25; o.connect(g); o2.connect(g2); g2.connect(g); g.connect(ac.destination);
+        o.start(t0 + d); o2.start(t0 + d); o.stop(t0 + d + 0.5); o2.stop(t0 + d + 0.5);
+      });
+    }catch(e){}
+  }
   function emoAcDraw(q){
     if(!emoAcEl) return;
     if(q != null) emoAcEl.dataset.q = q;
+    if(emoAcItems[0] && emoAcItems[0].men){
+      emoAcEl.innerHTML = `<div class="emo-ac-h">Mention someone${emoAcEl.dataset.q ? ` matching <b>@${escapeHtml(emoAcEl.dataset.q)}</b>` : ''}</div>` + emoAcItems.map((x, i) => `<button type="button" data-i="${i}" class="men ${i === emoAcSel ? 'on' : ''}" role="option" aria-selected="${i === emoAcSel}"><span class="men-dot${x.on ? ' on' : ''}"></span><b style="color:${chatColor(x.k)}">${escapeHtml(x.k)}</b><i>${x.on ? 'online' : ''}</i></button>`).join('');
+      return;
+    }
     emoAcEl.innerHTML = `<div class="emo-ac-h">Emojis matching <b>:${escapeHtml(emoAcEl.dataset.q || '')}</b></div>` + emoAcItems.map((x, i) => `<button type="button" data-i="${i}" class="${i === emoAcSel ? 'on' : ''}" role="option" aria-selected="${i === emoAcSel}"><span>${x.e}</span><i>:${escapeHtml(x.k)}:</i></button>`).join('');
   }
   function emoPicker(btn){
@@ -26404,6 +26579,11 @@
     try{ bjSay(m); casSay(m); }catch(e){}
     if(m && m.e === 'crate' && m.a === true){ try{ crateAnnounce(m); }catch(e){} return; }
     if(chatIsMe(m.u) || (chatBanned(m.u) && !m.a) || m.e) return;   // (my own message coming back / someone banned)
+    if(chatMentionsMe(m) && Math.abs(Date.now() + (PRES.offset || 0) - (m.t || 0)) < 120000){
+      if(chatLS('msound') !== '0') sfxMention();
+      if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
+      CHAT.unread++; chatPopup(m); return;
+    }
     if(CHAT.open && document.visibilityState === 'visible'){ chatLS('seen:' + chatRoom(), Date.now()); return; }
     CHAT.unread++;
     if(chatSoundOn()) chatPing();
@@ -26417,6 +26597,7 @@
     if(!m.a && chatRoom() !== CHAT_ROOM){ const r = document.createElement('small'); r.textContent = ' in ' + chatRoomLabel(chatRoom()); b.appendChild(r); }
     const sp = document.createElement('span'); sp.textContent = m.a ? m.m : chatMask(m.m);
     if(m.r && m.r.k && CHAT.msgs.get(m.r.k) && chatIsMe(CHAT.msgs.get(m.r.k).u)){ const rr = document.createElement('small'); rr.textContent = ' replied to you'; b.appendChild(rr); }
+    else if(chatMentionsMe(m)){ const rr = document.createElement('small'); rr.textContent = ' mentioned you'; b.appendChild(rr); pop.classList.add('men'); }
     t.append(b, sp); pop.append(av, t);
     pop.title = 'Open the chat';
     pop.addEventListener('click', () => { pop.remove(); chatToggle(true); });
