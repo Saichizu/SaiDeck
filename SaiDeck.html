@@ -276,6 +276,8 @@
   .bj-pl{position:relative;display:flex;align-items:center;gap:4px;}
   .bj-gift{all:unset;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:6px;opacity:.55;} .bj-gift:hover, .bj-gift:focus-visible{opacity:1;background:rgba(255,255,255,.12);}
   .bj-nm{font-size:11.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gm-pts{display:block;font:700 10.5px/1.2 'Inter',sans-serif;font-style:normal;color:#ffe08a;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;margin-top:1px;}
+  .gm-pts:empty{display:none;}
   .bj-who.bj-walk{z-index:6;} .bj-who.bj-walk > b{opacity:0;transition:opacity .15s;}
   .bj-pie{position:fixed;left:0;top:0;z-index:99999;font-size:26px;line-height:26px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));}
   .bj-splat{position:absolute;width:62px;height:62px;z-index:4;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}
@@ -21498,7 +21500,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 89;                 // ← goes up by one with every published version
+  const SD_BUILD = 90;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23869,13 +23871,14 @@
       if(!m){
         m = document.createElement('div'); m.className = 'cas-m' + (w.u === me ? ' me' : ''); m.dataset.u = w.u;
         m.innerHTML = `<div class="cas-cab"><div class="cas-light"></div><div class="cas-reels">${'<div class="cas-reel"><div class="cas-strip"><span>❔</span></div></div>'.repeat(3)}</div><div class="cas-res">sat down</div></div>
-          <div class="cas-seat"><div class="cas-stool"></div></div><b class="cas-nm"></b>`;
+          <div class="cas-seat"><div class="cas-stool"></div></div><b class="cas-nm"></b><i class="cas-pts gm-pts"></i>`;
         const av = chatAv(w.u, w.n, false, false); av.classList.add('cas-av'); m.querySelector('.cas-seat').prepend(av);
         m.querySelector('.cas-nm').textContent = (chatBadName(w.n) ? 'someone' : w.n) + (w.u === me ? ' (you)' : '');
         m.querySelector('.cas-nm').style.color = chatColor(w.n);
         m.animate([{ opacity: 0, transform: 'translateY(16px) scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
       }
       if(floor.children[i] !== m) floor.insertBefore(m, floor.children[i] || null);
+      gmPts(m.querySelector('.cas-pts'), w.u);
       const sp = CAS.spins[w.u];
       if(sp && typeof sp.t === 'number'){
         const prev = CAS.seen[w.u];
@@ -24562,7 +24565,7 @@
       let n = box.querySelector(`.bj-seat[data-u="${CSS.escape(s.u)}"]`);
       if(!n){
         n = document.createElement('div'); n.className = 'bj-seat' + (s.u === me ? ' me' : ''); n.dataset.u = s.u;
-        n.innerHTML = `<div class="bj-hands"><div class="bj-h1"><div class="bj-hand"></div><div class="bj-tot"></div></div><div class="bj-h2"><div class="bj-hand bj-hand2"></div><div class="bj-tot bj-tot2"></div></div></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b>`;
+        n.innerHTML = `<div class="bj-hands"><div class="bj-h1"><div class="bj-hand"></div><div class="bj-tot"></div></div><div class="bj-h2"><div class="bj-hand bj-hand2"></div><div class="bj-tot bj-tot2"></div></div></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b><i class="bj-pts gm-pts"></i>`;
         const av = chatAv(s.u, s.n, false, false); av.classList.add('bj-av'); n.querySelector('.bj-pl').append(av);
         if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g); }
         n.querySelector('.bj-nm').textContent = bjName(s.n) + (s.u === me ? ' (you)' : ''); n.querySelector('.bj-nm').style.color = chatColor(s.n);
@@ -24592,6 +24595,7 @@
         cls += net > 0 ? ' win' : net === 0 ? ' push' : ' lose';
       }
       if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
+      gmPts(n.querySelector('.bj-pts'), s.u);
       n.classList.toggle('turn', !!(T && T.u === s.u));
       try{ bjPile(n, s, D, !!el.dataset.pilesReady); }catch(e){}
     });
@@ -25715,7 +25719,20 @@
       if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
-    presRender(); if(CHAT.open && force !== 'quiet') try{ chatRenderMessages(); }catch(e){} if(CHAT.side === 'arcade' && SC.tab === 'board') chatRenderArcade();
+    presRender(); try{ document.querySelectorAll('.gm-pts').forEach(e => { const row = e.closest('[data-u]'); if(row) gmPts(e, row.dataset.u); }); }catch(e){}
+    if(CHAT.open && force !== 'quiet') try{ chatRenderMessages(); }catch(e){} if(CHAT.side === 'arcade' && SC.tab === 'board') chatRenderArcade();
+  }
+  // the little "🪙 1,234" under each player at the blackjack table and the slot machines
+  // (everyone's points are re-read every few seconds while a game is open)
+  function gmPts(el, uid){
+    if(!el) return;
+    if(!SCALL.busy && (!SCALL.at || Date.now() - SCALL.at > 6000)) scAllLoad('quiet');
+    const v = scOf(uid), t = v == null ? '' : '🪙 ' + v.toLocaleString();
+    if(el.textContent !== t){
+      const up = el.dataset.v != null && v != null ? v - Number(el.dataset.v) : 0;
+      el.textContent = t; if(v != null) el.dataset.v = v;
+      if(up) el.animate([{ transform: 'scale(1.35)', color: up > 0 ? '#5dff9e' : '#ff7b7b' }, { transform: 'none' }], { duration: 700, easing: 'ease-out' });
+    }
   }
   function scOf(uid){
     if(chatIsMe(uid) && SC.loaded) return Math.max(0, scBal());

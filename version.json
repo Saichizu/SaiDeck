@@ -1,6 +1,6 @@
 {
-  "build": 89,
+  "build": 90,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Mention people with @name (they get their own sound). Blackjack has no 500 limit any more, and Max bets everything. The dealer bot walks over to mock losers, throws pies and teases your bet size. Points lost to the bot go into the slots jackpot. Tidier paper plane bubbles."
+  "notes": "You can now see everyone's points under their name at the blackjack table and the slot machines. Plus everything from build 89: @mentions, no 500 bet limit in blackjack, a meaner dealer bot with pies, blackjack losses feeding the slots jackpot, and tidier paper plane bubbles."
 }
