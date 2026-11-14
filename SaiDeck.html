@@ -278,6 +278,17 @@
   .bj-nm{font-size:11.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .gm-pts{display:block;font:700 10.5px/1.2 'Inter',sans-serif;font-style:normal;color:#ffe08a;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;margin-top:1px;}
   .gm-pts:empty{display:none;}
+  .bj-mini{position:absolute;z-index:5;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:left .6s cubic-bezier(.3,.8,.3,1), top .6s cubic-bezier(.3,.8,.3,1);}
+  .bj-mini-b{font-size:21px;line-height:1;display:block;animation:bjMiniBob .45s ease-in-out infinite alternate;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));}
+  .bj-mini > i{font:800 8.5px/1.3 'Inter',sans-serif;font-style:normal;color:#d7ffe8;background:rgba(0,0,0,.55);border-radius:6px;padding:0 4px;margin-top:1px;}
+  .bj-mini .bj-say{max-width:150px;font-size:11px;padding:5px 8px;}
+  @keyframes bjMiniBob{from{transform:translateY(0) rotate(-4deg);}to{transform:translateY(-3px) rotate(4deg);}}
+  .bj-whip{position:fixed;left:0;top:0;z-index:99998;pointer-events:none;overflow:visible;}
+  .bj-welt{position:absolute;width:42px;height:42px;z-index:4;pointer-events:none;}
+  .bj-welt i{position:absolute;left:4px;right:4px;top:50%;height:3px;border-radius:2px;background:#ff3b52;box-shadow:0 0 4px #ff3b52;transform:rotate(-35deg);}
+  .bj-welt i + i{transform:rotate(-20deg) translateY(7px);}
+  .bj-welt b{position:absolute;right:-8px;top:-10px;font-size:16px;}
+  .bj-crack{position:fixed;z-index:99999;pointer-events:none;font:900 15px 'Inter',sans-serif;color:#ffd84a;-webkit-text-stroke:1px #7a2a00;text-shadow:0 2px 0 #7a2a00;}
   .bj-who.bj-walk{z-index:6;} .bj-who.bj-walk > b{opacity:0;transition:opacity .15s;}
   .bj-pie{position:fixed;left:0;top:0;z-index:99999;font-size:26px;line-height:26px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));}
   .bj-splat{position:absolute;width:62px;height:62px;z-index:4;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}
@@ -21500,7 +21511,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 90;                 // ← goes up by one with every published version
+  const SD_BUILD = 91;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24352,8 +24363,8 @@
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
         <div class="cas-feed bj-feed"></div>`;
       const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
-      const setBet = (v) => { BJ.bet = Math.max(0, Math.min(scBal(), 1000000, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); };
-      inp.addEventListener('input', () => { const v = Math.max(0, Math.min(scBal(), 1000000, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); });
+      const setBet = (v) => { const was = BJ.bet; BJ.bet = Math.max(0, Math.min(scBal(), 1000000, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); try{ bjBetNudge(was); }catch(e){} };
+      inp.addEventListener('input', () => { const was = BJ.bet, v = Math.max(0, Math.min(scBal(), 1000000, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); try{ bjBetNudge(was); }catch(e){} });
       inp.addEventListener('change', () => setBet(Number(inp.value)));
       inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); bjPlaceBet(); } });
       el.querySelector('.bj-chiprow').addEventListener('click', (e) => {
@@ -24700,11 +24711,11 @@
       'Imagine losing to a bot, {n} 🤖', 'Your points look better on my side, {n} ✨', '{n} donating {x} points to the house. So generous 💸', 'Calculated. Unlike you, {n} 🧠'],
     bust: ['Bust! 💥 Greedy, {n}?', '{n} went over 21. Classic 😂', 'Too many cards, {n}. Math is hard huh 🧮', '{n} flew too close to 21 ☀️', 'Hit me, they said. It hit back, {n} 💀', 'Bye bye points, {n} 👋'],
     group: ['{n} — thanks for the donations, all of you 💸', 'Look at {n}. A whole table of losers 😂', '{n}: the house thanks you for your service 🫡', 'Group project: losing to a bot. Great teamwork, {n} 👏'],
-    bettiny: ['{x} points? {n}, are we playing for crumbs? 🍞', 'Wow {n}, {x}. Big spender 🙄', '{x}?? My grandma bets more than that, {n} 👵', 'Scared, {n}? Put some real points down 🐔', '{n} betting {x} like it\'s their life savings 💀'],
+    bettiny: ['{x}?? bruh 💀', 'okdiokiiii {x} points 🙄', '{x} points? {n}, are we playing for crumbs? 🍞', 'Wow {n}, {x}. Big spender 🙄', '{x}?? My grandma bets more than that, {n} 👵', 'Scared, {n}? Put some real points down 🐔', '{n} betting {x} like it\'s their life savings 💀'],
     betsmall: ['Only {x}, {n}? Playing it safe I see 😴', '{x} points… come on {n}, live a little 🎲', 'Bet more, coward. Just kidding. Unless? 👀', '{n}, {x} won\'t make you rich. Double it 😏'],
     betmid: ['{x}, okay {n}, now we\'re talking 😤', 'Decent bet, {n}. Bet you won\'t double it though 🫵', "{x} points? I'll take them, {n} 😌", 'Feeling lucky with {x}, {n}? 🍀'],
     betbig: ['{x}?! {n} came to play 🔥', 'Woah {n}, {x} points. Bold. I love it 🤑', "{n} putting {x} down. Don't cry later 😭", 'Big money {n}! Thanks in advance 💸'],
-    betall: ['ALL IN?! {n} you absolute legend 💀', '{n} put everything down. I respect it. I will also take it 😈', '{x} points, all of it. Bye bye, {n} 👋', '{n} going all in. Somebody record this 📸'],
+    betall: ['ALL IN?! {n} heck yeah 😈', 'BOOO ALL IN {n} 💀', 'ALL IN?! {n} you absolute legend 💀', '{n} put everything down. I respect it. I will also take it 😈', '{x} points, all of it. Bye bye, {n} 👋', '{n} going all in. Somebody record this 📸'],
     big: ['{x} POINTS?! {n}, you okay? 😭', 'Rent money gone, {n}? 🏠💸', '{n} going all in and losing it all. Iconic 💀', 'That was a lot of points, {n}. Was. 😌'],
   };
   function bjTaunt(kind, n, x, seed){
@@ -24727,6 +24738,38 @@
     [/\b(gn|bye+|cya|sleep|leaving|ima go|imma go|brb)\b/, ['leaving already?? coward 😭', 'gn {n}, thx for the points', 'cya {n}, come back with more points', 'running away huh 🏃']],
     [/\b(bruh|bro|wtf|wth|huh|what)\b/, ['bruh 💀', 'yea what about it', 'bro really said that', 'WHAT 😭', 'huh??']],
   ];
+  // (more lines, written the way people in the SaiDeck chat actually talk)
+  BOT_REPLIES.unshift(
+    [/\b(fa+h+)\b/, ['FAHHH 😭', 'fah is right {n} 💀', 'FAH x2 lmaooo', 'the fah of a broke person', 'fahhh indeed. bet again tho']],
+    [/\ball ?in\b/, ['ALL IN?? yes pls 🤑', 'BOOO ALL IN lmaooo', 'send it {n}. i believe in u (to lose)', 'all in and all gone 👋', 'heck yeah all in, my favourite words']],
+    [/\b(lend|borrow|loan|gimme|give me)\b/, ['the house doesnt do loans 💅', 'ask papa Sai for money not me', 'lend u points? i AM the reason ur broke', 'no refunds no loans no mercy']],
+    [/\b(sai|saichizu|papa)\b/, ['papa Sai cant save u here {n} 😌', 'Sai made me to take ur points. blame him', 'even Sai loses to me sksksk', 'Sai is busy updating, its just u and me now 😈']],
+    [/\b(infiltrat\w*|swat\w*|cursor)\b/, ['infiltrate my table and i swat ur points 🪰', 'u can swat cursors but u cant swat me', 'stop infiltrating and start betting {n}']],
+    [/\b(jackpot|slots?|casino|777)\b/, ['every point u lose here feeds the jackpot btw 🎰', 'go spin slots then, ill be here when ur broke', 'the jackpot says thanks for ur donation {n}', 'slots r for people who cant handle me']],
+    [/\b(luck|lucky|unlucky|pray(ing)?)\b/, ['luck? never heard of it', 'praying wont help {n} 🙏💀', 'unlucky? nah just bad', 'luck runs out. my patience doesnt']],
+    [/\b(update|updating|build)\b/, ['update ur strategy first {n} 💀', 'no update can fix that gameplay', 'go update, ill keep ur seat warm (and ur points)']],
+  );
+  BOT_REPLIES.forEach(([re, L]) => {
+    const s = String(re);
+    if(s.includes('rigged')) L.push('rigged? its literally the server clock dealing {n} 💀', 'ur not cooked by the deck ur cooked by ur choices', 'aight cry about it 😭');
+    else if(s.includes('stupid')) L.push('bro is losing to a bunch of code 😭', 'imagine typing that while broke', 'ok and? still got ur points tho');
+    else if(s.includes('lets ?go')) L.push('yippie for u i guess 🙄', 'heck yeah… for now', 'ok ok one W doesnt make u a pro', 'enjoy ur 5 seconds of fame {n}');
+    else if(s.includes('l+mf?a+o+')) L.push('sksksk', 'lmao ur next {n}', 'teehee 😈', 'HAHAHAHA bro');
+    else if(s.includes('sad|cry')) L.push('NOO 😭 anyway bet again', 'aww is the lil gambler sad', 'pain is just points leaving ur body');
+    else if(s.includes('broke|poor')) L.push('flat broke club 💀 welcome {n}', 'if u lose ur broke. so dont lose lmao', 'broke?? relatable (not really im rich)', 'run ur money dry with me 🤑');
+    else if(s.includes('hit|stand')) L.push('hit it. i dare u. i double dare u', 'stand on 12? coward', 'the next card is a 10. or is it 👀');
+    else if(s.includes('bruh|bro')) L.push('bruhhh', 'bro what 💀', 'brobro chill', 'okdiokiiii');
+  });
+  BOT_TAUNTS.lose.push('L + broke + {x} points gone 💀', '{n} flat broke speedrun any%', 'FAHHH {n} 😭 {x} points', 'ur points said bye {n} 👋', 'heck yeah thanks {n} 🤑', '{n} cooked. absolutely cooked 🍳', 'teehee {x} points for me 😈', 'running ur money dry, {n} sksksk');
+  BOT_TAUNTS.bust.push('BUST lmaoooo 💀', '{n} really hit on that 😭', 'okdiokiiii thats a bust', 'bro hit and got hit back 🥊');
+  BOT_TAUNTS.big.push('{n} lost {x}. somebody check on them 😭', 'FAH. {x} points. {n} cooked', 'thats not a loss thats a donation {n} 💸');
+  Object.assign(BOT_TAUNTS, {
+    betup: ['ooh {n} adding more 👀 good good', 'yes {n} more. MORE 🤑', 'thats it {n} feed the house', 'bigger bet bigger L, love it', 'keep clicking those chips {n} 😈'],
+    betdown: ['taking chips OFF?? coward 🐔', '{n} getting scared lmaooo', 'nah put it back {n} 😭', 'lowering it? weak', 'scaredy cat {n} 🐱'],
+    betclear: ['cleared it all?? 💀 bet something {n}', 'zero?? u came here to watch?', 'put the chips back {n} its not that deep'],
+    betmore: ['{n} went from {p} to {x}. confidence 😤', '{x} this time {n}? someone feels lucky', 'up from {p} to {x}. bold. stupid. i love it', 'last round {p}, now {x}. ur points r coming home to me'],
+    betless: ['{n} went from {p} down to {x}?? scared 🐔', 'only {x} after betting {p} last time? lost ur nerve {n}', '{p} to {x}… the fear is real 😭', 'shrinking ur bet wont shrink ur L {n}'],
+  });
   const BOT_GENERIC = ['less talking more betting {n}', 'focus on ur cards {n} 💀', 'mhm sure', 'real', 'interesting… anyway', 'ok and? bet', 'fr fr', 'lowkey true', 'no way 😭', 'say that again after this hand'];
   function bjBotReply(m){
     const D = BJ.d; if(!D || D.u !== 'bot' || !m || m.e || !m.m || m.a) return;
@@ -24756,16 +24799,22 @@
         if(bjIsSplit(s) && s.q.h > 21 && !s.q.pe) say('bq:' + D.r + ':' + s.u, bjTaunt('bust', s.n, s.q.b, D.r + s.u + 'q'), 500);
       }
     }
-    // betting: look at what everyone put down and egg them on to bet more
+    // betting: the bot and its little helpers look at what everyone put down (and whether it's
+    // more or less than last time) and egg them on to bet more
     if(ph === 'bet'){
-      let i = 0;
-      for(const s of bjPlayers()){
-        if(!(s.b > 0)) continue;
-        const key = 'bet:' + D.r + ':' + s.u; if(BJ.taunted[key]) { i++; continue; }
-        const left = scOf(s.u), tot = s.b + (left || 0), r = tot ? s.b / tot : 0;
-        const kind = left != null && left < 1 ? 'betall' : (s.b <= 10 || r < 0.05) ? 'bettiny' : r < 0.2 ? 'betsmall' : r < 0.5 ? 'betmid' : 'betbig';
-        say(key, bjTaunt(kind, s.n, s.b, D.r + s.u + 'bet'), 700 + i * 2600); i++;
-      }
+      BJ.lastBets = BJ.lastBets || {};
+      const bets = bjPlayers().filter(s => s.b > 0 && !BJ.taunted['bet:' + D.r + ':' + s.u]);
+      const top = bjPlayers().filter(s => s.b > 0).sort((x, y) => y.b - x.b)[0];
+      bets.forEach((s, i) => {
+        BJ.taunted['bet:' + D.r + ':' + s.u] = 1;
+        const prev = BJ.lastBets[s.u], left = scOf(s.u), tot = s.b + (left || 0), r = tot ? s.b / tot : 0;
+        let kind = left != null && left < 1 ? 'betall' : (s.b <= 10 || r < 0.05) ? 'bettiny' : r < 0.2 ? 'betsmall' : r < 0.5 ? 'betmid' : 'betbig';
+        if(kind !== 'betall' && prev && prev.r !== D.r && prev.b !== s.b) kind = s.b > prev.b ? 'betmore' : 'betless';
+        BJ.lastBets[s.u] = { b: s.b, r: D.r };
+        const txt = bjTaunt(kind, s.n, s.b, D.r + s.u + 'bet').replace(/\{p\}/g, prev ? prev.b : '');
+        if(top && s.u === top.u && !BJ.taunted['bettop:' + D.r]){ BJ.taunted['bettop:' + D.r] = 1; setTimeout(() => { if(host.isConnected){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){} } }, 600); }
+        else setTimeout(() => bjMiniSay(el, s.u, txt), 300 + i * 350);
+      });
     }
     // the round's over: walk up to everyone who lost and rub it in (biggest loser first), with a pie or two
     if(ph === 'done' && !BJ.taunted['d:' + D.r]){
@@ -24776,7 +24825,7 @@
         if(lost > 0) L.push({ s, lost });
       }
       L.sort((x, y) => y.lost - x.lost || (x.s.u < y.s.u ? -1 : 1));
-      bjBotMock(el, host, L.slice(0, 3), D.r, L.length);
+      bjBotMock(el, host, L.slice(0, 7), D.r, L.length);
     }
     for(const k of Object.keys(BJ.taunted)) if(Object.keys(BJ.taunted).length > 60) delete BJ.taunted[k];
   }
@@ -24801,19 +24850,36 @@
       }catch(e){}
     }
   }
-  // the bot walks over to each loser, says something, maybe throws a pie, and walks back
+  // what the bot (or a helper) does to someone who lost: pie, whip, both, or grabs their chips
+  const BJ_ACTS = ['pie', 'whip', 'whip+pie', 'grab', 'whip', 'pie+grab'];
+  function bjAct(fromEl, av, kind, v){
+    if(!av || !av.isConnected) return;
+    const parts = kind.split('+');
+    parts.forEach((k, j) => setTimeout(() => {
+      if(!av.isConnected) return;
+      if(k === 'pie') bjPieAt(fromEl, av, v);
+      else if(k === 'whip') bjWhipAt(fromEl, av);
+      else if(k === 'grab') bjGrabAt(av, fromEl);
+    }, j * 900));
+  }
+  const bjHash = (k) => { let h = 0; k = String(k); for(let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h); };
+  // the bot walks over to the biggest loser; its little helpers run to everyone else who lost, all at once
   function bjBotMock(el, host, L, R, nAll){
-    const STEP = 3400; let t = 900;
-    const hseed = (k) => { let h = 0; for(let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) | 0; return Math.abs(h); };
+    const STEP = 3400, t = 900;
+    const ok = () => host.isConnected && BJ.d && BJ.d.r === R && !BJ.botQuiet;
     L.forEach((x, i) => {
+      const txt = bjTaunt(x.lost >= 200 ? 'big' : 'lose', x.s.n, x.lost, R + x.s.u), act = BJ_ACTS[bjHash(R + x.s.u + 'act') % BJ_ACTS.length];
+      if(i > 0){
+        // a helper: runs over, roasts them and does its thing
+        setTimeout(() => { if(!ok()) return; const m = bjMiniSay(el, x.s.u, txt, 700); if(m) setTimeout(() => bjAct(m.querySelector('.bj-mini-b') || m, el.querySelector(`.bj-seat[data-u="${CSS.escape(x.s.u)}"] .bj-av`), act, bjHash(R + x.s.u) % 4), 1400); }, t + (i - 1) * 300);
+        return;
+      }
       setTimeout(() => {
-        if(!host.isConnected || !BJ.d || BJ.d.r !== R || BJ.botQuiet) return;
+        if(!ok()) return;
         const av = el.querySelector(`.bj-seat[data-u="${CSS.escape(x.s.u)}"] .bj-av`);
-        const txt = bjTaunt(x.lost >= 200 ? 'big' : 'lose', x.s.n, x.lost, R + x.s.u);
-        const pie = i === 0 || hseed(R + x.s.u + 'pie') % 2 === 0;
+        bjMiniBye(el, x.s.u);     // (the boss handles this one; its helper steps aside)
         if(!av){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){} return; }
         const hr = host.getBoundingClientRect(), ar = av.getBoundingClientRect();
-        // stop just above / beside their picture, not on top of it
         const dx = ar.left + ar.width / 2 - (hr.left + 17) + (ar.left > hr.left ? -46 : 46), dy = ar.top - hr.top - 4;
         host.classList.add('bj-walk');
         const walk = host.animate([
@@ -24822,23 +24888,117 @@
           { transform: `translate(${dx}px,${dy}px) rotate(0)`, offset: 0.18 },
           { transform: `translate(${dx}px,${dy - 6}px)`, offset: 0.3 },
           { transform: `translate(${dx}px,${dy}px)`, offset: 0.4 },
-          { transform: `translate(${dx}px,${dy}px)`, offset: 0.8 },
-          { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 14}px) rotate(6deg)`, offset: 0.9 },
-          { transform: 'translate(0,0)' }], { duration: STEP - 200, easing: 'ease-in-out' });
+          { transform: `translate(${dx}px,${dy}px)`, offset: 0.82 },
+          { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 14}px) rotate(6deg)`, offset: 0.91 },
+          { transform: 'translate(0,0)' }], { duration: STEP + 800, easing: 'ease-in-out' });
         walk.onfinish = walk.oncancel = () => host.classList.remove('bj-walk');
         setTimeout(() => { if(host.isConnected){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){}
-          // (the bubble goes on the open side of where the bot is standing now)
-          const bb = host.querySelector('.bj-say'), box = host.closest('.chat-casino'); if(bb && box){ const br = box.getBoundingClientRect(); bb.classList.toggle('left', ar.left + ar.width / 2 > br.left + br.width / 2); } } }, 650);
-        if(pie) setTimeout(() => { if(av.isConnected) bjPieAt(host.querySelector('.bj-av') || host, av, hseed(R + x.s.u) % 4); }, 1300);
-      }, t + i * STEP);
+          const bb = host.querySelector('.bj-say'), box = host.closest('.chat-casino'); if(bb && box){ const br = box.getBoundingClientRect(); bb.classList.toggle('left', ar.left + ar.width / 2 > br.left + br.width / 2); } } }, 900);
+        setTimeout(() => { if(av.isConnected) bjAct(host.querySelector('.bj-av') || host, av, act, bjHash(R + x.s.u) % 4); }, 1300);
+      }, t);
     });
     // more than one loser: one last line for all of them together
     if(nAll >= 2) setTimeout(() => {
-      if(!host.isConnected || !BJ.d || BJ.d.r !== R || BJ.botQuiet) return;
-      const names = L.map(x => bjName(x.s.n)), list = names.length > 2 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join(' and ');
-      const txt = BOT_TAUNTS.group[hseed(R + 'grp') % BOT_TAUNTS.group.length].replace(/\{n\}/g, list);
+      if(!ok()) return;
+      const names = L.slice(0, 4).map(x => bjName(x.s.n)), list = names.length > 2 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join(' and ');
+      const txt = BOT_TAUNTS.group[bjHash(R + 'grp') % BOT_TAUNTS.group.length].replace(/\{n\}/g, list);
       gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){}
-    }, t + L.length * STEP + 200);
+    }, t + STEP + 600);
+  }
+  // ----- the bot's little helpers -----
+  const BJ_MINI = [['Bolt', 0], ['Chip', 140], ['Nut', 260], ['Byte', 60], ['Gizmo', 300], ['Rivet', 200]];
+  function bjMiniEl(el, u){
+    const tb = el.querySelector('.bj-table'); if(!tb) return null;
+    const av = el.querySelector(`.bj-seat[data-u="${CSS.escape(u)}"] .bj-av`); if(!av) return null;
+    BJ.mini = BJ.mini || {};
+    const tr = tb.getBoundingClientRect(), ar = av.getBoundingClientRect();
+    let x = ar.left - tr.left - 40, y = ar.top - tr.top + ar.height / 2 - 4; if(x < 26) x = ar.right - tr.left + 40;
+    let m = BJ.mini[u];
+    if(!m || !m.isConnected){
+      const k = bjHash(u) % BJ_MINI.length;
+      m = document.createElement('div'); m.className = 'bj-mini'; m.dataset.u = u;
+      m.innerHTML = `<span class="bj-mini-b" style="filter:hue-rotate(${BJ_MINI[k][1]}deg) saturate(1.4)">🤖</span><i></i>`;
+      m.querySelector('i').textContent = BJ_MINI[k][0];
+      const w = (el.querySelector('.bj-who .bj-av') || el.querySelector('.bj-who') || tb).getBoundingClientRect();
+      m.style.left = (w.left - tr.left + w.width / 2) + 'px'; m.style.top = (w.top - tr.top + w.height / 2) + 'px';
+      tb.appendChild(m); BJ.mini[u] = m; m.getBoundingClientRect();
+      m.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(.3)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }], { duration: 250, easing: 'ease-out' });
+    }
+    m.style.left = x + 'px'; m.style.top = y + 'px';
+    clearTimeout(m._bye); m._bye = setTimeout(() => bjMiniBye(el, u), 9000);
+    return m;
+  }
+  function bjMiniBye(el, u){
+    const m = BJ.mini && BJ.mini[u]; if(!m) return; delete BJ.mini[u];
+    if(!m.isConnected) return;
+    const tb = el.querySelector('.bj-table'), w = (el.querySelector('.bj-who .bj-av') || el.querySelector('.bj-who'));
+    if(tb && w){ const tr = tb.getBoundingClientRect(), r = w.getBoundingClientRect(); m.style.left = (r.left - tr.left + r.width / 2) + 'px'; m.style.top = (r.top - tr.top + r.height / 2) + 'px'; }
+    m.querySelectorAll('.bj-say').forEach(x => x.remove());
+    setTimeout(() => { m.animate([{ opacity: 1 }, { opacity: 0, transform: 'translate(-50%,-50%) scale(.3)' }], { duration: 220, fill: 'both' }).onfinish = () => m.remove(); }, 550);
+  }
+  // a helper runs to someone and says something (returns the helper)
+  function bjMiniSay(el, u, txt, delay){
+    if(!BJ.on || BJ.botQuiet) return null;
+    const m = bjMiniEl(el, u); if(!m) return null;
+    setTimeout(() => { if(!m.isConnected) return; gameSay(m, txt); try{ sfxMiniVoice(txt); }catch(e){}
+      const bb = m.querySelector('.bj-say'), box = m.closest('.chat-casino'); if(bb && box){ const br = box.getBoundingClientRect(), r = m.getBoundingClientRect(); bb.classList.toggle('left', r.left + r.width / 2 > br.left + br.width / 2); } }, delay == null ? 650 : delay);
+    return m;
+  }
+  // I'm still choosing my bet: a helper notices every time I add or take chips off
+  function bjBetNudge(was){
+    if(BJ.nudgeFrom == null) BJ.nudgeFrom = was | 0;
+    clearTimeout(BJ.nudgeT);
+    BJ.nudgeT = setTimeout(() => {
+      const from = BJ.nudgeFrom | 0; BJ.nudgeFrom = null;
+      const D = BJ.d, me = chatUid(); if(!D || D.u !== 'bot' || bjPhase() !== 'bet' || BJ.botQuiet) return;
+      const S = BJ.p[me]; if(S && S.r === D.r && S.b > 0) return;      // (already bet)
+      const v = BJ.bet | 0; if(v === from) return;
+      const kind = v === 0 ? 'betclear' : v >= scBal() && v > from ? 'betall' : v > from ? 'betup' : 'betdown';
+      const L = BOT_TAUNTS[kind], txt = L[Math.floor(Math.random() * L.length)].replace(/\{n\}/g, bjName(chatName())).replace(/\{x\}/g, v);
+      const el = chatPanel.querySelector('.chat-bj'); if(!el) return;
+      if(!bjMiniSay(el, me, txt, 300)){ const host = el.querySelector('.bj-who'); if(host) gameSay(host, txt); }
+    }, 900);
+  }
+  // a whip cracks from the bot (or helper) onto someone's picture
+  function bjWhipAt(fromEl, toEl){
+    const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+    const x0 = a.left + a.width / 2, y0 = a.top + a.height / 2, x1 = b.left + b.width / 2, y1 = b.top + b.height / 2;
+    const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'bj-whip');
+    svg.setAttribute('width', innerWidth); svg.setAttribute('height', innerHeight);
+    const hdl = document.createElementNS(NS, 'line'), rope = document.createElementNS(NS, 'path');
+    const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+    // the handle pokes out of the bot towards the target
+    hdl.setAttribute('x1', x0); hdl.setAttribute('y1', y0); hdl.setAttribute('x2', x0 + dx / len * 16); hdl.setAttribute('y2', y0 + dy / len * 16);
+    hdl.setAttribute('stroke', '#5a3315'); hdl.setAttribute('stroke-width', '5'); hdl.setAttribute('stroke-linecap', 'round');
+    rope.setAttribute('fill', 'none'); rope.setAttribute('stroke', '#8b5a2b'); rope.setAttribute('stroke-width', '4'); rope.setAttribute('filter', 'drop-shadow(0 2px 2px rgba(0,0,0,.5))'); rope.setAttribute('stroke-linecap', 'round');
+    svg.append(rope, hdl); document.body.appendChild(svg);
+    const hx = x0 + dx / len * 16, hy = y0 + dy / len * 16;
+    const shape = (bend, reach) => { const ex = hx + (x1 - hx) * reach, ey = hy + (y1 - hy) * reach, cx = hx + (ex - hx) * 0.5 + nx * bend, cy = hy + (ey - hy) * 0.5 + ny * bend; return `M${hx},${hy} Q${cx},${cy} ${ex},${ey}`; };
+    // wind up behind, swing over, crack, fall back
+    const frames = [[-len * 0.5, 0.25], [-len * 0.35, 0.55], [len * 0.15, 0.85], [-len * 0.05, 1], [len * 0.25, 0.7], [len * 0.1, 0.4]];
+    frames.forEach(([bd, rc], i) => setTimeout(() => rope.setAttribute('d', shape(bd, rc)), i * 80));
+    try{ sfxWhip(); }catch(e){}
+    setTimeout(() => {
+      if(!toEl.isConnected) return;
+      const pl = toEl.closest('.bj-pl') || toEl.parentElement;
+      const w = document.createElement('span'); w.className = 'bj-welt'; w.innerHTML = '<i></i><i></i><b>💢</b>';
+      w.style.left = (toEl.offsetLeft - 4) + 'px'; w.style.top = (toEl.offsetTop - 4) + 'px';
+      pl.appendChild(w);
+      const pop = document.createElement('div'); pop.className = 'bj-crack'; pop.textContent = 'CRACK!'; pop.style.left = (x1 - 30) + 'px'; pop.style.top = (y1 - 40) + 'px'; document.body.appendChild(pop);
+      pop.animate([{ opacity: 0, transform: 'scale(.5) rotate(-12deg)' }, { opacity: 1, transform: 'scale(1.2) rotate(-6deg)', offset: 0.25 }, { opacity: 0, transform: 'translateY(-16px) scale(1) rotate(-6deg)' }], { duration: 900, fill: 'both' }).onfinish = () => pop.remove();
+      toEl.animate([{ transform: 'none' }, { transform: 'translate(-5px,2px) rotate(-12deg)' }, { transform: 'translate(4px,-1px) rotate(9deg)' }, { transform: 'translate(-2px,0) rotate(-4deg)' }, { transform: 'none' }], { duration: 420 });
+      setTimeout(() => { if(w.isConnected) w.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, fill: 'both' }).onfinish = () => w.remove(); }, 2600);
+    }, 250);
+    setTimeout(() => svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'both' }).onfinish = () => svg.remove(), 650);
+  }
+  // the bot snatches some of their chips
+  function bjGrabAt(fromEl, toEl){
+    const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+    for(let i = 0; i < 6; i++) setTimeout(() => {
+      const c = document.createElement('div'); c.className = 'bj-pie'; c.textContent = '🪙'; c.style.fontSize = '18px'; document.body.appendChild(c);
+      const x0 = a.left + a.width / 2 - 9 + (i % 3 - 1) * 8, y0 = a.top + a.height / 2 - 9, x1 = b.left + b.width / 2 - 9, y1 = b.top + b.height / 2 - 9;
+      c.animate([{ transform: `translate(${x0}px,${y0}px) scale(.6)` }, { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 50 - i * 6}px) scale(1.1)`, offset: 0.5 }, { transform: `translate(${x1}px,${y1}px) scale(.5)`, opacity: 0.4 }], { duration: 560, easing: 'ease-in-out', fill: 'both' }).onfinish = () => { c.remove(); try{ sfxChip(); }catch(e){} };
+    }, i * 90);
   }
   // a pie flies from the bot into someone's face and sticks there for a bit
   function bjPieAt(fromEl, toEl, v){
@@ -26826,6 +26986,18 @@
       m.fx = Object.assign({}, m.fx, { [me]: { k: kind, f: best.k, t: Date.now() } }); if(!m.fk) m.fk = kind;
       chatRender();
     }catch(e){ toast("Couldn't throw it — check your connection and try again.", 2600); await scLoad(); }
+  }
+  // a whip: a whoosh, then a sharp crack
+  function sfxWhip(){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
+    sfxNoiseHit(ac, t, 'bandpass', 500, 3200, 2, 0.2, 0.14);
+    sfxNoiseHit(ac, t + 0.25, 'highpass', 2500, 7000, 0.7, 0.05, 0.55);
+    sfxTone(ac, t + 0.25, 'square', 1800, 300, 0.03, 0.12);
+  }
+  // the helpers talk in quick high squeaks
+  function sfxMiniVoice(txt){
+    if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime + 0.02, n = Math.min(6, 2 + (String(txt).length / 12 | 0));
+    for(let i = 0; i < n; i++) sfxTone(ac, t + i * 0.075, 'square', 900 + ((i * 397) % 500), 1200 + ((i * 211) % 600), 0.05, 0.035);
   }
   function sfxSplat(kind){
     if(!sfxOn()) return; const ac = sfxCtx(); if(!ac) return; const t = ac.currentTime;
