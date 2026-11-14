@@ -1,6 +1,6 @@
 {
-  "build": 91,
+  "build": 92,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "The blackjack dealer bot has little helper bots now: they run up to every player at once to roast their bets and their losses. New ways to suffer: whip cracks, pies and chip snatching. The bot notices when you add or take chips off your bet, and when you bet more or less than last round. Loads of new bot lines in our chat style."
+  "notes": "The little helper bots now head back as soon as you press Bet, and they don't hang around the table as long."
 }

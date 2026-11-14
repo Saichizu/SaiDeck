@@ -21511,7 +21511,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 91;                 // ← goes up by one with every published version
+  const SD_BUILD = 92;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24272,6 +24272,8 @@
     if(bet > scBal()){ toast(`You only have ${scBal()} points.`, 2000); return; }
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
+    clearTimeout(BJ.nudgeT); BJ.nudgeFrom = null;
+    { const el = chatPanel.querySelector('.chat-bj'); if(el) try{ bjMiniBye(el, me); }catch(e){} }
     bjUser(async () => {
       const body = { [`bj/p/${me}/r`]: D.r, [`bj/p/${me}/b`]: bet, [`bj/p/${me}/k`]: 0, [`bj/p/${me}/h`]: 0, [`bj/p/${me}/a`]: 0, [`bj/p/${me}/v`]: 0, [`bj/p/${me}/pe`]: false, [`bj/p/${me}/st`]: 'p', [`bj/p/${me}/c`]: null, [`bj/p/${me}/f1`]: null, [`bj/p/${me}/t`]: bjSv,
         [`scores/${me}/s`]: SC.s + bet, [`scores/${me}/t`]: bjSv };
@@ -24813,7 +24815,7 @@
         BJ.lastBets[s.u] = { b: s.b, r: D.r };
         const txt = bjTaunt(kind, s.n, s.b, D.r + s.u + 'bet').replace(/\{p\}/g, prev ? prev.b : '');
         if(top && s.u === top.u && !BJ.taunted['bettop:' + D.r]){ BJ.taunted['bettop:' + D.r] = 1; setTimeout(() => { if(host.isConnected){ gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){} } }, 600); }
-        else setTimeout(() => bjMiniSay(el, s.u, txt), 300 + i * 350);
+        else if(s.u !== chatUid()) setTimeout(() => bjMiniSay(el, s.u, txt, 650, 3800), 300 + i * 350);
       });
     }
     // the round's over: walk up to everyone who lost and rub it in (biggest loser first), with a pie or two
@@ -24871,7 +24873,7 @@
       const txt = bjTaunt(x.lost >= 200 ? 'big' : 'lose', x.s.n, x.lost, R + x.s.u), act = BJ_ACTS[bjHash(R + x.s.u + 'act') % BJ_ACTS.length];
       if(i > 0){
         // a helper: runs over, roasts them and does its thing
-        setTimeout(() => { if(!ok()) return; const m = bjMiniSay(el, x.s.u, txt, 700); if(m) setTimeout(() => bjAct(m.querySelector('.bj-mini-b') || m, el.querySelector(`.bj-seat[data-u="${CSS.escape(x.s.u)}"] .bj-av`), act, bjHash(R + x.s.u) % 4), 1400); }, t + (i - 1) * 300);
+        setTimeout(() => { if(!ok()) return; const m = bjMiniSay(el, x.s.u, txt, 700, 5200); if(m) setTimeout(() => bjAct(m.querySelector('.bj-mini-b') || m, el.querySelector(`.bj-seat[data-u="${CSS.escape(x.s.u)}"] .bj-av`), act, bjHash(R + x.s.u) % 4), 1400); }, t + (i - 1) * 300);
         return;
       }
       setTimeout(() => {
@@ -24907,7 +24909,7 @@
   }
   // ----- the bot's little helpers -----
   const BJ_MINI = [['Bolt', 0], ['Chip', 140], ['Nut', 260], ['Byte', 60], ['Gizmo', 300], ['Rivet', 200]];
-  function bjMiniEl(el, u){
+  function bjMiniEl(el, u, stay){
     const tb = el.querySelector('.bj-table'); if(!tb) return null;
     const av = el.querySelector(`.bj-seat[data-u="${CSS.escape(u)}"] .bj-av`); if(!av) return null;
     BJ.mini = BJ.mini || {};
@@ -24925,7 +24927,7 @@
       m.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(.3)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }], { duration: 250, easing: 'ease-out' });
     }
     m.style.left = x + 'px'; m.style.top = y + 'px';
-    clearTimeout(m._bye); m._bye = setTimeout(() => bjMiniBye(el, u), 9000);
+    clearTimeout(m._bye); m._bye = setTimeout(() => bjMiniBye(el, u), stay || 9000);
     return m;
   }
   function bjMiniBye(el, u){
@@ -24937,9 +24939,9 @@
     setTimeout(() => { m.animate([{ opacity: 1 }, { opacity: 0, transform: 'translate(-50%,-50%) scale(.3)' }], { duration: 220, fill: 'both' }).onfinish = () => m.remove(); }, 550);
   }
   // a helper runs to someone and says something (returns the helper)
-  function bjMiniSay(el, u, txt, delay){
+  function bjMiniSay(el, u, txt, delay, stay){
     if(!BJ.on || BJ.botQuiet) return null;
-    const m = bjMiniEl(el, u); if(!m) return null;
+    const m = bjMiniEl(el, u, stay); if(!m) return null;
     setTimeout(() => { if(!m.isConnected) return; gameSay(m, txt); try{ sfxMiniVoice(txt); }catch(e){}
       const bb = m.querySelector('.bj-say'), box = m.closest('.chat-casino'); if(bb && box){ const br = box.getBoundingClientRect(), r = m.getBoundingClientRect(); bb.classList.toggle('left', r.left + r.width / 2 > br.left + br.width / 2); } }, delay == null ? 650 : delay);
     return m;
