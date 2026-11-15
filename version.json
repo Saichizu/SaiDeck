@@ -1,6 +1,6 @@
 {
-  "build": 93,
+  "build": 95,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Fixed the +100 update bonus: it works again for every new build, no need to open Chat Admin for it."
+  "notes": "Fade in / fade out for the whole video (sound too). Names next to the track images (4 looks) and an option for images to start on the left. 5 new intro styles: Kings & Queens (with crowns), Polaroid, Spotlight, Trading cards and Comic, plus pictures that fly out of the tracks into the intro. 12 new fonts. Tracks no longer shuffle at the end when Singing tracks move up is off, and Fixed tracks stay put."
 }

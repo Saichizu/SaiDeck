@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>SaiDeck</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=M+PLUS+1+Code:wght@400;500;700&family=Pixelify+Sans:wght@400;600&family=VT323&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@800;900&family=Fredoka:wght@700&family=Anton&family=Bangers&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=M+PLUS+1+Code:wght@400;500;700&family=Pixelify+Sans:wght@400;600&family=VT323&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@800;900&family=Fredoka:wght@700&family=Anton&family=Bangers&family=Bebas+Neue&family=Montserrat:wght@900&family=Playfair+Display:wght@900&family=Pacifico&family=Lobster&family=Permanent+Marker&family=Righteous&family=Orbitron:wght@900&family=Caveat:wght@700&family=Press+Start+2P&family=Luckiest+Guy&family=Dancing+Script:wght@700&display=swap">
 <style>
   :root{
     --bg-deep:#0a0a0c;
@@ -274,8 +274,10 @@
   .bj-chip.on{background:radial-gradient(circle,#ffe08a 0 30%,#f5a524 31% 100%);color:#2a1a02;}
   .bj-chip.win{background:#2fb37a;color:#fff;} .bj-chip.lose{background:#a83246;color:#fff;} .bj-chip.push{background:#5b6170;color:#fff;}
   .bj-pl{position:relative;display:flex;align-items:center;gap:4px;}
+  .bj-rbb{all:unset;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:6px;opacity:.8;} .bj-rbb:hover, .bj-rbb:focus-visible{opacity:1;background:rgba(255,80,80,.2);} .bj-rbb[hidden]{display:none;}
   .bj-gift{all:unset;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:6px;opacity:.55;} .bj-gift:hover, .bj-gift:focus-visible{opacity:1;background:rgba(255,255,255,.12);}
   .bj-nm{font-size:11.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cas-pity{display:block;color:#7dffb2;margin-bottom:2px;}
   .gm-pts{display:block;font:700 10.5px/1.2 'Inter',sans-serif;font-style:normal;color:#ffe08a;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;margin-top:1px;}
   .gm-pts:empty{display:none;}
   .bj-mini{position:absolute;z-index:5;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:left .6s cubic-bezier(.3,.8,.3,1), top .6s cubic-bezier(.3,.8,.3,1);}
@@ -959,7 +961,7 @@
   input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
   input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   /* blackjack: casino chips to build your bet */
-  .bj-betin input{width:74px;font-size:16px;}
+  .bj-betin input{width:96px;font-size:16px;}
   .bj-chiprow{display:flex;align-items:center;gap:7px;}
   .bj-chipbtn{all:unset;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;
     border:4px dashed rgba(255,255,255,.85);box-shadow:0 3px 0 rgba(0,0,0,.45), 0 6px 12px rgba(0,0,0,.35), inset 0 0 0 3px rgba(0,0,0,.18);transition:transform .12s;}
@@ -969,6 +971,9 @@
   .bj-chipbtn.c5, .bj-c.c5{background-color:#d8263a;} .bj-chipbtn.c10, .bj-c.c10{background-color:#2563d9;} .bj-chipbtn.c25, .bj-c.c25{background-color:#1f9d55;}
   .bj-chipbtn.c50, .bj-c.c50{background-color:#e07b12;} .bj-chipbtn.c100, .bj-c.c100{background-color:#1b1b22;} .bj-chipbtn.c100{border-color:rgba(245,208,74,.9);} .bj-chipbtn.c100 span{background:#f5d04a;}
   .bj-c.c1{background-color:#e9e9ee;}
+  .bj-chipbtn.c500, .bj-c.c500{background-color:#7b3fe4;} .bj-chipbtn.c1000, .bj-c.c1000{background-color:#c9930f;} .bj-chipbtn.c5000, .bj-c.c5000{background-color:#d6337f;} .bj-c.c10000{background-color:#0f9b9b;}
+  .bj-chipbtn.c1000, .bj-chipbtn.c5000, .bj-c.c1000, .bj-c.c5000, .bj-c.c10000{border-color:rgba(255,240,190,.95);}
+  .bj-chiprow{flex-wrap:wrap;}
   .bj-clr{all:unset;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.07);font:700 12px 'Inter',sans-serif;color:var(--text);}
   .bj-clr:hover{background:rgba(255,255,255,.14);}
   /* the piles on the table */
@@ -4118,6 +4123,10 @@
         <div class="rec-row" data-hl="frame" title="How good the sound is in the MP4. 320 is the best AAC gets; TikTok re-compresses the sound anyway, so it mostly matters for YouTube or keeping the file."><span>Audio quality</span><div class="seg" data-rec="audioKbps"><button type="button" data-value="192">192 kbps</button><button type="button" data-value="320">320 kbps</button></div></div>
         <div class="rec-row" data-hl="ruler clock"><span>Part of the song</span><div class="seg" data-rec="rangeMode"><button type="button" data-value="selection">Selection</button><button type="button" data-value="song">Whole song</button></div></div>
         <div class="rec-range-text" id="recRangeText">Whole song</div>
+        <div class="rec-row rs" data-rec-row="renderFadeIn" data-hl="frame" title="The video fades in from black (or white) at the start. 0 = off."><span>Fade in</span><input type="range" min="0" max="5" step="0.1" data-rec="renderFadeIn"><span class="rec-val" data-rec-val="renderFadeIn"></span></div>
+        <div class="rec-row rs" data-rec-row="renderFadeOut" data-hl="frame" title="The video fades out at the end. 0 = off."><span>Fade out</span><input type="range" min="0" max="5" step="0.1" data-rec="renderFadeOut"><span class="rec-val" data-rec-val="renderFadeOut"></span></div>
+        <div class="rec-row" data-rec-row="renderFadeColor" data-hl="frame"><span>Fade to</span><div class="seg" data-rec="renderFadeColor"><button type="button" data-value="black">Black</button><button type="button" data-value="white">White</button></div></div>
+        <label class="rec-row rec-toggle" data-rec-row="renderFadeAudio" data-hl="frame" title="The sound fades in and out along with the picture"><span>Fade the sound too</span><span class="switch"><input type="checkbox" data-rec="renderFadeAudio"><span class="track"></span><span class="knob"></span></span></label>
         <div class="rec-row" data-hl="frame" title="Tracks mix: the video's sound is your tracks mixed together. Audio file: use a finished (e.g. professionally mixed) song instead — the tracks still drive all the visuals, and the video runs for the length of the file (or just the In / Out selection, when one is marked and Part of the song is set to Selection)."><span>Audio</span><div class="seg" data-rec="audioSource"><button type="button" data-value="tracks">Tracks mix</button><button type="button" data-value="file">Audio file</button></div></div>
         <div class="rec-audio-file" id="recAudioFileRow" hidden>
           <div class="rec-row"><button type="button" class="rec-small-btn" id="recAudioPickBtn">Choose audio file…</button><span class="rec-audio-name" id="recAudioName">No file yet</span><button type="button" class="rec-small-btn" id="recAudioClearBtn" title="Remove the audio file" hidden>✕</button></div>
@@ -4164,6 +4173,8 @@
           <label class="rec-row rec-toggle rec-chip" style="--chip:#9aa7b8" data-hl="unplayed"><span>Dim unplayed part</span><span class="switch"><input type="checkbox" data-rec="dimUnplayed"><span class="track"></span><span class="knob"></span></span></label>
           <label class="rec-row rec-toggle rec-chip" style="--chip:#ff5a5f" data-hl="playhead"><span>Playhead line</span><span class="switch"><input type="checkbox" data-rec="showPlayhead"><span class="track"></span><span class="knob"></span></span></label>
         </div>
+        <div class="rec-row" data-rec-row="imgNames" data-hl="images" title="Each person's name (from the track name) next to their track image"><span>Names by images</span><div class="seg seg-grid" data-rec="imgNames"><button type="button" data-value="off">Off</button><button type="button" data-value="beside">Beside</button><button type="button" data-value="tag">Colour tag</button><button type="button" data-value="banner">On the picture</button><button type="button" data-value="bold">Big &amp; bold</button></div></div>
+        <div class="rec-row" data-rec-row="imgPlace" data-hl="images" title="Glide: a track image waits on the right until the playhead has passed, then fades over to the left. Left: it sits on the left from the start."><span>Images start</span><div class="seg" data-rec="imgPlace"><button type="button" data-value="move">Right, then glide left</button><button type="button" data-value="left">On the left</button></div></div>
         <div class="rec-row" data-hl="clock"><span>Clock</span><div class="seg" data-rec="clock"><button type="button" data-value="relative">From 0:00</button><button type="button" data-value="song">Song time</button></div></div>
       </div>
     </section>
@@ -4282,7 +4293,8 @@
         <div class="rec-row rs" data-rec-row="introLen" data-hl="images" title="How long each introduction stays on screen (it's cut short only if the next singer would otherwise wait too long)"><span>Intro length</span><input type="range" min="1" max="8" step="0.1" data-rec="introLen"><span class="rec-val" data-rec-val="introLen"></span></div>
         <div class="rec-row" data-rec-row="introWhen" data-hl="images" title="One by one: each picture gets its own introduction. All at once: everyone is introduced together. (Also used by the Freedit styles' own intros.)"><span>Introduce</span><div class="seg" data-rec="introWhen"><button type="button" data-value="first">One by one</button><button type="button" data-value="all">All at once</button></div></div>
         <div class="rec-row" data-rec-row="introStart" data-hl="images" title="When they sing: each introduction comes as that person (or, for All at once, the first person) starts singing. From the start: the introductions play right at the start of the video, back to back. (Also used by the Freedit styles' own intros.)"><span>Starts</span><div class="seg" data-rec="introStart"><button type="button" data-value="sing">When they sing</button><button type="button" data-value="start">From the start</button></div></div>
-        <div class="rec-row" data-rec-row="introStyle" data-hl="images"><span>Intro style</span><div class="seg" data-rec="introStyle"><button type="button" data-value="fun">Fun</button><button type="button" data-value="epic">Epic</button><button type="button" data-value="anime">Anime</button></div></div>
+        <div class="rec-row" data-rec-row="introStyle" data-hl="images"><span>Intro style</span><div class="seg" data-rec="introStyle"><button type="button" data-value="fun">Fun</button><button type="button" data-value="epic">Epic</button><button type="button" data-value="anime">Anime</button><button type="button" data-value="kings">Kings &amp; Queens</button><button type="button" data-value="polaroid">Polaroid</button><button type="button" data-value="spotlight">Spotlight</button><button type="button" data-value="cards">Trading cards</button><button type="button" data-value="comic">Comic</button></div></div>
+        <label class="rec-row rec-toggle" data-rec-row="introFly" data-hl="images" title="On: each picture flies out of its track into the introduction and back again, instead of showing on the track and in the intro at once"><span>Pictures fly out of the tracks</span><span class="switch"><input type="checkbox" data-rec="introFly"><span class="track"></span><span class="knob"></span></span></label>
         <label class="rec-row rec-toggle" data-hl="images" title="When tracks that have an image harmonise together, their images fly out of their lanes to a spot on screen and perform; they fly back when the harmony ends."><span>Image Collab</span><span class="switch"><input type="checkbox" data-rec="orbitOn"><span class="track"></span><span class="knob"></span></span></label>
         <div class="rec-row beat-row" data-rec-row="orbitFrom" data-hl="images" title="Image Collab only starts from a time you mark: put the playhead there and press Start here"><span>Starts at</span><span class="rec-unit beat-end-txt" id="orbitFromTxt">the start</span><button type="button" class="rec-small-btn lit" id="orbitFromBtn" title="Image Collab starts where the playhead is now">Start here</button><button type="button" class="rec-small-btn" id="orbitFromClearBtn" title="Start from the beginning again" hidden>✕</button></div>
         <label class="rec-row rec-toggle" data-rec-row="orbitSolo" data-hl="images" title="Orbit style: while someone sings on their own, their picture flies round their own track in 3D — over, in front, under and behind it — near the playhead"><span>Solo singers circle their track</span><span class="switch"><input type="checkbox" data-rec="orbitSolo"><span class="track"></span><span class="knob"></span></span></label>
@@ -4352,10 +4364,13 @@
         <div class="rec-row" data-rec-row="openStyle" data-hl="opening"><span>Style</span><div class="seg seg-grid" data-rec="openStyle"><button type="button" data-value="fade">Fade</button><button type="button" data-value="type">Typewriter</button><button type="button" data-value="rise">Rise up</button><button type="button" data-value="pop">Pop</button><button type="button" data-value="cinema">Cinematic</button><button type="button" data-value="glitch">Glitch</button><button type="button" data-value="neon">Neon</button><button type="button" data-value="wipe">Wipe</button><button type="button" data-value="zoom">Zoom in</button><button type="button" data-value="wave">Wave</button></div></div>
         <div class="rec-row rs" data-rec-row="openLen" data-hl="opening" title="How long it stays on screen"><span>Duration</span><input type="range" min="1" max="12" step="0.5" data-rec="openLen"><span class="rec-val" data-rec-val="openLen"></span></div>
         <div class="rec-row rs" data-rec-row="openDelay" data-hl="opening" title="How long after the video starts it comes in"><span>Starts after</span><input type="range" min="0" max="10" step="0.1" data-rec="openDelay"><span class="rec-val" data-rec-val="openDelay"></span></div>
-        <div class="rec-row" data-hl="opening"><span>Font</span><select class="rec-select" data-rec="openFont"><option value="Poppins">Poppins</option><option value="Anton">Anton (tall)</option><option value="Bangers">Bangers (comic)</option><option value="Fredoka">Fredoka (rounded)</option><option value="Manrope">Manrope</option><option value="Inter">Inter</option><option value="Pixelify Sans">Pixelify (pixel)</option><option value="VT323">VT323 (retro)</option></select></div>
+        <div class="rec-row" data-hl="opening"><span>Font</span><select class="rec-select" data-rec="openFont"><option value="Poppins">Poppins</option><option value="Anton">Anton (tall)</option><option value="Bangers">Bangers (comic)</option><option value="Fredoka">Fredoka (rounded)</option><option value="Manrope">Manrope</option><option value="Inter">Inter</option><option value="Pixelify Sans">Pixelify (pixel)</option><option value="VT323">VT323 (retro)</option><option value="Bebas Neue">Bebas Neue (tall)</option><option value="Montserrat">Montserrat</option><option value="Playfair Display">Playfair (elegant)</option><option value="Pacifico">Pacifico (script)</option><option value="Lobster">Lobster</option><option value="Permanent Marker">Permanent Marker</option><option value="Righteous">Righteous (retro)</option><option value="Orbitron">Orbitron (sci-fi)</option><option value="Caveat">Caveat (handwriting)</option><option value="Press Start 2P">Press Start 2P (8-bit)</option><option value="Luckiest Guy">Luckiest Guy (cartoon)</option><option value="Dancing Script">Dancing Script</option></select></div>
         <div class="rec-row rs" data-rec-row="openSize" data-hl="opening"><span>Size</span><input type="range" min="40" max="220" step="5" data-rec="openSize"><span class="rec-val" data-rec-val="openSize"></span></div>
         <div class="rec-row" data-hl="opening"><span>Position</span><div class="seg" data-rec="openPos"><button type="button" data-value="top">Top</button><button type="button" data-value="middle">Middle</button><button type="button" data-value="bottom">Bottom</button><button type="button" data-value="custom" title="Where you dragged it to — drag the text on the preview">Dragged</button></div></div>
         <div class="rec-row" data-hl="opening"><span>Text colour</span><input type="color" data-rec="openColor"></div>
+        <label class="rec-row rec-toggle" data-rec-row="openStroke" data-hl="opening" title="An outline round the letters"><span>Outline</span><span class="switch"><input type="checkbox" data-rec="openStroke"><span class="track"></span><span class="knob"></span></span></label>
+        <div class="rec-row" data-rec-row="openStrokeColor" data-hl="opening"><span>Outline colour</span><input type="color" data-rec="openStrokeColor"></div>
+        <div class="rec-row rs" data-rec-row="openStrokeW" data-hl="opening" title="How thick the outline is"><span>Outline thickness</span><input type="range" min="0" max="100" step="1" data-rec="openStrokeW"><span class="rec-val" data-rec-val="openStrokeW"></span></div>
         <div class="rec-row" data-hl="opening" title="The glow, the cursor, the wipe bar and the other touches of colour"><span>Accent colour</span><input type="color" data-rec="openAccent"></div>
         <div class="rec-row rs" data-rec-row="openDim" data-hl="opening" title="Darkens everything behind the text while it shows"><span>Darken behind</span><input type="range" min="0" max="90" step="5" data-rec="openDim"><span class="rec-val" data-rec-val="openDim"></span></div>
         <label class="rec-row rec-toggle" data-hl="opening"><span>ALL CAPS</span><span class="switch"><input type="checkbox" data-rec="openUpper"><span class="track"></span><span class="knob"></span></span></label>
@@ -4387,7 +4402,7 @@
         </div>
         <div class="rec-row" data-rec-row="lyricStyle" data-hl="lyrics"><span>Style</span><div class="seg seg-grid" data-rec="lyricStyle"><button type="button" data-value="pop">Pop-in line</button><button type="button" data-value="big">Big words</button><button type="button" data-value="meaning">Mood words</button><button type="button" data-value="epic">EPIC</button><button type="button" data-value="sides">3D Sides</button><button type="button" data-value="fade">Soft fade</button><button type="button" data-value="karaoke">Karaoke</button><button type="button" data-value="type">Typewriter</button><button type="button" data-value="slide">Slide in</button><button type="button" data-value="drop">Drop</button><button type="button" data-value="wave">Wave</button><button type="button" data-value="neon">Neon</button><button type="button" data-value="blur">Focus blur</button><button type="button" data-value="flip">Flip</button><button type="button" data-value="stamp">Stamp</button><button type="button" data-value="highlight">Captions</button><button type="button" data-value="focus">Spotlight</button></div></div>
         <div class="lyr-style-note" id="lyrStyleNote"></div>
-        <div class="rec-row" data-hl="lyrics"><span>Font</span><select class="rec-select" data-rec="lyricFont"><option value="Poppins">Poppins</option><option value="Fredoka">Fredoka (rounded)</option><option value="Bangers">Bangers (comic)</option><option value="Anton">Anton (tall)</option><option value="Manrope">Manrope</option></select></div>
+        <div class="rec-row" data-hl="lyrics"><span>Font</span><select class="rec-select" data-rec="lyricFont"><option value="Poppins">Poppins</option><option value="Fredoka">Fredoka (rounded)</option><option value="Bangers">Bangers (comic)</option><option value="Anton">Anton (tall)</option><option value="Manrope">Manrope</option><option value="Bebas Neue">Bebas Neue (tall)</option><option value="Montserrat">Montserrat</option><option value="Playfair Display">Playfair (elegant)</option><option value="Pacifico">Pacifico (script)</option><option value="Lobster">Lobster</option><option value="Permanent Marker">Permanent Marker</option><option value="Righteous">Righteous (retro)</option><option value="Orbitron">Orbitron (sci-fi)</option><option value="Caveat">Caveat (handwriting)</option><option value="Press Start 2P">Press Start 2P (8-bit)</option><option value="Luckiest Guy">Luckiest Guy (cartoon)</option><option value="Dancing Script">Dancing Script</option></select></div>
         <div class="rec-row rs" data-rec-row="lyricSize" data-hl="lyrics"><span>Text size</span><input type="range" min="24" max="200" step="2" data-rec="lyricSize"><span class="rec-val" data-rec-val="lyricSize"></span></div>
         <div class="rec-row rs" data-rec-row="lyricBounce" data-hl="lyrics"><span>Bounce</span><input type="range" min="0" max="100" step="5" data-rec="lyricBounce"><span class="rec-val" data-rec-val="lyricBounce"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Position</span><div class="seg" data-rec="lyricPos"><button type="button" data-value="top">Top</button><button type="button" data-value="middle">Middle</button><button type="button" data-value="bottom">Bottom</button><button type="button" data-value="video">On video</button><button type="button" data-value="custom" title="Where you dragged them to — drag the lyrics on the preview">Dragged</button></div></div>
@@ -4396,6 +4411,9 @@
         <div class="rec-row" data-hl="lyrics"><span>Word colour</span><div class="seg" id="lyrColorModeSeg"><button type="button" data-v="singer" title="Each word in the colour of whoever sings it (a flowing gradient when several do)">Singers</button><button type="button" data-v="all" title="Every word flows through the colours of all your tracks">All tracks</button><button type="button" data-v="custom" title="Your own gradient colours whenever the tracks harmonise (singer colours the rest of the time)">Custom</button><button type="button" data-v="single" title="One colour for every word">One colour</button></div></div>
         <div class="rec-row lyr-grad-row" data-rec-row="lyricGrad" data-hl="lyrics" hidden><span>Harmony colours</span><div class="lyr-grad" id="lyrGradList"></div></div>
         <div class="rec-row" data-rec-row="lyricColor" data-hl="lyrics"><span>Text colour</span><input type="color" data-rec="lyricColor"></div>
+        <label class="rec-row rec-toggle" data-rec-row="lyricStroke" data-hl="lyrics" title="An outline round the words"><span>Outline</span><span class="switch"><input type="checkbox" data-rec="lyricStroke"><span class="track"></span><span class="knob"></span></span></label>
+        <div class="rec-row" data-rec-row="lyricStrokeColor" data-hl="lyrics"><span>Outline colour</span><input type="color" data-rec="lyricStrokeColor"></div>
+        <div class="rec-row rs" data-rec-row="lyricStrokeW" data-hl="lyrics" title="How thick the outline is"><span>Outline thickness</span><input type="range" min="0" max="100" step="1" data-rec="lyricStrokeW"><span class="rec-val" data-rec-val="lyricStrokeW"></span></div>
         <div class="rec-row" data-hl="lyrics" title="How the lyrics mix with what's behind them (tracks, background, your video)"><span>Blend</span><select class="rec-select" data-rec="lyricBlend">
           <option value="source-over">Normal</option>
           <optgroup label="Darken"><option value="multiply">Multiply</option><option value="darken">Darken</option><option value="color-burn">Colour burn</option></optgroup>
@@ -13051,6 +13069,10 @@
     iconBox: false,       // the tinted rounded box behind each icon (fixed off)
     showNames: true,
     showImages: true,
+    imgNames: 'off',          // a name next to each track image: 'off' | 'beside' | 'tag' | 'banner' | 'bold'
+    imgPlace: 'move',         // where a track image starts: 'move' (on the right, then over to the left) | 'left' (on the left from the start)
+    renderFadeIn: 0, renderFadeOut: 0, renderFadeColor: 'black', renderFadeAudio: true,   // fade the whole video in / out
+    introFly: false,          // the intro pictures fly out of their tracks (and back) instead of appearing twice
     panelWidth: 96,       // icon column width (px at 1080p)
     trackOpacity: 100, waveOpacity: 100, rulerOpacity: 100, panelOpacity: 100,   // % (the track images aren't affected)
     iconSize: 44,         // icon box size (px at 1080p)
@@ -13089,13 +13111,14 @@
     orbitNames: false,         // a name tag (the track name) above each collab image
     orbitSolo: true,           // a lone singer's picture flies round their own track (Orbit style)
     introOn: false,            // Introduction: each singer's picture big in the middle the first time they sing
-    introStyle: 'fun',         // 'fun' | 'epic' | 'anime'
+    introStyle: 'fun',         // 'fun' | 'epic' | 'anime' | 'kings' | 'polaroid' | 'spotlight' | 'cards' | 'comic'
     introLen: 2.5,             // s each introduction stays on screen
     orbit3D: false,            // orbit turns like a carousel (front bigger, back smaller)
     beatOn: false,             // Beat zoom: a tempo-synced zoom-edit camera
     fdKeepInst: true,
     openOn: false, openText: '', openStyle: 'fade', openLen: 4, openDelay: 0, openFont: 'Poppins', openSize: 100, openPos: 'middle',
     openColor: '#ffffff', openAccent: '#e5484d', openDim: 35, openUpper: false,   // Texts › Opening text
+    openStroke: false, openStrokeColor: '#000000', openStrokeW: 30,
     openX: 0.5, openY: 0.5,     // where it was dragged to (with openPos 'custom')
     videoNoStrip: false,       // the track-icon strip leaves the video's band clear          // the camera keeps the instrumental (non-singer) lanes in the shot
     beatBpm: 120,              // tempo
@@ -13141,6 +13164,7 @@
     lyricOpacity: 100,         // %
     lyricColor: '#ffffff',
     lyricUpper: false,
+    lyricStroke: false, lyricStrokeColor: '#000000', lyricStrokeW: 30,   // Texts › Lyrics: an outline round the words
     harmonyEdge: true,    // the harmony glow's ring round the tracks' edges in the video (Tracks & layout)
     harmonyGlow: true,    // glow on mic tracks while two or more sing the same thing together
     harmonyMode: 'auto',    // 'auto' (by volume) or 'manual' (Harmony Mark start / end marks)
@@ -13885,7 +13909,7 @@
   // Collab. Styles: Fun (bouncy pop + confetti), Epic (dark, letterbox, light
   // rays, big spaced-out name), Anime (speed lines, a coloured slash, slide-in).
   let introCache = null;
-  const INTRO_LEN = { fun: 2.3, epic: 3.1, anime: 2.3 };
+  const INTRO_LEN = { fun: 2.3, epic: 3.1, anime: 2.3, kings: 2.9, polaroid: 2.7, spotlight: 3.0, cards: 2.8, comic: 2.4 };
   const introLen = (style) => { const v = Number(recSettings.introLen); return v >= 1 ? v : INTRO_LEN[style]; };
   // which introduction runs now: a Freedit style's own (when its "Style
   // intro" is on and that style is playing), else Image Collab's
@@ -13943,7 +13967,35 @@
     }
     return (introCache = { key, style, groups: groups.filter(g => g.t1 - g.t0 > 0.5) });
   }
+  // "Pictures fly out of the tracks": while a person is being introduced their track picture is
+  // hidden and the intro's picture flies in from where it sat on the track (and back at the end)
+  let INTRO_HIDE = null, INTRO_FLY = null;
+  function introFlyPrep(T, rs){
+    INTRO_HIDE = null;
+    const S = recSettings; if(!S.introFly) return;
+    const act = introActive(); if(!act) return;
+    const P = introPlan(rs, act.style, act.len), g = P.groups.find(x => T >= x.t0 && T < x.t1);
+    if(g) INTRO_HIDE = new Set(g.people);
+  }
   function introPic(ctx, t, x, y, size, alpha, ring, u){
+    const F = INTRO_FLY;
+    if(F && F.people.has(t)) F.drawn.add(t);
+    if(F && F.people.has(t) && t._rAvRect && t._rAvRect.m && t._rAvRect.seq >= renderFrameSeq - 2){
+      const eo = (q) => 1 - Math.pow(1 - Math.max(0, Math.min(1, q)), 3);
+      const m = ctx.getTransform(), k = Math.hypot(m.a, m.b) || 1, P = m.transformPoint(new DOMPoint(x, y)), ps = size * k;
+      if(F.out <= 0) t._iflyR = { x: P.x, y: P.y, s: ps };
+      const fin = eo((F.t - 0.05) / 0.6), back = F.out > 0 ? eo(F.out) : 0;
+      if(fin < 0.999 || back > 0.001){
+        const L = t._rAvRect, lm = L.m, lk = Math.hypot(lm.a, lm.b) || 1, Lp = lm.transformPoint(new DOMPoint(L.x + L.a / 2, L.y + L.a / 2)), ls = L.a * lk;
+        const R = back > 0 ? (t._iflyR || { x: P.x, y: P.y, s: ps }) : { x: P.x, y: P.y, s: ps }, f = back > 0 ? 1 - back : fin;
+        const arc = Math.sin(f * Math.PI) * Math.min(F.H, F.W) * 0.08 * F.k0;
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+        INTRO_FLY = null;
+        try{ introPic(ctx, t, Lp.x + (R.x - Lp.x) * f, Lp.y + (R.y - Lp.y) * f - arc, ls + (R.s - ls) * f, Math.max(alpha, 0.999), ring * F.k0, u * F.k0); }
+        finally { INTRO_FLY = F; ctx.restore(); }
+        return;
+      }
+    }
     const img = t._renderAvatarImg;
     const r = t.avatarShape === 'circle' ? size / 2 : size * 0.16;
     ctx.save();
@@ -13962,7 +14014,30 @@
   // ===== Texts › Opening text =====
   // A title (the first line) and smaller lines under it, shown at the very
   // start of the video over everything else, in one of ten entrances.
-  Object.assign(FD_UNITS, { openLen: ' s', openDelay: ' s', openSize: '%', openDim: '%' });
+  Object.assign(FD_UNITS, { openLen: ' s', openDelay: ' s', openSize: '%', openDim: '%', openStrokeW: '%', lyricStrokeW: '%', renderFadeIn: ' s', renderFadeOut: ' s' });
+  // Texts › Outline: while the lyrics or the opening text are drawn, every word gets an outline
+  // under its fill (it works the same for all the text styles: any text they fill gets stroked first)
+  let TXT_STROKE = null;
+  for(const C of [window.CanvasRenderingContext2D, window.OffscreenCanvasRenderingContext2D]){
+    if(!C || C.prototype.__sdStroke) continue;
+    const fill = C.prototype.fillText; C.prototype.__sdStroke = true;
+    C.prototype.fillText = function(t, x, y, mw){
+      const st = TXT_STROKE;
+      if(st){
+        const m = /(\d+(?:\.\d+)?)px/.exec(this.font), fs = m ? Number(m[1]) : 20;
+        this.save(); this.lineJoin = 'round'; this.miterLimit = 2; this.lineWidth = Math.max(1, fs * st.k); this.strokeStyle = st.c;
+        if(mw === undefined) this.strokeText(t, x, y); else this.strokeText(t, x, y, mw);
+        this.restore();
+      }
+      return mw === undefined ? fill.call(this, t, x, y) : fill.call(this, t, x, y, mw);
+    };
+  }
+  function withTextStroke(on, col, w, fn){
+    w = Number(w);
+    if(!on || !(w > 0)){ fn(); return; }
+    const prev = TXT_STROKE; TXT_STROKE = { c: col || '#000000', k: w / 100 * 0.3 };   // (100% = 30% of the letter height)
+    try{ fn(); } finally { TXT_STROKE = prev; }
+  }
   function openFontStr(px){ const f = recSettings.openFont || 'Poppins'; return `${fontWeightOf(f)} ${Math.round(px)}px "${f}", "Poppins", Inter, sans-serif`; }
   function openFontLoad(){ try{ return document.fonts.load(openFontStr(60), 'Ag'); }catch(e){ return Promise.resolve(); } }
   const oEase = (x) => { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); };
@@ -14174,6 +14249,36 @@
       xs.push(cx + (col - (inRow - 1) / 2) * gapX); ys.push(cy + (row - (rows - 1) / 2) * gapY);
     }
     const names = g.people.map(r => nameTagText(r));
+    let F = null;
+    if(S.introFly){ const bm = ctx.getTransform(); F = INTRO_FLY = { people: new Set(g.people), drawn: new Set(), t, out, W, H, k0: Math.hypot(bm.a, bm.b) || 1 }; }
+    try{ drawIntroBody(ctx, u, T, P, g, t, len, out, outD, W, H, n, base, gapX, gapY, cx, cy, xs, ys, names); }
+    finally { INTRO_FLY = null; }
+    // (a style that isn't drawing someone's picture right now — just before it pops in, or while it
+    //  shrinks away — still gets the picture flying out of / back into its track)
+    if(F){
+      g.people.forEach((r, i) => {
+        if(F.drawn.has(r)) return;
+        const fin = 1 - Math.pow(1 - Math.max(0, Math.min(1, (t - 0.05) / 0.6)), 3);
+        if(out <= 0 && fin >= 0.999) return;
+        INTRO_FLY = F; ctx.save();
+        try{ introPic(ctx, r, xs[i], ys[i], base, 1, 3 * u, u); } finally { ctx.restore(); INTRO_FLY = null; }
+      });
+    }
+  }
+  // a little gold crown (for Kings & Queens)
+  function drawCrown(ctx, x, y, w, h, u){
+    ctx.save();
+    const g = ctx.createLinearGradient(x, y, x, y + h); g.addColorStop(0, '#fff1a8'); g.addColorStop(0.5, '#ffcc33'); g.addColorStop(1, '#c98a12');
+    ctx.beginPath();
+    ctx.moveTo(x, y + h); ctx.lineTo(x, y + h * 0.3); ctx.lineTo(x + w * 0.25, y + h * 0.62); ctx.lineTo(x + w * 0.5, y); ctx.lineTo(x + w * 0.75, y + h * 0.62); ctx.lineTo(x + w, y + h * 0.3); ctx.lineTo(x + w, y + h); ctx.closePath();
+    ctx.fillStyle = g; ctx.fill(); ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(1.5, 2.5 * u); ctx.strokeStyle = '#8a5a00'; ctx.stroke();
+    ctx.fillStyle = '#c98a12'; ctx.fillRect(x, y + h * 0.78, w, h * 0.22);
+    const gem = (gx, gy, r, c) => { ctx.beginPath(); ctx.arc(gx, gy, r, 0, Math.PI * 2); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 1 * u; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.stroke(); };
+    gem(x + w * 0.5, y + h * 0.89, h * 0.08, '#e5484d'); gem(x + w * 0.25, y + h * 0.89, h * 0.065, '#4fa3e3'); gem(x + w * 0.75, y + h * 0.89, h * 0.065, '#4fa3e3');
+    for(const px of [0, 0.5, 1]) gem(x + w * px, y + (px === 0.5 ? 0 : h * 0.3), h * 0.075, '#fff6d8');
+    ctx.restore();
+  }
+  function drawIntroBody(ctx, u, T, P, g, t, len, out, outD, W, H, n, base, gapX, gapY, cx, cy, xs, ys, names){
     if(FD_INTRO[P.style]){
       ctx.save();
       FD_INTRO[P.style](ctx, { g, t, len, out, outD, T, u, W, H, n, base, gapX, cx, cy, xs, ys, names, people: g.people });
@@ -14264,6 +14369,146 @@
         ctx.fillStyle = rgbaOf(col, 0.9); ctx.fillRect(cx - lw, ny + fs * 0.95, lw * 2, Math.max(1, 2 * u));
       }
       if(t < 0.25){ ctx.globalAlpha = 0.75 * (1 - t / 0.25); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); }
+    } else if(P.style === 'kings'){
+      // Kings & Queens: a royal purple hall, gold dust falling, the pictures rise up and a crown drops onto each one
+      const fade = clamp01(t / 0.3) * (1 - out);
+      const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.75);
+      bg.addColorStop(0, `rgba(90,30,140,${(0.55 * fade).toFixed(3)})`); bg.addColorStop(1, `rgba(12,4,24,${(0.85 * fade).toFixed(3)})`);
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      for(let k = 0; k < 50; k++){
+        const x = W * hash01(k * 3.7 + 5), sp = 0.12 + 0.1 * hash01(k * 1.9), y = ((hash01(k * 7.3) + t * sp) % 1.1) * H, r = (1.5 + 2.5 * hash01(k * 2.2)) * u;
+        ctx.globalAlpha = fade * (0.4 + 0.6 * Math.abs(Math.sin(t * 3 + k))); ctx.fillStyle = k % 3 ? '#ffd76a' : '#fff4c2';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      g.people.forEach((r, i) => {
+        const k = t - i * 0.18, up = eo(k / 0.55) * (1 - eo(out));
+        if(up <= 0.001) return;
+        const y = ys[i] + (1 - up) * base * 0.8;
+        ctx.save(); ctx.globalAlpha = up;
+        // a gold ring behind the picture
+        ctx.beginPath(); ctx.arc(xs[i], y, base * 0.6, 0, Math.PI * 2); ctx.lineWidth = 5 * u; ctx.strokeStyle = 'rgba(255,215,106,.85)'; ctx.stroke();
+        introPic(ctx, r, xs[i], y, base, 1, 4 * u, u);
+        // the crown falls from above and bounces onto the head
+        const ck = (k - 0.45) / 0.5;
+        if(ck > 0){
+          const b = ck >= 1 ? 1 : 1 - Math.abs(Math.cos(ck * Math.PI * 1.5)) * Math.pow(1 - ck, 2), drop = (1 - Math.min(1, ck * 1.6)) * H * 0.35;
+          const cw = base * 0.62, chh = cw * 0.62, x0 = xs[i] + base * 0.08, y0 = y - base * 0.5 - chh * 0.55 - drop - (1 - b) * 20 * u;
+          ctx.save(); ctx.translate(x0, y0 + chh / 2); ctx.rotate(0.18 + Math.sin(t * 2 + i) * 0.03); ctx.translate(-x0, -(y0 + chh / 2));
+          drawCrown(ctx, x0 - cw / 2, y0, cw, chh, u);
+          ctx.restore();
+          if(ck < 1.4 && ck > 0.55){ ctx.globalAlpha = up * (1 - Math.abs(ck - 0.9) / 0.5); ctx.fillStyle = '#fff6c8';
+            for(let q = 0; q < 6; q++){ const a0 = q / 6 * Math.PI * 2 + i, d = cw * (0.5 + (ck - 0.55)); ctx.beginPath(); ctx.arc(x0 + Math.cos(a0) * d, y0 + chh * 0.5 + Math.sin(a0) * d * 0.6, 2.5 * u, 0, Math.PI * 2); ctx.fill(); } }
+        }
+        ctx.restore();
+        const na = clamp01((k - 0.8) / 0.4) * (1 - out);
+        if(na > 0.01){
+          const fs = fitFs(names[i], Math.max(14 * u, Math.min(50 * u, base * 0.17)), 700, gapX * 0.95 - 40 * u);
+          const ny = y + base * 0.62 + fs * 1.15;
+          ctx.save(); ctx.globalAlpha = na; ctx.font = `700 ${fs}px Georgia, "Times New Roman", serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const tw = ctx.measureText(names[i]).width, bw = tw + fs * 2.2, bh = fs * 1.6;
+          ctx.fillStyle = '#6b1fa8'; ctx.beginPath(); ctx.moveTo(xs[i] - bw / 2 - fs * 0.6, ny - bh / 2); ctx.lineTo(xs[i] + bw / 2 + fs * 0.6, ny - bh / 2); ctx.lineTo(xs[i] + bw / 2, ny); ctx.lineTo(xs[i] + bw / 2 + fs * 0.6, ny + bh / 2); ctx.lineTo(xs[i] - bw / 2 - fs * 0.6, ny + bh / 2); ctx.lineTo(xs[i] - bw / 2, ny); ctx.closePath(); ctx.fill();
+          ctx.lineWidth = 2 * u; ctx.strokeStyle = '#ffd76a'; ctx.stroke();
+          ctx.fillStyle = '#ffe9a8'; ctx.fillText(names[i], xs[i], ny + fs * 0.04);
+          ctx.restore();
+        }
+      });
+    } else if(P.style === 'polaroid'){
+      // instant photos drop onto a table, swing a little and settle, a strip of tape on top, the name written underneath
+      const fade = clamp01(t / 0.25) * (1 - out);
+      ctx.fillStyle = `rgba(20,14,10,${(0.6 * fade).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+      g.people.forEach((r, i) => {
+        const k = t - i * 0.2, d = eo(k / 0.5); if(k <= 0) return;
+        const rot = ((hash01(i * 3.3 + g.on) - 0.5) * 0.3) + Math.sin(k * 9) * Math.exp(-k * 4) * 0.12 + out * (i % 2 ? 0.6 : -0.6);
+        const fw = base * 1.12, fh = base * 1.36, x = xs[i], y = ys[i] + base * 0.06 - (1 - d) * H * 0.6 + eo(out) * H;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = clamp01(k / 0.15);
+        ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 18 * u; ctx.shadowOffsetY = 8 * u;
+        ctx.fillStyle = '#f7f4ec'; ctx.fillRect(-fw / 2, -fh / 2, fw, fh); ctx.shadowColor = 'transparent';
+        const pa = base * 0.96, py = -fh / 2 + (fw - pa) / 2 + pa / 2;
+        // the photo develops: dark first, then the picture comes up
+        ctx.fillStyle = '#1b1a1f'; ctx.fillRect(-pa / 2, py - pa / 2, pa, pa);
+        const dev = clamp01((k - 0.35) / 0.8);
+        if(dev > 0){ ctx.save(); ctx.beginPath(); ctx.rect(-pa / 2, py - pa / 2, pa, pa); ctx.clip(); const sq = Object.assign({}, r, { avatarShape: 'square' }); sq._renderAvatarImg = r._renderAvatarImg; introPic(ctx, sq, 0, py, pa * 1.02, dev, 0, u); ctx.restore(); }
+        ctx.fillStyle = 'rgba(255,240,200,.55)'; ctx.save(); ctx.rotate(-0.08); ctx.fillRect(-fw * 0.2, -fh / 2 - 10 * u, fw * 0.4, 22 * u); ctx.restore();
+        const fs = Math.max(12 * u, Math.min(46 * u, base * 0.15)), na = clamp01((k - 0.6) / 0.4);
+        if(na > 0.01){ ctx.globalAlpha = na; ctx.font = `700 ${fs}px Caveat, "Permanent Marker", "Comic Sans MS", cursive`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#26314f';
+          let s2 = names[i]; while(s2.length > 2 && ctx.measureText(s2).width > fw * 0.9) s2 = s2.slice(0, -2) + '…'; ctx.fillText(s2, 0, fh / 2 - (fh - fw) * 0.42); }
+        ctx.restore();
+      });
+    } else if(P.style === 'spotlight'){
+      // a dark stage: spotlights sweep in from above and land on each singer, the name lights up underneath
+      const fade = clamp01(t / 0.3) * (1 - out);
+      ctx.fillStyle = `rgba(0,0,0,${(0.82 * fade).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+      g.people.forEach((r, i) => {
+        const k = t - i * 0.25, land = eo(k / 0.8); if(k <= 0) return;
+        const sx = i % 2 ? W * 1.05 : -W * 0.05, sy = -H * 0.1, tx = xs[i] + (1 - land) * (i % 2 ? 1 : -1) * W * 0.35, ty = ys[i];
+        const ang = Math.atan2(ty - sy, tx - sx), len2 = Math.hypot(tx - sx, ty - sy) + base * 0.8, spread = base * 0.75;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 * fade;
+        const gr = ctx.createLinearGradient(sx, sy, tx, ty); gr.addColorStop(0, 'rgba(255,250,220,.05)'); gr.addColorStop(1, 'rgba(255,250,220,.35)');
+        ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.cos(ang) * len2 - Math.sin(ang) * spread, sy + Math.sin(ang) * len2 + Math.cos(ang) * spread); ctx.lineTo(sx + Math.cos(ang) * len2 + Math.sin(ang) * spread, sy + Math.sin(ang) * len2 - Math.cos(ang) * spread); ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = 0.55 * fade; ctx.fillStyle = 'rgba(255,248,215,.5)'; ctx.beginPath(); ctx.ellipse(tx, ty + base * 0.62, base * 0.75, base * 0.16, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        const lit = clamp01((k - 0.55) / 0.35) * (1 - out);
+        if(lit > 0.001) introPic(ctx, r, xs[i], ys[i], base * (0.92 + 0.08 * lit), lit, 3 * u, u);
+        const na = clamp01((k - 0.9) / 0.4) * (1 - out);
+        if(na > 0.01){ const fs = fitFs(names[i].toUpperCase(), Math.max(14 * u, Math.min(52 * u, base * 0.17)), 900, gapX * 0.96);
+          ctx.save(); ctx.globalAlpha = na; ctx.font = nameFont(fs, 900); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(255,230,160,.9)'; ctx.shadowBlur = 18 * u;
+          ctx.fillStyle = '#fff'; ctx.fillText(names[i].toUpperCase(), xs[i], ys[i] + base * 0.62 + fs * 1.3); ctx.restore(); }
+      });
+    } else if(P.style === 'cards'){
+      // trading cards spin in face down, flip over to show the singer, and a shine sweeps across
+      const fade = clamp01(t / 0.25) * (1 - out);
+      ctx.fillStyle = `rgba(6,10,24,${(0.65 * fade).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+      g.people.forEach((r, i) => {
+        const k = t - i * 0.18; if(k <= 0) return;
+        const col = isHex6(r.color) ? r.color : '#4fa3e3', cw = base * 1.05, ch = base * 1.5;
+        const fly = eo(k / 0.45), flip = clamp01((k - 0.4) / 0.45), sxF = Math.cos(flip * Math.PI), face = flip > 0.5;
+        const x = xs[i] + (1 - fly) * (i - (n - 1) / 2) * base * 0.6 - eo(out) * (i % 2 ? -1 : 1) * W * 0.2, y = ys[i] + base * 0.1 + (1 - fly) * H * 0.5 + eo(out) * H * 0.7;
+        ctx.save(); ctx.translate(x, y); ctx.rotate((1 - fly) * (i % 2 ? 0.8 : -0.8)); ctx.scale(Math.max(0.02, Math.abs(sxF)), 1); ctx.globalAlpha = clamp01(k / 0.15);
+        ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 20 * u; ctx.shadowOffsetY = 8 * u;
+        roundRectPath(ctx, -cw / 2, -ch / 2, cw, ch, 14 * u); ctx.fillStyle = face ? '#f4f1e8' : col; ctx.fill(); ctx.shadowColor = 'transparent';
+        if(!face){
+          ctx.lineWidth = 4 * u; ctx.strokeStyle = 'rgba(255,255,255,.7)'; roundRectPath(ctx, -cw / 2 + 10 * u, -ch / 2 + 10 * u, cw - 20 * u, ch - 20 * u, 10 * u); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `900 ${base * 0.3}px Poppins, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', 0, 0);
+        } else {
+          roundRectPath(ctx, -cw / 2 + 7 * u, -ch / 2 + 7 * u, cw - 14 * u, ch - 14 * u, 10 * u); ctx.fillStyle = col; ctx.fill();
+          const sq = Object.assign({}, r, { avatarShape: 'square' }); sq._renderAvatarImg = r._renderAvatarImg;
+          introPic(ctx, sq, 0, -ch * 0.12, cw * 0.78, 1, 3 * u, u);
+          const fs = fitFs(names[i].toUpperCase(), Math.max(10 * u, Math.min(40 * u, cw * 0.13)), 900, cw * 0.84);
+          ctx.font = nameFont(fs, 900); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = contrastOf('#ffffff', col) >= 2.2 ? '#fff' : '#15151c';
+          ctx.fillText(names[i].toUpperCase(), 0, ch * 0.36);
+          // the holo shine
+          const sh = ((k - 0.85) / 0.7); if(sh > 0 && sh < 1){ ctx.save(); roundRectPath(ctx, -cw / 2, -ch / 2, cw, ch, 14 * u); ctx.clip(); ctx.globalCompositeOperation = 'lighter';
+            const gx = -cw + sh * cw * 2.2, gr = ctx.createLinearGradient(gx - cw * 0.3, -ch / 2, gx + cw * 0.3, ch / 2); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(200,240,255,.55)'); gr.addColorStop(1, 'rgba(255,200,255,0)');
+            ctx.fillStyle = gr; ctx.fillRect(-cw / 2, -ch / 2, cw, ch); ctx.restore(); }
+        }
+        ctx.restore();
+      });
+    } else if(P.style === 'comic'){
+      // a comic splash page: halftone burst, each picture punches in on a jagged starburst with a caption box
+      const fade = clamp01(t / 0.15) * (1 - out);
+      const col = isHex6(g.people[0].color) ? g.people[0].color : '#ffcf33';
+      ctx.fillStyle = `rgba(0,0,0,${(0.45 * fade).toFixed(3)})`; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.globalAlpha = 0.35 * fade; ctx.fillStyle = col;
+      const step = 26 * u; for(let yy = 0; yy < H; yy += step) for(let xx = (yy / step) % 2 ? step / 2 : 0; xx < W; xx += step){ const d = Math.hypot(xx - cx, yy - cy) / Math.max(W, H); const rr = step * 0.42 * Math.max(0, 1 - d * 1.4); if(rr > 0.5){ ctx.beginPath(); ctx.arc(xx, yy, rr, 0, Math.PI * 2); ctx.fill(); } }
+      ctx.restore();
+      g.people.forEach((r, i) => {
+        const k = t - i * 0.14, hit = k <= 0 ? 0 : 1 - Math.exp(-k * 9) * Math.cos(k * 18); if(k <= 0) return;
+        const sc = hit * (1 - eo(out)); if(sc <= 0.001) return;
+        ctx.save(); ctx.translate(xs[i], ys[i]); ctx.rotate((i % 2 ? 0.06 : -0.06)); ctx.scale(sc, sc);
+        // starburst
+        ctx.beginPath(); const sp = 14; for(let q = 0; q <= sp * 2; q++){ const a0 = q / (sp * 2) * Math.PI * 2, rr = base * (q % 2 ? 0.66 : 0.82 + 0.06 * hash01(q + i)); ctx.lineTo(Math.cos(a0) * rr, Math.sin(a0) * rr); }
+        ctx.closePath(); ctx.fillStyle = '#fff36b'; ctx.fill(); ctx.lineWidth = 5 * u; ctx.strokeStyle = '#111'; ctx.stroke();
+        introPic(ctx, r, 0, 0, base * 0.9, 1, 5 * u, u);
+        ctx.restore();
+        const na = clamp01((k - 0.35) / 0.25) * (1 - out);
+        if(na > 0.01){ const fs = fitFs(names[i].toUpperCase(), Math.max(14 * u, Math.min(56 * u, base * 0.2)), 400, gapX * 0.95 - 30 * u);
+          ctx.save(); ctx.globalAlpha = na; ctx.translate(xs[i], ys[i] + base * 0.78 + fs); ctx.rotate(i % 2 ? 0.04 : -0.04);
+          ctx.font = `400 ${fs}px Bangers, Poppins, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(names[i].toUpperCase()).width;
+          ctx.fillStyle = '#fffbe6'; ctx.fillRect(-tw / 2 - fs * 0.5, -fs * 0.75, tw + fs, fs * 1.5); ctx.lineWidth = 4 * u; ctx.strokeStyle = '#111'; ctx.strokeRect(-tw / 2 - fs * 0.5, -fs * 0.75, tw + fs, fs * 1.5);
+          ctx.fillStyle = '#111'; ctx.fillText(names[i].toUpperCase(), 0, fs * 0.05); ctx.restore(); }
+      });
+      if(t < 0.12){ ctx.globalAlpha = 0.6 * (1 - t / 0.12); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
     } else {
       // Anime: speed lines, a coloured slash, pictures slide in along it, name on the band
       const fade = clamp01(t / 0.15) * (1 - out);
@@ -15106,6 +15351,44 @@
   // A game-style name plate above an image's head: the track name in a dark
   // pill with a ring in the track's colour and a little pointer down to the
   // image. Upright always; dims when that person is quiet.
+  // Texts by the track images: the person's name (from the track name) in one of a few looks
+  function drawImgName(ctx, t, ax, ay, a, alpha, u, lit){
+    const st = recSettings.imgNames; if(!st || st === 'off' || alpha <= 0.02) return;
+    const txt = nameTagText(t); if(!txt) return;
+    const col = isHex6(t.color) ? t.color : '#ff6b9a', k = alpha * (0.55 + 0.45 * Math.max(0, Math.min(1, lit == null ? 1 : lit)));
+    ctx.save();
+    uprightAt(ctx, ax + a / 2, ay + a / 2);
+    ctx.globalAlpha *= k; ctx.textBaseline = 'middle';
+    if(st === 'banner'){
+      // a strip across the bottom of the picture
+      const fs = Math.max(8 * u, Math.min(26 * u, a * 0.15)), h = fs * 1.6;
+      ctx.save(); roundRectPath(ctx, ax, ay, a, a, t.avatarShape === 'circle' ? a / 2 : Math.min(a / 2, 10 * u * (a / (64 * u)))); ctx.clip();
+      ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(ax, ay + a - h, a, h);
+      ctx.font = `800 ${fs}px Poppins, Inter, sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+      let s2 = txt; while(s2.length > 2 && ctx.measureText(s2).width > a - fs * 0.6) s2 = s2.slice(0, -2) + '…';
+      ctx.fillText(s2, ax + a / 2, ay + a - h / 2); ctx.restore();
+    } else if(st === 'tag'){
+      // a pill in the track's colour, pointing at the picture
+      const fs = Math.max(9 * u, Math.min(30 * u, a * 0.2)), h = fs * 1.6, x0 = ax + a + 10 * u, y0 = ay + a / 2;
+      ctx.font = `800 ${fs}px Poppins, Inter, sans-serif`; const tw = ctx.measureText(txt).width;
+      ctx.beginPath(); ctx.moveTo(x0 - 7 * u, y0); ctx.lineTo(x0 + 2 * u, y0 - 6 * u); ctx.lineTo(x0 + 2 * u, y0 + 6 * u); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+      roundRectPath(ctx, x0, y0 - h / 2, tw + fs * 1.2, h, h / 2); ctx.fillStyle = col; ctx.fill();
+      ctx.textAlign = 'left'; ctx.fillStyle = contrastOf('#ffffff', col) >= 2.2 ? '#fff' : '#15151c'; ctx.fillText(txt, x0 + fs * 0.6, y0 + fs * 0.04);
+    } else if(st === 'bold'){
+      // big outlined letters beside the picture
+      const fs = Math.max(12 * u, Math.min(64 * u, a * 0.42));
+      ctx.font = `900 ${fs}px Poppins, Inter, sans-serif`; ctx.textAlign = 'left'; ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(2, fs * 0.16); ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText(txt.toUpperCase(), ax + a + 14 * u, ay + a / 2);
+      ctx.fillStyle = col; ctx.fillText(txt.toUpperCase(), ax + a + 14 * u, ay + a / 2);
+    } else {
+      // plain text beside it
+      const fs = Math.max(9 * u, Math.min(34 * u, a * 0.24));
+      ctx.font = `800 ${fs}px Poppins, Inter, sans-serif`; ctx.textAlign = 'left';
+      ctx.shadowColor = 'rgba(0,0,0,.75)'; ctx.shadowBlur = 6 * u; ctx.shadowOffsetY = 1 * u;
+      ctx.fillStyle = '#fff'; ctx.fillText(txt, ax + a + 12 * u, ay + a / 2);
+    }
+    ctx.restore();
+  }
   function nameTagText(t){ return String(t.name || 'Track').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim(); }
   function drawNameTag(ctx, t, x, bottomY, a, u, alpha, lit, maxW){
     if(alpha <= 0.01) return;
@@ -15314,12 +15597,13 @@
         imgLightIn(ctx, ax + a / 2, ay + a / 2, a);
         ctx.restore();
         if(alpha > 0.05) imgLightHalo(ctx, ax + a / 2, ay + a / 2, a * Math.min(1, alpha));
+        drawImgName(ctx, t, ax, ay, a, alpha, u, lit);
       };
       // where the image sits in its lane (the orbit flies it from / back to here)
-      t._rAvRect = { x: rightX * (1 - v) + leftX * v, y: ay, a, shapeR, lit, done, seq: renderFrameSeq };
+      t._rAvRect = { x: rightX * (1 - v) + leftX * v, y: ay, a, shapeR, lit, done, seq: renderFrameSeq, m: ctx.getTransform() };
       // out in Image Collab (or on its way there / back): the flying image is
       // the one you see, landing right here — so don't draw a second copy
-      const away = orbitFlyAmount(t);
+      const away = (INTRO_HIDE && INTRO_HIDE.has(t)) ? 1 : orbitFlyAmount(t);
       const solo = away <= 0.001 ? soloSpinAmount(t) : 0;
       if(solo > 0.001){
         const sx0 = rightX * (1 - v) + leftX * v;
@@ -15487,8 +15771,9 @@
     const shapeR = root.avatarShape === 'circle' ? a/2 : Math.min(a/2, 10*u * (a / (64*u)));
     const done = keep && ended;
     const iw = img.naturalWidth, ih = img.naturalHeight, fit = Math.max(a/iw, a/ih);
-    root._rAvRect = { x: rightX * (1 - v) + leftX * v, y: ay, a, shapeR, lit, done, seq: renderFrameSeq };
+    root._rAvRect = { x: rightX * (1 - v) + leftX * v, y: ay, a, shapeR, lit, done, seq: renderFrameSeq, m: ctx.getTransform() };
     if(orbitFlyAmount(root) > 0.001) return;                    // out in Image Collab
+    if(INTRO_HIDE && INTRO_HIDE.has(root)) return;              // flown out into the introduction
     const solo = soloSpinAmount(root);
     if(solo > 0.001){
       // circles the lane it's sitting by
@@ -15513,6 +15798,7 @@
       imgLightIn(ctx, ax + a / 2, ay + a / 2, a);
       ctx.restore();
       if(alpha > 0.05) imgLightHalo(ctx, ax + a / 2, ay + a / 2, a * Math.min(1, alpha));
+      drawImgName(ctx, root, ax, ay, a, alpha, u, lit);
     };
     let crE = -Infinity; for(const m of vis){ const L = lanes.get(m); crE = Math.max(crE, L.x1); }
     const endF = (keep || !(camStickAmt > 0)) ? 1 : Math.max(0, Math.min(1, (crE - leftX - 6 * u) / a));
@@ -15667,7 +15953,21 @@
     // singing to come (finished ones stay in the order they finished), so
     // the pictures don't end up stranded alone at the bottom.
     const lastEndG = (i) => { const sp = spansOf(i); return sp.length ? sp[sp.length - 1][1] : -1; };
-    const doneAt = (r, g) => linkMembers(r).every(m => { const j = rows.indexOf(m); return j < 0 || g > lastEndG(j) + TAILs; });
+    // (a track only counts as finished once its clip has really ended too — not just gone quiet —
+    //  so tracks that end together at the end of the song stay where they are)
+    const clipEndG = (i) => { const t = rows[i]; return Math.floor(((t.offset || 0) + trackSpan(t)) / REORD_STEP); };
+    const doneG = (i) => Math.max(lastEndG(i) + TAILs, clipEndG(i));
+    const doneAt = (r, g) => linkMembers(r).every(m => { const j = rows.indexOf(m); return j < 0 || g > doneG(j); });
+    // Fixed tracks never move: whatever else changes, they keep their row
+    const fixedIdx = linkOnly ? rows.map((t, i) => i).filter(i => isSinger(rows[i]) && vocalRoleOf(linkRoot(rows[i]), roles) === 'fixed') : [];
+    const keepFixed = (prev, next) => {
+      if(!fixedIdx.length) return next;
+      const at = []; prev.forEach((i, k) => { if(fixedIdx.includes(i)) at.push([k, i]); });
+      if(!at.length) return next;
+      const out = next.filter(i => !fixedIdx.includes(i));
+      for(const [k, i] of at) out.splice(Math.min(k, out.length), 0, i);
+      return out;
+    };
     const imgRowOf = (r) => {
       const ms = linkMembers(r);
       if(ms.length > 1){                                          // where the picture ends up (see personWeights)
@@ -15681,12 +15981,12 @@
       if(!S.showImages) return cur;
       const done = [], rest = [];
       for(const i of cur){ const r = linkRoot(rows[i]); if(hasImg(r) && doneAt(r, g) && imgRowOf(r) === i) done.push(i); else rest.push(i); }
-      if(!done.length) return cur;
+      if(!done.length || !rest.some(i => hasImg(linkRoot(rows[i])))) return cur;     // (everyone with a picture is done: leave them be)
       // the last lane, top to bottom, that carries a picture and still has
       // singing to come (a connected track that has finished doesn't count,
       // even if its person sings on in another lane)
       let L = -1;
-      rest.forEach((i, k) => { const r = linkRoot(rows[i]); if(hasImg(r) && g <= lastEndG(i) + TAILs) L = k; });
+      rest.forEach((i, k) => { const r = linkRoot(rows[i]); if(hasImg(r) && g <= doneG(i)) L = k; });
       return rest.slice(0, L + 1).concat(done, rest.slice(L + 1));
     };
     // A connected track (of a person with a picture) that has sung its last
@@ -15702,7 +16002,7 @@
       for(const i of cur){
         const r = linkRoot(rows[i]);
         if(!hasImg(r) || linkMembers(r).length < 2) continue;
-        if(!(g > lastEndG(i) + TAILs + DROPs)) continue;             // still to sing (or only just stopped)
+        if(!(g > doneG(i) + DROPs)) continue;             // still to sing (or only just stopped / the clip's still going)
         if(doneAt(r, g) && imgRowOf(r) === i) continue;               // the picture's lane, person all done
         drop.push(i);
       }
@@ -15728,7 +16028,7 @@
           const GW = Math.round(REORD_GROUP / REORD_STEP);
           const on = (i) => { for(let k2 = 0; k2 <= GW; k2++) if(singAt(i, gg + k2)) return true; return false; };
           let nxt;
-          if(name === 'link') nxt = packLinked(members.slice(), on);      // only the connected ones move
+          if(name === 'link') nxt = keepFixed(cur, packLinked(members.slice(), on));      // only the connected ones move
           else {
             let fq = cur.findIndex(i => !on(i));
             nxt = cur.slice();
@@ -15752,7 +16052,7 @@
           if(packed.join(',') !== cur.join(',')){ cur = packed; st.last = gg; }
         }
         {
-          const gathered = dropFinished(gatherDone(cur, gg), gg);
+          const gathered = keepFixed(cur, dropFinished(gatherDone(cur, gg), gg));
           if(gathered.join(',') !== cur.join(',')){ cur = gathered; st.last = gg; }
         }
         st.seq.push(cur);
@@ -16882,7 +17182,7 @@
   // gone left it stays there unless the playhead is clearly back before it
   // (so a camera that drifts or rocks can't flip it back and forth).
   function imgWantLeft(t, leftX, rightX, a, playheadX, u){
-    if(rightX <= leftX + a){ t._rImgWant = 1; return 1; }
+    if(rightX <= leftX + a || recSettings.imgPlace === 'left'){ t._rImgWant = 1; return 1; }
     const thr = leftX + a + 12 * u;
     const w = t._rImgWant ? (playheadX >= thr - 48 * u ? 1 : 0) : (playheadX >= thr ? 1 : 0);
     t._rImgWant = w;
@@ -16949,6 +17249,7 @@
     const dur = Math.max(re - rs, 0.001);
     renderNowTime = renderOfflineTime != null ? renderOfflineTime : (isPlaying ? currentPlayheadTime() : playheadTime);
     const pt = Math.max(rs, Math.min(re, renderNowTime));
+    try{ introFlyPrep(pt, rs); }catch(e){ INTRO_HIDE = null; }
     fdMarksSync(pt);
     // Every fixed size below is designed for a 1080p frame and scaled by the
     // frame's SHORT side, so 1080p landscape and portrait share the same
@@ -17900,7 +18201,17 @@
       ctx.fillRect(0, 0, RENDER_W, RENDER_H);
       ctx.restore();
     }
-    drawOpeningText(ctx, u, pt, rs);       // Texts › Opening text: over everything
+    withTextStroke(S.openStroke, S.openStrokeColor, S.openStrokeW, () => drawOpeningText(ctx, u, pt, rs));       // Texts › Opening text: over everything
+    // Format › Fade in / Fade out: the whole picture fades from / to black (or white) at the ends
+    { const fi = Number(S.renderFadeIn) || 0, fo = Number(S.renderFadeOut) || 0;
+      if(fi > 0 || fo > 0){
+        const R2 = currentRenderRange(), fr = 1 / (Number(S.fps) || 30);
+        let k = 0;
+        if(fi > 0) k = Math.max(k, 1 - (pt - R2.a) / fi);
+        if(fo > 0) k = Math.max(k, 1 - (R2.b - fr - pt) / fo);
+        k = Math.max(0, Math.min(1, k));
+        if(k > 0.001){ ctx.save(); ctx.setTransform(ctx.getTransform()); ctx.globalAlpha = k; ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = S.renderFadeColor === 'white' ? '#ffffff' : '#000000'; ctx.fillRect(-10, -10, RENDER_W + 20, RENDER_H + 20); ctx.restore(); }
+      } }
     if(hlFrame){
       if(mT > 0){ hlAdd('margins', 0, 0, RENDER_W, mT); hlAdd('bg', 0, 0, RENDER_W, mT); }
       if(mB > 0){ hlAdd('margins', 0, contentBottom, RENDER_W, mB); hlAdd('bg', 0, contentBottom, RENDER_W, mB); }
@@ -18369,6 +18680,18 @@
     try{
       // ---- audio: mix, then encode ----
       const mixed = (audioFileMode() && masterAudio) ? await fileAudioOffline(a, b, SR) : await mixAudioOffline(a, b, SR);
+      // the sound fades in / out with the picture
+      if(recSettings.renderFadeAudio !== false){
+        const fi = Number(recSettings.renderFadeIn) || 0, fo = Number(recSettings.renderFadeOut) || 0;
+        if(fi > 0 || fo > 0){
+          const N = mixed.length, ni = Math.min(N, Math.round(fi * SR)), no = Math.min(N, Math.round(fo * SR));
+          for(let c = 0; c < mixed.numberOfChannels; c++){
+            const d = mixed.getChannelData(c);
+            for(let i = 0; i < ni; i++){ const x = i / ni; d[i] *= x * x; }
+            for(let i = 0; i < no; i++){ const x = i / no; d[N - 1 - i] *= x * x; }
+          }
+        }
+      }
       if(st.cancelled) throw new Error('cancelled');
       let pcmChunks = null;
       if(asMov){
@@ -18783,6 +19106,7 @@
     });
     const persistRow = recPanel.querySelector('[data-rec-row="persistImages"]');
     if(persistRow) persistRow.classList.toggle('disabled', !recSettings.showImages);
+    ['imgNames', 'imgPlace'].forEach(k => { const r = recPanel.querySelector(`[data-rec-row="${k}"]`); if(r) r.classList.toggle('disabled', !recSettings.showImages); });
     ['videoFit', 'videoScale', 'videoRatio', 'videoSlot', 'videoSize', 'videoHint', 'videoFrame', 'videoZoom', 'videoPanX', 'videoPanY', 'videoFrameBtns'].forEach(key => {
       const row = recPanel.querySelector(`[data-rec-row="${key}"]`);
       if(row) row.classList.toggle('disabled', !recSettings.videoSpace || (videoFill && (key === 'videoRatio' || key === 'videoSize')) || (/^videoFrame|^videoZoom|^videoPan/.test(key) && !projVideo));
@@ -21511,7 +21835,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 93;                 // ← goes up by one with every published version
+  const SD_BUILD = 95;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23684,21 +24008,53 @@
   const CAS_SYMS = ['🍒', '🍋', '🍊', '🔔', '💎', '7️⃣'];
   const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: 50, pot: null };
   const casReels = (T) => [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
-  // a spin is always 50. What it pays (the database checks the same table): 7️⃣7️⃣7️⃣ the whole jackpot, 💎💎💎 600,
-  // any three 300, two 💎 or 7️⃣ 125, any two 50 (your bet back), one 7️⃣ 20 back. What you lose goes into the jackpot.
-  const CAS_BET = 50, CAS_POT0 = 1000;
+  // A spin costs 2% of your points (at least 10, at most 2,000) — the database works out the same.
+  // What a result pays is in tenths of your bet, and the lower you are on the leaderboard the better
+  // it pays (pity luck): tier 2 = the bottom third, tier 1 = the middle third (config/pity holds the lines).
+  // 7️⃣7️⃣7️⃣ always takes the whole jackpot. Whatever you lose goes into the jackpot.
+  const CAS_MIN = 10, CAS_MAX = 2000, CAS_POT0 = 1000;
+  const casFee = (bal) => { const f = Math.floor(Math.max(0, bal | 0) / 50); return f < CAS_MIN ? CAS_MIN : f > CAS_MAX ? CAS_MAX : f; };
+  //            💎💎💎  any three  two 💎/7️⃣  any two  one 7️⃣  nothing
+  const CAS_PAY = [[120, 60, 25, 10, 4, 0], [120, 60, 25, 11, 4, 0], [120, 60, 27, 11, 5, 0]];
+  const CAS_TIER_NAME = ['', 'Lucky break', 'Pity luck'];
   const casIsJack = (T) => { const [a, b, c] = casReels(T); return a === 5 && b === 5 && c === 5; };
-  function casPayT(T){
+  // which kind of result: -1 the jackpot, else an index into CAS_PAY's rows
+  function casClass(T){
     const [a, b, c] = casReels(T);
-    if(a === b && b === c) return a === 5 ? -1 : a === 4 ? 600 : 300;
+    if(a === b && b === c) return a === 5 ? -1 : a === 4 ? 0 : 1;
     const pair = a === b || a === c ? a : b === c ? b : -1;
-    if(pair >= 0) return pair >= 4 ? 125 : 50;
-    return (a === 5 || b === 5 || c === 5) ? 20 : 0;
+    if(pair >= 0) return pair >= 4 ? 2 : 3;
+    return (a === 5 || b === 5 || c === 5) ? 4 : 5;
   }
+  // what a bet of b at pity tier y pays for a spin at T (-1 = the jackpot)
+  function casPayAt(b, y, T){ const k = casClass(T); if(k < 0) return -1; const m = (CAS_PAY[y | 0] || CAS_PAY[0])[k]; return Math.floor((b | 0) * m / 10); }
+  function casPayT(T){ return casPayAt(50, 0, T); }
   // what a spin paid out (a jackpot pays whatever the pot was)
-  function casWin(sp){ if(!sp || sp.b !== CAS_BET) return 0; const v = casPayT(sp.t); return v < 0 ? (sp.jp || CAS.pot || CAS_POT0) : v; }
+  function casWin(sp){ if(!sp || !(sp.b > 0)) return 0; const v = casPayAt(sp.b, sp.y, sp.t); return v < 0 ? (sp.jp || CAS.pot || CAS_POT0) : v; }
+  // my pity tier right now (from my points and the leaderboard lines the admin's SaiDeck keeps up to date)
+  function casTier(bal){
+    const P = (CHAT.cfg && CHAT.cfg.pity) || {}, a = typeof P.a === 'number' ? P.a : 1000, b = typeof P.b === 'number' ? P.b : 3000;
+    bal = bal == null ? scBal() : bal;
+    return bal < a ? 2 : bal < b ? 1 : 0;
+  }
   // (for the sounds: how big a win it was)
-  function casMult(T){ const v = casPayT(T); return v < 0 ? 25 : v >= 600 ? 12 : v >= 300 ? 6 : v >= 125 ? 2 : v > 0 ? 1 : 0; }
+  function casMult(T){ const k = casClass(T); return k < 0 ? 25 : [12, 6, 2, 1, 1, 0][k]; }
+  // the admin's SaiDeck keeps the pity lines up to date: the bottom third and the middle third of everyone with points
+  async function casPityUpdate(){
+    if(CAS.pityTried || chatLS('notadminP') === new Date().toDateString() || !SCALL.m) return;
+    const now = Date.now(), bals = Object.values(SCALL.m).map(x => x.b).filter(x => x > 0).sort((x, y) => x - y);
+    if(bals.length < 3) return;
+    const q = (f) => bals[Math.min(bals.length - 1, Math.floor(bals.length * f))];
+    const a = Math.max(100, q(1 / 3)), b = Math.max(a, q(2 / 3)), P = (CHAT.cfg && CHAT.cfg.pity) || {};
+    if(P.a === a && P.b === b) return;
+    if(P.t && now - P.t < 600000 && Math.abs(P.a - a) < P.a * 0.1 && Math.abs(P.b - b) < P.b * 0.1) return;
+    CAS.pityTried = true;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/config/pity.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ a, b, t: now }) });
+      if(r.ok){ CHAT.cfg.pity = { a, b, t: now }; CAS.pityTried = false; } else chatLS('notadminP', new Date().toDateString());
+    }catch(e){ CAS.pityTried = false; }
+  }
   const casSeatLive = (st) => st && typeof st.t === 'number' && Date.now() + PRES.offset - st.t < 95000;
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
@@ -23754,24 +24110,24 @@
   // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
   async function casSpin(){
     if(!CAS.on || CAS.busy) return;
-    const bet = CAS_BET;
     if(!SC.loaded) await scLoad();
-    if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
+    const bet = casFee(scBal()), y = casTier(scBal());
+    if(scBal() < bet){ toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return; }
     const last = CAS.spins[chatUid()];
     if(last && last.c === false){ await casClaim(last); }
     CAS.busy = true; casCtl();
     const me = chatUid(), sv = { '.sv': 'timestamp' };
     try{
       const tok = await chatAuth(), body = {};
-      body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false };
+      body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false, y };
       const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); toast(r.status === 401 ? 'Slow down a little — one spin every few seconds.' : "Couldn't spin — check your connection.", 2400); return; }
       SC.s += bet; try{ questEv('spin'); }catch(e){}
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
-      const sp = { b: bet, t: T, c: false }; CAS.spins[me] = sp;
-      if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += casWin({ b: bet, t: T }); }
+      const sp = { b: bet, t: T, c: false, y }; CAS.spins[me] = sp;
+      if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += casWin({ b: bet, t: T, y }); }
       CAS.seen[me] = T;
       const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
       if(myM) casShow(myM, sp, true, { n: chatName() });
@@ -23787,9 +24143,9 @@
         // (the jackpot as it is right now: a jackpot takes it all; a loss adds to it)
         const pg = await casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
         const potNow = pg.ok ? await pg.json() : null, pot = typeof potNow === 'number' ? potNow : CAS_POT0;
-        const jack = sp.b === CAS_BET && casIsJack(sp.t);
+        const jack = casIsJack(sp.t);
         if(jack) sp.jp = pot;
-        const win = casWin(sp), loss = sp.b === CAS_BET && !jack ? Math.max(0, CAS_BET - win) : 0;
+        const win = casWin(sp), loss = !jack ? Math.max(0, sp.b - win) : 0;
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss) body['casino/pot'] = pot + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
@@ -23834,7 +24190,7 @@
         <div class="cas-floor"></div>
         <div class="cas-pot"><span class="cp-l">💰 JACKPOT</span><b class="cp-v">…</b><span class="cp-s">grows with every losing spin — hit 7️⃣7️⃣7️⃣ to win it all</span></div>
         <div class="cas-ctl"><button type="button" class="cas-spin">SPIN · 50</button><button type="button" class="cas-leave">Leave</button></div>
-        <div class="cas-pays">Every spin is 50 · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 600 · any three 300 · two 💎 or 7️⃣ 125 · any two 50 back · one 7️⃣ 20 back</div>
+        <div class="cas-pays"></div>
         <div class="cas-feed"></div>`;
       el.querySelector('.cas-spin').addEventListener('click', casSpin);
       el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
@@ -23846,7 +24202,10 @@
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
     el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - (CAS.held || 0)) : '…';
-    const sb = el.querySelector('.cas-spin'); sb.disabled = CAS.busy || !CAS.on || scBal() < CAS_BET; sb.textContent = CAS.busy ? '…' : `SPIN · ${CAS_BET}`;
+    const sb = el.querySelector('.cas-spin'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !CAS.on || scBal() < fee; sb.textContent = CAS.busy ? '…' : `SPIN · ${fee.toLocaleString()}`;
+    { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
+      const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 2% of your points (${CAS_MIN}–${CAS_MAX.toLocaleString()}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
+      if(pe.dataset.h !== h){ pe.dataset.h = h; pe.innerHTML = h; } } }
     casPotShow();
   }
   const casSym = (i) => CAS_SYMS[i] || '❔';
@@ -23903,7 +24262,7 @@
   }
   // a machine's reels: roll and land on the spin's result (or just show it)
   function casShow(m, sp, roll, w){
-    const R = casReels(sp.t), jackpot = sp.b === CAS_BET && casIsJack(sp.t), win = casWin(sp), res = m.querySelector('.cas-res');
+    const R = casReels(sp.t), jackpot = casIsJack(sp.t), win = casWin(sp), res = m.querySelector('.cas-res');
     const strips = [...m.querySelectorAll('.cas-strip')];
     const still = !roll || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     const done = () => {
@@ -24022,7 +24381,7 @@
     try{
       const tok = await chatAuth();
       const g = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 8000); const d = g.ok ? await g.json() : null;
-      if(d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; }
+      if(d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjBaitSeen(d.rb); }
       if(!BJ.p[me]) await bjPatch({ [`bj/p/${me}`]: { n: nm, t: bjSv, j: bjSv, r: 0, b: 0, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, st: 's', pd: 0, o: false } });
       else await bjPatch({ [`bj/p/${me}/n`]: nm, [`bj/p/${me}/t`]: bjSv, [`bj/p/${me}/o`]: false });
       if(!BJ.d) await bjPatch({ 'bj/d': { u: 'bot', n: 'Dealer', r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv } });
@@ -24059,7 +24418,7 @@
         const tok = await chatAuth();
         const r = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
         const d = r.ok ? await r.json() : null;
-        if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjSync(); bjDrive(); }
+        if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjBaitSeen(d.rb); bjSync(); bjDrive(); }
       }catch(e){}
       BJ.polling = false;
     };
@@ -24358,7 +24717,7 @@
           <div class="bj-specs"></div>
         </div>
         <div class="cas-ctl bj-ctl"><div class="bj-betbox"><div class="cas-bet bj-betin"><input type="number" min="0" step="1" aria-label="Your bet" placeholder="0"></div>
-          <div class="bj-chiprow">${[5, 10, 25, 50, 100].map(v => `<button type="button" class="bj-chipbtn c${v}" data-v="${v}" title="Add ${v}"><span>${v}</span></button>`).join('')}<button type="button" class="bj-clr" data-v="max">Max</button><button type="button" class="bj-clr" data-v="clear">Clear</button></div>
+          <div class="bj-chiprow">${[5, 25, 100, 500, 1000, 5000].map(v => `<button type="button" class="bj-chipbtn c${v}" data-v="${v}" title="Add ${v.toLocaleString()}"><span>${v >= 1000 ? v / 1000 + 'K' : v}</span></button>`).join('')}<button type="button" class="bj-clr" data-v="max">Max</button><button type="button" class="bj-clr" data-v="clear">Clear</button></div>
           <button type="button" class="cas-spin bj-betb">BET</button></div>
           <div class="bj-acts"><button type="button" class="bj-a bj-hit">Hit</button><button type="button" class="bj-a bj-stand">Stand</button><button type="button" class="bj-a bj-dbl">Double</button><button type="button" class="bj-a bj-split">Split</button></div>
           <span class="bj-note"></span>
@@ -24395,7 +24754,7 @@
         const b = e.target.closest('[data-dact]'); if(!b) return; b.blur();
         ({ take: bjTakeDealer, drop: bjDropDealer, kick: bjVoteKick, deal: bjDealerDeal, hit: bjDealerHit, stand: bjDealerStand })[b.dataset.dact]();
       });
-      el.querySelector('.bj-seats').addEventListener('click', (e) => { const g = e.target.closest('[data-gift]'); if(g){ g.blur(); gpOpen(g.dataset.gift, g.dataset.n, g); } });
+      el.querySelector('.bj-seats').addEventListener('click', (e) => { const g = e.target.closest('[data-gift]'); if(g){ g.blur(); gpOpen(g.dataset.gift, g.dataset.n, g); } const rb = e.target.closest('[data-rb]'); if(rb){ rb.blur(); bjOrderBait(rb.dataset.rb, rb); } });
     }
     bjSync();
   }
@@ -24484,8 +24843,8 @@
     });
   }
   const bjTotTxt = (h) => !h || !h.k ? '' : h.h > 21 ? `${h.h} · bust` : (h.k === 2 && h.v === 21) ? 'Blackjack' : (h.a > 0 && h.h <= 11) ? `${h.v} (or ${h.h})` : `${h.v}`;
-  const BJ_DENOM = [100, 50, 25, 10, 5, 1];
-  const bjChipsOf = (n) => { const out = []; for(const d of BJ_DENOM){ while(n >= d && out.length < 14){ out.push(d); n -= d; } } return out; };
+  const BJ_DENOM = [10000, 5000, 1000, 500, 100, 50, 25, 10, 5, 1];
+  const bjChipsOf = (n) => { const out = []; for(const d of BJ_DENOM){ while(n >= d && out.length < 20){ out.push(d); n -= d; } } return out; };
   function bjPile(n, s, D, animate){
     const pl = n.querySelector('.bj-pl'); if(!pl) return;
     let pile = pl.querySelector('.bj-pile'); if(!pile){ pile = document.createElement('div'); pile.className = 'bj-pile'; pl.appendChild(pile); }
@@ -24581,7 +24940,9 @@
         n = document.createElement('div'); n.className = 'bj-seat' + (s.u === me ? ' me' : ''); n.dataset.u = s.u;
         n.innerHTML = `<div class="bj-hands"><div class="bj-h1"><div class="bj-hand"></div><div class="bj-tot"></div></div><div class="bj-h2"><div class="bj-hand bj-hand2"></div><div class="bj-tot bj-tot2"></div></div></div><div class="bj-chip"></div><div class="bj-pl"></div><b class="bj-nm"></b><i class="bj-pts gm-pts"></i>`;
         const av = chatAv(s.u, s.n, false, false); av.classList.add('bj-av'); n.querySelector('.bj-pl').append(av);
-        if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g); }
+        if(s.u !== me){ const g = document.createElement('button'); g.type = 'button'; g.className = 'bj-gift'; g.title = 'Send points'; g.textContent = '💸'; g.dataset.gift = s.u; g.dataset.n = s.n; n.querySelector('.bj-pl').append(g);
+          // (when I'm the dealer: send the bot's helpers to wind this player up)
+          const rb = document.createElement('button'); rb.type = 'button'; rb.className = 'bj-rbb'; rb.title = 'Send the bots to rage bait them'; rb.textContent = '😈'; rb.dataset.rb = s.u; rb.hidden = true; n.querySelector('.bj-pl').append(rb); }
         n.querySelector('.bj-nm').textContent = bjName(s.n) + (s.u === me ? ' (you)' : ''); n.querySelector('.bj-nm').style.color = chatColor(s.n);
         if(s.u === me){ av.title = 'Drag to move your seat'; bjDragSetup(n, av); }
         n.animate([{ opacity: 0, transform: 'translate(-50%, calc(-50% + 14px))' }, { opacity: 1, transform: 'translate(-50%, -50%)' }], { duration: 300, easing: 'ease-out' });
@@ -24609,6 +24970,7 @@
         cls += net > 0 ? ' win' : net === 0 ? ' push' : ' lose';
       }
       if(chip.textContent !== ct) chip.textContent = ct; chip.className = cls;
+      { const rb = n.querySelector('.bj-rbb'); if(rb) rb.hidden = !(D && D.u === me && s.u !== me); }
       gmPts(n.querySelector('.bj-pts'), s.u);
       n.classList.toggle('turn', !!(T && T.u === s.u));
       try{ bjPile(n, s, D, !!el.dataset.pilesReady); }catch(e){}
@@ -24907,6 +25269,30 @@
       const txt = BOT_TAUNTS.group[bjHash(R + 'grp') % BOT_TAUNTS.group.length].replace(/\{n\}/g, list);
       gameSay(host, txt); try{ sfxBotVoice(txt); }catch(e){}
     }, t + STEP + 600);
+  }
+  // ----- the human dealer orders the helpers to wind someone up (everyone at the table sees it) -----
+  const BOT_ORDER = ['the dealer sent me 😈 {n} ur bet is MID', '{n} the dealer says ur getting cooked this round 🍳', 'special delivery from the dealer: L 📦', '{n} u smell like a busted 22 💀',
+    'dealer said to tell u: skill issue {n}', 'oi {n}. the dealer is watching ur chips 👀', '{n} bet more or go home 🐔', 'the dealer wanted u to have this 🥧', '{n} imagine losing to THIS dealer 😭',
+    'boss says hi {n}. also bye to ur points 👋', '{n} ur hand looks scared', 'FAHHH {n} the dealer hates u specifically', 'okdiokiiii {n} time to lose', '{n} sksksk the dealer sent the whole squad'];
+  async function bjOrderBait(u, btn){
+    const D = BJ.d, me = chatUid(); if(!D || D.u !== me || !u || u === me) return;
+    if(Date.now() - (BJ.rbAt || 0) < 3000){ toast('Give the bots a second…', 1200); return; }
+    BJ.rbAt = Date.now();
+    if(btn) btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.4) rotate(-12deg)' }, { transform: 'scale(1)' }], { duration: 300 });
+    const ok = await bjPatch({ 'bj/rb': { u, t: bjSv } });
+    if(!ok) toast("The bots didn't hear you — try again in a moment.", 1800);
+  }
+  function bjBaitSeen(rb){
+    if(!rb || typeof rb.t !== 'number') return;
+    if(BJ.rbSeen == null){ BJ.rbSeen = rb.t; if(bjNow() - rb.t > 6000) return; }    // (an old order when I sit down: don't replay it)
+    else if(rb.t === BJ.rbSeen) return;
+    BJ.rbSeen = rb.t;
+    if(bjNow() - rb.t > 8000 || BJ.botQuiet) return;
+    const el = chatPanel.querySelector('.chat-bj'); if(!el || !el.dataset.built) return;
+    const S = BJ.p[rb.u]; if(!S) return;
+    const h = bjHash(rb.t + rb.u), txt = BOT_ORDER[h % BOT_ORDER.length].replace(/\{n\}/g, bjName(S.n)), act = BJ_ACTS[(h >> 3) % BJ_ACTS.length];
+    const m = bjMiniSay(el, rb.u, txt, 650, 5200);
+    if(m) setTimeout(() => bjAct(m.querySelector('.bj-mini-b') || m, el.querySelector(`.bj-seat[data-u="${CSS.escape(rb.u)}"] .bj-av`), act, h % 4), 1400);
   }
   // ----- the bot's little helpers -----
   const BJ_MINI = [['Bolt', 0], ['Chip', 140], ['Nut', 260], ['Byte', 60], ['Gizmo', 300], ['Rivet', 200]];
@@ -25896,6 +26282,7 @@
       if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
+    try{ casPityUpdate(); }catch(e){}
     presRender(); try{ document.querySelectorAll('.gm-pts').forEach(e => { const row = e.closest('[data-u]'); if(row) gmPts(e, row.dataset.u); }); }catch(e){}
     if(CHAT.open && force !== 'quiet') try{ chatRenderMessages(); }catch(e){} if(CHAT.side === 'arcade' && SC.tab === 'board') chatRenderArcade();
   }
@@ -27248,7 +27635,7 @@
   // selected); the video draws every visible one, each in its own look, so
   // two singers' overlapping lines can show at the same time.
   var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricBySinger', 'lyricAllTracks',
-    'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper'];
+    'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper', 'lyricStroke', 'lyricStrokeColor', 'lyricStrokeW'];
   function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], cuts: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
   function lyrStyleNow(){ const o = {}; for(const k of LYR_STYLE_KEYS) o[k] = recSettings[k]; return o; }
   var lyrTracks = [{ name: 'Lyrics 1', on: true, lyr, style: null }];
@@ -28304,7 +28691,8 @@
   function cloneLines(lines){ return lines.map(L => Object.assign({}, L, { words: L.words.map(w => Object.assign({}, w, { sing: w.sing.slice(), st: w.st ? w.st.slice() : w.st })) })); }
   function partsOf(w){ return w.parts && w.parts.length ? w.parts : (w.parts = syllabify(w.w)); }
   function lyricFontStr(weight, px){ return `${weight} ${px}px "${recSettings.lyricFont || 'Poppins'}", "Poppins", Inter, sans-serif`; }
-  function fontWeightOf(f){ return f === 'Anton' || f === 'Bangers' ? 400 : f === 'Fredoka' ? 700 : f === 'Manrope' ? 800 : 900; }
+  const FONT_W = { 'Bebas Neue': 400, 'Montserrat': 900, 'Playfair Display': 900, 'Pacifico': 400, 'Lobster': 400, 'Permanent Marker': 400, 'Righteous': 400, 'Orbitron': 900, 'Caveat': 700, 'Press Start 2P': 400, 'Luckiest Guy': 400, 'Dancing Script': 700 };
+  function fontWeightOf(f){ return FONT_W[f] || (f === 'Anton' || f === 'Bangers' ? 400 : f === 'Fredoka' ? 700 : f === 'Manrope' ? 800 : 900); }
   function lyricWeight(){ return fontWeightOf(recSettings.lyricFont); }
   // a word's own font (set from the strip's right-click menu), or the style's
   function wordFontStr(w, px){
@@ -29006,7 +29394,7 @@
   const LYR_BLENDS = ['source-over', 'multiply', 'darken', 'color-burn', 'screen', 'lighter', 'lighten', 'color-dodge',
     'overlay', 'soft-light', 'hard-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
   let lyrLayer = null;
-  function drawLyricsBlended(ctx, L, T){ forEachLyrTrack(() => drawLyricsBlended1(ctx, L, T)); }
+  function drawLyricsBlended(ctx, L, T){ forEachLyrTrack(() => { const S = recSettings; withTextStroke(S.lyricStroke, S.lyricStrokeColor, S.lyricStrokeW, () => drawLyricsBlended1(ctx, L, T)); }); }
   // A cut point (right-click on the lyric strip): the line on screen fades out
   // quickly so it's completely gone by that moment (until the next line starts).
   function lyrCutFade(T){
@@ -29604,7 +29992,7 @@
     let scope = h.kind === 'line' ? 'line' : 'word';
     const w0 = L.words[h.wi != null ? h.wi : 0];
     lyr.undo.push(cloneLines(lyr.lines)); if(lyr.undo.length > 60) lyr.undo.shift();
-    const fonts = ['Poppins', 'Fredoka', 'Bangers', 'Anton', 'Manrope'];
+    const fonts = ['Poppins', 'Fredoka', 'Bangers', 'Anton', 'Manrope', 'Bebas Neue', 'Montserrat', 'Playfair Display', 'Pacifico', 'Lobster', 'Permanent Marker', 'Righteous', 'Orbitron', 'Caveat', 'Press Start 2P', 'Luckiest Guy', 'Dancing Script'];
     const swatches = ['#ffffff', '#ffd84a', '#ff9f1a', '#e5484d', '#ff4f8b', '#b06cff', '#4fa3e3', '#4fd0c8', '#6fcf97', '#111111'];
     const el = document.createElement('div');
     el.className = 'lyr-ctx';
@@ -30699,7 +31087,7 @@
     };
     const ov = document.createElement('div');
     ov.className = 'confirm-overlay fdc-overlay';
-    const fonts = ['Poppins', 'Anton', 'Bangers', 'Fredoka', 'Manrope', 'Inter', 'Pixelify Sans', 'VT323'];
+    const fonts = ['Poppins', 'Anton', 'Bangers', 'Fredoka', 'Manrope', 'Inter', 'Pixelify Sans', 'VT323', 'Bebas Neue', 'Montserrat', 'Playfair Display', 'Pacifico', 'Lobster', 'Permanent Marker', 'Righteous', 'Orbitron', 'Caveat', 'Press Start 2P', 'Luckiest Guy', 'Dancing Script'];
     ov.innerHTML = `<div class="fdc-card" role="dialog" aria-modal="true">
       <div class="fdc-head"><div><div class="confirm-title">${old ? 'Edit your Freedit' : 'Create your own Freedit'}</div><div class="fdc-sub">Pick a background, effects, a colour look and a big moment. It's saved in this browser under Edit style, like the others.</div></div>
         <button type="button" class="vcrop-x fdc-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button></div>
