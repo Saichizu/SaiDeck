@@ -1,6 +1,6 @@
 {
-  "build": 104,
+  "build": 105,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Put the tracks where you want them: in the render preview, drag any track up or down and it moves there from the playhead on (the others shift over to make room). It keys the order at that moment, slides into place, and beats everything else (Fixed, Main, Backup, Singing tracks move up) until your next key. The keys are listed under Tracks: click one to jump to it, ✕ to delete it, or \"+ Auto from here\" to go back to the automatic order. Latching lyrics onto a track now lands them dead-centre on it."
+  "notes": "Track order keys now only remember the tracks you actually moved. Every key builds on the one before it, so tracks you didn't touch never shuffle around, whatever order you make or edit the keys in. Drag any track in the render preview to key the order at the playhead; the keys are listed under Tracks."
 }

@@ -16139,9 +16139,29 @@
     }
     return laneKeyMemo.list;
   }
+  // A key keeps only the moves made at it (mv: [[track key, row], …]); its full order (o) is
+  // rebuilt from the key before it (or the automatic order, at the first key / after "Auto
+  // from here"), so tracks you didn't touch carry over unchanged from key to key.
+  // (b: a full order a key started from — keys from before moves were kept.)
+  function laneOrderKeys(o){ const pos = lanePosFromOrder(o || []); return tracks.map((t, i) => i).sort((a, b) => pos[a] - pos[b]).map(i => trackSnapKey(tracks[i])); }
+  function laneAutoOrder(T){ const pos = vocalLanePositionsAuto(T) || tracks.map((t, i) => i); return tracks.map((t, i) => i).sort((a, b) => pos[a] - pos[b]).map(i => trackSnapKey(tracks[i])); }
+  function laneMove(o, m, r){ const a = o.filter(x => x !== m); a.splice(Math.max(0, Math.min(a.length, r)), 0, m); return a; }
+  function laneKeysRebuild(list){
+    let prev = null;
+    for(const k of list){
+      if(!k.o && !(k.mv && k.mv.length) && !k.b){ k.o = null; prev = null; continue; }     // "Auto from here"
+      if(k.mv && k.mv.length){
+        let o = laneOrderKeys(k.b || prev || laneAutoOrder(k.t - LANE_KEY_MOVE - 0.02));
+        for(const [m, r] of k.mv) o = laneMove(o, m, r);
+        k.o = o;
+      }
+      prev = k.o;
+    }
+    return list;
+  }
   function laneKeysSet(list){
-    list = list.slice().sort((x, y) => x.t - y.t);
-    recSettings.laneKeys = list.length ? JSON.stringify(list.map(k => ({ t: Math.round(k.t * 1000) / 1000, o: k.o || null }))) : '';
+    list = laneKeysRebuild(list.map(k => Object.assign({}, k)).sort((x, y) => x.t - y.t));
+    recSettings.laneKeys = list.length ? JSON.stringify(list.map(k => { const o = { t: Math.round(k.t * 1000) / 1000, o: k.o || null }; if(k.mv && k.mv.length) o.mv = k.mv; if(k.b) o.b = k.b; return o; })) : '';
   }
   function lanePosFromOrder(o){
     const idx = [], used = new Set();
@@ -21603,9 +21623,14 @@
       if(!D.on){ if(Math.abs(p.y - D.p0.y) < 5) return; D.on = true; cv.style.cursor = 'grabbing'; }
       // the row nearest the pointer (the rows as they were when the drag started)
       let r = 0, bd = Infinity; D.slots.forEach((c, i) => { const d = Math.abs(p.y - c); if(d < bd){ bd = d; r = i; } });
-      const others = D.order.filter(i => i !== D.idx), order = others.slice(0, r).concat([D.idx], others.slice(r));
-      const L = laneKeysNow().filter(k => Math.abs(k.t - D.T) > 0.05);
-      L.push({ t: D.T, o: order.map(i => trackSnapKey(tracks[i])) });
+      // the key at the playhead (new, or the one already there) gets this move; the moves made
+      // there before stay, and every later key is rebuilt on top
+      const mKey = trackSnapKey(tracks[D.idx]);
+      const L = laneKeysNow().map(k => Object.assign({}, k));
+      let k = L.find(x => Math.abs(x.t - D.T) <= 0.05);
+      if(!k){ k = { t: D.T, mv: [] }; L.push(k); }
+      else if(!(k.mv && k.mv.length)) k.b = k.o || laneAutoOrder(D.T);  // (an older key, or "Auto from here": what it shows is where it starts)
+      k.mv = (k.mv || []).filter(x => x[0] !== mKey).concat([[mKey, r]]);
       laneKeysSet(L);
       const rr = laneRectOf(tracks[D.idx]) || { t: p.y - 20, b: p.y + 20 };
       showBox({ l: 0, r: RENDER_W, t: D.slots[r] - (rr.b - rr.t) / 2, b: D.slots[r] + (rr.b - rr.t) / 2 }, p.k, `${tracks[D.idx].name || 'Track'} → row ${r + 1} · keyed at ${fmtT(D.T)}`);
@@ -22324,7 +22349,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 104;                 // ← goes up by one with every published version
+  const SD_BUILD = 105;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
