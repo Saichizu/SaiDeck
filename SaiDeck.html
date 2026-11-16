@@ -3723,11 +3723,175 @@
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{animation:none !important;transition:none !important;}
   }
+
+  /* ===================================================================
+     Build 96 — polish layer: motion, depth and feedback for the editor.
+     Everything here is additive. It never touches how waveforms, clips
+     or the rendered video are drawn. Performance mode (body.sd-perf) and
+     "reduce motion" switch the moving parts off.
+     =================================================================== */
+  :root{
+    --ease-out:cubic-bezier(.22,1,.36,1);
+    --ease-spring:cubic-bezier(.34,1.56,.64,1);
+    --glass:rgba(24,24,32,.9);
+    --hair:rgba(255,255,255,.09);
+  }
+  ::selection{background:rgba(229,72,77,.45);color:#fff;}
+
+  /* --- top bar: soft depth + a colour line that comes alive on play --- */
+  .topbar{position:relative;background:linear-gradient(180deg,#18181f 0%,#111116 100%);}
+  .tb-aurora{position:absolute;left:0;right:0;bottom:-1px;height:1px;overflow:hidden;pointer-events:none;opacity:.22;transition:opacity .6s ease;}
+  .tb-aurora i{
+    display:block;width:200%;height:100%;
+    background:linear-gradient(90deg,transparent 0%,#e5484d 7%,#ff7a59 15%,#f5d04a 22%,#35d0b8 29%,#5b8def 36%,#b48cff 43%,transparent 50%,#e5484d 57%,#ff7a59 65%,#f5d04a 72%,#35d0b8 79%,#5b8def 86%,#b48cff 93%,transparent 100%);
+  }
+  body.sd-playing .tb-aurora{opacity:.95;}
+  /* lit while playing; one slow sweep when playback starts (no endless loop, so playing stays light) */
+  body.sd-playing .tb-aurora i{animation:sdAurora 1.6s var(--ease-out) 1;}
+  @keyframes sdAurora{from{transform:translateX(-50%);}}
+
+  .brand .mark{position:relative;transition:transform .35s var(--ease-spring);}
+  .brand .mark::after{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    box-shadow:0 0 16px 3px rgba(255,110,90,.75);opacity:0;transition:opacity .4s ease;
+  }
+  .brand-switch:hover .mark{transform:rotate(-8deg) scale(1.1);}
+  body.sd-playing .brand .mark{animation:sdBeat .6s var(--ease-out) 1;}
+  body.sd-playing .brand .mark::after{opacity:.55;}
+  @keyframes sdBeat{0%{transform:scale(1);}35%{transform:scale(1.22) rotate(-8deg);}100%{transform:scale(1);}}
+
+  /* --- transport pill --- */
+  .transport{
+    background:linear-gradient(180deg,#1c1c24,#15151b);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 18px rgba(0,0,0,.28);
+    transition:border-color .4s ease, box-shadow .4s ease;
+  }
+  body.sd-playing .transport{border-color:rgba(229,72,77,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 22px rgba(229,72,77,.16);}
+  .tbtn{transition:background .15s ease, transform .22s var(--ease-spring), box-shadow .2s ease;}
+  .tbtn:hover{transform:scale(1.08);}
+  .tbtn:active{transform:scale(.9);transition-duration:.06s;}
+  .tbtn.play{position:relative;background:linear-gradient(135deg,#ee5257,#ff7a59);box-shadow:0 4px 14px rgba(229,72,77,.4), inset 0 1px 0 rgba(255,255,255,.25);}
+  .tbtn.play:hover{background:linear-gradient(135deg,#f25d62,#ff8a6b);box-shadow:0 6px 20px rgba(229,72,77,.55), inset 0 1px 0 rgba(255,255,255,.3);}
+  .tbtn.play::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #ff6b6f;opacity:0;pointer-events:none;}
+  body.sd-playing .tbtn.play::after{animation:sdRing .7s var(--ease-out) 1;}
+  @keyframes sdRing{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.75);opacity:0;}}
+  body.sd-playing #curTime{color:#fff;text-shadow:0 0 12px rgba(255,110,90,.45);}
+  #curTime{transition:color .3s ease, text-shadow .3s ease;}
+
+  /* --- buttons: lift on hover, squish on press --- */
+  .file-btn, .bulk-btn, .tutorial-btn, .range-btn, .addtrack-btn, .render-top-btn, .chat-btn, .sd-update-btn, .empty-state .cta, .confirm-actions button{
+    position:relative;
+    transition:background .15s ease, border-color .15s ease, color .15s ease, box-shadow .2s ease, transform .2s var(--ease-spring);
+  }
+  .file-btn:hover, .bulk-btn:hover, .tutorial-btn:hover, .addtrack-btn:hover, .render-top-btn:hover, .chat-btn:hover, .sd-update-btn:hover, .empty-state .cta:hover{transform:translateY(-1px);}
+  .file-btn:active, .bulk-btn:active, .tutorial-btn:active, .range-btn:active, .addtrack-btn:active, .render-top-btn:active, .chat-btn:active, .sd-update-btn:active, .empty-state .cta:active, .confirm-actions button:active{transform:translateY(0) scale(.95);transition-duration:.06s;}
+  .file-btn:hover, .bulk-btn:hover{box-shadow:0 4px 12px rgba(0,0,0,.35);}
+  .icon-btn{transition:background .15s ease, color .15s ease, transform .2s var(--ease-spring);}
+  .icon-btn:not(:disabled):hover{transform:scale(1.12);}
+  .icon-btn:not(:disabled):active{transform:scale(.88);transition-duration:.06s;}
+  .render-top-btn, .addtrack-btn, .empty-state .cta{background:linear-gradient(135deg,#e5484d,#f4634c);box-shadow:0 3px 12px rgba(229,72,77,.3), inset 0 1px 0 rgba(255,255,255,.2);}
+  .render-top-btn:hover, .addtrack-btn:hover, .empty-state .cta:hover{background:linear-gradient(135deg,#ee5257,#ff7a59);box-shadow:0 6px 20px rgba(229,72,77,.5), inset 0 1px 0 rgba(255,255,255,.25);}
+  .chat-btn:hover{box-shadow:0 4px 16px rgba(180,140,255,.3);}
+  .sd-update-btn:hover{box-shadow:0 4px 16px rgba(53,208,184,.28);}
+  .effect-label-btn .chev, .tb-menu-btn .chev{transition:transform .25s var(--ease-out);}
+  .effect-label-btn[aria-expanded="true"] .chev{transform:rotate(180deg);}
+
+  /* click ripple (added by sdRipple) */
+  .sd-rip-box{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;}
+  .sd-rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.32);transform:scale(0);animation:sdRip .55s var(--ease-out) forwards;}
+  @keyframes sdRip{to{transform:scale(1);opacity:0;}}
+
+  /* --- switches: springy knob, glow when on --- */
+  .switch .track{transition:background .2s ease, border-color .2s ease, box-shadow .25s ease;}
+  .switch .knob{transition:transform .3s var(--ease-spring), background .2s ease, width .15s ease;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+  .switch input:checked ~ .track{box-shadow:0 0 10px rgba(229,72,77,.4);}
+  .switch input:active ~ .knob{width:14px;}
+  .switch input:checked:active ~ .knob{transform:translateX(10px);}
+  .switch input:focus-visible ~ .track{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* --- menus, panels and pop-ups: frosted, and they ease in --- */
+  .tb-panel, .effect-menu, .color-popover{
+    background:var(--glass);border-color:var(--hair);
+    -webkit-backdrop-filter:blur(16px) saturate(1.35);backdrop-filter:blur(16px) saturate(1.35);
+    box-shadow:0 20px 54px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .tb-panel.open, .effect-menu, .color-popover{animation:sdPopIn .2s var(--ease-out);}
+  @keyframes sdPopIn{from{opacity:0;transform:translateY(-6px);}}
+  .tb-panel .playhead-toggle, .effect-menu button{transition:background .12s ease, transform .18s var(--ease-out);}
+  .effect-menu button:hover{transform:translateX(2px);}
+  .confirm-overlay{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+  .render-overlay.open{animation:cfIn .2s ease-out;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+  .render-overlay.open .render-panel{animation:cfPop .3s var(--ease-spring);}
+
+  /* --- toast --- */
+  .toast{
+    border-radius:12px;padding:10px 18px;background:rgba(30,31,41,.92);border-color:rgba(255,255,255,.1);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    box-shadow:0 16px 44px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07);
+    transform:translate(-50%, 18px) scale(.94);
+    transition:opacity .22s ease, transform .42s var(--ease-spring);
+  }
+  .toast.show{transform:translate(-50%, 0) scale(1);}
+
+  /* --- tracks: new ones slide in, and the colour bar lights up with the voice --- */
+  .track-header{transition:background .2s ease;}
+  .track-header:hover{background:rgba(255,255,255,.022);}
+  .track-header.sd-in{animation:sdRowIn .45s var(--ease-out);}
+  .lane.sd-in{animation:sdLaneIn .55s var(--ease-out);}
+  @keyframes sdRowIn{from{opacity:0;transform:translateX(-14px);}}
+  @keyframes sdLaneIn{from{opacity:0;}}
+  .th-vu{
+    position:absolute;left:0;top:0;bottom:0;width:64px;pointer-events:none;opacity:0;will-change:opacity;
+    background:linear-gradient(90deg, color-mix(in srgb, var(--tc) 46%, transparent), color-mix(in srgb, var(--tc) 12%, transparent) 45%, transparent);
+  }
+  .th-vu::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:color-mix(in srgb, var(--tc) 50%, #fff 50%);box-shadow:0 0 10px 1px var(--tc);}
+  .track-icon-btn{transition:transform .22s var(--ease-spring), box-shadow .2s ease;}
+  .track-icon-btn:hover{transform:scale(1.15) rotate(-6deg);box-shadow:0 0 12px color-mix(in srgb, var(--tc) 55%, transparent);}
+
+  /* --- empty timeline --- */
+  .empty-state > *{animation:sdRise .6s var(--ease-out) both;}
+  .empty-state > :nth-child(2){animation-delay:.07s;}
+  .empty-state > :nth-child(3){animation-delay:.14s;}
+  .empty-state > :nth-child(4){animation-delay:.21s;}
+  @keyframes sdRise{from{opacity:0;transform:translateY(12px);}}
+  .empty-state .icon{
+    position:relative;background:linear-gradient(160deg,#20202a,#15151b);border-color:var(--hair);
+    box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+    animation:sdRise .6s var(--ease-out) both, sdFloat 4.5s ease-in-out .6s infinite;
+  }
+  .empty-state .icon::before{
+    content:'';position:absolute;inset:-14px;border-radius:24px;pointer-events:none;z-index:-1;
+    background:radial-gradient(closest-side, rgba(229,72,77,.3), transparent);animation:sdBreathe 4.5s ease-in-out infinite;
+  }
+  .empty-state .icon svg{fill:#ff8f7a;}
+  @keyframes sdFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  @keyframes sdBreathe{0%,100%{opacity:.45;transform:scale(.9);}50%{opacity:1;transform:scale(1.1);}}
+
+  /* --- small things --- */
+  .brand .title{transition:color .15s ease, background .15s ease;}
+  .range-btn{transition:background .15s ease, color .15s ease, transform .2s var(--ease-spring);}
+  .swatch-dock .sd-sw{transition:transform .22s var(--ease-spring), box-shadow .18s ease;}
+  .sidebar-head, .toolbar{box-shadow:0 1px 0 rgba(255,255,255,.02) inset;}
+  .sd-confetti{position:fixed;inset:0;width:100vw;height:100vh;z-index:99990;pointer-events:none;}
+
+  /* Performance mode / reduced motion: keep the look, drop the motion. */
+  body.sd-perf .tb-aurora i, body.sd-perf .brand .mark, body.sd-perf .tbtn.play::after,
+  body.sd-perf .empty-state .icon, body.sd-perf .empty-state .icon::before{animation:none !important;}
+  body.sd-perf .tb-panel, body.sd-perf .effect-menu, body.sd-perf .color-popover, body.sd-perf .toast,
+  body.sd-perf .confirm-overlay, body.sd-perf .render-overlay.open{-webkit-backdrop-filter:none;backdrop-filter:none;}
+  body.sd-perf .tb-panel, body.sd-perf .effect-menu, body.sd-perf .color-popover{background:#191920;}
+  body.sd-perf .th-vu{display:none;}
+  @media (prefers-reduced-motion: reduce){
+    .tb-aurora i, .brand .mark, .tbtn.play::after, .empty-state > *, .empty-state .icon, .empty-state .icon::before,
+    .tb-panel.open, .effect-menu, .color-popover, .track-header.sd-in, .lane.sd-in, .sd-rip{animation:none !important;}
+    .file-btn, .bulk-btn, .tutorial-btn, .addtrack-btn, .render-top-btn, .chat-btn, .sd-update-btn, .icon-btn, .tbtn, .toast{transition-duration:.01s !important;}
+  }
 </style>
 
 <div class="app" style="--sidebar-w:250px;--lane-h:92px;">
 
   <header class="topbar">
+    <div class="tb-aurora" aria-hidden="true"><i></i></div>
     <div class="brand">
       <span class="brand-switch" id="brandSwitch">
         <span class="mark" id="brandMark">
@@ -4201,7 +4365,7 @@
         <div class="rec-row bg-pick" data-rec-row="bgGrad" data-hl="bg" title="A quiet gradient behind everything — dark enough that the tracks, panel and waveforms keep their colours"><span>Background</span><div class="seg bg-grid" data-rec="bgGrad"><button type="button" data-value="" title="Plain colour (below)" style="--g:var(--plain-bg,#08080a)"><i></i><span>Plain</span></button><button type="button" data-value="midnight" title="Midnight" style="--g:linear-gradient(155deg,#070a14,#0e1428,#18203a)"><i></i><span>Midnight</span></button><button type="button" data-value="dusk" title="Dusk" style="--g:linear-gradient(160deg,#0a0912,#171126,#2a1426)"><i></i><span>Dusk</span></button><button type="button" data-value="plum" title="Plum" style="--g:linear-gradient(135deg,#0b070f,#1a0f22,#2a1233)"><i></i><span>Plum</span></button><button type="button" data-value="ocean" title="Ocean" style="--g:linear-gradient(170deg,#050c12,#0a1b26,#0e2a36)"><i></i><span>Ocean</span></button><button type="button" data-value="aurora" title="Aurora" style="--g:linear-gradient(120deg,#06110f,#0b1a22,#141430,#1d1029)"><i></i><span>Aurora</span></button><button type="button" data-value="forest" title="Forest" style="--g:linear-gradient(165deg,#060b08,#0c1a12,#14281c)"><i></i><span>Forest</span></button><button type="button" data-value="ember" title="Ember" style="--g:linear-gradient(150deg,#0b0706,#1a0f0c,#2e1510)"><i></i><span>Ember</span></button><button type="button" data-value="rose" title="Rose" style="--g:linear-gradient(145deg,#0c070a,#1b0e17,#2e1423)"><i></i><span>Rose</span></button><button type="button" data-value="graphite" title="Graphite" style="--g:linear-gradient(170deg,#08080b,#121318,#1d1f27)"><i></i><span>Graphite</span></button></div></div>
         <div class="rec-row" data-rec-row="bgColor" data-hl="bg"><span>Background colour</span><input type="color" data-rec="bg"></div>
         <label class="rec-row rec-toggle" data-hl="lanes" title="In the video only (the timeline never changes): singing tracks move up past quiet ones. Pick below which mic tracks are Main, Backup or Fixed; instruments never move."><span>Singing tracks move up</span><span class="switch"><input type="checkbox" data-rec="vocalReorder"><span class="track"></span><span class="knob"></span></span></label>
-        <label class="rec-row rec-toggle" data-rec-row="vocalOverflow" data-hl="lanes" title="On: the tracks keep the Track height you set even if they don't all fit — the ones that aren't singing can run off the bottom of the frame, since whoever's singing moves up into view."><span>Tracks can go off the frame</span><span class="switch"><input type="checkbox" data-rec="vocalOverflow"><span class="track"></span><span class="knob"></span></span></label>
+        <label class="rec-row rec-toggle" data-rec-row="vocalOverflow" data-hl="lanes" title="On: the tracks keep the Track height you set even if they don't all fit, so some can run off the bottom of the frame (with Singing tracks move up, whoever's singing moves up into view), and a Freedit's camera can zoom past quiet tracks. Off: every track always stays inside the frame and the safe margins, even while a Freedit's camera moves."><span>Tracks can go off the frame</span><span class="switch"><input type="checkbox" data-rec="vocalOverflow"><span class="track"></span><span class="knob"></span></span></label>
         <label class="rec-row rec-toggle" data-hl="lanes" title="The top and bottom of each waveform are the same shape, like BandLab — tidier. Off: the exact up / down shape of the sound. Same switch as View › Mirrored waveform."><span>Mirrored waveform</span><span class="switch"><input type="checkbox" id="recWaveMirrorToggle"><span class="track"></span><span class="knob"></span></span></label>
         <div class="vocal-roles" data-rec-row="vocalRoles" data-hl="lanes">
           <div class="vocal-roles-hint">Main vocals swap with main vocals — when one goes quiet, or hands over (one is about to stop as another comes in). Backup vocals swap with backups, only when one goes quiet. Volume differences never cause a swap. Fixed never moves.</div>
@@ -4406,6 +4570,7 @@
         <div class="rec-row rs" data-rec-row="lyricSize" data-hl="lyrics"><span>Text size</span><input type="range" min="24" max="200" step="2" data-rec="lyricSize"><span class="rec-val" data-rec-val="lyricSize"></span></div>
         <div class="rec-row rs" data-rec-row="lyricBounce" data-hl="lyrics"><span>Bounce</span><input type="range" min="0" max="100" step="5" data-rec="lyricBounce"><span class="rec-val" data-rec-val="lyricBounce"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Position</span><div class="seg" data-rec="lyricPos"><button type="button" data-value="top">Top</button><button type="button" data-value="middle">Middle</button><button type="button" data-value="bottom">Bottom</button><button type="button" data-value="video">On video</button><button type="button" data-value="custom" title="Where you dragged them to — drag the lyrics on the preview">Dragged</button></div></div>
+        <label class="rec-row rec-toggle" data-rec-row="lyricSnap" data-hl="lyrics" title="This lyric track sits on the lane of the track it belongs to (its [Name] tag, or whoever sings most of the line) and goes up and down with it when the tracks move. Dragging it then only moves it left / right; Move up / down nudges it off the lane."><span>Stick to the singer's track</span><span class="switch"><input type="checkbox" data-rec="lyricSnap"><span class="track"></span><span class="knob"></span></span></label>
         <div class="rec-row rs" data-rec-row="lyricNudge" data-hl="lyrics"><span>Move up / down</span><input type="range" min="-400" max="400" step="5" data-rec="lyricNudge"><span class="rec-val" data-rec-val="lyricNudge"></span></div>
         <div class="rec-row rs" data-rec-row="lyricNudgeX" data-hl="lyrics"><span>Move left / right</span><input type="range" min="-500" max="500" step="5" data-rec="lyricNudgeX"><span class="rec-val" data-rec-val="lyricNudgeX"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Word colour</span><div class="seg" id="lyrColorModeSeg"><button type="button" data-v="singer" title="Each word in the colour of whoever sings it (a flowing gradient when several do)">Singers</button><button type="button" data-v="all" title="Every word flows through the colours of all your tracks">All tracks</button><button type="button" data-v="custom" title="Your own gradient colours whenever the tracks harmonise (singer colours the rest of the time)">Custom</button><button type="button" data-v="single" title="One colour for every word">One colour</button></div></div>
@@ -5550,13 +5715,7 @@
       }
       case 'embers': {
         const radius = size * (1.5 + 0.5 * twinkle);
-        const glow = ctx.createRadialGradient(px, py, 0, px, py, radius);
-        glow.addColorStop(0, rgba(sr, sg, sb, 0.55 * twinkle));
-        glow.addColorStop(1, rgba(sr, sg, sb, 0));
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(px, py, radius, 0, Math.PI * 2);
-        ctx.fill();
+        stampGlow(ctx, glowSprite(sr + ',' + sg + ',' + sb, 1, 0, null), px, py, radius, 0.55 * twinkle);
         break;
       }
       case 'exploding': {
@@ -5755,14 +5914,7 @@
       case 'sparkle':
       default: {
         const radius = size * (0.75 + 0.35 * twinkle);
-        const glow = ctx.createRadialGradient(px, py, 0, px, py, radius * 3);
-        glow.addColorStop(0, rgba(sr, sg, sb, 0.7 * twinkle));
-        glow.addColorStop(0.4, rgba(sr, sg, sb, 0.28 * twinkle));
-        glow.addColorStop(1, rgba(sr, sg, sb, 0));
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(px, py, radius * 3, 0, Math.PI * 2);
-        ctx.fill();
+        stampGlow(ctx, glowSprite(sr + ',' + sg + ',' + sb, 0.7, 0.28, 0.4), px, py, radius * 3, twinkle);
         ctx.fillStyle = rgba(255, 255, 255, 0.75 * twinkle);
         ctx.beginPath();
         ctx.arc(px, py, Math.max(0.4, radius * 0.35), 0, Math.PI * 2);
@@ -6517,18 +6669,24 @@
   }
   function updateAvatarStates(){
     for(const t of tracks){
-      if(!t.avatarEl) continue;
+      if(!t.avatarEl && (perfMode || !t.vuEl)) continue;
       const ended = !isTrackSounding(t, playheadTime);
       const amp = ended ? 0 : getAmplitudeAt(t, playheadTime);
       const gain = effectiveGain(t);
       const intensity = amp * gain;
-      t.avatarEl.classList.toggle('silent', avatarQuiet(t, playheadTime, intensity, '_avLoud'));
+      if(t.vuEl && !perfMode && (tickFrame & 1)){
+        // every other frame, 8 steps, and the style is only written when the step changes
+        const lv = Math.round(Math.min(1, intensity * 1.6) * 8);
+        if(lv !== t._vu){ t._vu = lv; t.vuEl.style.opacity = lv ? (lv / 8).toFixed(2) : ''; }
+      }
+      if(t.avatarEl) t.avatarEl.classList.toggle('silent', avatarQuiet(t, playheadTime, intensity, '_avLoud'));
     }
   }
 
   function setAllAvatarsSilent(){
     for(const t of tracks){
       if(t.avatarEl) t.avatarEl.classList.add('silent');
+      if(t.vuEl && t._vu){ t._vu = 0; t.vuEl.style.opacity = ''; }
     }
   }
 
@@ -7255,20 +7413,41 @@
     if(sparkleParticles.length > maxP) sparkleParticles.splice(0, sparkleParticles.length - maxP);
   }
 
+  // Soft round glows are the most-drawn thing on the timeline. Building a
+  // radial gradient for every particle on every frame was the single
+  // biggest cost while playing, so each colour's glow is painted once into
+  // a small sprite and stamped with drawImage; its strength rides on
+  // globalAlpha. The picture is the same — only cheaper.
+  const GLOW_SPR = new Map();
+  function glowSprite(rgb, a0, aMid, mid){
+    const k = rgb + '|' + a0 + '|' + aMid + '|' + mid;
+    let c = GLOW_SPR.get(k);
+    if(!c){
+      if(GLOW_SPR.size > 300) GLOW_SPR.clear();
+      c = document.createElement('canvas'); c.width = c.height = 96;
+      const g = c.getContext('2d');
+      const gr = g.createRadialGradient(48, 48, 0, 48, 48, 48);
+      gr.addColorStop(0, `rgba(${rgb},${a0})`);
+      if(mid != null) gr.addColorStop(mid, `rgba(${rgb},${aMid})`);
+      gr.addColorStop(1, `rgba(${rgb},0)`);
+      g.fillStyle = gr; g.fillRect(0, 0, 96, 96);
+      GLOW_SPR.set(k, c);
+    }
+    return c;
+  }
+  // strength 0..1 multiplies the sprite's own alpha (and whatever globalAlpha is already set)
+  function stampGlow(ctx, spr, x, y, R, strength){
+    const ga = ctx.globalAlpha;
+    ctx.globalAlpha = ga * Math.max(0, Math.min(1, strength));
+    ctx.drawImage(spr, x - R, y - R, R * 2, R * 2);
+    ctx.globalAlpha = ga;
+  }
   function drawSparkleParticle(ctx, p, a){
     const twinkle = 0.5 + 0.5 * Math.sin(p.age*20 + p.seed*7);
     const aa = a * (0.45 + 0.55*twinkle);
     if(aa <= 0.02) return;
-    const [r,g,b] = hexToRgb(p.color);
     const radius = p.size * (0.7 + 0.5*twinkle);
-    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius*3);
-    glow.addColorStop(0, `rgba(${r},${g},${b},${0.9*aa})`);
-    glow.addColorStop(0.4, `rgba(${r},${g},${b},${0.35*aa})`);
-    glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, radius*3, 0, Math.PI*2);
-    ctx.fill();
+    stampGlow(ctx, p._gs || (p._gs = glowSprite(hexToRgb(p.color).join(','), 0.9, 0.35, 0.4)), p.x, p.y, radius*3, aa);
     ctx.fillStyle = `rgba(255,255,255,${0.85*aa})`;
     ctx.beginPath();
     ctx.arc(p.x, p.y, Math.max(0.4, radius*0.35), 0, Math.PI*2);
@@ -7328,15 +7507,8 @@
     const flick = 0.5 + 0.5 * Math.sin(p.age*34 + p.seed*9);
     const aa = a * (0.5 + 0.5*flick);
     if(aa <= 0.02) return;
-    const [r,g,b] = hexToRgb(p.color);
     const radius = p.size * (0.7 + 0.3*flick);
-    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius*2.4);
-    glow.addColorStop(0, `rgba(${r},${g},${b},${aa})`);
-    glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, radius*2.4, 0, Math.PI*2);
-    ctx.fill();
+    stampGlow(ctx, p._gs || (p._gs = glowSprite(hexToRgb(p.color).join(','), 1, 0, null)), p.x, p.y, radius*2.4, aa);
   }
 
   function drawExplodingParticle(ctx, p, a){
@@ -8640,6 +8812,7 @@
       }
     }
     isPlaying = true;
+    document.body.classList.add('sd-playing');
     playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
     playBtn.title = 'Pause';
     rafId = requestAnimationFrame(tick);
@@ -8662,6 +8835,7 @@
     }
     stopSources();
     isPlaying = false;
+    document.body.classList.remove('sd-playing');
     playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
     playBtn.title = 'Play';
     if(resetToZero){ playheadTime = 0; clearSparkles(); }
@@ -8999,6 +9173,10 @@
     `;
     sidebar.insertBefore(header, sidebarFoot);
     t.headerEl = header;
+    // the colour bar's glow, driven by how loud the track is (updateAvatarStates)
+    { const vu = document.createElement('span'); vu.className = 'th-vu'; header.appendChild(vu); t.vuEl = vu; t._vu = 0; }
+    const sdFresh = !t._sdSeen; t._sdSeen = true;      // only a brand-new track slides in, not every rebuild
+    if(sdFresh){ header.classList.add('sd-in'); header.addEventListener('animationend', () => header.classList.remove('sd-in'), { once: true }); }
     // drop an audio file here to replace this track's audio — or a picture
     // to set its image (several pictures fill this track and the ones below)
     const hasFiles = (e) => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
@@ -9042,6 +9220,7 @@
     lane.appendChild(clip);
     lanes.appendChild(lane);
     t.laneEl = lane;
+    if(sdFresh){ lane.classList.add('sd-in'); lane.addEventListener('animationend', (e) => { if(e.target === lane) lane.classList.remove('sd-in'); }); }
     t.clipEl = clip;
     t.canvas = canvas;
     t.labelEl = label;
@@ -13084,6 +13263,7 @@
     lyricBounce: 70,        // %
     lyricPos: 'bottom',     // 'top' / 'middle' / 'bottom' / 'video' (centre of the video box) / 'custom' (dragged)
     lyricX: 0.5, lyricY: 0.8,   // where they were dragged to (frame fractions, with lyricPos 'custom')
+    lyricSnap: false,       // the line sits on its singer's lane (and moves with it); dragging is left / right only
     lyricNudge: 0,          // px up (-) / down (+) from there
     lyricNudgeX: 0,         // px left (-) / right (+)
     lyricBySinger: true,    // words take their singer's colour (gradient when harmonising)
@@ -13977,6 +14157,40 @@
     const P = introPlan(rs, act.style, act.len), g = P.groups.find(x => T >= x.t0 && T < x.t1);
     if(g) INTRO_HIDE = new Set(g.people);
   }
+  // a picture saved as a circle (plain corners baked in): how far it has to be zoomed in so a square
+  // frame shows only the inside of the circle (1 = it's a normal picture)
+  function imgCircleZoom(img){
+    if(!img || !img.naturalWidth) return 1;
+    if(img._sdCircKey === img.src) return img._sdCirc;
+    let res = 1;
+    try{
+      const N = 96, h = N / 2, c = document.createElement('canvas'); c.width = c.height = N;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      const iw = img.naturalWidth, ih = img.naturalHeight, f = Math.max(N / iw, N / ih);
+      g.drawImage(img, (N - iw * f) / 2, (N - ih * f) / 2, iw * f, ih * f);
+      const d = g.getImageData(0, 0, N, N).data;
+      const at = (X, Y) => { const i = (Y * N + X) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+      const near = (a, b, lim) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < lim && Math.abs(a[3] - b[3]) < 40;
+      const corners = [[0, 0], [1, 0], [0, 1], [1, 1]].map(([cx, cy]) => ({ cx, cy, P: (ox, oy) => at(cx ? N - 1 - ox : ox, cy ? N - 1 - oy : oy) }));
+      const p0 = corners[0].P(1, 1);
+      // all four corners the same plain colour…
+      let ok = corners.every(C => [[1, 1], [3, 1], [1, 3], [2, 2]].every(([ox, oy]) => near(C.P(ox, oy), p0, 40)));
+      // …and the middle isn't (not just a plain picture)
+      if(ok && near(at(h, h), p0, 40)) ok = false;
+      if(ok){
+        // walk in along each diagonal to where the circle starts
+        let rMin = Infinity;
+        for(const C of corners){
+          let k = 1;
+          while(k < h - 2 && near(C.P(k, k), p0, 60)) k++;
+          rMin = Math.min(rMin, (h - k) * Math.SQRT2);
+        }
+        res = Math.max(1, Math.min(1.45, (h * Math.SQRT2 / Math.max(1, rMin)) * 1.04));
+      }
+    }catch(e){ res = 1; }
+    img._sdCircKey = img.src; img._sdCirc = res;
+    return res;
+  }
   function introPic(ctx, t, x, y, size, alpha, ring, u){
     const F = INTRO_FLY;
     if(F && F.people.has(t)) F.drawn.add(t);
@@ -14005,7 +14219,10 @@
     ctx.fillStyle = '#111'; ctx.fill();
     ctx.shadowColor = 'transparent';
     ctx.save(); ctx.clip();
-    const iw = img.naturalWidth, ih = img.naturalHeight, fit = Math.max(size / iw, size / ih);
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    // a picture saved as a circle (plain corners baked in) drawn in a square / rounded frame:
+    // zoomed in to the circle's inside, so the frame is filled edge to edge with no corners showing
+    const fit = Math.max(size / iw, size / ih) * (t.avatarShape !== 'circle' ? imgCircleZoom(img) : 1);
     ctx.drawImage(img, x - iw * fit / 2, y - ih * fit / 2, iw * fit, ih * fit);
     ctx.restore();
     if(ring){ roundRectPath(ctx, x - size / 2, y - size / 2, size, size, r); ctx.lineWidth = ring; ctx.strokeStyle = isHex6(t.color) ? t.color : '#ffffff'; ctx.stroke(); }
@@ -14236,7 +14453,10 @@
     const P = introPlan(rs, act.style, act.len);
     const g = P.groups.find(x => T >= x.t0 && T < x.t1);
     if(!g) return;
-    const W = RENDER_W, H = RENDER_H, t = T - g.t0, len = g.t1 - g.t0;
+    // a style is timed for its own length; when the intro is shorter, the whole animation
+    // plays faster (so the picture and the name are fully in before it leaves)
+    const nat = INTRO_LEN[act.style] || 2.8, glen = Math.max(0.05, g.t1 - g.t0), spd = Math.max(1, nat / glen);
+    const W = RENDER_W, H = RENDER_H, t = (T - g.t0) * spd, len = glen * spd;
     const outD = Math.min(0.45, len * 0.3), out = Math.max(0, (t - (len - outD)) / outD);   // 0 … 1 while leaving
     const n = g.people.length;
     // up to 4 in a row; more (All at once) go in 2–3 rows
@@ -15844,6 +16064,21 @@
     C.lvl.set(i, lv);
     const spans = [];
     let g = 0;
+    // "Sung parts only": the takes shown on the timeline ARE the singing parts — each take's
+    // end is the cue (no joining across gaps, so the next singer can take the top right away)
+    if(C.takes){
+      const t = C.rows[i], off = t.offset || 0;
+      if(t.buffer && effectiveGain(t) > 0.001){
+        const pcs = viewSegsOf(t).map(q => [off + q.d + q.s, off + q.d + q.e]).sort((a, b) => a[0] - b[0]);
+        for(const [a, b] of pcs){
+          const ga = Math.max(0, Math.floor(a / REORD_STEP)), gb = Math.min(G - 1, Math.ceil(b / REORD_STEP) - 1);
+          if(gb < ga) continue;
+          const last = spans[spans.length - 1];
+          if(last && ga <= last[1] + 1) last[1] = Math.max(last[1], gb); else spans.push([ga, gb]);
+        }
+      }
+      g = G;
+    }
     while(g < G){
       if(!loud[g]){ g++; continue; }
       let e = g; while(e + 1 < G && loud[e + 1]) e++;
@@ -15903,9 +16138,10 @@
     });
     if(!Object.values(groups).some(g => g.length >= 2)) return null;
     const sig = tracks.map(t => t.id + ':' + effectiveGain(t).toFixed(3) + ':' + (t.offset || 0) + ':' + (t.buffer ? t.buffer.duration : 0) + ':' + linkRoot(t).id + ':' + (hasImg(linkRoot(t)) ? 1 : 0)).join(',') + '|' + (S.showImages ? 1 : 0) + '|' + Object.entries(groups).map(([k, v]) => k + '=' + v.join('.')).join('|');
-    if(!reordCache || reordCache.sig !== sig){
+    const takesNow = takesView ? takesPlan() : null;      // (a new plan whenever the takes change)
+    if(!reordCache || reordCache.sig !== sig || reordCache.tp !== takesNow){
       let end = 0; for(const t of tracks) end = Math.max(end, (t.offset || 0) + trackSpan(t));
-      reordCache = { sig, rows, G: Math.ceil(end / REORD_STEP) + 2, sing: new Map(), lvl: new Map(), spans: new Map(), grp: {} };
+      reordCache = { sig, rows, G: Math.ceil(end / REORD_STEP) + 2, sing: new Map(), lvl: new Map(), spans: new Map(), grp: {}, tp: takesNow, takes: !!takesNow };
     }
     const C = reordCache;
     const singAt = (i, g) => { const m = reordSinging(i, C); return g >= 0 && g < m.length ? m[g] : 0; };
@@ -16019,7 +16255,10 @@
         let cur = st.seq[gg];
         const k = members.map(i => singAt(i, gg)).join('');
         if(k !== st.cand){ st.cand = k; st.candSince = gg; }
-        if(k !== st.applied && gg - st.candSince >= SET && gg - st.last >= DW){
+        // ("Sung parts only": a take just ended — move the others up now, no settling or holding)
+        const takeEnd = C.takes && members.some(i => singAt(i, gg - 1) && !singAt(i, gg));
+        if(takeEnd && k !== st.applied) st.candSince = gg - SET;
+        if(k !== st.applied && gg - st.candSince >= SET && (takeEnd || gg - st.last >= DW)){
           st.applied = k;
           // Singers (counting anyone who comes in within REORD_GROUP s, so a
           // bunch starting together rise as one) move above the quiet ones,
@@ -16133,7 +16372,7 @@
     }
     const wrap = recPanel.querySelector('[data-rec-row="vocalRoles"]');
     if(wrap) wrap.classList.remove('disabled');      // (the roles also set the harmony groups, so they always work)
-    { const r = recPanel.querySelector('[data-rec-row="vocalOverflow"]'); if(r){ r.hidden = !recSettings.vocalReorder; r.classList.toggle('disabled', !!recSettings.fillFrame); } }
+    { const r = recPanel.querySelector('[data-rec-row="vocalOverflow"]'); if(r){ r.hidden = false; r.classList.toggle('disabled', !!recSettings.fillFrame); } }
   }
   // ----- cached waveform tiles (render / preview) -----
   // A track's waveform is drawn into 512px-wide image tiles laid on a grid
@@ -17024,6 +17263,13 @@
     }
     // the instrumental lanes too, so a zoom never crops them out
     if(geo.inst) for(const i of geo.inst){ const y = geo.laneTop(i); if(!isFinite(y)) continue; yT = Math.min(yT, y + geo.laneH * 0.08); yB = Math.max(yB, y + geo.laneH * 0.92); }
+    // "Tracks can go off the frame" off: every lane (and every picture) stays inside the margins, singing or not
+    // (taken as it is right now, not glided: the lanes already slide smoothly, and a lagging fit would crop them)
+    let aT = Infinity, aB = -Infinity;
+    if(geo.allIn){
+      for(let i = 0; i < geo.n; i++){ const y = geo.laneTop(i); if(!isFinite(y)) continue; aT = Math.min(aT, y); aB = Math.max(aB, y + geo.laneH); }
+      for(const t of tracks){ const r = t._rAvRect; if(!r || r.seq < renderFrameSeq - 3) continue; if(typeof orbitFlyAmount === 'function' && orbitFlyAmount(linkRoot(t)) > 0.5) continue; aT = Math.min(aT, r.y); aB = Math.max(aB, r.y + r.a); }
+    }
     // the singers' span glides as people come in / drop out (so the
     // correction never jumps); the correction itself is worked out fresh every
     // frame, so a cut can never zoom past it
@@ -17037,25 +17283,46 @@
       }
       camFit.w += ((has ? 1 : 0) - camFit.w) * k;
     }
-    if(camFit.w < 0.005) return camKeepVideo(cam, geo);
+    if(camFit.w < 0.005 && !(aB > aT)) return camKeepVideo(cam, geo);
     yT = camFit.yT; yB = camFit.yB;
-    const pad = 22 * geo.u, top0 = geo.cy - geo.contentH / 2, bot = top0 + geo.contentH;
+    let wFit = camFit.w;
+    if(aB > aT){ if(wFit < 0.005){ yT = aT; yB = aB; } else { yT = Math.min(yT, aT); yB = Math.max(yB, aB); } wFit = 1; }
+    const pad = (geo.allIn ? 0 : 22) * geo.u, top0 = geo.cy - geo.contentH / 2, bot = top0 + geo.contentH;
     // (what's under the header and ruler, which stay over the top while zoomed, doesn't count as in view)
     const top = geo.fitTop != null && isFinite(geo.fitTop) ? Math.min(bot - 40 * geo.u, Math.max(top0, geo.fitTop)) : top0;
+    // (every track kept in: a tilt or a hard shake makes the camera zoom in to hide the frame's corners,
+    //  which would crop the tracks — so they're calmed down to what the tracks leave room for)
+    if(geo.allIn){
+      const s0 = Math.min(cam.s, Math.max(1, (bot - top) / Math.max(1, yB - yT))), sh0 = cam.soft ? 0 : Math.hypot(cam.sx || 0, cam.sy || 0);
+      let kq = 1;
+      while(kq > 0.02 && camNeedZoom(cam.rot * kq, sh0 * kq, geo.W, geo.H) * 1.002 + 0.015 > s0) kq *= 0.85;
+      if(kq <= 0.02) kq = 0;
+      if(kq < 1) cam = Object.assign({}, cam, { rot: cam.rot * kq, sx: cam.soft ? cam.sx : (cam.sx || 0) * kq, sy: cam.soft ? cam.sy : (cam.sy || 0) * kq });
+    }
     const co = Math.cos(cam.rot), si = Math.sin(cam.rot), bh = Math.max(1, yB - yT);
     const availW = geo.W - 2 * pad, availH = bot - top - 2 * pad;
     // the pictures run across the lanes (frame y); on screen that line is
     // turned by the camera — zoom out until it fits
     const sMax = Math.min(Math.abs(si) > 1e-3 ? availW / (Math.abs(si) * bh) : Infinity, Math.abs(co) > 1e-3 ? availH / (Math.abs(co) * bh) : Infinity);
     const sFit = Math.min(cam.s, Math.max(1, sMax));
-    const s = Math.exp(Math.log(cam.s) + (Math.log(sFit) - Math.log(cam.s)) * camFit.w);
+    const s = Math.exp(Math.log(cam.s) + (Math.log(sFit) - Math.log(cam.s)) * wFit);
     // then slide so both ends are inside the frame
     const scr = (y) => [geo.cx - si * s * (y - cam.fy), geo.cy + co * s * (y - cam.fy)];
     const a = scr(yT), b = scr(yB);
     const fitAxis = (v1, v2, lo, hi) => { const mn = Math.min(v1, v2), mx = Math.max(v1, v2); if(mx - mn > hi - lo) return (lo + hi) / 2 - (mn + mx) / 2; if(mn < lo) return lo - mn; if(mx > hi) return hi - mx; return 0; };
-    const dx = fitAxis(a[0], b[0], pad, geo.W - pad) * camFit.w, dy = fitAxis(a[1], b[1], top + pad, bot - pad) * camFit.w;
+    const dx = fitAxis(a[0], b[0], pad, geo.W - pad) * wFit, dy = fitAxis(a[1], b[1], top + pad, bot - pad) * wFit;
     // a screen shift (dx, dy) = moving the focus the other way, turned back
     return camKeepVideo(Object.assign({}, cam, { s, fx: cam.fx - (co * dx + si * dy) / s, fy: cam.fy - (-si * dx + co * dy) / s }), geo);
+  }
+  // how much the camera has to zoom in so a turn (and a shake) never shows past the frame's edge
+  function camNeedZoom(rot, sh, W, H){
+    const co = Math.cos(rot), si = Math.sin(rot), Cx = W / 2, Cy = H / 2;
+    let mnx = Infinity, mxx = -Infinity, mny = Infinity, mxy = -Infinity;
+    for(const [x, y] of [[-Cx - sh, -Cy - sh], [W - Cx + sh, -Cy - sh], [-Cx - sh, H - Cy + sh], [W - Cx + sh, H - Cy + sh]]){
+      const a = co * x + si * y, b = -si * x + co * y;
+      if(a < mnx) mnx = a; if(a > mxx) mxx = a; if(b < mny) mny = b; if(b > mxy) mxy = b;
+    }
+    return Math.max(1, (mxx - mnx) / W, (mxy - mny) / H);
   }
   // The video box (with a Freedit on) is part of the layout, not something to zoom past: the camera zooms in
   // no further than keeps the whole box on screen — between the header / ruler and the bottom margin — and
@@ -17294,7 +17561,7 @@
       // so it shrinks (keeping its shape) to the room that's left under the bars and the tracks above it.
       if(typeof vidSlot === 'number' && S.videoFit !== 'fill'){
         // (tracks that can shrink to fit squeeze first; with "Tracks can go off the frame" they keep their height)
-        const offOK = !S.fillFrame && S.vocalReorder && S.vocalOverflow;
+        const offOK = !S.fillFrame && S.vocalOverflow;
         const g0 = S.gap * u, laneMin = offOK ? Math.max(6 * u, S.trackHeight * u) : 6 * u;
         const fullTop = mT + headerH + rulerH;
         const room = contentBottom - fullTop - g0 - vidSlot * (laneMin + g0);
@@ -17328,7 +17595,7 @@
     const fitH = (areaH - gap*(n-1)) / n;
     const fillTracks = S.fillFrame && !(S.videoSpace && S.videoFit === 'fill');
     // ("Tracks can go off the frame": the set height, whatever doesn't fit runs off the bottom)
-    const overflowOK = !fillTracks && S.vocalReorder && S.vocalOverflow;
+    const overflowOK = !fillTracks && S.vocalOverflow;
     const laneH = Math.max(6*u, fillTracks ? fitH : overflowOK ? S.trackHeight * u : Math.min(S.trackHeight * u, fitH));
     const blockH = n*laneH + (n-1)*gap;
     const spare = Math.max(0, areaH - blockH);
@@ -17405,7 +17672,7 @@
       const softMin = half + kk * (d > 20 ? 0 : d < -20 ? d : d - Math.log1p(Math.exp(d)));   // ≈ min(pt, half)
       pxSoft = clipX0 + Math.max(0, softMin) * pps;
     }
-    const camGeo = { W: RENDER_W, H: RENDER_H, u, cx: RENDER_W / 2, cy: mT + contentH / 2, px: playheadX, pxSoft, laneH, contentH, n: rows.length,
+    const camGeo = { W: RENDER_W, H: RENDER_H, u, cx: RENDER_W / 2, cy: mT + contentH / 2, px: playheadX, pxSoft, laneH, contentH, n: rows.length, allIn: !overflowOK,
       laneTop: (i) => lanePos ? laneYAt(lanePos[i]) : laneTopAt(i), lanesAt: (Tq) => vocalLanePositions(Tq), rowY: (p) => laneYAt(p),
       // the instrumental lanes playing right now (kept in the shot)
       fitTop: vidTop ? null : topH,      // (the header + ruler stay over the top while zoomed)
@@ -18083,8 +18350,18 @@
       ctx.restore();
     }
 
-    const lyrArgs = { u, top: mT, ch: contentH, vid: (S.videoSpace && vidH > 0) ? { y: vidY, h: vidH, w: vidW } : null };
     const lyrWithCam = camOn && !jvkeActive() && !frierenActive() && !forestActive() && !todohActive() && !davidActive() && !khaiiActive() && !sageActive() && !saichizuActive() && !fdGen() && S.beatLyrics && S.lyricsOn && lyrAnyLines();
+    // (for "Stick to the singer's track": the middle of a track's lane right now — sliding with
+    //  the lanes — in the space the lyrics are drawn in: with the camera, or on the screen)
+    const lyrCamM = camHL;
+    const lyrLaneY = (id) => {
+      const i = rows.findIndex(t => t.id === id); if(i < 0) return null;
+      let y = camGeo.laneTop(i) + laneH / 2;
+      if(!isFinite(y)) return null;
+      if(lyrCamM && !lyrWithCam && !lyrJvCam){ try{ y = lyrCamM.transformPoint(new DOMPoint(RENDER_W / 2, y)).y; }catch(e){} }
+      return Math.max(mT + laneH * 0.3, Math.min(contentBottom - laneH * 0.3, y));
+    };
+    const lyrArgs = { u, top: mT, ch: contentH, vid: (S.videoSpace && vidH > 0) ? { y: vidY, h: vidH, w: vidW } : null, laneY: lyrLaneY };
     // JVKE: the lyrics can ride the calm camera too (drawn later, over the
     // sunset light, but with the camera's motion)
     const lyrJvCam = camOn && ((jvkeActive() && S.jvLyrics) || (frierenActive() && S.frLyrics) || (forestActive() && S.fsLyrics) || (todohActive() && S.tdLyrics) || (davidActive() && S.dvLyrics) || (khaiiActive() && S.khLyrics) || (sageActive() && S.sgLyrics) || (saichizuActive() && S.szLyrics) || (fdGen() && S[fdGen().px + 'Lyrics'])) && S.lyricsOn && lyrAnyLines();
@@ -18527,22 +18804,38 @@
     const lvl = mbs <= 8192 ? (fps > 30 ? '2A' : '28') : (fps > 30 ? '34' : '33');
     return ['avc1.6400' + lvl, 'avc1.4D00' + lvl, 'avc1.42E0' + lvl]; // High, Main, Constrained Baseline
   }
-  function videoCandidates(w, h, fps, bps){
-    const base = { width: w, height: h, bitrate: bps, framerate: fps, latencyMode: 'quality', bitrateMode: 'variable' };
+  // Constant quality first ("quantizer": every frame gets as much data as it needs, so fades from
+  // black, dark gradients, glows, sparkles and camera moves never go grainy — a bitrate budget
+  // starves the first second and the busy moments), then a high variable bitrate where the
+  // encoder can't do that. q: the H.264 quantizer (lower = cleaner); VP9 uses its own scale.
+  function videoCandidates(w, h, fps, bps, q){
+    const base = { width: w, height: h, framerate: fps, latencyMode: 'quality' };
+    const vbr = Object.assign({ bitrate: bps, bitrateMode: 'variable' }, base), cq = Object.assign({ bitrateMode: 'quantizer' }, base);
+    const hwName = (hw) => hw === 'prefer-hardware' ? 'hardware' : 'software';
     const list = [];
     for(const hw of ['prefer-hardware', 'prefer-software']){
-      for(const codec of h264Codec(w, h, fps)){
-        list.push({ codecKind: 'avc', label: `H.264 · ${hw === 'prefer-hardware' ? 'hardware' : 'software'}`,
-          config: Object.assign({}, base, { codec, hardwareAcceleration: hw, avc: { format: 'avc' } }) });
+      for(const [B, isCq] of [[cq, true], [vbr, false]]){
+        for(const codec of h264Codec(w, h, fps)){
+          list.push({ codecKind: 'avc', q: isCq ? q : null, label: `H.264 · ${hwName(hw)}${isCq ? ' · constant quality' : ''}`,
+            config: Object.assign({}, B, { codec, hardwareAcceleration: hw, avc: { format: 'avc' } }) });
+        }
       }
     }
     for(const hw of ['prefer-hardware', 'prefer-software']){
-      for(const codec of ['vp09.00.51.08', 'vp09.00.41.08', 'vp09.00.10.08']){
-        list.push({ codecKind: 'vp9', label: `VP9 · ${hw === 'prefer-hardware' ? 'hardware' : 'software'}`,
-          config: Object.assign({}, base, { codec, hardwareAcceleration: hw }) });
+      for(const [B, isCq] of [[cq, true], [vbr, false]]){
+        for(const codec of ['vp09.00.51.08', 'vp09.00.41.08', 'vp09.00.10.08']){
+          list.push({ codecKind: 'vp9', q: isCq ? Math.round(q * 1.25) : null, label: `VP9 · ${hwName(hw)}${isCq ? ' · constant quality' : ''}`,
+            config: Object.assign({}, B, { codec, hardwareAcceleration: hw }) });
+        }
       }
     }
     return list;
+  }
+  // the per-frame encode options (with the quality, in constant-quality mode)
+  function vidEncOpts(cand, keyFrame){
+    const o = { keyFrame };
+    if(cand.q != null) o[cand.codecKind === 'vp9' ? 'vp9' : 'avc'] = { quantizer: cand.q };
+    return o;
   }
   async function probeVideoEncoder(cand){
     try{
@@ -18558,7 +18851,7 @@
         const c = new OffscreenCanvas(cand.config.width, cand.config.height);
         c.getContext('2d').fillRect(0, 0, 1, 1);
         const f = new VideoFrame(c, { timestamp: 0 });
-        enc.encode(f, { keyFrame: true });
+        enc.encode(f, vidEncOpts(cand, true));
         f.close();
         enc.flush().then(() => finish(got), () => finish(false));
         setTimeout(() => finish(got), 4000);
@@ -18639,12 +18932,13 @@
     const fps = Math.max(1, Math.min(120, Number(recSettings.fps) || 30));
     const a = range.a, b = range.b;
     const totalFrames = Math.max(1, Math.round((b - a) * fps));
-    const baseBps = { standard: 6_000_000, high: 10_000_000, max: 16_000_000 }[recSettings.quality] || 10_000_000;
+    const baseBps = { standard: 8_000_000, high: 14_000_000, max: 24_000_000 }[recSettings.quality] || 14_000_000;
+    const qz = { standard: 25, high: 22, max: 19 }[recSettings.quality] || 22;
     const bps = Math.round(baseBps * (RENDER_W * RENDER_H) / (1920 * 1080) * (fps >= 60 ? 1.5 : 1));
 
     renderStatusText.textContent = 'Finding the fastest video encoder…';
     let vid = null;
-    for(const cand of videoCandidates(RENDER_W, RENDER_H, fps, bps)){
+    for(const cand of videoCandidates(RENDER_W, RENDER_H, fps, bps, qz)){
       if(await probeVideoEncoder(cand)){ vid = cand; break; }
     }
     if(!vid) return false;
@@ -18773,7 +19067,7 @@
         renderFrameDraw(ctx, n === 0 ? 0 : dt);
         const tb = performance.now();
         const frame = new VideoFrame(renderCanvas, { timestamp: Math.round(n * 1e6 / fps), duration: Math.round(1e6 / fps) });
-        videoEncoder.encode(frame, { keyFrame: n % Math.max(1, Math.round(fps * 2)) === 0 });
+        videoEncoder.encode(frame, vidEncOpts(vid, n % Math.max(1, Math.round(fps * 2)) === 0));
         frame.close();
         const tc = performance.now();
         // Don't let the encoder queue run away from us.
@@ -20085,8 +20379,10 @@
   // ---------- Performance mode toggle ----------
   const perfToggle = $('perfToggle');
   perfToggle.checked = perfMode;
+  document.body.classList.toggle('sd-perf', perfMode);
   perfToggle.addEventListener('change', () => {
     perfMode = perfToggle.checked;
+    document.body.classList.toggle('sd-perf', perfMode);
     try{ localStorage.setItem('saideck.perfMode', perfMode ? '1' : '0'); }catch(e){}
     tracks.forEach(t => { t._harmCnvKey = null; t._harmWaveLvl = 0; });
     if(perfMode){
@@ -21118,14 +21414,21 @@
       tag.style.left = Math.max(0, 6 - bl) + 'px';
       tag.style.top = bt < 26 ? 'calc(100% + 4px)' : '-22px';
     };
-    const labelOf = (g) => g.key === 'opening' ? 'Opening text — drag to move' : (lyrTracks.length > 1 ? `${(lyrTracks[g.lt] || {}).name || 'Lyrics'} — drag to move` : 'Lyrics — drag to move');
+    const labelOf = (g) => { if(g.key === 'opening') return 'Opening text — drag to move'; const how = snapped(g) ? ' — on its track, drag left / right' : ' — drag to move'; return (lyrTracks.length > 1 ? (lyrTracks[g.lt] || {}).name || 'Lyrics' : 'Lyrics') + how; };
     // read / write the position of a thing (frame px of its centre)
     const getPos = (g) => {
       if(g.key === 'opening') return { x: recSettings.openPos === 'custom' ? recSettings.openX * RENDER_W : (g.l + g.r) / 2, y: recSettings.openPos === 'custom' ? recSettings.openY * RENDER_H : (g.t + g.b) / 2 };
       const st = g.lt === lyrActive || g.lt < 0 ? recSettings : (lyrTracks[g.lt] && lyrTracks[g.lt].style) || recSettings;
       return st.lyricPos === 'custom' ? { x: st.lyricX * RENDER_W, y: st.lyricY * RENDER_H } : { x: RENDER_W / 2, y: (g.t + g.b) / 2 };
     };
+    const snapped = (g) => { if(g.key === 'opening') return false; const st = g.lt === lyrActive || g.lt < 0 ? recSettings : (lyrTracks[g.lt] && lyrTracks[g.lt].style) || recSettings; return !!st.lyricSnap; };
     const setPos = (g, x, y) => {
+      if(snapped(g)){   // stuck to its track: only across
+        const fx2 = Math.round(x / RENDER_W * 10000) / 10000;
+        if(g.lt === lyrActive || g.lt < 0){ recSettings.lyricPos = 'custom'; recSettings.lyricX = fx2; }
+        else { const LT = lyrTracks[g.lt]; if(LT) LT.style = Object.assign({}, LT.style || {}, { lyricPos: 'custom', lyricX: fx2 }); }
+        return;
+      }
       const fx = Math.round(x / RENDER_W * 10000) / 10000, fy = Math.round(y / RENDER_H * 10000) / 10000;
       if(g.key === 'opening'){ recSettings.openPos = 'custom'; recSettings.openX = fx; recSettings.openY = fy; return; }
       if(g.lt === lyrActive || g.lt < 0){ recSettings.lyricPos = 'custom'; recSettings.lyricX = fx; recSettings.lyricY = fy; }
@@ -21154,8 +21457,10 @@
       const p = toFrame(e), snap = 14 / Math.max(0.05, p.k) * 0.5;     // (about 7 screen px)
       let x = drag.pos0.x + (p.x - drag.p0.x), y = drag.pos0.y + (p.y - drag.p0.y);
       x = Math.max(RENDER_W * 0.05, Math.min(RENDER_W * 0.95, x)); y = Math.max(RENDER_H * 0.03, Math.min(RENDER_H * 0.97, y));
+      const lockY = snapped(drag.g);
+      if(lockY) y = drag.pos0.y;          // stuck to its track: left / right only
       // snap to the middle, across and down
-      const sx = Math.abs(x - RENDER_W / 2) < snap * 2, sy = Math.abs(y - RENDER_H / 2) < snap * 2;
+      const sx = Math.abs(x - RENDER_W / 2) < snap * 2, sy = !lockY && Math.abs(y - RENDER_H / 2) < snap * 2;
       if(sx) x = RENDER_W / 2; if(sy) y = RENDER_H / 2;
       gV.hidden = !sx; gH.hidden = !sy;
       setPos(drag.g, x, y);
@@ -21639,7 +21944,7 @@
     'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale',
     'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
     'dimUnplayed', 'showPlayhead', 'fps', 'quality', 'audioKbps', 'rangeMode',
-    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
+    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricSnap', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
   const BUILTIN_RENDER_PRESETS = [
     { name: 'Default - Saichizu', builtin: true, format: 'tiktok', settings: {
       widthMode: 'zoom', zoom: 140, trackHeight: 150, fillFrame: false, gap: 5, marginTop: 160, marginBottom: 440,
@@ -21835,7 +22140,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 95;                 // ← goes up by one with every published version
+  const SD_BUILD = 100;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26085,8 +26390,47 @@
   const rwdDay = () => { const n = rwdNow(); return n - (n + 28800000) % 86400000; };      // (a new day at midnight, UTC+8)
   const MSTR_LINES = ['finished a masterpiece', 'just dropped a banger', 'rendered pure art', 'cooked up something legendary', 'just made movie magic',
     'delivered another hit', 'finished an epic edit', 'rendered a work of art', 'created something iconic', 'just premiered a blockbuster', 'made a cinematic gem', 'rendered a certified classic'];
+  // A short confetti burst over the whole window (a finished render).
+  function sdCelebrate(){
+    if(perfMode || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    const cv = document.createElement('canvas'); cv.className = 'sd-confetti';
+    const W = cv.width = window.innerWidth, H = cv.height = window.innerHeight;
+    document.body.appendChild(cv);
+    const c = cv.getContext('2d'), cols = ['#e5484d', '#ff7a59', '#f5d04a', '#35d0b8', '#5b8def', '#b48cff', '#ffffff'];
+    const ps = [];
+    for(let i = 0; i < 150; i++){
+      const side = i & 1, ang = (side ? Math.PI * 1.25 : Math.PI * 1.75) + (Math.random() - 0.5) * 0.9, sp = 520 + Math.random() * 720;
+      ps.push({ x: side ? W + 10 : -10, y: H * 0.72, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 14,
+        w: 6 + Math.random() * 7, h: 3 + Math.random() * 5, c: cols[i % cols.length] });
+    }
+    const t0 = performance.now(); let last = t0;
+    (function step(now){
+      const dt = Math.min(0.05, (now - last) / 1000), age = (now - t0) / 1000; last = now;
+      c.clearRect(0, 0, W, H);
+      if(age > 2.4 || !cv.isConnected){ cv.remove(); return; }
+      c.globalAlpha = age > 1.6 ? Math.max(0, 1 - (age - 1.6) / 0.8) : 1;
+      for(const p of ps){
+        p.vy += 900 * dt; p.vx *= 1 - 0.9 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+        c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.fillStyle = p.c; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 1.7)) + 1); c.restore();
+      }
+      requestAnimationFrame(step);
+    })(t0);
+  }
+  // Click ripple on the main buttons.
+  document.addEventListener('pointerdown', (e) => {
+    if(perfMode || e.button !== 0 || !e.target.closest) return;
+    const b = e.target.closest('.file-btn, .bulk-btn, .tutorial-btn, .addtrack-btn, .render-top-btn, .chat-btn, .sd-update-btn, .tbtn, .range-btn, .empty-state .cta, .confirm-actions button');
+    if(!b || b.disabled) return;
+    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+    const box = document.createElement('span'); box.className = 'sd-rip-box';
+    const rip = document.createElement('span'); rip.className = 'sd-rip';
+    rip.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px;`;
+    box.appendChild(rip); b.appendChild(box);
+    setTimeout(() => box.remove(), 600);
+  }, true);
   function renderReward(sec){
     if(!(sec > 0.5)) return;
+    try{ sdCelebrate(); }catch(e){}
     try{ questEv('render', null, Math.round(sec)); }catch(e){}
     let acc = (Number(rwdLS('acc')) || 0) + sec;
     const n = Math.floor(acc / RWD_SEC + 1e-6); acc = Math.max(0, acc - n * RWD_SEC);
@@ -27634,7 +27978,7 @@
   // show it, and its look lives in recSettings' lyric* keys while it's
   // selected); the video draws every visible one, each in its own look, so
   // two singers' overlapping lines can show at the same time.
-  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricBySinger', 'lyricAllTracks',
+  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricSnap', 'lyricBySinger', 'lyricAllTracks',
     'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper', 'lyricStroke', 'lyricStrokeColor', 'lyricStrokeW'];
   function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], cuts: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
   function lyrStyleNow(){ const o = {}; for(const k of LYR_STYLE_KEYS) o[k] = recSettings[k]; return o; }
@@ -28842,16 +29186,46 @@
     }catch(e){ return n === 1 ? cols[0] : baseAt(0.5); }
   }
   // where the words go, given the frame layout
-  function lyricAnchor(L){
-    const a = lyricAnchor0(L), S = recSettings, dx = (Number(S.lyricNudgeX) || 0) * L.u;
+  function lyricAnchor(L, T){
+    const a = lyricAnchor0(L, T), S = recSettings, dx = (Number(S.lyricNudgeX) || 0) * L.u;
     if(!dx) return a;
     // moved left / right: the line stays inside the frame (it gets narrower near an edge)
     const x = Math.max(RENDER_W * 0.08, Math.min(RENDER_W * 0.92, a.x + dx));
     return Object.assign({}, a, { x, maxW: Math.max(RENDER_W * 0.25, Math.min(a.maxW, 2 * Math.min(x, RENDER_W - x) - 24 * L.u)) });
   }
-  function lyricAnchor0(L){
+  // "Stick to the singer's track": the lane the line at T belongs to (its [Name] tag, or whoever
+  // sings most of its words; a tie goes to the higher lane), gliding over when the next line is
+  // someone else's
+  function lyrLineLaneY(L, line){
+    if(!line || !L.laneY) return null;
+    const cnt = new Map();
+    if(line.tag != null) cnt.set(line.tag, 1e6);
+    for(const w of line.words || []) for(const id of (w.sing || [])) cnt.set(id, (cnt.get(id) || 0) + 1);
+    let best = null, bc = -1, by = Infinity;
+    for(const [id, c] of cnt){ const y = L.laneY(id); if(y == null) continue; if(c > bc || (c === bc && y < by)){ best = y; bc = c; by = y; } }
+    return best;
+  }
+  function lyrSnapY(L, T){
+    const idx = lyricLineAt(T); if(idx < 0) return null;
+    const line = lyr.lines[idx], y1 = lyrLineLaneY(L, line);
+    if(y1 == null) return null;
+    let prev = null; for(let i = idx - 1; i >= 0; i--) if(lyr.lines[i].t0 != null){ prev = lyr.lines[i]; break; }
+    const f = Math.max(0, Math.min(1, (T - line.t0) / 0.35));
+    if(!prev || f >= 1) return y1;
+    const y0 = lyrLineLaneY(L, prev); if(y0 == null) return y1;
+    const e = f * f * (3 - 2 * f);
+    return y0 + (y1 - y0) * e;
+  }
+  function lyricAnchor0(L, T){
     const S = recSettings, u = L.u;
     let y, maxW = RENDER_W * 0.88;
+    if(S.lyricSnap && T != null){
+      const ys = lyrSnapY(L, T);
+      if(ys != null){
+        const x = S.lyricPos === 'custom' ? Math.max(0.05, Math.min(0.95, Number(S.lyricX) || 0.5)) * RENDER_W : RENDER_W / 2;
+        return { x, y: ys + (S.lyricNudge || 0) * u, maxW: Math.max(RENDER_W * 0.3, Math.min(maxW, 2 * Math.min(x, RENDER_W - x) - 24 * u)) };
+      }
+    }
     if(S.lyricPos === 'custom' && isFinite(S.lyricY)){
       const x = Math.max(0.05, Math.min(0.95, Number(S.lyricX) || 0.5)) * RENDER_W;
       return { x, y: S.lyricY * RENDER_H, maxW: Math.max(RENDER_W * 0.3, Math.min(maxW, 2 * Math.min(x, RENDER_W - x) - 24 * u)) };
@@ -29466,7 +29840,7 @@
     let ci = -1;
     for(let i = 0; i < chunks.length; i++){ if(chunks[i].words[0].t0 <= T) ci = i; else break; }
     if(ci < 0) return;
-    const A = lyricAnchor(L);
+    const A = lyricAnchor(L, T);
     const cx = RENDER_W / 2, cy = A.y;
     const margin = RENDER_W * 0.03, Xw = RENDER_W / 2 - margin;
     const px = Math.max(16, S.lyricSize * u * 3.0);   // letter size where the wall meets the screen edge
@@ -29656,7 +30030,7 @@
     lyrWorldM = ctx.getTransform();
     if(recSettings.lyricStyle === 'sides'){ drawLyricsSides(ctx, L, T); return; }
     const S = recSettings, u = L.u, b = (S.lyricBounce == null ? 70 : S.lyricBounce) / 100;
-    const A = lyricAnchor(L);
+    const A = lyricAnchor(L, T);
     const idx = lyricLineAt(T);
     if(idx < 0) return;
     const line = lyr.lines[idx];
@@ -31365,7 +31739,7 @@
         stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 60, cursor: 'never' }, audio: false, preferCurrentTab: true, selfBrowserSurface: 'include', surfaceSwitching: 'exclude' });
       }catch(e){ toast('Recording cancelled.', 1800); return; }
       for(const t of ['video/mp4;codecs=avc1.640028', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']) if(MediaRecorder.isTypeSupported(t)){ recType = t; break; }
-      rec = new MediaRecorder(stream, recType ? { mimeType: recType, videoBitsPerSecond: 16000000 } : { videoBitsPerSecond: 16000000 });
+      rec = new MediaRecorder(stream, recType ? { mimeType: recType, videoBitsPerSecond: 24000000 } : { videoBitsPerSecond: 24000000 });
       rec.ondataavailable = (e) => { if(e.data && e.data.size) chunks.push(e.data); };
     }
     // ----- what the tour changes, to put back afterwards -----

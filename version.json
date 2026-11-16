@@ -1,6 +1,6 @@
 {
-  "build": 95,
+  "build": 100,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Fade in / fade out for the whole video (sound too). Names next to the track images (4 looks) and an option for images to start on the left. 5 new intro styles: Kings & Queens (with crowns), Polaroid, Spotlight, Trading cards and Comic, plus pictures that fly out of the tracks into the intro. 12 new fonts. Tracks no longer shuffle at the end when Singing tracks move up is off, and Fixed tracks stay put."
+  "notes": "Cleaner videos: the render now encodes at constant quality, so the start, fades, glows and busy moments don't go grainy anymore (bigger files on busy parts). Computers that can't do that get a higher bitrate instead. Also in this update: \"Tracks can go off the frame\" has its own switch, and when it's off Freedit cameras keep every track inside the frame. Short intros play faster so names always show, and circle pictures fill the square intros. With \"Sung parts only\" on, the next singer moves up the moment a take ends. New lyric option \"Stick to the singer's track\": words ride their singer's lane, and dragging moves them left and right only."
 }
