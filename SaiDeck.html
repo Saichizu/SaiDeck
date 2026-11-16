@@ -255,6 +255,7 @@
   .bj-table{position:relative;border-radius:180px 180px 26px 26px / 120px 120px 26px 26px;padding:16px 16px 18px;background:radial-gradient(90% 90% at 50% 20%, #1f7a4f 0%, #145a3a 55%, #0e4029 100%);border:7px solid #6b4222;box-shadow:inset 0 0 0 2px rgba(255,220,140,.25), inset 0 0 40px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;gap:10px;min-height:300px;}
   .bj-dealer{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:150px;}
   .bj-who{position:relative;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e9f7ee;}
+  .bj-strk{font:700 11px 'JetBrains Mono',monospace;color:#ffb35a;background:rgba(255,120,40,.15);padding:1px 6px;border-radius:6px;}
   .bj-av{width:34px !important;height:34px !important;font-size:14px !important;border:2px solid #0e4029;}
   .bj-bot{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#2b3142;font-size:18px !important;}
   .bj-hand{display:flex;justify-content:center;min-height:68px;padding:0 10px;}
@@ -649,6 +650,17 @@
   .cas-chips button{border-radius:999px;border:1px dashed rgba(245,208,74,.5);}
   .cas-spin{all:unset;cursor:pointer;padding:10px 26px;border-radius:999px;font:900 14px 'Manrope',sans-serif;letter-spacing:.05em;color:#2a0d0d;background:linear-gradient(135deg,#ffd76a,#ff7a3c);box-shadow:0 6px 18px rgba(255,140,60,.4);}
   .cas-spin:disabled{opacity:.5;cursor:default;} .cas-spin:active:not(:disabled){transform:scale(.95);}
+  .cas-spin10{padding:10px 16px;background:linear-gradient(135deg,#c8a2ff,#7a5cff);color:#140a2a;box-shadow:0 6px 18px rgba(130,90,255,.4);}
+  .cas-spin10.on{background:linear-gradient(135deg,#ff9a9a,#ff5a5a);}
+  .cas-multi{margin:8px 0 2px;padding:8px;border-radius:12px;background:rgba(0,0,0,.25);}
+  .cas-multi .cm-row{display:flex;flex-wrap:wrap;gap:4px;}
+  .cas-multi .cm-r{display:flex;flex-direction:column;align-items:center;min-width:52px;padding:4px 5px;border-radius:8px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.2;}
+  .cas-multi .cm-r i{font:700 10.5px 'JetBrains Mono',monospace;font-style:normal;color:#ff9a9a;}
+  .cas-multi .cm-r.some i{color:#ffd76a;} .cas-multi .cm-r.win i{color:#6dffa8;} .cas-multi .cm-r.jack{background:rgba(255,215,106,.25);} .cas-multi .cm-r.jack i{color:#ffd76a;}
+  .cas-multi .cm-wait{opacity:.55;}
+  .cas-multi .cm-sum{margin-top:6px;font-size:12px;color:#cfd3dc;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+  .cas-multi .cm-sum b.up{color:#6dffa8;} .cas-multi .cm-sum b.down{color:#ff9a9a;}
+  .cas-multi .cm-x{all:unset;cursor:pointer;margin-left:auto;padding:0 4px;color:#9aa0ab;}
   .cas-leave{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;font:700 12px 'Inter',sans-serif;color:var(--text-dim);border:1px solid var(--border);}
   .cas-leave:hover{color:var(--text);}
   .cas-bet button:focus-visible, .cas-chips button:focus-visible, .cas-spin:focus-visible, .cas-leave:focus-visible{outline:2px solid #fff;}
@@ -22352,7 +22364,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 106;                 // ← goes up by one with every published version
+  const SD_BUILD = 107;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24610,7 +24622,8 @@
           CAS.pot = d && typeof d.pot === 'number' ? d.pot : CAS_POT0; casPotShow();
           const sp = (d && d.spin) || {}, me = chatUid();
           // (your own spin is shown the moment it's made — don't let an older copy undo it)
-          if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t)) sp[me] = CAS.spins[me];
+          // (…nor an older copy from before it was paid out: quick spins in a row would try to collect it twice)
+          if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t || (sp[me].t === CAS.spins[me].t && CAS.spins[me].c === true && sp[me].c !== true))) sp[me] = CAS.spins[me];
           CAS.spins = sp;
           casSync();
         }
@@ -24625,20 +24638,21 @@
     return fetch(url, Object.assign({}, opt, { signal: ac.signal })).finally(() => clearTimeout(t));
   }
   // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
-  async function casSpin(){
-    if(!CAS.on || CAS.busy) return;
+  async function casSpin(quiet){
+    if(!CAS.on || CAS.busy) return null;
     if(!SC.loaded) await scLoad();
     const bet = casFee(scBal()), y = casTier(scBal());
-    if(scBal() < bet){ toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return; }
+    if(scBal() < bet){ if(!quiet) toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return null; }
+    let res = null;
     const last = CAS.spins[chatUid()];
-    if(last && last.c === false){ await casClaim(last); }
+    if(last && last.c === false && last.t !== CAS.paidT){ await casClaim(last); }
     CAS.busy = true; casCtl();
     const me = chatUid(), sv = { '.sv': 'timestamp' };
     try{
       const tok = await chatAuth(), body = {};
       body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false, y };
       const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-      if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); toast(r.status === 401 ? 'Slow down a little — one spin every few seconds.' : "Couldn't spin — check your connection.", 2400); return; }
+      if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); if(!quiet) toast(r.status === 401 ? 'Slow down a little.' : "Couldn't spin — check your connection.", 2400); return { err: r.status }; }
       SC.s += bet; try{ questEv('spin'); }catch(e){}
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
@@ -24648,9 +24662,45 @@
       CAS.seen[me] = T;
       const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
       if(myM) casShow(myM, sp, true, { n: chatName() });
-      await casClaim(sp);
-    }catch(e){ toast(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
+      const w = await casClaim(sp);
+      res = { b: bet, t: T, w: Math.max(0, w), jack: casIsJack(T) };
+    }catch(e){ if(!quiet) toast(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
     CAS.busy = false; casCtl(); chatRenderArcade();
+    return res;
+  }
+  // 10 spins in a row (each one a real spin, paid and checked by the server on its own), the results lined up
+  async function casSpin10(){
+    if(CAS.multi){ CAS.multi.stop = true; return; }              // (pressing it again stops after the spin that's going)
+    if(!CAS.on || CAS.busy) return;
+    if(!SC.loaded) await scLoad();
+    if(scBal() < casFee(scBal())){ toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return; }
+    const M = CAS.multi = { n: 0, bet: 0, won: 0, res: [], stop: false };
+    casMultiShow(); casCtl();
+    for(let i = 0; i < 10 && CAS.on && !M.stop; i++){
+      if(scBal() < casFee(scBal())) break;
+      let r = await casSpin(true);
+      if(r && r.err === 401){ await new Promise(z => setTimeout(z, 450)); r = await casSpin(true); }     // (one more go if it was a hair too quick)
+      if(!r || r.err) break;
+      M.n++; M.bet += r.b; M.won += r.w; M.res.push(r); casMultiShow();
+      await new Promise(z => setTimeout(z, 280));
+    }
+    CAS.multi = null; casCtl(); casMultiShow(M, true);
+    if(M.n){
+      const net = M.won - M.bet;
+      toast(`${M.n} spin${M.n === 1 ? '' : 's'}: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
+    } else toast("Couldn't spin — check your connection.", 2200);
+  }
+  // the row of results under the buttons while (and after) spinning 10×
+  function casMultiShow(M, done){
+    const el = chatPanel.querySelector('.chat-casino .cas-multi'); if(!el) return;
+    M = M || CAS.multi; if(!M){ el.hidden = true; return; }
+    el.hidden = false;
+    const reels = (t) => [t % 6, Math.floor(t / 6) % 6, Math.floor(t / 36) % 6].map(casSym).join('');
+    const cells = M.res.map(r => `<span class="cm-r${r.jack ? ' jack' : r.w > r.b ? ' win' : r.w > 0 ? ' some' : ''}" title="paid ${r.b}, won ${r.w}">${reels(r.t)}<i>${r.w ? '+' + r.w.toLocaleString() : '−' + r.b.toLocaleString()}</i></span>`).join('')
+      + (done ? '' : '<span class="cm-r cm-wait">🎰<i>' + (M.n + 1) + '/10</i></span>');
+    const net = M.won - M.bet;
+    el.innerHTML = `<div class="cm-row">${cells}</div><div class="cm-sum">${M.n}/10 · paid ${M.bet.toLocaleString()} · won ${M.won.toLocaleString()} · <b class="${net >= 0 ? 'up' : 'down'}">${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}</b>${done ? ' <button type="button" class="cm-x" title="Hide">✕</button>' : ''}</div>`;
+    const x = el.querySelector('.cm-x'); if(x) x.addEventListener('click', () => { el.hidden = true; });
   }
   async function casClaim(sp){
     const me = chatUid();
@@ -24666,7 +24716,7 @@
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss) body['casino/pot'] = pot + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(r.ok){ SC.p += win; sp.c = true; if(!sp.shown) CAS.held = (CAS.held || 0) + win; CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
+        if(r.ok){ SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown) CAS.held = (CAS.held || 0) + win; CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
         await scLoad();
       }catch(e){}
     }
@@ -24706,10 +24756,12 @@
       el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj title="Open Blackjack next to the slots">＋ 🃏 Blackjack</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the slots" aria-label="Leave the slots">${ICON_X}</button></div>
         <div class="cas-floor"></div>
         <div class="cas-pot"><span class="cp-l">💰 JACKPOT</span><b class="cp-v">…</b><span class="cp-s">grows with every losing spin — hit 7️⃣7️⃣7️⃣ to win it all</span></div>
-        <div class="cas-ctl"><button type="button" class="cas-spin">SPIN · 50</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-ctl"><button type="button" class="cas-spin">SPIN · 50</button><button type="button" class="cas-spin cas-spin10" title="Spin 10 times in a row (press again to stop)">10×</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-multi" hidden></div>
         <div class="cas-pays"></div>
         <div class="cas-feed"></div>`;
-      el.querySelector('.cas-spin').addEventListener('click', casSpin);
+      el.querySelector('.cas-spin:not(.cas-spin10)').addEventListener('click', () => casSpin());
+      el.querySelector('.cas-spin10').addEventListener('click', casSpin10);
       el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
       el.querySelector('.cas-leave').addEventListener('click', () => gameClose('casino'));
       el.querySelector('.cas-x').addEventListener('click', () => gameClose('casino'));
@@ -24719,7 +24771,8 @@
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
     el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - (CAS.held || 0)) : '…';
-    const sb = el.querySelector('.cas-spin'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !CAS.on || scBal() < fee; sb.textContent = CAS.busy ? '…' : `SPIN · ${fee.toLocaleString()}`;
+    const sb = el.querySelector('.cas-spin:not(.cas-spin10)'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !!CAS.multi || !CAS.on || scBal() < fee; sb.textContent = CAS.busy || CAS.multi ? '…' : `SPIN · ${fee.toLocaleString()}`;
+    { const b10 = el.querySelector('.cas-spin10'); if(b10){ b10.disabled = !CAS.multi && (CAS.busy || !CAS.on || scBal() < fee); b10.textContent = CAS.multi ? (CAS.multi.stop ? 'stopping…' : `■ ${CAS.multi.n}/10`) : '10×'; b10.classList.toggle('on', !!CAS.multi); } }
     { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
       const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 2% of your points (${CAS_MIN}–${CAS_MAX.toLocaleString()}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
       if(pe.dataset.h !== h){ pe.dataset.h = h; pe.innerHTML = h; } } }
@@ -24898,7 +24951,7 @@
     try{
       const tok = await chatAuth();
       const g = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 8000); const d = g.ok ? await g.json() : null;
-      if(d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjBaitSeen(d.rb); }
+      if(d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; BJ.st = d.st || {}; bjBaitSeen(d.rb); }
       if(!BJ.p[me]) await bjPatch({ [`bj/p/${me}`]: { n: nm, t: bjSv, j: bjSv, r: 0, b: 0, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, st: 's', pd: 0, o: false } });
       else await bjPatch({ [`bj/p/${me}/n`]: nm, [`bj/p/${me}/t`]: bjSv, [`bj/p/${me}/o`]: false });
       if(!BJ.d) await bjPatch({ 'bj/d': { u: 'bot', n: 'Dealer', r: bjSv, k: 0, h: 0, a: 0, v: 0, lt: 0, pe: false, f: false, ut: bjSv } });
@@ -24935,7 +24988,7 @@
         const tok = await chatAuth();
         const r = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
         const d = r.ok ? await r.json() : null;
-        if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; bjBaitSeen(d.rb); bjSync(); bjDrive(); }
+        if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; BJ.st = d.st || {}; bjBaitSeen(d.rb); bjSync(); bjDrive(); }
       }catch(e){}
       BJ.polling = false;
     };
@@ -24983,6 +25036,27 @@
     try{ await fn(); }catch(e){}
     BJ.act = false;
   }
+  // ----- dealer strikes: a player dealing who busts on purpose (hits on 17+, or hits while already beating
+  // everyone still in, then busts) gets a strike; 3 in a day and they're taken off the seat until tomorrow -----
+  const BJ_MAX_HUMAN_BET = 1000;            // (the most anyone can bet while a player is dealing — the server checks it too)
+  function bjDay(){ const t = Date.now() + (PRES.offset || 0); return t - (t + 28800000) % 86400000; }   // (midnight in Singapore, like the server)
+  function bjStrikes(u){ const s = BJ.st && BJ.st[u]; return s && s.d === bjDay() ? (s.n | 0) : 0; }
+  // the dealer is already beating every hand still in (busted hands count as beaten)
+  function bjBeatsAll(D){
+    if(!(D.v <= 21)) return false;
+    const hands = [];
+    for(const s of bjSeats()){ if(s.u === D.u || !bjInRound(s, D)) continue; hands.push(s); if(bjIsSplit(s) && s.q) hands.push(s.q); }
+    return hands.length > 0 && hands.every(h => h.v > 21 || h.v < D.v);
+  }
+  // (the strike a busting tally has to carry: the server insists on it for a hit on 17+)
+  function bjStrikeFor(hand, n){
+    if(!hand || !hand.u || hand.u === 'bot' || !(n.h > 21)) return null;
+    const flagged = BJ.unneed && BJ.unneed.r === hand.r && BJ.unneed.k === hand.k && hand.u === chatUid();
+    if(!(hand.v >= 17 || flagged)) return null;
+    const cur = BJ.st && BJ.st[hand.u], day = bjDay();
+    if(cur && cur.l === hand.r) return null;
+    return { n: (cur && cur.d === day ? (cur.n | 0) : 0) + 1, d: day, l: hand.r };
+  }
   // draw a card into a hand (yours, or the dealer's): the server stamps the card, then the totals are counted from it
   async function bjDraw(path, hand, extra){
     const body = Object.assign({ [`${path}/pe`]: true, [`${path}/lt`]: bjSv, [`${path}/c/${hand.k | 0}`]: bjSv }, extra || {});
@@ -24997,7 +25071,15 @@
     const n = bjCount(hand, hand.lt), body = { [`${path}/pe`]: false, [`${path}/k`]: n.k, [`${path}/h`]: n.h, [`${path}/a`]: n.a, [`${path}/v`]: n.v };
     if(/^bj\/p\/[^/]+$/.test(path) && (hand.k | 0) === 0) body[`${path}/f1`] = hand.lt % 13;
     for(const k of Object.keys(extra || {})) if(/\/(ut|t)$/.test(k)) body[k] = bjSv;
-    return !!(await bjPatch(body));
+    const strike = path === 'bj/d' ? bjStrikeFor(hand, n) : null;
+    if(strike) body[`bj/st/${hand.u}`] = strike;
+    const ok = !!(await bjPatch(body));
+    if(ok && strike){
+      BJ.st = BJ.st || {}; BJ.st[hand.u] = strike;
+      const who = hand.u === chatUid() ? 'You' : bjName(hand.n);
+      bjFeed(strike.n >= 3 ? `🚫 ${who} busted on purpose 3 times — off the dealer seat until tomorrow` : `⚠️ ${who} busted on purpose — strike ${strike.n}/3`, true);
+    }
+    return ok;
   }
   // everything that has to happen next — each computer does its own hand; one of them runs the bot dealer
   function bjDrive(){
@@ -25020,6 +25102,8 @@
     // 2) a card that was drawn but not counted yet
     if(S.pe){ bjDo(() => bjTally(`bj/p/${me}`, S, { [`bj/p/${me}/t`]: 1 })); return; }
     if(D.pe && (driver || iDeal || sNow - (D.ut || 0) > 3000)){ bjDo(() => bjTally('bj/d', D, { 'bj/d/ut': 1 })); return; }
+    // (a dealer with 3 strikes today is taken off the seat straight away; the bot carries on)
+    if(human && !D.pe && bjStrikes(D.u) >= 3 && !BJ.dropping){ BJ.dropping = true; bjDo(async () => { await bjPatch({ 'bj/d/u': 'bot', 'bj/d/n': 'Dealer', 'bj/d/ut': bjSv }); BJ.dropping = false; }); return; }
     // (a vote to kick a dealer who's no longer dealing is taken back)
     if(BJ.kick[me] && (D.u === 'bot' || BJ.kick[me] !== D.u) && !BJ.kclr){ BJ.kclr = true; bjDo(async () => { await bjPatch({ [`bj/kick/${me}`]: null }); delete BJ.kick[me]; BJ.kclr = false; }); return; }
     // (no points left: you watch instead of playing or dealing)
@@ -25146,6 +25230,7 @@
     const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
     if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || BJ.watch) return;
     if(!(bet >= 1 && bet <= 1000000)){ toast('Bet at least 1 point.', 2000); return; }
+    if(D.u !== 'bot' && bet > BJ_MAX_HUMAN_BET){ BJ.bet = BJ_MAX_HUMAN_BET; bjSync(); toast(`While a player is dealing, the most you can bet is ${BJ_MAX_HUMAN_BET.toLocaleString()}.`, 2600); return; }
     if(bet > scBal()){ toast(`You only have ${scBal()} points.`, 2000); return; }
     if(!SC.loaded) await scLoad();
     if(scBal() < bet){ toast(`You only have ${scBal()} points to bet.`, 2200); return; }
@@ -25197,6 +25282,7 @@
     const me = chatUid(), D = BJ.d, S = BJ.p[me];
     if(BJ.watch || scBal() < 1){ toast('You need points to deal — the dealer stakes a bet each round too.', 2600); return; }
     if(!D || D.u !== 'bot' || !(D.f || D.k === 0) || (S && bjInRound(S, D))) { toast('You can take the dealer seat between rounds (and not after betting).', 2400); return; }
+    if(bjStrikes(me) >= 3){ toast("You busted on purpose 3 times today — you can deal again tomorrow.", 2800); return; }
     bjUser(async () => { if(await bjPatch({ 'bj/d/u': me, 'bj/d/n': chatName().slice(0, CHAT_NAME_MAX), 'bj/d/ut': bjSv })) bjFeed('You took the dealer seat', false); else toast("Couldn't take the dealer seat.", 2000); });
   }
   // stop playing but keep watching the table (a hand you already bet on still plays out and pays)
@@ -25217,7 +25303,14 @@
     bjUser(async () => { if(await bjPatch({ [`bj/kick/${me}`]: on ? null : D.u })){ if(on) delete BJ.kick[me]; else BJ.kick[me] = D.u; bjSync(); } });
   }
   function bjDealerDeal(){ const D = BJ.d, S = BJ.p[chatUid()]; if(!(D && D.u === chatUid() && bjPhase() === 'bet')) return; if(!(S && bjInRound(S, D)) && BJ.noStake !== D.r){ toast('Stake your bet first (below), then deal.', 2200); return; } bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
-  function bjDealerHit(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.v < 21) bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv })); }
+  function bjDealerHit(){
+    const D = BJ.d; if(!(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.v < 21)) return;
+    // (a hit you don't need — on 17 or more, or when you're already beating everyone — is a strike if you bust)
+    const unneeded = D.k >= 2 && (D.v >= 17 || bjBeatsAll(D));
+    BJ.unneed = unneeded ? { r: D.r, k: D.k } : null;
+    if(unneeded) toast(`You don't need that card — bust now and it's strike ${bjStrikes(D.u) + 1}/3 (3 and you're off the dealer seat till tomorrow).`, 3200);
+    bjUser(() => bjDraw('bj/d', D, { 'bj/d/ut': bjSv }));
+  }
   function bjDealerStand(){ const D = BJ.d; if(D && D.u === chatUid() && bjPhase() === 'dealer' && !D.pe && D.k >= 2) bjUser(() => bjPatch({ 'bj/d/f': true, 'bj/d/ut': bjSv })); }
   // ----- the table window -----
   function bjRender(){
@@ -25408,7 +25501,7 @@
     // the dealer
     const who = el.querySelector('.bj-who'), dh = el.querySelector('.bj-dhand'), dctl = el.querySelector('.bj-dctl');
     if(D){
-      const human = D.u !== 'bot', sig = D.u + '|' + D.n;
+      const human = D.u !== 'bot', sig = D.u + '|' + D.n + '|' + (human ? bjStrikes(D.u) : 0);
       if(who.dataset.sig !== sig){
         who.dataset.sig = sig; who.innerHTML = '';
         const av = human ? chatAv(D.u, D.n, false, false) : Object.assign(document.createElement('span'), { className: 'chat-av bj-bot', textContent: '🤖' });
@@ -25416,6 +25509,7 @@
         const nm = document.createElement('b'); nm.textContent = human ? bjName(D.n) + (D.u === me ? ' (you)' : '') + ' · dealer' : 'Dealer bot';
         if(human) nm.style.color = chatColor(D.n);
         who.append(av, nm);
+        if(human){ const k = bjStrikes(D.u); if(k){ const w = document.createElement('span'); w.className = 'bj-strk'; w.textContent = '⚠️'.repeat(k) + ` ${k}/3`; w.title = 'Busted on purpose ' + k + ' time' + (k === 1 ? '' : 's') + ' today — 3 and they’re off the dealer seat till tomorrow'; who.append(w); } }
       }
       dh.dataset.k = 'd'; bjHandEl(dh, D, false);
       el.querySelector('.bj-dtot').textContent = bjTotTxt(D);

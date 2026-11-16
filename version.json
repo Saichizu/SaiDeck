@@ -1,6 +1,6 @@
 {
-  "build": 106,
+  "build": 107,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Freedits can now have as many big moments as they like (no more limit of six). The Kings & Queens Freedit (reinstall version 16) splits three of its moments so you can time each half yourself: 2b the queen's crown, 3b the glasses clinking, 4b the pawns rising. Leave a b-half unmarked and it plays right after its first half, like before. Also: track order keys only remember the tracks you moved, and you can drag tracks in the render preview to key their order."
+  "notes": "Casino: a new 10× button spins the slots 10 times in a row (about 3 seconds), with all ten results lined up; press it again to stop. Blackjack: while a player is dealing, bets are capped at 1,000. A player dealer who busts on purpose (hits on 17 or more, or hits while already beating everyone, then busts) gets a strike; 3 strikes in a day and they're taken off the dealer seat until tomorrow."
 }
