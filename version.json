@@ -1,6 +1,6 @@
 {
-  "build": 107,
+  "build": 108,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Casino: a new 10× button spins the slots 10 times in a row (about 3 seconds), with all ten results lined up; press it again to stop. Blackjack: while a player is dealing, bets are capped at 1,000. A player dealer who busts on purpose (hits on 17 or more, or hits while already beating everyone, then busts) gets a strike; 3 strikes in a day and they're taken off the dealer seat until tomorrow."
+  "notes": "Casino: a new 10× button spins the slots 10 times in a row, with all ten results lined up (press it again to stop), and the points in the top corner now match your real balance after fast spins. Blackjack: while a player is dealing, bets are capped at 1,000. A player dealer who busts on purpose gets a strike; 3 strikes in a day and they're off the dealer seat until tomorrow."
 }

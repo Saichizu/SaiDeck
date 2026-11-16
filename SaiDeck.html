@@ -22364,7 +22364,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 107;                 // ← goes up by one with every published version
+  const SD_BUILD = 108;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24588,7 +24588,7 @@
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
-    CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0;
+    CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0; CAS.heldBy = {};
     if(!CHAT.gm.casino) gameOpen('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
@@ -24599,7 +24599,7 @@
   }
   function casLeave(){
     if(!CAS.on) return;
-    CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0; CAS.held = 0;
+    CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0; CAS.held = 0; CAS.heldBy = {};
     const S = CAS.sess; CAS.sess = null;
     if(S && S.spins > 0) casSessionPost(S);
     clearInterval(CAS.poll); CAS.poll = 0;
@@ -24685,6 +24685,7 @@
       await new Promise(z => setTimeout(z, 280));
     }
     CAS.multi = null; casCtl(); casMultiShow(M, true);
+    setTimeout(() => { casHeldSum(); casCtl(); }, 3000);
     if(M.n){
       const net = M.won - M.bet;
       toast(`${M.n} spin${M.n === 1 ? '' : 's'}: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
@@ -24716,7 +24717,7 @@
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss) body['casino/pot'] = pot + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(r.ok){ SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown) CAS.held = (CAS.held || 0) + win; CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
+        if(r.ok){ SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown && win > 0){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; casHeldSum(); } CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
         await scLoad();
       }catch(e){}
     }
@@ -24770,7 +24771,7 @@
   }
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
-    el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - (CAS.held || 0)) : '…';
+    el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - casHeldSum()) : '…';
     const sb = el.querySelector('.cas-spin:not(.cas-spin10)'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !!CAS.multi || !CAS.on || scBal() < fee; sb.textContent = CAS.busy || CAS.multi ? '…' : `SPIN · ${fee.toLocaleString()}`;
     { const b10 = el.querySelector('.cas-spin10'); if(b10){ b10.disabled = !CAS.multi && (CAS.busy || !CAS.on || scBal() < fee); b10.textContent = CAS.multi ? (CAS.multi.stop ? 'stopping…' : `■ ${CAS.multi.n}/10`) : '10×'; b10.classList.toggle('on', !!CAS.multi); } }
     { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
@@ -24831,7 +24832,16 @@
     casCtl();
   }
   // a machine's reels: roll and land on the spin's result (or just show it)
+  // A win is kept out of the balance on show until its reels land (so the number doesn't give it away early).
+  // Each one is held for its own spin and let go when its reels land, when a newer spin of yours starts
+  // rolling (10× spins cut each other's reels short), or after 8 s at the most.
+  function casHeldSum(){
+    const H = CAS.heldBy || {}, now = Date.now(); let sum = 0;
+    for(const k of Object.keys(H)){ if(now - H[k].at > 8000) delete H[k]; else sum += H[k].w; }
+    CAS.held = sum; return sum;
+  }
   function casShow(m, sp, roll, w){
+    if(m.classList.contains('me') && CAS.heldBy){ for(const k of Object.keys(CAS.heldBy)) if(Number(k) < sp.t) delete CAS.heldBy[k]; casHeldSum(); }
     const R = casReels(sp.t), jackpot = casIsJack(sp.t), win = casWin(sp), res = m.querySelector('.cas-res');
     const strips = [...m.querySelectorAll('.cas-strip')];
     const still = !roll || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -24841,7 +24851,7 @@
       sp.shown = true;
       if(roll){
         sfxSlotResult(casMult(sp.t), m.classList.contains('me') ? 1 : 0.35);
-        if(m.classList.contains('me')){ CAS.held = Math.max(0, (CAS.held || 0) - win); casCtl(); }      // (the win shows in your points only now)
+        if(m.classList.contains('me')){ if(CAS.heldBy) delete CAS.heldBy[sp.t]; casHeldSum(); casCtl(); }      // (the win shows in your points only now)
         if(win > 0) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
         casFeed(`${nm} → ${R.map(casSym).join('')} ${jackpot ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || jackpot);
@@ -27389,7 +27399,7 @@
     el.hidden = CHAT.side !== 'arcade';
     el.classList.toggle('wide', SC.tab === 'shop');
     if(el.hidden){ el.innerHTML = ''; el._h = ''; el.dataset.fresh = ''; delete el.dataset.bal; delete el.dataset.tabx; return; }
-    const cur = ammoNow(), bal = Math.max(0, scBal() - (CAS.held || 0));
+    const cur = ammoNow(), bal = Math.max(0, scBal() - casHeldSum());
     const freshKey = SC.tab + '|' + (SC.tab === 'board' ? !!SC.board : '');
     const isFresh = el.dataset.fresh !== freshKey; el.dataset.fresh = freshKey;
     const bump = SC.loaded && el.dataset.bal != null && el.dataset.bal !== String(bal); el.dataset.bal = SC.loaded ? String(bal) : '';
