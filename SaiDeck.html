@@ -22373,7 +22373,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 110;                 // ← goes up by one with every published version
+  const SD_BUILD = 111;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24649,29 +24649,42 @@
   function casPayT(T){ return casPayAt(50, 0, T); }
   // what a spin paid out (a jackpot pays whatever the pot was)
   function casWin(sp){ if(!sp || !(sp.b > 0)) return 0; const v = casPayAt(sp.b, sp.y, sp.t); return v < 0 ? (sp.jp || CAS.pot || CAS_POT0) : v; }
-  // my pity tier right now (from my points and the leaderboard lines the admin's SaiDeck keeps up to date)
+  // my pity tier right now (from my points and the leaderboard lines everyone's SaiDeck keeps up to date;
+  // config/pity is a fixed override the admin can set, else casino/pity, else 1,000 / 3,000)
   function casTier(bal){
-    const P = (CHAT.cfg && CHAT.cfg.pity) || {}, a = typeof P.a === 'number' ? P.a : 1000, b = typeof P.b === 'number' ? P.b : 3000;
+    const P = (CHAT.cfg && CHAT.cfg.pity) || CAS.pity || {}, a = typeof P.a === 'number' ? P.a : 1000, b = typeof P.b === 'number' ? P.b : 3000;
     bal = bal == null ? scBal() : bal;
     return bal < a ? 2 : bal < b ? 1 : 0;
   }
   // (for the sounds: how big a win it was)
   function casMult(T){ const k = casClass(T); return k < 0 ? 25 : [12, 6, 2, 1, 1, 0][k]; }
-  // the admin's SaiDeck keeps the pity lines up to date: the bottom third and the middle third of everyone with points
+  // the pity lines follow the leaderboard by themselves: the bottom third and the middle third of everyone with points.
+  // Any player at or above the middle line writes them (the server checks they're real players' points, that it
+  // can't help the writer, and at most every 5 minutes), so nobody has to have the admin chat open.
   async function casPityUpdate(){
-    if(CAS.pityTried || chatLS('notadminP') === new Date().toDateString() || !SCALL.m) return;
-    const now = Date.now(), bals = Object.values(SCALL.m).map(x => x.b).filter(x => x > 0).sort((x, y) => x - y);
-    if(bals.length < 3) return;
-    const q = (f) => bals[Math.min(bals.length - 1, Math.floor(bals.length * f))];
-    const a = Math.max(100, q(1 / 3)), b = Math.max(a, q(2 / 3)), P = (CHAT.cfg && CHAT.cfg.pity) || {};
+    if(!SCALL.m || CAS.pityBusy || Date.now() < (CAS.pityNext || 0)) return;
+    const me = chatUid(), ent = Object.entries(SCALL.m).filter(([u, x]) => x.b > 0).sort((x, y) => x[1].b - y[1].b);
+    if(ent.length < 3 || !me) return;
+    const at = (f) => ent[Math.min(ent.length - 1, Math.floor(ent.length * f))];
+    const [ua, xa] = at(1 / 3), [ub, xb] = at(2 / 3);
+    const a = Math.max(100, xa.b), b = Math.max(a, xb.b), mine = SCALL.m[me] ? SCALL.m[me].b : 0;
+    if(ua === me || ub === me || mine < b) return;                      // (someone richer than the middle line does it)
+    const P = CAS.pity || {};
     if(P.a === a && P.b === b) return;
-    if(P.t && now - P.t < 600000 && Math.abs(P.a - a) < P.a * 0.1 && Math.abs(P.b - b) < P.b * 0.1) return;
-    CAS.pityTried = true;
+    const now = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
+    if(P.t && now - P.t < 310000) return;
+    CAS.pityBusy = true;
     try{
-      const tok = await chatAuth();
-      const r = await fetch(`${CHAT_DB}/config/pity.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ a, b, t: now }) });
-      if(r.ok){ CHAT.cfg.pity = { a, b, t: now }; CAS.pityTried = false; } else chatLS('notadminP', new Date().toDateString());
-    }catch(e){ CAS.pityTried = false; }
+      const tok = await chatAuth(), v = { a, b, t: { '.sv': 'timestamp' }, ua, ub };
+      const r = await fetch(`${CHAT_DB}/casino/pity.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify(v) });
+      if(r.ok) CAS.pity = { a, b, t: now, ua, ub };
+      CAS.pityNext = Date.now() + (r.ok ? 300000 : 60000);
+    }catch(e){ CAS.pityNext = Date.now() + 60000; }
+    CAS.pityBusy = false;
+  }
+  // (read the lines even when the casino isn't open, so the leaderboard can show them)
+  async function casPityLoad(){
+    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/pity.json?auth=${encodeURIComponent(tok)}`); if(r.ok){ const v = await r.json(); CAS.pity = v && typeof v.a === 'number' ? v : null; } }catch(e){}
   }
   const casSeatLive = (st) => st && typeof st.t === 'number' && Date.now() + PRES.offset - st.t < 95000;
   async function casJoin(){
@@ -24709,6 +24722,7 @@
         if(CAS.on){
           CAS.seats = (d && d.seats) || {};
           CAS.pot = d && typeof d.pot === 'number' ? d.pot : CAS_POT0; casPotShow();
+          CAS.pity = d && d.pity && typeof d.pity.a === 'number' ? d.pity : null;
           const sp = (d && d.spin) || {}, me = chatUid();
           // (your own spin is shown the moment it's made — don't let an older copy undo it)
           // (…nor an older copy from before it was paid out: quick spins in a row would try to collect it twice)
@@ -24731,7 +24745,8 @@
     if(!CAS.on || CAS.busy) return null;
     if(Date.now() < (CAS.jackHold || 0)) return null;          // (a moment to enjoy a jackpot before the next spin)
     if(!SC.loaded) await scLoad();
-    const bet = casFee(scBal()), y = casTier(scBal());
+    const bet = casFee(scBal());
+    let y = casTier(scBal());
     if(scBal() < bet){ if(!quiet) toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return null; }
     let res = null;
     const last = CAS.spins[chatUid()];
@@ -24741,7 +24756,12 @@
     try{
       const tok = await chatAuth(), body = {};
       body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false, y };
-      const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      // (the pity lines may have just moved: read them again and retry once with the tier the server will take)
+      if(r.status === 401 && y > 0){
+        await casPityLoad(); const y2 = casTier(scBal());
+        if(y2 !== y){ y = y2; body[`casino/spin/${me}`].y = y; r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }); }
+      }
       if(!r.ok){ CAS.busy = false; casCtl(); await scLoad(); if(!quiet) toast(r.status === 401 ? 'Slow down a little.' : "Couldn't spin — check your connection.", 2400); return { err: r.status }; }
       SC.s += bet; try{ questEv('spin'); }catch(e){}
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
@@ -27040,7 +27060,7 @@
       if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
-    try{ casPityUpdate(); }catch(e){}
+    try{ if(!CAS.pity && !CAS.pityRead){ CAS.pityRead = true; casPityLoad().then(casPityUpdate); } else casPityUpdate(); }catch(e){}
     presRender(); try{ document.querySelectorAll('.gm-pts').forEach(e => { const row = e.closest('[data-u]'); if(row) gmPts(e, row.dataset.u); }); }catch(e){}
     if(CHAT.open && force !== 'quiet') try{ chatRenderMessages(); }catch(e){} if(CHAT.side === 'arcade' && SC.tab === 'board') chatRenderArcade();
   }

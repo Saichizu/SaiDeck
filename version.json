@@ -1,6 +1,6 @@
 {
-  "build": 110,
+  "build": 111,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "New in the Arcade shop: infiltrator power-ups (one use each, press the key while you're on someone's screen). 🎭 Multi invasion (M): come in as 10 cursors, only one is real and only it can shoot. Swatting a fake does nothing, and artillery wastes shots on them. 🛡️ Artillery shield (S) blocks 3 artillery hits. 📡 Jammer (J) stops their artillery firing for 60 seconds. 👻 Ghost cloak (G) makes you see-through, and artillery lands half as often. Also: 10× slot spins with jackpots announced straight away, and a 1,000 bet cap plus strikes for player dealers who bust on purpose."
+  "notes": "Slots luck now follows the leaderboard by itself: the bottom third of players get the best payouts, the middle third get better ones, the top third get normal ones. The lines update on their own every few minutes as points change, so a big jackpot moves you up and your luck goes back to normal straight away. Also closed a gap where a lucky tier could stick around after you got rich."
 }
