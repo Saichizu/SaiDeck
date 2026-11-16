@@ -22364,7 +22364,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 108;                 // ← goes up by one with every published version
+  const SD_BUILD = 109;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24640,6 +24640,7 @@
   // your spin: pay the bet (the server stamps the time), then the reels from that time, then collect
   async function casSpin(quiet){
     if(!CAS.on || CAS.busy) return null;
+    if(Date.now() < (CAS.jackHold || 0)) return null;          // (a moment to enjoy a jackpot before the next spin)
     if(!SC.loaded) await scLoad();
     const bet = casFee(scBal()), y = casTier(scBal());
     if(scBal() < bet){ if(!quiet) toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return null; }
@@ -24664,6 +24665,13 @@
       if(myM) casShow(myM, sp, true, { n: chatName() });
       const w = await casClaim(sp);
       res = { b: bet, t: T, w: Math.max(0, w), jack: casIsJack(T) };
+      // A jackpot is told to everyone straight away — not when the reels land: another quick spin would cut the
+      // reels short, and the chat only takes the jackpot post while it's still your latest spin.
+      if(res.jack && w > 0){
+        CAS.jackPosted = T; CAS.jackHold = Date.now() + 2600;
+        await casJackpotPost(w);
+        if(quiet) toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${w.toLocaleString()} points!`, 5000);
+      }
     }catch(e){ if(!quiet) toast(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that spin — it'll pay out next time you spin.", 2600); }
     CAS.busy = false; casCtl(); chatRenderArcade();
     return res;
@@ -24682,13 +24690,14 @@
       if(r && r.err === 401){ await new Promise(z => setTimeout(z, 450)); r = await casSpin(true); }     // (one more go if it was a hair too quick)
       if(!r || r.err) break;
       M.n++; M.bet += r.b; M.won += r.w; M.res.push(r); casMultiShow();
+      if(r.jack){ M.jack = r.w; break; }          // (a jackpot ends the run, so you get to see it)
       await new Promise(z => setTimeout(z, 280));
     }
     CAS.multi = null; casCtl(); casMultiShow(M, true);
     setTimeout(() => { casHeldSum(); casCtl(); }, 3000);
     if(M.n){
       const net = M.won - M.bet;
-      toast(`${M.n} spin${M.n === 1 ? '' : 's'}: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
+      if(!M.jack) toast(`${M.n} spin${M.n === 1 ? '' : 's'}: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
     } else toast("Couldn't spin — check your connection.", 2200);
   }
   // the row of results under the buttons while (and after) spinning 10×
@@ -24856,7 +24865,7 @@
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
         casFeed(`${nm} → ${R.map(casSym).join('')} ${jackpot ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || jackpot);
         if(m.classList.contains('me') && (win >= 300 || jackpot)) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win.toLocaleString()} points!`, 3600);
-        if(m.classList.contains('me') && jackpot) casJackpotPost(win);
+        if(m.classList.contains('me') && jackpot && CAS.jackPosted !== sp.t){ CAS.jackPosted = sp.t; casJackpotPost(win); }
         if(m.classList.contains('me')) chatRenderArcade();
       }
     };
