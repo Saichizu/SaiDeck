@@ -18376,7 +18376,13 @@
       if(lyrCamM && !lyrWithCam && !lyrJvCam){ try{ y = lyrCamM.transformPoint(new DOMPoint(RENDER_W / 2, y)).y; }catch(e){} }
       return Math.max(mT + laneH * 0.3, Math.min(contentBottom - laneH * 0.3, y));
     };
-    const lyrArgs = { u, top: mT, ch: contentH, vid: (S.videoSpace && vidH > 0) ? { y: vidY, h: vidH, w: vidW } : null, laneY: lyrLaneY };
+    // (…and how tall a lane is there)
+    const lyrLaneH = () => {
+      const t = rows.find(x => x._rLane && x._rLane.seq === renderFrameSeq), R = t && t._rLane;
+      if(R && lyrWorldM){ try{ const inv = lyrWorldM.inverse(), a = inv.transformPoint(R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y))), b = inv.transformPoint(R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y + R.h))); const h = Math.hypot(b.x - a.x, b.y - a.y); if(h > 1) return h; }catch(e){} }
+      return laneH;
+    };
+    const lyrArgs = { u, top: mT, ch: contentH, vid: (S.videoSpace && vidH > 0) ? { y: vidY, h: vidH, w: vidW } : null, laneY: lyrLaneY, laneH: lyrLaneH };
     // JVKE: the lyrics can ride the calm camera too (drawn later, over the
     // sunset light, but with the camera's motion)
     const lyrJvCam = camOn && ((jvkeActive() && S.jvLyrics) || (frierenActive() && S.frLyrics) || (forestActive() && S.fsLyrics) || (todohActive() && S.tdLyrics) || (davidActive() && S.dvLyrics) || (khaiiActive() && S.khLyrics) || (sageActive() && S.sgLyrics) || (saichizuActive() && S.szLyrics) || (fdGen() && S[fdGen().px + 'Lyrics'])) && S.lyricsOn && lyrAnyLines();
@@ -22187,7 +22193,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 101;                 // ← goes up by one with every published version
+  const SD_BUILD = 102;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -29272,7 +29278,7 @@
       const ys = lyrSnapY(L, T);
       if(ys != null){
         const x = S.lyricPos === 'custom' ? Math.max(0.05, Math.min(0.95, Number(S.lyricX) || 0.5)) * RENDER_W : RENDER_W / 2;
-        return { x, y: ys + (S.lyricNudge || 0) * u, maxW: Math.max(RENDER_W * 0.3, Math.min(maxW, 2 * Math.min(x, RENDER_W - x) - 24 * u)) };
+        return { x, y: ys + (S.lyricNudge || 0) * u, h: L.laneH ? L.laneH() : null, maxW: Math.max(RENDER_W * 0.3, Math.min(maxW, 2 * Math.min(x, RENDER_W - x) - 24 * u)) };
       }
     }
     if(S.lyricPos === 'custom' && isFinite(S.lyricY)){
@@ -29764,6 +29770,7 @@
     const boxW = Math.min(RENDER_W * 0.94, (S.lyricPos === 'video' && Lr.vid) ? Lr.vid.w * 0.96 : RENDER_W * 0.94);
     let boxH = boxW * 9 / 16;
     boxH = Math.min(boxH, Lr.ch * 0.9);
+    if(A.h) boxH = Math.min(boxH, A.h * 1.05);      // (stuck to a track: as tall as the lane)
     const t = cur.w.toUpperCase().replace(/[.,!?;:"]+$/g, '');
     const fontStr = (px) => cur.font ? wordFontStr(cur, px) : `400 ${px}px "Anton", Impact, "Arial Black", "Bebas Neue", sans-serif`;
     ctx.save();
@@ -30074,7 +30081,18 @@
       lyrXDraw(o, { a: 0.4 + 0.6 * Math.max(k, lxSung(w, o.T) ? 0.35 : 0), sc: 1 + 0.16 * k });
     },
   };
+  // stuck to a track: the words are as tall as the lane (Text size is the most they get)
   function drawLyrics(ctx, L, T){
+    const S = recSettings;
+    if(!S.lyricSnap || !lyr.lines || !lyr.lines.length || !S.lyricsOn){ drawLyrics0(ctx, L, T); return; }
+    lyrWorldM = ctx.getTransform();
+    const A = lyricAnchor(L, T);
+    if(!A.h){ drawLyrics0(ctx, L, T); return; }
+    const keep = S.lyricSize, mul = S.lyricStyle === 'big' ? 2.1 : S.lyricStyle === 'sides' ? 3.0 : 1, fitH = S.lyricStyle === 'big' ? 0.95 : 0.8;
+    S.lyricSize = Math.max(4, Math.min(keep, A.h * fitH / (mul * L.u)));
+    try{ drawLyrics0(ctx, L, T); } finally { S.lyricSize = keep; }
+  }
+  function drawLyrics0(ctx, L, T){
     if(!lyr.lines || !lyr.lines.length || !recSettings.lyricsOn) return;
     lyrWorldM = ctx.getTransform();
     if(recSettings.lyricStyle === 'sides'){ drawLyricsSides(ctx, L, T); return; }
@@ -30117,14 +30135,16 @@
         const sp = lyrSpring(T - w.t0, b);
         let sc = fit * (0.25 + 0.75 * sp) * (1 + 0.1 * (0.3 + b) * lyrSylPulse(w, T)), dy = (1 - sp) * px * 0.35, al = Math.min(1, (T - w.t0) / 0.08);
         let rot = lyrLiteFrame ? 0 : b * 0.12 * Math.exp(-(T - w.t0) * 6) * Math.sin((T - w.t0) * 22);
-        if(!it.cur){ const q = Math.min(1, (T - nextStart) / 0.22); sc *= 1 - 0.45 * q; dy -= px * 0.9 * q; al *= 1 - q; rot = 0; }
+        let xo = 0;
+        if(!it.cur){ const q = Math.min(1, (T - nextStart) / 0.22); sc *= 1 - 0.45 * q; dy -= px * 0.9 * q; al *= 1 - q; rot = 0; if(A.h) xo = -A.maxW * 0.3 * q; }
+        if(A.h) dy = 0;          // stuck to a track: it stays on the lane (pops in place, the old word slides off sideways)
         if(it.cur && T > w.t1){ const s2 = Math.min(1, (T - w.t1) / 0.4); sc *= 1 - 0.06 * s2; }
         al *= 1 - leave;
         if(al <= 0.01) continue;
         const tw = ctx.measureText(t).width;
         ctx.save();
         ctx.globalAlpha = al;
-        ctx.translate(A.x, A.y + dy);
+        ctx.translate(A.x + xo, A.y + dy);
         ctx.rotate(rot);
         ctx.scale(sc, sc);
         if(!lyrLiteFrame){ ctx.shadowColor = LYR_THEME ? LYR_THEME.glowNow : 'rgba(0,0,0,.6)'; ctx.shadowBlur = (LYR_THEME ? LYR_THEME.blur : 18) * u; ctx.shadowOffsetY = LYR_THEME ? 0 : 4 * u; }
@@ -30132,7 +30152,7 @@
         ctx.textAlign = 'left';
         lyrDrawWordText(ctx, w, t, tw, T, b, px);
         ctx.restore();
-        hlAdd('lyrics', A.x - tw * sc / 2, A.y + dy - px * sc * 0.6, tw * sc, px * sc * 1.2);
+        hlAdd('lyrics', A.x + xo - tw * sc / 2, A.y + dy - px * sc * 0.6, tw * sc, px * sc * 1.2);
       }
       ctx.restore();
       return;
@@ -30148,7 +30168,11 @@
     const longest = Math.max(...ws.map(x => x.lw));
     if(longest > A.maxW){ const k = A.maxW / longest; px *= k; ctx.font = lyricFontStr(weight, px); ws.forEach(x => { x.wd *= k; x.lw *= k; }); }
     const tallLine = moodOn && ws.some(x => { const m = lyrMood(x.w.w); return m === 'big' || m === 'love' || m === 'pulse'; });
-    const space2 = Math.max(ctx.measureText(' ').width * 1.2, px * 0.32);
+    let space2 = Math.max(ctx.measureText(' ').width * 1.2, px * 0.32);
+    if(A.h){   // stuck to a track: one row, so it stays on the lane
+      const tot = ws.reduce((a, x) => a + x.lw, 0) + space2 * (ws.length - 1);
+      if(tot > A.maxW){ const k = A.maxW / tot * 0.995; px *= k; ctx.font = lyricFontStr(weight, px); ws.forEach(x => { x.wd *= k; x.lw *= k; }); space2 *= k; }
+    }
     const rows = [[]]; let rw = 0;
     for(const x of ws){
       const add = (rows[rows.length - 1].length ? space2 : 0) + x.lw;
