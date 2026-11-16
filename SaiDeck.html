@@ -22373,7 +22373,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 111;                 // ← goes up by one with every published version
+  const SD_BUILD = 112;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26188,7 +26188,7 @@
     if(uid === chatUid()) return;
     const g = document.createElement('div'); g.className = 'gift-pop rps-pop'; g.setAttribute('role', 'dialog');
     g.innerHTML = `<b>✊✋✌️ Challenge <span></span></b><p class="chat-side-p">You both put in the same points; the winner takes it all. You have <em>${SC.loaded ? scBal() : '…'}</em>.</p>
-      <div class="gp-row"><input type="number" min="1" max="5000" step="1" value="20" aria-label="Points each"><button type="button" class="chat-pbtn gp-send">Challenge</button><button type="button" class="chat-sbtn gp-x">Cancel</button></div>`;
+      <div class="gp-row"><input type="number" min="1" step="1" value="20" aria-label="Points each"><button type="button" class="chat-pbtn gp-send">Challenge</button><button type="button" class="chat-sbtn gp-x">Cancel</button></div>`;
     g.querySelector('b span').textContent = bjName(name); g.querySelector('b span').style.color = chatColor(name || '');
     chatPanel.appendChild(g);
     const r = anchor.getBoundingClientRect(), w = 300;
@@ -26202,7 +26202,7 @@
     g.querySelector('.gp-x').addEventListener('click', gpClose);
   }
   async function rpsSend(uid, name, w, pop){
-    if(!(w >= 1 && w <= 5000)){ toast('Bet between 1 and 5000 points.', 2000); return; }
+    if(!(w >= 1 && w <= 1000000000)){ toast('Bet at least 1 point.', 2000); return; }
     if(!SC.loaded) await scLoad();
     if(scBal() < w){ toast(`You only have ${scBal()} points.`, 2000); return; }
     if(Object.values(rpsMine()).some(g => !g.done)){ toast('Finish your other Rock Paper Scissors game first.', 2400); return; }

@@ -1,6 +1,6 @@
 {
-  "build": 111,
+  "build": 112,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Slots luck now follows the leaderboard by itself: the bottom third of players get the best payouts, the middle third get better ones, the top third get normal ones. The lines update on their own every few minutes as points change, so a big jackpot moves you up and your luck goes back to normal straight away. Also closed a gap where a lucky tier could stick around after you got rich."
+  "notes": "Rock Paper Scissors has no 5,000 cap anymore: bet as much as you both have. Slots luck now follows the leaderboard by itself: the bottom third of players get the best payouts, the middle third get better ones, the top third get normal ones. The lines update on their own every few minutes as points change, so a big jackpot moves you up and your luck goes back to normal straight away. Also closed a gap where a lucky tier could stick around after you got rich."
 }
