@@ -4570,7 +4570,8 @@
         <div class="rec-row rs" data-rec-row="lyricSize" data-hl="lyrics"><span>Text size</span><input type="range" min="24" max="200" step="2" data-rec="lyricSize"><span class="rec-val" data-rec-val="lyricSize"></span></div>
         <div class="rec-row rs" data-rec-row="lyricBounce" data-hl="lyrics"><span>Bounce</span><input type="range" min="0" max="100" step="5" data-rec="lyricBounce"><span class="rec-val" data-rec-val="lyricBounce"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Position</span><div class="seg" data-rec="lyricPos"><button type="button" data-value="top">Top</button><button type="button" data-value="middle">Middle</button><button type="button" data-value="bottom">Bottom</button><button type="button" data-value="video">On video</button><button type="button" data-value="custom" title="Where you dragged them to — drag the lyrics on the preview">Dragged</button></div></div>
-        <label class="rec-row rec-toggle" data-rec-row="lyricSnap" data-hl="lyrics" title="This lyric track sits on the lane of the track it belongs to (its [Name] tag, or whoever sings most of the line) and goes up and down with it when the tracks move. Dragging it then only moves it left / right; Move up / down nudges it off the lane."><span>Stick to the singer's track</span><span class="switch"><input type="checkbox" data-rec="lyricSnap"><span class="track"></span><span class="knob"></span></span></label>
+        <label class="rec-row rec-toggle" data-rec-row="lyricSnap" data-hl="lyrics" title="This lyric track sits on the lane of the track it belongs to (pick it below, drag the lyrics onto a track, or Auto: whoever sings the line) and goes up and down with it when the tracks move, Freedit included. Move up / down nudges it off the lane."><span>Stick to the singer's track</span><span class="switch"><input type="checkbox" data-rec="lyricSnap"><span class="track"></span><span class="knob"></span></span></label>
+        <div class="rec-row" data-rec-row="lyricSnapTo" data-hl="lyrics" title="Which track this lyric track rides on. Auto: each line goes to whoever sings it. You can also drag the lyrics onto a track in the preview and they latch on to it."><span>Belongs to</span><select class="rec-select" data-rec="lyricSnapTo"><option value="">Auto (whoever sings)</option></select></div>
         <div class="rec-row rs" data-rec-row="lyricNudge" data-hl="lyrics"><span>Move up / down</span><input type="range" min="-400" max="400" step="5" data-rec="lyricNudge"><span class="rec-val" data-rec-val="lyricNudge"></span></div>
         <div class="rec-row rs" data-rec-row="lyricNudgeX" data-hl="lyrics"><span>Move left / right</span><input type="range" min="-500" max="500" step="5" data-rec="lyricNudgeX"><span class="rec-val" data-rec-val="lyricNudgeX"></span></div>
         <div class="rec-row" data-hl="lyrics"><span>Word colour</span><div class="seg" id="lyrColorModeSeg"><button type="button" data-v="singer" title="Each word in the colour of whoever sings it (a flowing gradient when several do)">Singers</button><button type="button" data-v="all" title="Every word flows through the colours of all your tracks">All tracks</button><button type="button" data-v="custom" title="Your own gradient colours whenever the tracks harmonise (singer colours the rest of the time)">Custom</button><button type="button" data-v="single" title="One colour for every word">One colour</button></div></div>
@@ -13263,7 +13264,8 @@
     lyricBounce: 70,        // %
     lyricPos: 'bottom',     // 'top' / 'middle' / 'bottom' / 'video' (centre of the video box) / 'custom' (dragged)
     lyricX: 0.5, lyricY: 0.8,   // where they were dragged to (frame fractions, with lyricPos 'custom')
-    lyricSnap: false,       // the line sits on its singer's lane (and moves with it); dragging is left / right only
+    lyricSnap: false,       // the line sits on its singer's lane (and moves with it)
+    lyricSnapTo: '',        // …that track ('name|k' = the k-th track called name), or '' = whoever sings the line
     lyricNudge: 0,          // px up (-) / down (+) from there
     lyricNudgeX: 0,         // px left (-) / right (+)
     lyricBySinger: true,    // words take their singer's colour (gradient when harmonising)
@@ -17918,6 +17920,11 @@
     };
     const drawLaneInner = (idx) => {
       const t = rows[idx];
+      { // where this lane really is on screen this frame (camera, Freedit lane moves and all) — the lyrics latch on to it
+        const lt0 = lanePos ? laneYAt(lanePos[idx]) : laneTopAt(idx), m0 = ctx.getTransform();
+        const sy = m0.transformPoint(new DOMPoint(RENDER_W / 2, lt0 + laneH / 2)).y, R = t._rLane;
+        if(!R || R.seq !== renderFrameSeq || (sy >= 0 && sy <= ctx.canvas.height)) t._rLane = { m: m0, y: lt0, h: laneH, seq: renderFrameSeq };
+      }
       const members = [t];
       // a person spread over connected tracks: one image for all of them,
       // drawn after the lanes at whichever of their lanes has the voice
@@ -18356,6 +18363,14 @@
     const lyrCamM = camHL;
     const lyrLaneY = (id) => {
       const i = rows.findIndex(t => t.id === id); if(i < 0) return null;
+      const R = rows[i]._rLane;
+      if(R && R.seq === renderFrameSeq && lyrWorldM){
+        // the lane as it was drawn this frame, brought into the space the lyrics are drawn in
+        try{
+          const P = R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y + R.h / 2)), q = lyrWorldM.inverse().transformPoint(P);
+          if(isFinite(q.y)) return q.y;
+        }catch(e){}
+      }
       let y = camGeo.laneTop(i) + laneH / 2;
       if(!isFinite(y)) return null;
       if(lyrCamM && !lyrWithCam && !lyrJvCam){ try{ y = lyrCamM.transformPoint(new DOMPoint(RENDER_W / 2, y)).y; }catch(e){} }
@@ -19344,9 +19359,27 @@
       box.innerHTML = L.map(t => `<span class="fd-mark"><button type="button" class="fd-mark-t" data-t="${t}" title="Jump to ${fmtTime(t)}">${fmtTime(t)}</button><button type="button" class="fd-mark-x" data-k="${key}" data-t="${t}" title="Remove this time" aria-label="Remove the big moment at ${fmtTime(t)}">✕</button></span>`).join('');
     }
   }
+  // "Belongs to" for the lyrics: Auto, or any track (kept as name + which one of that name, so it survives saving)
+  function trackSnapKey(t){ const same = tracks.filter(x => x.name === t.name); return t.name + '|' + same.indexOf(t); }
+  function trackFromSnapKey(v){
+    if(!v) return null;
+    const i = v.lastIndexOf('|'), nm = v.slice(0, i), k = Number(v.slice(i + 1)) || 0;
+    const same = tracks.filter(x => x.name === nm); return same[k] || same[0] || null;
+  }
+  function buildLyrSnapOptions(){
+    const sel = recPanel.querySelector('select[data-rec="lyricSnapTo"]'); if(!sel) return;
+    const opts = [['', 'Auto (whoever sings)']];
+    for(const t of tracks){ const same = tracks.filter(x => x.name === t.name); opts.push([trackSnapKey(t), (t.name || 'Track') + (same.length > 1 ? ' ' + (same.indexOf(t) + 1) : '')]); }
+    const sig = opts.map(o => o.join('=')).join('|');
+    if(sel._sig !== sig){ sel.textContent = ''; for(const [v, l] of opts){ const o = document.createElement('option'); o.value = v; o.textContent = l; sel.appendChild(o); } sel._sig = sig; }
+    const v = recSettings.lyricSnapTo || '';
+    sel.value = opts.some(o => o[0] === v) ? v : '';
+    const row = recPanel.querySelector('[data-rec-row="lyricSnapTo"]'); if(row) row.hidden = !recSettings.lyricSnap;
+  }
   function syncRecControls(){
     try{ buildTrackColorList(); }catch(e){}
     buildVideoSlotOptions();
+    try{ buildLyrSnapOptions(); }catch(e){}
     updateVideoUI();
     recPanel.querySelectorAll('[data-rec]').forEach(el => {
       const key = el.dataset.rec;
@@ -21414,20 +21447,34 @@
       tag.style.left = Math.max(0, 6 - bl) + 'px';
       tag.style.top = bt < 26 ? 'calc(100% + 4px)' : '-22px';
     };
-    const labelOf = (g) => { if(g.key === 'opening') return 'Opening text — drag to move'; const how = snapped(g) ? ' — on its track, drag left / right' : ' — drag to move'; return (lyrTracks.length > 1 ? (lyrTracks[g.lt] || {}).name || 'Lyrics' : 'Lyrics') + how; };
+    const labelOf = (g) => { if(g.key === 'opening') return 'Opening text — drag to move'; const how = snapped(g) ? ' — drag onto a track' : ' — drag to move'; return (lyrTracks.length > 1 ? (lyrTracks[g.lt] || {}).name || 'Lyrics' : 'Lyrics') + how; };
     // read / write the position of a thing (frame px of its centre)
     const getPos = (g) => {
       if(g.key === 'opening') return { x: recSettings.openPos === 'custom' ? recSettings.openX * RENDER_W : (g.l + g.r) / 2, y: recSettings.openPos === 'custom' ? recSettings.openY * RENDER_H : (g.t + g.b) / 2 };
       const st = g.lt === lyrActive || g.lt < 0 ? recSettings : (lyrTracks[g.lt] && lyrTracks[g.lt].style) || recSettings;
+      if(st.lyricSnap) return { x: st.lyricPos === 'custom' ? st.lyricX * RENDER_W : (g.l + g.r) / 2, y: (g.t + g.b) / 2 };   // (stuck to a track: where it's drawn)
       return st.lyricPos === 'custom' ? { x: st.lyricX * RENDER_W, y: st.lyricY * RENDER_H } : { x: RENDER_W / 2, y: (g.t + g.b) / 2 };
     };
     const snapped = (g) => { if(g.key === 'opening') return false; const st = g.lt === lyrActive || g.lt < 0 ? recSettings : (lyrTracks[g.lt] && lyrTracks[g.lt].style) || recSettings; return !!st.lyricSnap; };
+    // the track whose lane is under a point of the preview (frame px), from where the lanes were drawn
+    const laneAtY = (y) => {
+      const k = cv.width / RENDER_W; let best = null, bd = Infinity;
+      for(const t of tracks){
+        const R = t._rLane; if(!R || R.seq < renderFrameSeq - 2) continue;
+        const c = R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y + R.h / 2)).y / k, e = R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y + R.h)).y / k;
+        const d = Math.abs(y - c), half = Math.max(4, Math.abs(e - c));
+        if(d <= half && d < bd){ bd = d; best = t; }
+      }
+      return best;
+    };
     const setPos = (g, x, y) => {
-      if(snapped(g)){   // stuck to its track: only across
-        const fx2 = Math.round(x / RENDER_W * 10000) / 10000;
-        if(g.lt === lyrActive || g.lt < 0){ recSettings.lyricPos = 'custom'; recSettings.lyricX = fx2; }
-        else { const LT = lyrTracks[g.lt]; if(LT) LT.style = Object.assign({}, LT.style || {}, { lyricPos: 'custom', lyricX: fx2 }); }
-        return;
+      if(snapped(g)){   // stuck to a track: across, and up / down latches on to the lane it's dropped on
+        const fx2 = Math.round(x / RENDER_W * 10000) / 10000, onT = laneAtY(y);
+        const add = { lyricPos: 'custom', lyricX: fx2 };
+        if(onT) add.lyricSnapTo = trackSnapKey(onT);
+        if(g.lt === lyrActive || g.lt < 0) Object.assign(recSettings, add);
+        else { const LT = lyrTracks[g.lt]; if(LT) LT.style = Object.assign({}, LT.style || {}, add); }
+        return onT;
       }
       const fx = Math.round(x / RENDER_W * 10000) / 10000, fy = Math.round(y / RENDER_H * 10000) / 10000;
       if(g.key === 'opening'){ recSettings.openPos = 'custom'; recSettings.openX = fx; recSettings.openY = fy; return; }
@@ -21458,15 +21505,15 @@
       let x = drag.pos0.x + (p.x - drag.p0.x), y = drag.pos0.y + (p.y - drag.p0.y);
       x = Math.max(RENDER_W * 0.05, Math.min(RENDER_W * 0.95, x)); y = Math.max(RENDER_H * 0.03, Math.min(RENDER_H * 0.97, y));
       const lockY = snapped(drag.g);
-      if(lockY) y = drag.pos0.y;          // stuck to its track: left / right only
       // snap to the middle, across and down
       const sx = Math.abs(x - RENDER_W / 2) < snap * 2, sy = !lockY && Math.abs(y - RENDER_H / 2) < snap * 2;
       if(sx) x = RENDER_W / 2; if(sy) y = RENDER_H / 2;
       gV.hidden = !sx; gH.hidden = !sy;
-      setPos(drag.g, x, y);
+      const onT = setPos(drag.g, x, y);
       // the box follows the pointer right away (the next frame redraws the text there)
       const dx = x - drag.pos0.x, dy = y - drag.pos0.y;
-      showBox({ l: drag.cx0 + dx - drag.w / 2, r: drag.cx0 + dx + drag.w / 2, t: drag.cy0 + dy - drag.h / 2, b: drag.cy0 + dy + drag.h / 2 }, p.k, (sx || sy) ? 'Snapped to the middle' : labelOf(drag.g));
+      showBox({ l: drag.cx0 + dx - drag.w / 2, r: drag.cx0 + dx + drag.w / 2, t: drag.cy0 + dy - drag.h / 2, b: drag.cy0 + dy + drag.h / 2 }, p.k,
+        lockY ? (onT ? `On ${onT.name || 'Track'}'s track` : 'Drop it on a track') : (sx || sy) ? 'Snapped to the middle' : labelOf(drag.g));
     });
     const end = () => {
       if(!drag) return;
@@ -21944,7 +21991,7 @@
     'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale',
     'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
     'dimUnplayed', 'showPlayhead', 'fps', 'quality', 'audioKbps', 'rangeMode',
-    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricSnap', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
+    'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricSnap', 'lyricSnapTo', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
   const BUILTIN_RENDER_PRESETS = [
     { name: 'Default - Saichizu', builtin: true, format: 'tiktok', settings: {
       widthMode: 'zoom', zoom: 140, trackHeight: 150, fillFrame: false, gap: 5, marginTop: 160, marginBottom: 440,
@@ -22140,7 +22187,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 100;                 // ← goes up by one with every published version
+  const SD_BUILD = 101;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -27978,7 +28025,7 @@
   // show it, and its look lives in recSettings' lyric* keys while it's
   // selected); the video draws every visible one, each in its own look, so
   // two singers' overlapping lines can show at the same time.
-  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricSnap', 'lyricBySinger', 'lyricAllTracks',
+  var LYR_STYLE_KEYS = ['lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricX', 'lyricY', 'lyricSnap', 'lyricSnapTo', 'lyricBySinger', 'lyricAllTracks',
     'lyricCustomGrad', 'lyricGradColors', 'lyricBlend', 'lyricOpacity', 'lyricColor', 'lyricUpper', 'lyricStroke', 'lyricStrokeColor', 'lyricStrokeW'];
   function lyrNewData(mode){ return { text: '', lines: null, textAtDetect: '', edited: false, undo: [], cuts: [], mode: mode === 'manual' ? 'manual' : 'auto' }; }
   function lyrStyleNow(){ const o = {}; for(const k of LYR_STYLE_KEYS) o[k] = recSettings[k]; return o; }
@@ -29206,6 +29253,8 @@
     return best;
   }
   function lyrSnapY(L, T){
+    const pick = trackFromSnapKey(recSettings.lyricSnapTo);
+    if(pick && L.laneY){ const y = L.laneY(pick.id); if(y != null) return y; }
     const idx = lyricLineAt(T); if(idx < 0) return null;
     const line = lyr.lines[idx], y1 = lyrLineLaneY(L, line);
     if(y1 == null) return null;

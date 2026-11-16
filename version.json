@@ -1,6 +1,6 @@
 {
-  "build": 100,
+  "build": 101,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Cleaner videos: the render now encodes at constant quality, so the start, fades, glows and busy moments don't go grainy anymore (bigger files on busy parts). Computers that can't do that get a higher bitrate instead. Also in this update: \"Tracks can go off the frame\" has its own switch, and when it's off Freedit cameras keep every track inside the frame. Short intros play faster so names always show, and circle pictures fill the square intros. With \"Sung parts only\" on, the next singer moves up the moment a take ends. New lyric option \"Stick to the singer's track\": words ride their singer's lane, and dragging moves them left and right only."
+  "notes": "Lyrics can stick to a track: turn on \"Stick to the singer's track\", then pick which track under \"Belongs to\" (or Auto for whoever sings), or just drag the lyrics onto a track in the preview and they latch on. They stay centred on that lane as it moves, with a Freedit's camera too. Also in this update: cleaner videos with no more grain (constant quality), Freedit cameras keep every track in frame when \"Tracks can go off the frame\" is off, faster short intros, circle pictures fill square intros, and the next singer moves up the moment a take ends."
 }
