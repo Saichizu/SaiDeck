@@ -3188,6 +3188,15 @@
   .lane-keys .lk-x{color:var(--text-faint)!important;padding:3px 5px!important;}
   .lane-keys .lk-hint{font-size:11px;color:var(--text-faint);text-align:right;}
   .lane-keys .lk-add{border:1px dashed var(--border);border-radius:6px;background:none;color:var(--text-dim);font-size:11px;padding:3px 7px;cursor:pointer;}
+  .infil.ghost{opacity:.42;filter:saturate(.6);}
+  .infil-fake{position:fixed;z-index:100003;pointer-events:none;font:900 15px 'Manrope',sans-serif;color:#ff5a7a;text-shadow:0 2px 8px rgba(0,0,0,.6),0 0 2px #000;white-space:nowrap;}
+  .infil-fake.shield{color:#7ad8ff;}
+  .art-turret.jammed{filter:grayscale(1) brightness(.7);animation:artJam .25s steps(2) infinite;}
+  .art-turret.jammed::after{content:'📡';position:absolute;right:-8px;top:-10px;font-size:14px;}
+  @keyframes artJam{50%{transform:translate(1px,-1px);}}
+  .infil-hud .ih-sep{width:1px;align-self:stretch;background:rgba(255,255,255,.2);margin:0 4px;}
+  .infil-hud .ih-pw.on{background:rgba(120,255,170,.25);}
+  .arc-key{font:700 10px 'JetBrains Mono',monospace;font-style:normal;padding:0 4px;border:1px solid rgba(255,255,255,.3);border-radius:4px;margin-left:4px;opacity:.8;}
   .trk-cols-note{font-size:11px;color:var(--text-faint);line-height:1.4;}
   /* top bar: title, presets, Render, window buttons */
   .rec-top{grid-column:1 / 4;grid-row:1;display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg-panel);border-bottom:1px solid var(--border);min-width:0;}
@@ -22364,7 +22373,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 109;                 // ← goes up by one with every published version
+  const SD_BUILD = 110;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23053,6 +23062,7 @@
         const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); dockRender(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
         const a = e.target.closest('[data-art]'); if(a){ a.blur(); scBuy('art', a.dataset.art); return; }
+        { const pw = e.target.closest('[data-pw]'); if(pw){ pw.blur(); scBuy('pw', pw.dataset.pw); return; } }
         const rxb = e.target.closest('[data-rx]'); if(rxb){ rxb.blur(); scBuy('rx', rxb.dataset.rx); return; }
         const sb2 = e.target.closest('[data-snd-buy]'); if(sb2){ sb2.blur(); scBuy('snd', sb2.dataset.sndBuy); return; }
         const sp2 = e.target.closest('[data-sndprev]'); if(sp2){ sp2.blur(); const pv = new Audio(SND_SRC[sp2.dataset.sndprev]); pv.volume = 0.6; pv.play().catch(() => {}); return; }
@@ -24127,16 +24137,38 @@
   function infHud(){
     const M = INF.me; if(!M || !M.hud) return;
     const cur = ammoNow();
-    M.hud.innerHTML = `<span class="ih-t">Right-click to shoot</span><span class="ih-a ih-tot${SC.tot ? '' : ' locked'}"><i>Space</i>🎃×${SC.tot | 0}</span>` + AMMO.map((a, i) => `<span class="ih-a${a.k === cur ? ' on' : ''}${ammoOwned(a.k) ? '' : ' locked'}"><i>${i + 1}</i>${a.em}</span>`).join('');
+    M.hud.innerHTML = `<span class="ih-t">Right-click to shoot</span><span class="ih-a ih-tot${SC.tot ? '' : ' locked'}"><i>Space</i>🎃×${SC.tot | 0}</span>` + AMMO.map((a, i) => `<span class="ih-a${a.k === cur ? ' on' : ''}${ammoOwned(a.k) ? '' : ' locked'}"><i>${i + 1}</i>${a.em}</span>`).join('')
+      + `<span class="ih-sep"></span>` + PWR.map(a => { const on = (M.p || '').includes(a.l), n = (SC.pw || {})[a.k] | 0; return `<span class="ih-a ih-pw${on ? ' on' : ''}${on || n ? '' : ' locked'}" title="${escapeHtml(a.name)}"><i>${a.key}</i>${a.em}${on ? '' : '×' + n}</span>`; }).join('');
   }
   function infEat(e){ if(INF.eatClick){ e.preventDefault(); e.stopPropagation(); INF.eatClick = false; window.removeEventListener('click', infEat, true); } }
   function infKey(e){
     if(!INF.me) return;
     if(e.code === 'Space' || e.key === ' '){ e.preventDefault(); e.stopImmediatePropagation(); if(!e.repeat) totPlant(); return; }
     if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); infStop('click'); return; }
+    { const pw = !e.ctrlKey && !e.metaKey && !e.altKey && PWR.find(x => x.key.toLowerCase() === String(e.key).toLowerCase()); if(pw){ e.preventDefault(); e.stopImmediatePropagation(); if(!e.repeat) infPower(pw); return; } }
     const n = /^[1-6]$/.test(e.key) ? Number(e.key) - 1 : -1;
     if(n >= 0){ e.preventDefault(); e.stopImmediatePropagation(); const a = AMMO[n];
       if(ammoOwned(a.k)){ chatLS('ammo', a.k); infHud(); } else toast(`${a.em} ${a.name} is locked — buy it for ${a.price} points in the chat's Arcade (trophy button).`, 2600); }
+  }
+  async function infPower(it){
+    const M = INF.me; if(!M) return;
+    M.p = M.p || '';
+    if(M.p.includes(it.l)){ toast(`${it.em} ${it.name} is already on.`, 1800); return; }
+    if(!((SC.pw || {})[it.k] > 0)){ toast(`${it.em} You don't have a ${it.name} — get one in the chat's Arcade (trophy button) for ${it.price} points.`, 2800); return; }
+    if(M.pBusy) return; M.pBusy = true;
+    // (no cursor update may cross this one: an older one landing after it would wipe the power-up off the seat)
+    for(let i = 0; i < 40 && M.busy; i++) await new Promise(r => setTimeout(r, 25));
+    M.busy = true;
+    const np = PWR.filter(x => M.p.includes(x.l) || x.l === it.l).map(x => x.l).join('');
+    try{
+      const tok = await chatAuth(), left = (SC.pw[it.k] | 0) - 1;
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify({ [`pokes/${M.uid}/zi/${M.slot}/p`]: np, [`inv/${chatUid()}/pw/${it.k}`]: left }) });
+      if(!r.ok) throw new Error('no');
+      if(INF.me === M){ M.p = np; SC.pw[it.k] = left; infHud(); }
+      toast(it.k === 'multi' ? `🎭 You're 10 cursors on ${M.name}'s screen now — good luck finding the real one!` : it.k === 'shield' ? `🛡️ Shield up — it blocks the next ${PW_SHIELD} artillery hits.` : it.k === 'jam' ? `📡 Their artillery is jammed for 60 seconds.` : `👻 You're see-through — artillery lands half as often.`, 3000);
+      try{ chatRenderArcade(); }catch(e){}
+    }catch(e){ toast("Couldn't switch that on — check your connection.", 2400); try{ await scLoad(); }catch(e2){} }
+    M.busy = false; M.pBusy = false;
   }
   function infHidden(){ if(INF.me && document.visibilityState !== 'visible') infStop('idle'); }
   async function infSend(final){
@@ -24145,8 +24177,10 @@
     try{
       const tok = await chatAuth();
       if(INF.me !== M) return;      // (you've already left)
-      await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT',
-        body: JSON.stringify(Object.assign({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }, M.shots && M.shots.length ? { s: infShotStr(M) } : {})) });
+      const r = await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT',
+        body: JSON.stringify(Object.assign({ u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), x: Math.max(-0.1, Math.min(1.1, M.px / innerWidth)), y: Math.max(-0.1, Math.min(1.1, M.py / innerHeight)), d: Math.round(M.ang * 100) / 100, t: { '.sv': 'timestamp' } }, M.shots && M.shots.length ? { s: infShotStr(M) } : {}, M.p ? { p: M.p } : {})) });
+      // (refused with power-ups on: they fell off the seat somehow — carry on without them rather than freeze)
+      if(r && r.status === 401 && M.p && INF.me === M){ M.p = ''; infHud(); M.dirty = true; }
       // (if you left while that was on its way, it put your seat back — take it away again)
       if(INF.me !== M) await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(M.uid)}/zi/${M.slot}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' });
     }catch(e){}
@@ -24187,11 +24221,11 @@
     const s = path[0]; if(!/^s[123]$/.test(s || '')) return;
     if(path.length > 1){ const cur = Object.assign({}, INF.remote[s] && INF.remote[s].d); cur[path[1]] = v; v = cur; }
     const R = INF.remote[s];
-    if(!v || !v.u){ if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; } artUI(); return; }
+    if(!v || !v.u){ if(R){ infPop(R.px, R.py, R.el); R.el.remove(); (R.fakes || []).forEach(F => F.el.remove()); delete INF.remote[s]; } artUI(); return; }
     const G = INF.gone && INF.gone[s]; if(G && G.u === v.u && Date.now() < G.until) return;
     if(!chatInfOn() || chatBanned(v.u)){ infKick(s); return; }
     if(!R || R.d.u !== v.u){
-      if(R){ R.el.remove(); }
+      if(R){ R.el.remove(); (R.fakes || []).forEach(F => F.el.remove()); }
       const el = infAvatar(v.u, v.n, 'them');
       const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = `${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating`; el.appendChild(tag);
       el.title = `${chatBadName(v.n) ? 'Someone' : v.n} — click to swat them out`;
@@ -24202,11 +24236,47 @@
       // (a heads-up when someone new comes in)
       if(!R || R.d.u !== v.u){ toast(`👀 ${chatBadName(v.n) ? 'Someone' : v.n} is infiltrating your screen! Click their picture to swat them out.`, 3200); sfxIntruder(); }
     } else { R.d = v; R.heard = performance.now(); infShotsIn(R, v.s, false); }
+    infPowersIn(s, INF.remote[s], v.p || '');
     infLoop(); artUI();
+  }
+  // their power-ups, the moment each one comes on
+  function infPowersIn(s, R, p){
+    if(!R) return;
+    R.pw = R.pw || '';
+    const nm = chatBadName(R.d.n) ? 'Someone' : R.d.n;
+    for(const it of PWR){
+      if(!p.includes(it.l) || R.pw.includes(it.l)) continue;
+      R.pw += it.l;
+      if(it.k === 'multi'){
+        R.fakes = [];
+        for(let i = 0; i < INF_FAKES; i++){
+          const el = infAvatar(R.d.u, R.d.n, 'them fake');
+          const tag = document.createElement('div'); tag.className = 'infil-tag'; tag.textContent = `${nm} is infiltrating`; el.appendChild(tag);
+          el.title = `${nm} — click to swat them out`;
+          // (spread out round the screen, each copying the real one's moves turned its own way)
+          const F = { s, R, el, i, rot: (i + 1) / (INF_FAKES + 1) * Math.PI * 2, k: 0.7 + 0.5 * ((i * 37) % 10) / 10, ph: i * 1.7, px: R.px, py: R.py, ang: 0, sp: 0 };
+          if(R.d.p && R.d.p.includes('g')) el.classList.add('ghost');
+          el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); infFakePop(F, true); });
+          document.body.appendChild(el); R.fakes.push(F);
+        }
+        toast(`🎭 ${nm} came in as 10 cursors — only one is real! Swat the right one.`, 3400); sfxIntruder();
+      } else if(it.k === 'shield'){ R.shield = PW_SHIELD; toast(`🛡️ ${nm} has an artillery shield (blocks ${PW_SHIELD} hits) — swat them by hand!`, 3000); }
+      else if(it.k === 'jam'){ R.jamUntil = Date.now() + PW_JAM_MS; toast(`📡 ${nm} jammed your artillery for 60 seconds!`, 3000); }
+      else if(it.k === 'ghost'){ R.el.classList.add('ghost'); for(const F of R.fakes || []) F.el.classList.add('ghost'); toast(`👻 ${nm} is wearing a ghost cloak — your artillery will miss more.`, 3000); }
+    }
+  }
+  // a fake popping (swatted by hand, or hit by artillery): nothing happens to them, it's just gone
+  function infFakePop(F, byHand){
+    const R = F.R; if(!R || !R.fakes) return;
+    const i = R.fakes.indexOf(F); if(i < 0) return;
+    R.fakes.splice(i, 1); infPop(F.px, F.py, F.el); F.el.remove();
+    const n = document.createElement('div'); n.className = 'infil-fake'; n.textContent = 'FAKE!'; n.style.left = F.px + 'px'; n.style.top = F.py + 'px'; document.body.appendChild(n);
+    n.animate([{ opacity: 1, transform: 'translate(-50%,-50%) scale(.8)' }, { opacity: 1, transform: 'translate(-50%,-120%) scale(1.1)', offset: .3 }, { opacity: 0, transform: 'translate(-50%,-180%) scale(1)' }], { duration: 900, easing: 'ease-out' }).onfinish = () => n.remove();
+    if(byHand && !R.fakes.length) toast('🎭 All the fakes are gone — that one left is the real one!', 2400);
   }
   async function infKick(s){
     const R = INF.remote[s];
-    if(R){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; }
+    if(R){ infPop(R.px, R.py, R.el); R.el.remove(); (R.fakes || []).forEach(F => F.el.remove()); delete INF.remote[s]; }
     artUI();
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
   }
@@ -24216,7 +24286,7 @@
     const R = INF.remote[s]; if(!R) return;
     const who = R.d.u, nm = chatBadName(R.d.n) ? 'them' : R.d.n;
     INF.gone = INF.gone || {}; INF.gone[s] = { u: who, until: Date.now() + 2500 };
-    infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI();
+    infPop(R.px, R.py, R.el); R.el.remove(); (R.fakes || []).forEach(F => F.el.remove()); delete INF.remote[s]; artUI();
     splatFade(who);
     await scAward(who, nm, arty ? `${arty.em} Your ${arty.name} swatted` : 'You swatted');      // (while their seat is still there: that's the proof)
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(chatUid())}/zi/${s}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
@@ -24263,9 +24333,19 @@
       const srvNow = Date.now() + PRES.offset;
       if(Object.keys(INF.remote).length) infCursorOut(now);
       for(const [s, R] of Object.entries(INF.remote)){
-        if(now - (R.heard || now) > 7000 || (R.d.t && srvNow - R.d.t > 15000)){ infPop(R.px, R.py, R.el); R.el.remove(); delete INF.remote[s]; artUI(); infKick(s); continue; }
+        if(now - (R.heard || now) > 7000 || (R.d.t && srvNow - R.d.t > 15000)){ infPop(R.px, R.py, R.el); R.el.remove(); (R.fakes || []).forEach(F => F.el.remove()); delete INF.remote[s]; artUI(); infKick(s); continue; }
         place(R, (R.d.x || 0) * innerWidth, (R.d.y || 0) * innerHeight, 7, R.el);
+        // the fakes: each copies the real one's moves, turned and stretched its own way round the middle, with a little wander
+        if(R.fakes) for(const F of R.fakes){
+          const cx = innerWidth / 2, cy = innerHeight / 2, dx = (R.d.x || 0.5) * innerWidth - cx, dy = (R.d.y || 0.5) * innerHeight - cy, c = Math.cos(F.rot), sn = Math.sin(F.rot), t = now / 1000;
+          let tx = cx + (dx * c - dy * sn) * F.k + Math.sin(t * 0.9 + F.ph) * 40 + (F.i % 3 - 1) * innerWidth * 0.12;
+          let ty = cy + (dx * sn + dy * c) * F.k + Math.cos(t * 0.7 + F.ph) * 40 + ((F.i >> 1) % 3 - 1) * innerHeight * 0.1;
+          tx = Math.max(20, Math.min(innerWidth - 20, tx)); ty = Math.max(20, Math.min(innerHeight - 20, ty));
+          place(F, tx, ty, 6 + (F.i % 3), F.el);
+        }
       }
+      // (fakes whose real one has gone, go too)
+      for(const F of document.querySelectorAll('.infil.fake')){ if(![...Object.values(INF.remote)].some(R => R.fakes && R.fakes.some(f => f.el === F))){ F.remove(); } }
       if(INF.me || Object.keys(INF.remote).length) INF.raf = requestAnimationFrame(step);
       else INF.raf = 0;
     };
@@ -24382,12 +24462,21 @@
     { k: 'cannon', name: 'Water cannon', em: '💦', price: 20, every: 2.5, hit: 0.75, desc: 'Sprays every 2.5 seconds — hits 3 times out of 4.', col: '#5ac8ff' },
     { k: 'laser', name: 'Laser turret', em: '🔴', price: 20, every: 1.5, hit: 0.5, desc: 'Fires every 1.5 seconds, but only half the shots land.', col: '#ff4d6d' },
   ];
+  // infiltrator power-ups: one use each, switched on with a key while you're on someone's screen
+  // (the seat's p = the letters switched on; the database only takes a letter in the same write that uses one up)
+  const PWR = [
+    { k: 'multi', l: 'm', key: 'M', name: 'Multi invasion', em: '🎭', price: 150, desc: 'Come in as 10 cursors that all move with you — only one is really you, and only it can shoot. Swatting a fake does nothing, and artillery wastes shots on them.' },
+    { k: 'shield', l: 's', key: 'S', name: 'Artillery shield', em: '🛡️', price: 100, desc: 'Blocks the next 3 artillery hits on you. (A hand swat still gets you.)' },
+    { k: 'jam', l: 'j', key: 'J', name: 'Jammer', em: '📡', price: 120, desc: "Jams their artillery for 60 seconds — it can't fire at anyone." },
+    { k: 'ghost', l: 'g', key: 'G', name: 'Ghost cloak', em: '👻', price: 80, desc: 'You turn see-through, and artillery only lands on you half as often.' },
+  ];
+  const INF_FAKES = 9, PW_SHIELD = 3, PW_JAM_MS = 60000;
   function priceOf(kind, k, def){
     const P = CHAT.cfg && CHAT.cfg.prices, v = P && P[kind] && P[kind][k];
     return Number.isInteger(v) && v >= 0 ? v : def;
   }
   function priced(list, kind){ for(const it of list){ const def = it.price; Object.defineProperty(it, 'price', { get(){ return priceOf(kind, it.k, def); }, configurable: true }); } }
-  priced(AMMO, 'fx'); priced(ARTY, 'art');
+  priced(AMMO, 'fx'); priced(ARTY, 'art'); priced(PWR, 'pw');
   const SWAT_PTS = 10;                       // (the database only accepts exactly this many per swat)
   const ARTY_SHOTS = 10, ARTY_COOL = 5 * 60 * 1000;      // (each artillery swats up to 10 infiltrators, then 5 minutes' cooldown)
   const SC = { p: 0, s: 0, fx: {}, art: {}, bub: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
@@ -27343,7 +27432,7 @@
         fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
         fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
       SC.p = (a && a.p) | 0; SC.s = (a && a.s) | 0;
-      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.snd = (b && b.snd) || {};
+      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.pw = (b && b.pw) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.snd = (b && b.snd) || {};
       SC.loaded = true;
     }catch(e){}
     chatRenderArcade(); artUI(); try{ dockRender(); }catch(e){}
@@ -27366,7 +27455,7 @@
     return ok;
   }
   async function scBuy(kind, k){
-    const list = kind === 'fx' ? AMMO : kind === 'bub' ? BUBBLES : kind === 'rx' ? THROWS : kind === 'snd' ? SOUNDS : ARTY, it = list.find(x => x.k === k); if(!it || SC.busy) return;
+    const list = kind === 'fx' ? AMMO : kind === 'bub' ? BUBBLES : kind === 'rx' ? THROWS : kind === 'snd' ? SOUNDS : kind === 'pw' ? PWR : ARTY, it = list.find(x => x.k === k); if(!it || SC.busy) return;
     if(kind === 'snd' && sndOwned(k)){ toast(`You already have ${it.name} — send it from the 🔊 button.`, 2400); return; }
     if(!SC.loaded) await scLoad();
     try{ if(CHAT.pollCfg) await CHAT.pollCfg(); }catch(e){}
@@ -27377,7 +27466,7 @@
     try{
       const tok = await chatAuth(), me = chatUid(), body = {};
       body[`scores/${me}/s`] = SC.s + it.price; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
-      if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else if(kind === 'bub') body[`inv/${me}/bub/${k}`] = true; else if(kind === 'rx') body[`inv/${me}/rx/${k}`] = (((SC.rx || {})[k] | 0) + 1); else if(kind === 'snd') body[`inv/${me}/snd/${k}`] = true; else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
+      if(kind === 'pw') body[`inv/${me}/pw/${k}`] = (((SC.pw || {})[k] | 0) + 1); else if(kind === 'fx') body[`inv/${me}/fx/${k}`] = true; else if(kind === 'bub') body[`inv/${me}/bub/${k}`] = true; else if(kind === 'rx') body[`inv/${me}/rx/${k}`] = (((SC.rx || {})[k] | 0) + 1); else if(kind === 'snd') body[`inv/${me}/snd/${k}`] = true; else body[`inv/${me}/art/${k}`] = ((SC.art[k] | 0) + 1);
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(!r.ok) throw new Error('no');
       SC.s += it.price; SC._justBought = k;
@@ -27385,6 +27474,7 @@
       if(kind === 'bub'){ SC.bub[k] = true; chatLS('bubble', k); toast(`${it.em} ${it.name} bubble unlocked — your messages use it now.`, 3000); }
       else if(kind === 'fx'){ SC.fx[k] = true; chatLS('ammo', k); toast(`${it.em} ${it.name} unlocked — it's your bullet now (switch any time with 1–6 while infiltrating).`, 3200); }
       else if(kind === 'snd'){ SC.snd = SC.snd || {}; SC.snd[k] = true; toast(`${it.em} ${it.name} unlocked — send it from the 🔊 button next to the chat box.`, 3000); try{ sndPlay(k); }catch(e){} }
+      else if(kind === 'pw'){ SC.pw = SC.pw || {}; SC.pw[k] = (SC.pw[k] | 0) + 1; toast(`${it.em} ${it.name} bought — you have ${SC.pw[k]}. Press ${it.key} while you're infiltrating someone to use it.`, 3200); }
       else if(kind === 'rx'){ SC.rx = SC.rx || {}; SC.rx[k] = (SC.rx[k] | 0) + 1; toast(`${it.em} ${it.name} bought — you have ${SC.rx[k]}. Throw it from a message's reaction button.`, 2600); }
       else { SC.art[k] = (SC.art[k] | 0) + 1; toast(`${it.em} ${it.name} bought — deploy it from the artillery button when someone infiltrates you.`, 3200); }
     }catch(e){ toast("Couldn't buy that — check your connection and try again.", 2600); await scLoad(); }
@@ -27447,6 +27537,12 @@
         h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''}</b><span>${escapeHtml(a.desc)}</span></div>
           <button type="button" class="arc-buy" data-art="${a.k}">${a.price} pts</button></div>`;
       }
+      h += `<div class="chat-who-h" style="margin-top:6px">Infiltrator power-ups</div><p class="chat-side-p">One use each, for when you're the one infiltrating: press its key while you're on someone's screen. Good against their artillery.</p>`;
+      for(const a of PWR){
+        const n = (SC.pw || {})[a.k] | 0;
+        h += `<div class="arc-item"><span class="arc-em">${a.em}</span><div class="arc-t"><b>${escapeHtml(a.name)}${n ? ` <i>× ${n}</i>` : ''} <i class="arc-key">${a.key}</i></b><span>${escapeHtml(a.desc)}</span></div>
+          <button type="button" class="arc-buy" data-pw="${a.k}">${a.price} pts</button></div>`;
+      }
     } else if(SC.tab === 'quests'){
       h += questHtml();
     } else if(SC.tab === 'casino'){
@@ -27478,7 +27574,7 @@
     if(bump){ const b = el.querySelector('.arc-pts b'); if(b) b.classList.add('bump'); }
     try{ dockRender(); }catch(e){}
     try{ winXSync(); setTimeout(winXSync, 320); }catch(e){}
-    if(SC._justBought){ const it = el.querySelector(`[data-fx="${SC._justBought}"], [data-art="${SC._justBought}"], [data-rx="${SC._justBought}"]`); if(it) it.closest('.arc-item').classList.add('bought'); SC._justBought = null; }
+    if(SC._justBought){ const it = el.querySelector(`[data-fx="${SC._justBought}"], [data-art="${SC._justBought}"], [data-rx="${SC._justBought}"], [data-pw="${SC._justBought}"]`); if(it) it.closest('.arc-item').classList.add('bought'); SC._justBought = null; }
   }
   // ----- the splats -----
   const SPLAT = { img: {}, on: null, mine: null };
@@ -27672,18 +27768,31 @@
   window.addEventListener('resize', () => { if(ART.btn || ART.el) artPlace(); });
   function artTick(){
     const act = artActive();
+    // (a jammer on any of them: the turret can't fire)
+    const jammed = Object.values(INF.remote).some(R => R.jamUntil && Date.now() < R.jamUntil);
+    if(ART.el){ ART.el.classList.toggle('jammed', jammed); ART.el.title = jammed ? '📡 Jammed!' : 'Drag to move it'; }
+    if(act && ART.el && jammed) ART.nextShot = Math.max(ART.nextShot, performance.now() + 400);
     if(act && ART.el && performance.now() >= ART.nextShot){
       const seats = Object.keys(INF.remote);
       if(seats.length){
         const it = ARTY.find(a => a.k === act.k); ART.nextShot = performance.now() + it.every * 1000;
-        const s = seats[Math.floor(Math.random() * seats.length)], R = INF.remote[s];
-        const r = ART.el.getBoundingClientRect(), x0 = r.left + r.width / 2, y0 = r.top + r.height / 2, hit = Math.random() < it.hit;
-        const tx = R.px + (hit ? 0 : (Math.random() < 0.5 ? -1 : 1) * (60 + Math.random() * 60)), ty = R.py + (hit ? 0 : (Math.random() - 0.5) * 120);
+        // every cursor on screen is a target — the fakes too (they soak up shots)
+        const tg = []; for(const s2 of seats){ const R2 = INF.remote[s2]; tg.push({ s: s2, R: R2 }); for(const F of R2.fakes || []) tg.push({ s: s2, R: R2, F }); }
+        const pick = tg[Math.floor(Math.random() * tg.length)], s = pick.s, R = pick.R, Fk = pick.F || null, O = Fk || R;
+        const ghost = (R.d.p || '').includes('g');
+        const r = ART.el.getBoundingClientRect(), x0 = r.left + r.width / 2, y0 = r.top + r.height / 2, hit = Math.random() < it.hit * (ghost ? 0.5 : 1);
+        const tx = O.px + (hit ? 0 : (Math.random() < 0.5 ? -1 : 1) * (60 + Math.random() * 60)), ty = O.py + (hit ? 0 : (Math.random() - 0.5) * 120);
         ART.el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 240 });
         const p = document.createElement('div'); p.className = 'art-shot'; p.style.background = it.col; p.style.left = x0 + 'px'; p.style.top = y0 + 'px'; document.body.appendChild(p);
         p.animate([{ transform: 'translate(-50%,-50%)' }, { transform: `translate(calc(-50% + ${tx - x0}px), calc(-50% + ${ty - y0}px))` }], { duration: 380, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
           p.remove();
-          if(hit && INF.remote[s] === R){ infSwat(s, it); artUsed(it); }
+          if(hit && Fk){ infFakePop(Fk, false); artUsed(it); }
+          else if(hit && INF.remote[s] === R && R.shield > 0){
+            R.shield--; artUsed(it);
+            const b = document.createElement('div'); b.className = 'infil-fake shield'; b.textContent = `🛡️ BLOCKED${R.shield ? ' (' + R.shield + ' left)' : ''}`; b.style.left = R.px + 'px'; b.style.top = R.py + 'px'; document.body.appendChild(b);
+            b.animate([{ opacity: 1, transform: 'translate(-50%,-50%) scale(.8)' }, { opacity: 1, transform: 'translate(-50%,-120%) scale(1.1)', offset: .3 }, { opacity: 0, transform: 'translate(-50%,-180%)' }], { duration: 1000, easing: 'ease-out' }).onfinish = () => b.remove();
+          }
+          else if(hit && INF.remote[s] === R){ infSwat(s, it); artUsed(it); }
           else infPop(tx, ty, null);
         };
       } else ART.nextShot = performance.now() + 500;
