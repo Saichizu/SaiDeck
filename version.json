@@ -1,6 +1,6 @@
 {
-  "build": 103,
+  "build": 104,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Latching lyrics onto a track (switching on \"Stick to the singer's track\", picking a track, or dragging onto one) now resets Move up / down, so the words land dead-centre on the lane instead of keeping an old offset. Lyrics stuck to a track are as tall as the lane in every style. Also in this update: no more grain in renders, Freedit cameras keep every track in frame, faster short intros, circle pictures fill square intros, and the next singer moves up the moment a take ends."
+  "notes": "Put the tracks where you want them: in the render preview, drag any track up or down and it moves there from the playhead on (the others shift over to make room). It keys the order at that moment, slides into place, and beats everything else (Fixed, Main, Backup, Singing tracks move up) until your next key. The keys are listed under Tracks: click one to jump to it, ✕ to delete it, or \"+ Auto from here\" to go back to the automatic order. Latching lyrics onto a track now lands them dead-centre on it."
 }

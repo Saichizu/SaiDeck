@@ -3168,6 +3168,14 @@
   .trk-keys .kl{flex:1;min-width:0;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
   .trk-keys .kl i{width:10px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,.2);}
   .trk-keys .kc{font:600 10.5px 'JetBrains Mono',monospace;color:var(--text-faint);}
+  .lane-keys{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:240px;}
+  .lane-keys .lk{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--border);border-radius:6px;background:var(--bg-control);font:600 11px 'JetBrains Mono',monospace;color:var(--text);overflow:hidden;}
+  .lane-keys .lk button{border:0;background:none;color:inherit;font:inherit;padding:3px 6px;cursor:pointer;}
+  .lane-keys .lk button:hover{color:#fff;background:rgba(255,255,255,.08);}
+  .lane-keys .lk.auto{color:var(--text-dim);}
+  .lane-keys .lk-x{color:var(--text-faint)!important;padding:3px 5px!important;}
+  .lane-keys .lk-hint{font-size:11px;color:var(--text-faint);text-align:right;}
+  .lane-keys .lk-add{border:1px dashed var(--border);border-radius:6px;background:none;color:var(--text-dim);font-size:11px;padding:3px 7px;cursor:pointer;}
   .trk-cols-note{font-size:11px;color:var(--text-faint);line-height:1.4;}
   /* top bar: title, presets, Render, window buttons */
   .rec-top{grid-column:1 / 4;grid-row:1;display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg-panel);border-bottom:1px solid var(--border);min-width:0;}
@@ -4366,6 +4374,7 @@
         <div class="rec-row" data-rec-row="bgColor" data-hl="bg"><span>Background colour</span><input type="color" data-rec="bg"></div>
         <label class="rec-row rec-toggle" data-hl="lanes" title="In the video only (the timeline never changes): singing tracks move up past quiet ones. Pick below which mic tracks are Main, Backup or Fixed; instruments never move."><span>Singing tracks move up</span><span class="switch"><input type="checkbox" data-rec="vocalReorder"><span class="track"></span><span class="knob"></span></span></label>
         <label class="rec-row rec-toggle" data-rec-row="vocalOverflow" data-hl="lanes" title="On: the tracks keep the Track height you set even if they don't all fit, so some can run off the bottom of the frame (with Singing tracks move up, whoever's singing moves up into view), and a Freedit's camera can zoom past quiet tracks. Off: every track always stays inside the frame and the safe margins, even while a Freedit's camera moves."><span>Tracks can go off the frame</span><span class="switch"><input type="checkbox" data-rec="vocalOverflow"><span class="track"></span><span class="knob"></span></span></label>
+        <div class="rec-row lane-keys-row" data-rec-row="laneKeys" data-hl="lanes" title="Drag a track up or down in the preview to put it where you want from that moment: it keys the order at the playhead, and your order beats everything else (Fixed, Main, Backup, Singing tracks move up) until the next key. Click a key to jump to it, ✕ to delete it."><span>Track order keys</span><div class="lane-keys" id="laneKeyList"></div></div>
         <label class="rec-row rec-toggle" data-hl="lanes" title="The top and bottom of each waveform are the same shape, like BandLab — tidier. Off: the exact up / down shape of the sound. Same switch as View › Mirrored waveform."><span>Mirrored waveform</span><span class="switch"><input type="checkbox" id="recWaveMirrorToggle"><span class="track"></span><span class="knob"></span></span></label>
         <div class="vocal-roles" data-rec-row="vocalRoles" data-hl="lanes">
           <div class="vocal-roles-hint">Main vocals swap with main vocals — when one goes quiet, or hands over (one is about to stop as another comes in). Backup vocals swap with backups, only when one goes quiet. Volume differences never cause a swap. Fixed never moves.</div>
@@ -13275,6 +13284,7 @@
     vocalOverflow: false,      // with vocalReorder: keep the Track height even if not every track fits
     vocalReorder: false,       // singing tracks swap places by who's singing (video only)
     vocalMain: '',             // (old) name of a track that keeps its place — now "Fixed" in vocalRoles
+    laneKeys: '',              // JSON [{t, o: [track keys top→bottom] | null (= back to auto)}]: track order keys dragged in the preview
     vocalRoles: '',            // JSON {track name: 'main' | 'backup' | 'fixed'}; mic tracks not listed are 'main'
  audioSource: 'tracks',      // render sound: 'tracks' (mixed) | 'file' (a finished song)
     audioFileName: '',         // the chosen file's name (the file itself isn't saved)
@@ -16115,7 +16125,47 @@
     return mm ? Math.max(1, Number(mm[1]) || 1) : 1;
   }
   function vocalMainNum(t, m){ const r = (m || vocalRolesMap())[t.name || ''], mm = /^main(\d+)$/.exec(r || ''); return mm ? Math.max(1, Number(mm[1]) || 1) : 1; }
+  // ----- Track order keys: the order dragged in the preview -----
+  // Each key puts the tracks in the dragged order (or hands back to the
+  // automatic order: o = null) from its time until the next key, sliding
+  // into place over the LANE_KEY_MOVE s before it. Above everything else.
+  const LANE_KEY_MOVE = 0.55;
+  let laneKeyMemo = { src: null, list: [] };
+  function laneKeysNow(){
+    const src = recSettings.laneKeys || '';
+    if(laneKeyMemo.src !== src){
+      let a = []; try{ a = JSON.parse(src || '[]'); }catch(e){}
+      laneKeyMemo = { src, list: (Array.isArray(a) ? a : []).filter(k => k && isFinite(k.t)).sort((x, y) => x.t - y.t) };
+    }
+    return laneKeyMemo.list;
+  }
+  function laneKeysSet(list){
+    list = list.slice().sort((x, y) => x.t - y.t);
+    recSettings.laneKeys = list.length ? JSON.stringify(list.map(k => ({ t: Math.round(k.t * 1000) / 1000, o: k.o || null }))) : '';
+  }
+  function lanePosFromOrder(o){
+    const idx = [], used = new Set();
+    for(const key of o){ const t = trackFromSnapKey(key), i = t ? tracks.indexOf(t) : -1; if(i >= 0 && !used.has(i)){ idx.push(i); used.add(i); } }
+    tracks.forEach((t, i) => { if(!used.has(i)) idx.push(i); });      // (tracks added since: at the bottom)
+    const pos = new Array(tracks.length); idx.forEach((i, r) => { pos[i] = r; });
+    return pos;
+  }
   function vocalLanePositions(T){
+    const K = laneKeysNow();
+    if(!K.length) return vocalLanePositionsAuto(T);
+    const auto = () => vocalLanePositionsAuto(T) || tracks.map((t, i) => i);
+    const stateAt = (j) => {
+      if(j < 0) return auto();
+      const k = K[j], target = k.o ? lanePosFromOrder(k.o) : auto();
+      const f = Math.max(0, Math.min(1, (T - (k.t - LANE_KEY_MOVE)) / LANE_KEY_MOVE));
+      if(f >= 1) return target;
+      const prev = stateAt(j - 1), e = f * f * (3 - 2 * f);
+      return target.map((v, i) => prev[i] + (v - prev[i]) * e);
+    };
+    let j = -1; for(let i = 0; i < K.length; i++) if(K[i].t - LANE_KEY_MOVE <= T) j = i;
+    return j < 0 ? vocalLanePositionsAuto(T) : stateAt(j);
+  }
+  function vocalLanePositionsAuto(T){
     const S = recSettings;
     const rows = tracks;
     const anyLinks = tracks.some(x => x.linkTo != null && isLinkedChild(x));
@@ -19382,8 +19432,32 @@
     sel.value = opts.some(o => o[0] === v) ? v : '';
     const row = recPanel.querySelector('[data-rec-row="lyricSnapTo"]'); if(row) row.hidden = !recSettings.lyricSnap;
   }
+  function buildLaneKeyList(){
+    const box = $('laneKeyList'); if(!box) return;
+    const K = laneKeysNow(), sig = (recSettings.laneKeys || '') + '|' + tracks.length;
+    if(box._sig === sig) return; box._sig = sig;
+    box.textContent = '';
+    const fmt = (t) => { const m = Math.floor(t / 60), s2 = t - m * 60; return m + ':' + (s2 < 10 ? '0' : '') + s2.toFixed(1); };
+    if(!K.length){ const h = document.createElement('span'); h.className = 'lk-hint'; h.textContent = 'Drag a track in the preview'; box.appendChild(h); }
+    K.forEach((k, i) => {
+      const c = document.createElement('span'); c.className = 'lk' + (k.o ? '' : ' auto');
+      const go = document.createElement('button'); go.type = 'button'; go.textContent = fmt(k.t) + (k.o ? '' : ' auto');
+      go.title = k.o ? 'Jump here' : 'Back to the automatic order from here — jump here';
+      go.addEventListener('click', () => { go.blur(); seekTo(k.t); });
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'lk-x'; x.textContent = '✕'; x.title = 'Delete this key';
+      x.addEventListener('click', () => { const L = laneKeysNow().slice(); L.splice(i, 1); laneKeysSet(L); saveRecSettings(); syncRecControls(); });
+      c.append(go, x); box.appendChild(c);
+    });
+    if(K.length){
+      const a = document.createElement('button'); a.type = 'button'; a.className = 'lk-add'; a.textContent = '+ Auto from here';
+      a.title = 'From the playhead on, the tracks go back to their automatic order';
+      a.addEventListener('click', () => { a.blur(); const T = playheadTime, L = laneKeysNow().filter(k => Math.abs(k.t - T) > 0.05); L.push({ t: T, o: null }); laneKeysSet(L); saveRecSettings(); syncRecControls(); });
+      box.appendChild(a);
+    }
+  }
   function syncRecControls(){
     try{ buildTrackColorList(); }catch(e){}
+    try{ buildLaneKeyList(); }catch(e){}
     buildVideoSlotOptions();
     try{ buildLyrSnapOptions(); }catch(e){}
     updateVideoUI();
@@ -20095,6 +20169,7 @@
     for(const key in REC_DEFAULTS){
       if(typeof obj[key] === typeof REC_DEFAULTS[key]) recSettings[key] = obj[key];
     }
+    if(typeof obj.laneKeys !== 'string') recSettings.laneKeys = '';      // (track order keys belong to their own song)
     // the big moments' lists of times (a project without them goes back to its single times)
     for(const k of Object.keys(recSettings)) if(FD_MARK_KEY.test(k) && typeof obj[k] !== 'string') delete recSettings[k];
     for(const k of Object.keys(obj)) if(FD_MARK_KEY.test(k) && typeof obj[k] === 'string'){ recSettings[k] = obj[k]; const L = fdMarksAll(k.slice(0, -3)); recSettings[k.slice(0, -3)] = L.length ? L[0] : -1; }
@@ -21494,16 +21569,62 @@
     };
     let drag = null;
     cv.addEventListener('pointermove', (e) => {
+      if(laneDrag){ laneDragMove(toFrame(e)); return; }
       if(drag) return;
       const p = toFrame(e), g = hitAt(p);
-      cv.style.cursor = g ? 'move' : '';
-      showBox(g, p.k, g ? labelOf(g) : '');
+      if(!g){
+        const t = laneHit(p);
+        cv.style.cursor = t ? 'ns-resize' : '';
+        if(t){ const r = laneRectOf(t); showBox({ l: 0, r: RENDER_W, t: r.t, b: r.b }, p.k, `${t.name || 'Track'} — drag up / down to put it there from ${fmtT(playheadTime)}`); }
+        else showBox(null);
+        return;
+      }
+      cv.style.cursor = 'move';
+      showBox(g, p.k, labelOf(g));
     });
     cv.addEventListener('pointerleave', () => { if(!drag){ box.hidden = true; cv.style.cursor = ''; } });
+    // ---- dragging a track up / down: keys the order at the playhead ----
+    let laneDrag = null;
+    const inVideoBox = (p) => {
+      const B = vidBoxLast; if(!B || !recSettings.videoSpace || typeof projVideo === 'undefined' || !projVideo) return false;
+      const k = cv.width / RENDER_W, xs = [], ys = [];
+      for(const [x, y] of [[B.x, B.y], [B.x + B.w, B.y], [B.x, B.y + B.h], [B.x + B.w, B.y + B.h]]){ xs.push((B.m.a * x + B.m.c * y + B.m.e) / k); ys.push((B.m.b * x + B.m.d * y + B.m.f) / k); }
+      return p.x >= Math.min(...xs) - 10 && p.x <= Math.max(...xs) + 10 && p.y >= Math.min(...ys) - 10 && p.y <= Math.max(...ys) + 10;
+    };
+    const laneRectOf = (t) => {   // the lane on the preview, frame px
+      const R = t._rLane, k = cv.width / RENDER_W; if(!R) return null;
+      const a = R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y)).y / k, b = R.m.transformPoint(new DOMPoint(RENDER_W / 2, R.y + R.h)).y / k;
+      return { t: Math.min(a, b), b: Math.max(a, b), c: (a + b) / 2 };
+    };
+    const laneHit = (p) => { if(inVideoBox(p)) return null; for(const t of tracks){ const r = laneRectOf(t); if(r && t._rLane.seq >= renderFrameSeq - 2 && p.y >= r.t && p.y <= r.b) return t; } return null; };
+    const fmtT = (t) => { const m = Math.floor(t / 60), s2 = t - m * 60; return m + ':' + (s2 < 10 ? '0' : '') + s2.toFixed(1); };
+    const laneDragMove = (p) => {
+      const D = laneDrag;
+      if(!D.on){ if(Math.abs(p.y - D.p0.y) < 5) return; D.on = true; cv.style.cursor = 'grabbing'; }
+      // the row nearest the pointer (the rows as they were when the drag started)
+      let r = 0, bd = Infinity; D.slots.forEach((c, i) => { const d = Math.abs(p.y - c); if(d < bd){ bd = d; r = i; } });
+      const others = D.order.filter(i => i !== D.idx), order = others.slice(0, r).concat([D.idx], others.slice(r));
+      const L = laneKeysNow().filter(k => Math.abs(k.t - D.T) > 0.05);
+      L.push({ t: D.T, o: order.map(i => trackSnapKey(tracks[i])) });
+      laneKeysSet(L);
+      const rr = laneRectOf(tracks[D.idx]) || { t: p.y - 20, b: p.y + 20 };
+      showBox({ l: 0, r: RENDER_W, t: D.slots[r] - (rr.b - rr.t) / 2, b: D.slots[r] + (rr.b - rr.t) / 2 }, p.k, `${tracks[D.idx].name || 'Track'} → row ${r + 1} · keyed at ${fmtT(D.T)}`);
+    };
     cv.addEventListener('pointerdown', (e) => {
       if(e.button !== 0) return;
       const p = toFrame(e), g = hitAt(p);
-      if(!g) return;
+      if(!g){
+        const t = laneHit(p);
+        if(!t) return;
+        e.preventDefault();
+        const T = playheadTime, pos = vocalLanePositions(T) || tracks.map((x, i) => i);
+        const order = tracks.map((x, i) => i).sort((a, b) => pos[a] - pos[b]);
+        const slots = order.map(i => { const r = laneRectOf(tracks[i]); return r ? r.c : NaN; });
+        if(slots.some(v => !isFinite(v))) return;
+        laneDrag = { idx: tracks.indexOf(t), T, order, slots, p0: p, on: false, keys0: recSettings.laneKeys };
+        cv.setPointerCapture(e.pointerId);
+        return;
+      }
       e.preventDefault();
       const pos = getPos(g);
       drag = { g, p0: p, pos0: pos, w: g.r - g.l, h: g.b - g.t, cx0: (g.l + g.r) / 2, cy0: (g.t + g.b) / 2 };
@@ -21527,6 +21648,11 @@
         lockY ? (onT ? `On ${onT.name || 'Track'}'s track` : 'Drop it on a track') : (sx || sy) ? 'Snapped to the middle' : labelOf(drag.g));
     });
     const end = () => {
+      if(laneDrag){
+        const D = laneDrag; laneDrag = null; box.hidden = true; cv.style.cursor = '';
+        if(D.on){ saveRecSettings(); syncRecControls(); }
+        return;
+      }
       if(!drag) return;
       drag = null; box.classList.remove('dragging'); gV.hidden = gH.hidden = true;
       saveRecSettings(); syncRecControls();
@@ -22198,7 +22324,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 103;                 // ← goes up by one with every published version
+  const SD_BUILD = 104;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
