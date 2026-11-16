@@ -1,6 +1,6 @@
 {
-  "build": 105,
+  "build": 106,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Track order keys now only remember the tracks you actually moved. Every key builds on the one before it, so tracks you didn't touch never shuffle around, whatever order you make or edit the keys in. Drag any track in the render preview to key the order at the playhead; the keys are listed under Tracks."
+  "notes": "Freedits can now have as many big moments as they like (no more limit of six). The Kings & Queens Freedit (reinstall version 16) splits three of its moments so you can time each half yourself: 2b the queen's crown, 3b the glasses clinking, 4b the pawns rising. Leave a b-half unmarked and it plays right after its first half, like before. Also: track order keys only remember the tracks you moved, and you can drag tracks in the render preview to key their order."
 }

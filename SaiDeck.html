@@ -13408,7 +13408,7 @@
       for(const key in REC_DEFAULTS){
         if(typeof saved[key] === typeof REC_DEFAULTS[key]) recSettings[key] = saved[key];
       }
-      for(const k in saved) if(/^[a-z]{2}Climax\d?All$/.test(k) && typeof saved[k] === 'string') recSettings[k] = saved[k];
+      for(const k in saved) if(/^[a-z]{2}Climax\d*All$/.test(k) && typeof saved[k] === 'string') recSettings[k] = saved[k];
     }
   }catch(e){}
   // Scroll position of the zoomed recording view (seconds at its left edge)
@@ -15192,7 +15192,7 @@
     recSettings[key + 'All'] = JSON.stringify(list);
     recSettings[key] = list.length ? list[0] : -1;
   }
-  const FD_MARK_KEY = /^[a-z]{2}Climax\d?All$/;
+  const FD_MARK_KEY = /^[a-z]{2}Climax\d*All$/;
   function fdMarksSync(T){
     const S = recSettings;
     for(const k in S){
@@ -19422,7 +19422,7 @@
   // every big-moment row: how many times it's marked, and the times listed under it (click one to jump there, ✕ removes it)
   function fdMarksUI(){
     for(const tt of recPanel.querySelectorAll('[id$="Txt"]')){
-      const mm = /^([a-z]{2})Climax(\d?)Txt$/.exec(tt.id); if(!mm || mm[1] === 'jv') continue;
+      const mm = /^([a-z]{2})Climax(\d*)Txt$/.exec(tt.id); if(!mm || mm[1] === 'jv') continue;
       const key = mm[1] + 'Climax' + mm[2], L = fdMarksAll(key), row = tt.closest('.rec-row'); if(!row) continue;
       tt.textContent = !L.length ? 'not set' : L.length === 1 ? fmtTime(L[0]) : `${L.length} times`;
       const cb = $(key + 'ClearBtn'); if(cb){ cb.hidden = L.length < 2; cb.title = 'Remove every time this big moment is marked'; }
@@ -19639,7 +19639,10 @@
       const G = FD_GEN[id], I = FD_INSTALLED[id], on = S.freeditMode === id;
       if(I && I.pane){ I.pane.hidden = !on; I.pane.querySelectorAll('.rec-row').forEach(r => r.classList.toggle('disabled', !S.beatOn)); }
       if(on){ const bp = $('fdBeatPane'); if(bp) bp.hidden = true; }
-      for(const n of ['', '2', '3', '4', '5', '6']){
+      // (as many big moments as the Freedit's pane has: xxClimax, xxClimax2, xxClimax3 …)
+      const nums = [''];
+      if(I && I.pane) for(const el of I.pane.querySelectorAll('[id$="Txt"]')){ const mm = new RegExp('^' + G.px + 'Climax(\\d+)Txt$').exec(el.id); if(mm) nums.push(mm[1]); }
+      for(const n of nums){
         const k = G.px + 'Climax' + n, tt = $(k + 'Txt'); if(!tt && n) continue;
         if(tt) tt.textContent = S[k] >= 0 ? fmtTime(S[k]) : 'not set';
         const cc = $(k + 'ClearBtn'); if(cc) cc.hidden = !(S[k] >= 0);
@@ -19874,8 +19877,8 @@
       toast(`Fight at ${fmtTime(now)} → ${fmtTime(now + L)}.`, 2000);
     } else if(b.id === 'frBattleClearBtn'){
       b.blur(); S.frBattles = ''; saveRecSettings(); syncRecControls();
-    } else if((m = /^([a-z]{2})Climax(\d?)Btn$/.exec(b.id)) && m[1] !== 'jv'){
-      // (a Freedit can have several big moments: xxClimax, xxClimax2 … xxClimax6)
+    } else if((m = /^([a-z]{2})Climax(\d*)Btn$/.exec(b.id)) && m[1] !== 'jv'){
+      // (a Freedit can have as many big moments as its pane has: xxClimax, xxClimax2, … xxClimax12 …)
       // (each press adds another time — the list shows under the button, each with its own ✕)
       b.blur();
       const key = m[1] + 'Climax' + m[2], list = fdMarksAll(key);
@@ -19883,7 +19886,7 @@
       list.push(now); fdMarksSet(key, list); fdMarksSync(now); S.beatOn = true;
       saveRecSettings(); syncRecControls();
       toast(`${m[1] === 'td' ? 'Lights out' : 'Big moment'} at ${fmtTime(now)}` + (list.length > 1 ? ` (${list.length} times now).` : '.'), 2000);
-    } else if((m = /^([a-z]{2})Climax(\d?)ClearBtn$/.exec(b.id)) && m[1] !== 'jv'){
+    } else if((m = /^([a-z]{2})Climax(\d*)ClearBtn$/.exec(b.id)) && m[1] !== 'jv'){
       b.blur(); fdMarksSet(m[1] + 'Climax' + m[2], []); saveRecSettings(); syncRecControls();
     } else if(b.classList.contains('fd-mark-x')){
       b.blur();
@@ -22349,7 +22352,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 105;                 // ← goes up by one with every published version
+  const SD_BUILD = 106;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
