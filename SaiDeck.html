@@ -19494,7 +19494,11 @@
         saveRecSettings(); syncRecControls();
       });
     } else if(el.type === 'checkbox'){
-      el.addEventListener('change', () => { recSettings[key] = el.checked; saveRecSettings(); syncRecControls(); });
+      el.addEventListener('change', () => {
+        recSettings[key] = el.checked;
+        if(key === 'lyricSnap' && el.checked) recSettings.lyricNudge = 0;      // (latching on starts dead-centre on the lane)
+        saveRecSettings(); syncRecControls();
+      });
     } else if(el.type === 'number'){
       // typed numbers apply when you leave the box / press Enter
       el.addEventListener('change', () => {
@@ -19505,6 +19509,7 @@
     } else {
       el.addEventListener('input', () => {
         recSettings[key] = el.type === 'range' || (el.tagName === 'SELECT' && typeof REC_DEFAULTS[key] === 'number') ? Number(el.value) : el.value;
+        if(key === 'lyricSnapTo') recSettings.lyricNudge = 0;                  // (a new track: dead-centre on its lane)
         saveRecSettings(); syncRecControls();
       });
     }
@@ -21477,7 +21482,7 @@
       if(snapped(g)){   // stuck to a track: across, and up / down latches on to the lane it's dropped on
         const fx2 = Math.round(x / RENDER_W * 10000) / 10000, onT = laneAtY(y);
         const add = { lyricPos: 'custom', lyricX: fx2 };
-        if(onT) add.lyricSnapTo = trackSnapKey(onT);
+        if(onT){ add.lyricSnapTo = trackSnapKey(onT); add.lyricNudge = 0; }     // (dropped on a track: dead-centre on it)
         if(g.lt === lyrActive || g.lt < 0) Object.assign(recSettings, add);
         else { const LT = lyrTracks[g.lt]; if(LT) LT.style = Object.assign({}, LT.style || {}, add); }
         return onT;
@@ -22193,7 +22198,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 102;                 // ← goes up by one with every published version
+  const SD_BUILD = 103;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

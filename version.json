@@ -1,6 +1,6 @@
 {
-  "build": 102,
+  "build": 103,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Lyrics stuck to a track now really sit on it: the words are as tall as the lane and centred on it in every lyric style (Big Words, Epic and Sides included), with no bouncing up or down; Big Words' old word slides off sideways. Pick the track under \"Belongs to\" or drag the lyrics onto it. Text size becomes the most they can be. Also in this update: no more grain in renders (constant quality), Freedit cameras keep every track in frame, faster short intros, circle pictures fill square intros, and the next singer moves up the moment a take ends."
+  "notes": "Latching lyrics onto a track (switching on \"Stick to the singer's track\", picking a track, or dragging onto one) now resets Move up / down, so the words land dead-centre on the lane instead of keeping an old offset. Lyrics stuck to a track are as tall as the lane in every style. Also in this update: no more grain in renders, Freedit cameras keep every track in frame, faster short intros, circle pictures fill square intros, and the next singer moves up the moment a take ends."
 }
