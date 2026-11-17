@@ -1,6 +1,6 @@
 {
-  "build": 120,
+  "build": 122,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🔗 Link your devices: ⚙️ Settings › Link devices shows a code. Type it into Link devices on your other device, pick which account stays, and the other one's points move into it — both devices then use the same account. Works for 3 or more accounts too (link them one after another). Also new: 🏰 Tower Defense (solo or team, with its own leaderboards) in the games menu, and the chat's on/off switches are now inside the ⚙️ settings button."
+  "notes": "🏰 Tower Defense now plays for real points: troops cost your points and every wave you clear pays points back (plus your kills). Prices and pay follow the team's average points (an Archer is about 0.5% of it), so everyone plays for the same stakes — up to 3,000 + 5% of your points a day. The castle now shows your team's profile pictures. Also: link your devices (⚙️ › Link devices), and the chat's on/off switches are inside ⚙️."
 }
