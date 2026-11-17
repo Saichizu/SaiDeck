@@ -1,6 +1,6 @@
 {
-  "build": 130,
+  "build": 133,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🏰 Fixed Tower Defense getting stuck on a grey map with no buttons after leaving a game. Open teams in the lobby (and the players in a game) now show everyone's profile pictures. 🎨 Lyrics look changes from the last update are included."
+  "notes": "🎰 No more cap on slot spins (always 2% of your points, at least 10) and no more 1,000,000 cap on blackjack bets against the bot. Fixed points showing wrong for anyone above about 2.1 billion."
 }

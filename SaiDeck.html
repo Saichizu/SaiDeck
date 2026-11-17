@@ -811,7 +811,7 @@
   /* Tower Defense */
   .td-win{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;}
   .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
-  .td-box{position:relative;width:min(1000px, 96vw);max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
+  .td-box{position:relative;width:min(1000px, calc(100% - 16px));max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
   .td-win:focus{outline:none;}
   .td-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--border);}
   .td-head b{font:800 15px 'Manrope',sans-serif;} .td-mode{font-size:11.5px;color:var(--text-faint);}
@@ -4526,6 +4526,7 @@
         <div class="rec-row rs" data-rec-row="marginTop" data-hl="margins"><span>Top margin</span><input type="range" min="0" max="800" step="10" data-rec="marginTop"><span class="rec-val" data-rec-val="marginTop"></span></div>
         <div class="rec-row rs" data-rec-row="marginBottom" data-hl="margins"><span>Bottom margin</span><input type="range" min="0" max="800" step="10" data-rec="marginBottom"><span class="rec-val" data-rec-val="marginBottom"></span></div>
         <label class="rec-row rec-toggle" data-hl="margins" title="Grey out the margin bands in the preview (with their dashed line and label) so you can see where they are. Never in the video."><span>Grey out the margins in the preview</span><span class="switch"><input type="checkbox" data-rec="marginShade"><span class="track"></span><span class="knob"></span></span></label>
+        <label class="rec-row rec-toggle" data-hl="margins" title="On: a Freedit's scene (its background picture — the shield, the city, the moon…) moves up as you make the bottom margin bigger (and down with the top margin), so it stays centred in the space that's left. Off: it stays where it is in the frame, whatever the margins."><span>Freedit design moves with the margins</span><span class="switch"><input type="checkbox" data-rec="fdFollowMargin"><span class="track"></span><span class="knob"></span></span></label>
         <div class="rec-btn-row" data-hl="margins"><button type="button" class="rec-small-btn" id="recNoMarginBtn">No margins</button></div>
         <div class="rec-hint">Keeps the top and bottom of the frame empty so TikTok's tabs, caption and buttons don't cover anything. <b>Best for TikTok</b> (in Format) sets the right ones for you. Greyed out in the preview only (if that's on).</div>
       </div>
@@ -13459,6 +13460,7 @@
     fillFrame: false,     // stretch tracks to fill the frame instead
     gap: 5,               // space between tracks
     marginShade: true,    // grey out the margins in the preview (never in the video)
+    fdFollowMargin: false, // a Freedit's scene moves up / down to stay centred between the margins (off: it stays where it is in the frame)
     marginTop: 0,         // empty band kept clear at the top (px at 1080), e.g. for TikTok's top tabs
     marginBottom: 0,      // ...and at the bottom, for TikTok's caption & buttons
     align: 'top',         // where the block of tracks sits: top / center / bottom
@@ -15555,6 +15557,7 @@
     }
   }
   // behind the tracks: the active style's scene
+  var fdShiftY = 0;      // (how far a Freedit's scene is moved to stay centred between the safe margins, when that's on)
   function drawStyleBack(ctx, u, T){
     const S = recSettings; if(!S.beatOn) return;
     const m = S.freeditMode;
@@ -18002,11 +18005,16 @@
       DV.top = topH + rulerDy;
     }
     if(camOn){ ctx.fillStyle = bgPaint(); ctx.fillRect(-RENDER_W, -RENDER_H, RENDER_W * 3, RENDER_H * 3); }
+    // ("Freedit design moves with the margins": the scenes behind the tracks move to the middle of the space between the margins)
+    fdShiftY = S.fdFollowMargin && S.beatOn && S.freeditMode && S.freeditMode !== 'beat' ? (mT - mB) / 2 : 0;
+    if(fdShiftY){ ctx.save(); ctx.translate(0, fdShiftY); }
+    try{
     drawForestMoonBack(ctx, u, false, pt);   // Forest's: the moon, behind the tracks
     drawFrierenScene(ctx, u, pt, false);     // Frieren: the land on the journey, behind the tracks
     if(fdBgOn('sg')) drawSageBack(ctx, u, pt);                // Forest 2: the green robe, the sash and gold, behind the tracks
     drawStyleBack(ctx, u, pt);               // the other styles' scenes, behind the tracks
     drawFrierenFightBg(ctx, u, pt, false);   // Frieren: the hall behind a fight
+    } finally { if(fdShiftY) ctx.restore(); }
     // With a Freedit on, the safe margins only keep the tracks, lyrics and titles
     // out — the Freedit's scene runs right to the edges. So the scene in the
     // margin bands is kept now (before any tracks are drawn) and put back there
@@ -22567,7 +22575,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 130;                 // ← goes up by one with every published version
+  const SD_BUILD = 133;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25024,8 +25032,8 @@
   // What a result pays is in tenths of your bet, and the lower you are on the leaderboard the better
   // it pays (pity luck): tier 2 = the bottom third, tier 1 = the middle third (config/pity holds the lines).
   // 7️⃣7️⃣7️⃣ always takes the whole jackpot. Whatever you lose goes into the jackpot.
-  const CAS_MIN = 10, CAS_MAX = 2000, CAS_POT0 = 1000;
-  const casFee = (bal) => { const f = Math.floor(Math.max(0, bal | 0) / 50); return f < CAS_MIN ? CAS_MIN : f > CAS_MAX ? CAS_MAX : f; };
+  const CAS_MIN = 10, CAS_MAX = Infinity, CAS_POT0 = 1000;     // (a spin is 2% of your points, at least 10 — no top limit)
+  const casFee = (bal) => { const f = Math.floor(Math.max(0, Math.floor(Number(bal) || 0)) / 50); return f < CAS_MIN ? CAS_MIN : f > CAS_MAX ? CAS_MAX : f; };
   //            💎💎💎  any three  two 💎/7️⃣  any two  one 7️⃣  nothing
   const CAS_PAY = [[120, 60, 25, 10, 4, 0], [120, 60, 25, 11, 4, 0], [120, 60, 27, 11, 5, 0]];
   const CAS_TIER_NAME = ['', 'Lucky break', 'Pity luck'];
@@ -25287,7 +25295,7 @@
     const sb = el.querySelector('.cas-spin:not(.cas-spin10)'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !!CAS.multi || !CAS.on || scBal() < fee; sb.textContent = CAS.busy || CAS.multi ? '…' : `SPIN · ${fee.toLocaleString()}`;
     { const b10 = el.querySelector('.cas-spin10'); if(b10){ b10.disabled = !CAS.multi && (CAS.busy || !CAS.on || scBal() < fee); b10.textContent = CAS.multi ? (CAS.multi.stop ? 'stopping…' : `■ ${CAS.multi.n}/10`) : '10×'; b10.classList.toggle('on', !!CAS.multi); } }
     { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
-      const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 2% of your points (${CAS_MIN}–${CAS_MAX.toLocaleString()}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
+      const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 2% of your points (at least ${CAS_MIN}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
       if(pe.dataset.h !== h){ pe.dataset.h = h; pe.innerHTML = h; } } }
     casPotShow();
   }
@@ -25450,7 +25458,7 @@
   const bjCards = (hand) => { const c = (hand && hand.c) || {}, n = (hand.k | 0) + (hand.pe ? 1 : 0), out = []; for(let i = 0; i < n; i++) if(typeof c[i] === 'number') out.push(c[i]); return out; };
   // how a hand did against the dealer: what it pays back (0 lost, bet = push, 2×, or 2.5× for a blackjack)
   function bjPay(P, Dd, noBJ){
-    const W = P.b | 0, pBJ = !noBJ && P.k === 2 && P.v === 21, dBJ = Dd.k === 2 && Dd.v === 21;
+    const W = Math.floor(+(P.b) || 0), pBJ = !noBJ && P.k === 2 && P.v === 21, dBJ = Dd.k === 2 && Dd.v === 21;
     if(P.h > 21) return { amt: 0, lbl: 'Bust' };
     if(pBJ && !dBJ) return { amt: (W * 5 - (W * 5) % 2) / 2, lbl: 'Blackjack!' };
     if(pBJ && dBJ) return { amt: W, lbl: 'Push' };
@@ -25753,7 +25761,7 @@
   async function bjPlaceBet(){
     const me = chatUid(), D = BJ.d, S = BJ.p[me], bet = Math.round(BJ.bet);
     if(!D || !S || bjPhase() !== 'bet' || bjInRound(S, D) || BJ.watch) return;
-    if(!(bet >= 1 && bet <= 1000000)){ toast('Bet at least 1 point.', 2000); return; }
+    if(!(bet >= 1 && bet <= 1e15)){ toast('Bet at least 1 point.', 2000); return; }
     if(D.u !== 'bot' && bet > BJ_MAX_HUMAN_BET){ BJ.bet = BJ_MAX_HUMAN_BET; bjSync(); toast(`While a player is dealing, the most you can bet is ${BJ_MAX_HUMAN_BET.toLocaleString()}.`, 2600); return; }
     if(bet > scBal()){ toast(`You only have ${scBal()} points.`, 2000); return; }
     if(!SC.loaded) await scLoad();
@@ -25859,8 +25867,8 @@
           <button type="button" class="cas-leave bj-leave">Leave</button></div>
         <div class="cas-feed bj-feed"></div>`;
       const inp = el.querySelector('.cas-bet input'); inp.value = BJ.bet;
-      const setBet = (v) => { const was = BJ.bet; BJ.bet = Math.max(0, Math.min(scBal(), 1000000, Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); try{ bjBetNudge(was); }catch(e){} };
-      inp.addEventListener('input', () => { const was = BJ.bet, v = Math.max(0, Math.min(scBal(), 1000000, Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); try{ bjBetNudge(was); }catch(e){} });
+      const setBet = (v) => { const was = BJ.bet; BJ.bet = Math.max(0, Math.min(scBal(), Math.round(v) || 0)); inp.value = BJ.bet || ''; if(BJ.bet) chatLS('bjBet', BJ.bet); bjCtl(); try{ bjBetNudge(was); }catch(e){} };
+      inp.addEventListener('input', () => { const was = BJ.bet, v = Math.max(0, Math.min(scBal(), Math.round(Number(inp.value)) || 0)); BJ.bet = v; bjCtl(); try{ bjBetNudge(was); }catch(e){} });
       inp.addEventListener('change', () => setBet(Number(inp.value)));
       inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ setBet(Number(inp.value)); bjPlaceBet(); } });
       el.querySelector('.bj-chiprow').addEventListener('click', (e) => {
@@ -25982,7 +25990,7 @@
   function bjPile(n, s, D, animate){
     const pl = n.querySelector('.bj-pl'); if(!pl) return;
     let pile = pl.querySelector('.bj-pile'); if(!pile){ pile = document.createElement('div'); pile.className = 'bj-pile'; pl.appendChild(pile); }
-    const inR = D && bjInRound(s, D), total = inR ? (s.b | 0) + (bjIsSplit(s) ? s.q.b | 0 : 0) : 0, key = inR ? s.r + ':' + total : '';
+    const inR = D && bjInRound(s, D), total = inR ? Math.floor(+(s.b) || 0) + (bjIsSplit(s) ? Math.floor(+(s.q.b) || 0) : 0) : 0, key = inR ? s.r + ':' + total : '';
     if(pile.dataset.key === key){
       if(inR && D.f){ const spl = bjIsSplit(s), r = bjPay(s, D, spl), r2 = spl ? bjPay(s.q, D, true) : { amt: 0 }, net = r.amt + r2.amt - total; pile.classList.toggle('won', net > 0); pile.classList.toggle('lost', net < 0); }
       return;
@@ -26472,6 +26480,9 @@
     const w = document.createElement('div'); w.className = 'td-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Tower Defense');
     w.innerHTML = `<div class="td-back"></div><div class="td-box"><div class="td-head"><b>🏰 Tower Defense</b><span class="td-mode"></span><button type="button" class="td-leave" hidden>Leave game</button><button type="button" class="td-x" aria-label="Close">${ICON_X}</button></div><div class="td-main"></div></div>`;
     document.body.appendChild(w); TDG.win = w;
+    // the game sits beside the chat panel (when it's open), so you can keep chatting while you play
+    const fit = () => { if(!TDG.win) return; const r = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = r && r.width > 0 ? Math.max(0, window.innerWidth - r.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v) w.style.right = v; };
+    fit(); TDG.fit = setInterval(fit, 400); window.addEventListener('resize', fit); TDG.fitOff = () => { clearInterval(TDG.fit); window.removeEventListener('resize', fit); };
     w.querySelector('.td-x').addEventListener('click', tdClose);
     w.querySelector('.td-back').addEventListener('click', tdClose);
     w.querySelector('.td-leave').addEventListener('click', () => tdLeave());
@@ -26482,7 +26493,7 @@
   function tdClose(){
     if(!TDG.on) return;
     if(TDG.rid && TDG.room && TDG.room.st !== 'over' && TDG.room.m === 'team'){ toast('You left the window — you\'re still in the team. Open Tower Defense again to get back in.', 3500); }
-    TDG.on = false; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = TDG.raf = 0;
+    TDG.on = false; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = TDG.raf = 0; if(TDG.fitOff){ TDG.fitOff(); TDG.fitOff = null; }
     if(TDG.win){ TDG.win.remove(); TDG.win = null; }
   }
   // ----- the lobby: play solo, start or join a team, the leaderboards -----
@@ -26899,7 +26910,7 @@
     try{
       await scLoad();
       let d = null; try{ d = await tdGet(`td/day/${me}`); }catch(e){}
-      const day = tdDay(), before = d && d.d === day ? (d.e | 0) : 0, pay = my.pay | 0;
+      const day = tdDay(), before = d && d.d === day ? Math.floor(+(d.e) || 0) : 0, pay = Math.floor(+(my.pay) || 0);
       {
         const ok = await tdPatch({ [tdP(`pl/${me}/cl`)]: r.cw, [`scores/${me}/p`]: SC.p + pay, [`scores/${me}/td`]: TDG.rid, [`scores/${me}/t`]: bjSv, [`td/day/${me}`]: { d: day, e: before + pay } });
         if(ok){ SC.p += pay; toast(`🏰 Wave ${r.cw}: +${pay.toLocaleString()} points`, 2200); try{ sfxChip(); }catch(e){} tdUi(); }
@@ -27801,7 +27812,7 @@
       const from = BJ.nudgeFrom | 0; BJ.nudgeFrom = null;
       const D = BJ.d, me = chatUid(); if(!D || D.u !== 'bot' || bjPhase() !== 'bet' || BJ.botQuiet) return;
       const S = BJ.p[me]; if(S && S.r === D.r && S.b > 0) return;      // (already bet)
-      const v = BJ.bet | 0; if(v === from) return;
+      const v = Math.floor(+(BJ.bet) || 0); if(v === from) return;
       const kind = v === 0 ? 'betclear' : v >= scBal() && v > from ? 'betall' : v > from ? 'betup' : 'betdown';
       const L = BOT_TAUNTS[kind], txt = L[Math.floor(Math.random() * L.length)].replace(/\{n\}/g, bjName(chatName())).replace(/\{x\}/g, v);
       const el = chatPanel.querySelector('.chat-bj'); if(!el) return;
@@ -28448,7 +28459,7 @@
     if(d.u === chatUid()){ toast("That's this account's own code — type it on your other device.", 2600); return; }
     if(d.ans){ toast('That code has already been used.', 2200); return; }
     if(!SC.loaded) await scLoad();
-    const mine = { u: chatUid(), n: chatName() || 'This device', b: scBal() }, theirs = { u: d.u, n: d.n || 'Other device', b: d.b | 0 };
+    const mine = { u: chatUid(), n: chatName() || 'This device', b: scBal() }, theirs = { u: d.u, n: d.n || 'Other device', b: Math.floor(+(d.b) || 0) };
     const pick = await lkChoose(mine, theirs); if(!pick) return;
     try{
       if(pick === 'mine'){
@@ -28620,7 +28631,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=8&auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null; if(!d) return;
-      const list = Object.entries(d).map(([u, v]) => ({ u, p: (v && v.p) | 0 })).filter(x => x.p > 0 && !chatBanned(x.u)).sort((a, b) => b.p - a.p).slice(0, 3);
+      const list = Object.entries(d).map(([u, v]) => ({ u, p: Math.floor(+(v && v.p) || 0) })).filter(x => x.p > 0 && !chatBanned(x.u)).sort((a, b) => b.p - a.p).slice(0, 3);
       const nr = {}; list.forEach((x, i) => { nr[x.u] = i + 1; });
       const changed = JSON.stringify(nr) !== JSON.stringify(TOP.r);
       TOP.r = nr; TOP.at = Date.now(); TOP.init = true;
@@ -28923,7 +28934,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
+      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg) m[u] = { b: Math.max(0, Math.floor(+(v.p) || 0) - Math.floor(+(v.s) || 0)), p: Math.floor(+(v.p) || 0), n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
     try{ if(!CAS.pity && !CAS.pityRead){ CAS.pityRead = true; casPityLoad().then(casPityUpdate); } else casPityUpdate(); }catch(e){}
@@ -29218,7 +29229,7 @@
       const [t, w, wn, pd, a] = await Promise.all([get('t'), get('w'), get('wn'), get('pd'), get('a')]);
       if(t == null) return null;
       const d = { t, w: w || null, wn: wn || null, pd: pd === true, legacy: typeof a === 'number', a: typeof a === 'number' ? a : null, x: false, _at: Date.now() };
-      if(w && !d.legacy){ const sc = await get('s'); if(sc){ d.a = sc.a | 0; d.x = sc.x === true; } }
+      if(w && !d.legacy){ const sc = await get('s'); if(sc){ d.a = Math.floor(+(sc.a) || 0); d.x = sc.x === true; } }
       CRATES.set(id, d);
       // (you opened it but the points didn't reach you yet: collect them now)
       if(w && chatIsMe(w) && !d.legacy && !d.pd && !d.x && d.a > 0) crateCollect(id, d, null);
@@ -29317,7 +29328,7 @@
       const [a, b] = await Promise.all([
         fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
         fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
-      SC.p = (a && a.p) | 0; SC.s = (a && a.s) | 0;
+      SC.p = Math.floor(+(a && a.p) || 0); SC.s = Math.floor(+(a && a.s) || 0);
       SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.pw = (b && b.pw) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.snd = (b && b.snd) || {};
       SC.loaded = true;
     }catch(e){}
@@ -29372,7 +29383,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=25&auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      SC.board = Object.entries(d || {}).filter(([u, v]) => !(v && v.mg)).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: (v && v.p) | 0 })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
+      SC.board = Object.entries(d || {}).filter(([u, v]) => !(v && v.mg)).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: Math.floor(+(v && v.p) || 0) })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
       SC.boardAt = Date.now();
     }catch(e){ SC.board = SC.board || []; }
     chatRenderArcade();
