@@ -318,8 +318,6 @@
   .chat-gift i{margin-left:6px;font-style:normal;font-size:10.5px;color:var(--text-faint);}
   .chat-gift.in{animation:chatGiftIn .5s cubic-bezier(.2,.9,.3,1.25) both;}
   @keyframes chatGiftIn{from{opacity:0;transform:translateY(10px) scale(.94);}to{opacity:1;transform:none;}}
-  .chat-poke .chat-gift-btn{margin-top:6px;}
-  .chat-poke .chat-gift-btn span:first-child{font-size:14px;}
   .bj-fast{display:flex;justify-content:center;min-height:0;} .bj-go{border-color:rgba(255,224,138,.7);color:#ffe08a;font-size:12px;padding:6px 14px;}
   .bj-go:disabled{opacity:.5;}
   .gift-asks{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:420;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:min(380px, calc(100vw - 32px));}
@@ -804,25 +802,37 @@
   .chat-av.poke{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;}
   .chat-av.poke:hover{transform:scale(1.1);box-shadow:0 0 0 2px rgba(180,140,255,.7);}
   .chat-av.poke:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
-  .chat-poke{position:absolute;z-index:6;display:flex;flex-direction:column;gap:7px;padding:9px;border-radius:12px;background:#22232d;border:1px solid rgba(180,140,255,.45);box-shadow:0 12px 30px rgba(0,0,0,.55);max-width:calc(100% - 16px);}
-  .chat-poke-h{display:flex;flex-direction:column;gap:1px;padding:0 3px;}
-  .chat-poke-h b{font:700 12.5px 'Inter',sans-serif;color:var(--text);}
-  .chat-poke-h span{font-size:10.5px;color:var(--text-faint);}
-  .chat-poke-row{display:flex;gap:3px;flex-wrap:wrap;}
-  .chat-poke-row button{all:unset;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;line-height:1;}
-  .chat-poke-row button:hover:not(:disabled){background:rgba(255,255,255,.1);transform:scale(1.15);}
+  /* the little menu on someone's picture: emojis to send, and what else you can do to them */
+  .chat-poke{position:absolute;z-index:6;width:228px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:6px 6px 5px;border-radius:14px;background:#1f2029;border:1px solid rgba(180,140,255,.35);box-shadow:0 10px 26px rgba(0,0,0,.5);}
+  .chat-poke.in{animation:pokeIn .22s cubic-bezier(.2,.9,.3,1.25) both;}
+  .chat-poke.out{animation:pokeOut .12s ease-in both;}
+  @keyframes pokeIn{from{opacity:0;transform:scale(.6) translateY(-4px);}to{opacity:1;transform:none;}}
+  @keyframes pokeOut{to{opacity:0;transform:scale(.85);}}
+  .chat-poke-h{display:flex;align-items:center;gap:6px;padding:0 0 0 4px;min-width:0;}
+  .chat-poke-h b{font:700 12px 'Inter',sans-serif;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .chat-poke-h .cp-dot{flex:none;width:7px;height:7px;border-radius:50%;background:#5b5e6b;} .chat-poke-h .cp-dot.on{background:#35d0b8;box-shadow:0 0 0 2px rgba(53,208,184,.2);}
+  .chat-poke-row{display:grid;grid-template-columns:repeat(8, 1fr);gap:1px;}
+  .chat-poke-row button{all:unset;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;line-height:1;transition:transform .12s, background .12s;}
+  .chat-poke.in .chat-poke-row button{animation:pokeEmo .28s cubic-bezier(.2,.9,.3,1.5) both;animation-delay:calc(40ms + var(--i) * 22ms);}
+  @keyframes pokeEmo{from{opacity:0;transform:scale(.3) translateY(6px);}to{opacity:1;transform:none;}}
+  .chat-poke-row button:hover:not(:disabled){background:rgba(255,255,255,.09);transform:scale(1.22) translateY(-2px);}
+  .chat-poke-row button:active:not(:disabled){transform:scale(.9);}
   .chat-poke-row button:focus-visible{outline:2px solid #b48cff;}
   .chat-poke-row button:disabled{opacity:.35;cursor:default;}
+  .chat-poke-acts{margin-left:auto;flex:none;display:flex;gap:3px;}
+  .chat-poke .chat-infil-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:28px;height:26px;border-radius:8px;cursor:pointer;font:700 11px 'Inter',sans-serif;color:var(--text);background:rgba(180,140,255,.12);border:1px solid rgba(180,140,255,.22);transition:background .12s, transform .12s;}
+  .chat-poke .chat-infil-btn:first-child{color:#16102a;background:linear-gradient(135deg,#b48cff,#ff7ab6);border-color:transparent;}
+  .chat-poke .chat-infil-btn svg{width:13px;height:13px;fill:currentColor;}
+  .chat-poke .chat-infil-btn span{font-size:14px;line-height:1;}
+  .chat-poke .chat-infil-btn:hover:not(:disabled){background:rgba(180,140,255,.22);transform:translateY(-1px);} .chat-poke .chat-infil-btn:first-child:hover:not(:disabled){background:linear-gradient(135deg,#c2a0ff,#ff8cc0);}
+  .chat-poke .chat-infil-btn:focus-visible{outline:2px solid #fff;outline-offset:1px;}
+  .chat-poke .chat-infil-btn:disabled{opacity:.4;cursor:default;}
+  .chat-poke-note{font-size:10px;color:var(--text-faint);text-align:center;margin-top:-2px;}
+  @media (prefers-reduced-motion: reduce){ .chat-poke.in, .chat-poke.out, .chat-poke.in .chat-poke-row button{animation:none;} }
   .poke-fx{position:fixed;inset:0;z-index:9000;pointer-events:none;overflow:hidden;}
   .poke-fx-big{position:absolute;left:50%;top:45%;font-size:min(22vw,180px);line-height:1;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45));}
   .poke-fx-bit{position:absolute;bottom:-60px;line-height:1;}
   .poke-fx-tag{position:absolute;left:50%;bottom:90px;padding:8px 14px;border-radius:999px;background:rgba(23,24,31,.92);border:1px solid rgba(180,140,255,.5);color:var(--text);font:700 13px 'Inter',sans-serif;white-space:nowrap;}
-  .chat-infil-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 10px;border-radius:9px;cursor:pointer;font:800 12px 'Inter',sans-serif;color:#16102a;background:linear-gradient(135deg,#b48cff,#ff7ab6);}
-  .chat-infil-btn svg{width:15px;height:15px;fill:currentColor;}
-  .chat-infil-btn:hover:not(:disabled){filter:brightness(1.08);}
-  .chat-infil-btn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
-  .chat-infil-btn:disabled{opacity:.4;cursor:default;}
-  .chat-poke-note{font-size:10.5px;color:var(--text-faint);text-align:center;margin-top:-2px;}
   body.infil-mode, body.infil-mode *{cursor:none !important;}
   .infil{position:fixed;left:0;top:0;z-index:9600;pointer-events:none;width:0;height:0;will-change:transform;}
   .infil .infil-av{position:absolute;left:0;top:0;width:42px;height:42px;transform:translate(-50%,-50%);font-size:16px;box-shadow:0 0 0 3px #fff, 0 6px 18px rgba(0,0,0,.45);}
@@ -22426,7 +22436,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 115;                 // ← goes up by one with every published version
+  const SD_BUILD = 118;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22461,9 +22471,34 @@
   // the folder this SaiDeck file is in, with permission to write — and it has
   // to be *this* copy (same build as the one running), not another SaiDeck
   // with the same name somewhere else
-  async function sdAppFolder(name, newBuild, quiet){
-    const fileBuild = async (d) => { try{ return sdBuildOf(await (await (await d.getFileHandle(name)).getFile()).text()); }catch(e){ return -1; } };
-    const mine = async (d) => { const b = await fileBuild(d); return b === SD_BUILD || (newBuild && b >= newBuild) ? b : -1; };
+  // Where the open SaiDeck lives: its file name, the name of its folder, the whole path (to show people), and the
+  // file's own "last changed" time. A folder only counts as SaiDeck's if it has the same name AND holds this very
+  // file (same build, same last-changed time) — a copy of SaiDeck in another folder never matches, so an update
+  // can't land in the wrong copy and send you round in circles.
+  const SD_LOADED = Date.now();
+  function sdHere(){
+    if(location.protocol !== 'file:') return null;
+    const parts = location.pathname.split('/').filter(Boolean).map(x => { try{ return decodeURIComponent(x); }catch(e){ return x; } });
+    const file = parts.pop() || '', folder = parts.length && !/^[A-Za-z]:$/.test(parts[parts.length - 1]) ? parts[parts.length - 1] : '';
+    const win = /^[A-Za-z]:$/.test(parts[0] || '');
+    const path = win ? parts.join('\\') : '/' + parts.join('/');
+    let mt = Date.parse(document.lastModified); if(!(mt > 0) || Math.abs(mt - SD_LOADED) < 5000) mt = 0;     // (no real file time known)
+    return { file, folder, path, mt };
+  }
+  async function sdAppFolder(name, newBuild, quiet, say){
+    const H = sdHere() || {};
+    const fileOf = async (d) => { try{ return await (await d.getFileHandle(name)).getFile(); }catch(e){ return null; } };
+    // -1: not this SaiDeck's folder. Otherwise the build of the file in it.
+    const mine = async (d) => {
+      if(H.folder && d.name !== H.folder) return -1;
+      const f = await fileOf(d); if(!f) return -1;
+      const b = sdBuildOf(await f.text());
+      if(newBuild && b >= newBuild) return b;                       // (the update already went in here)
+      if(b !== SD_BUILD) return -1;
+      if(H.mt && Math.abs(f.lastModified - H.mt) > 2500) return -1;      // (same build, but a different copy of the file)
+      return b;
+    };
+    const fileBuild = async (d) => { const f = await fileOf(d); return f ? sdBuildOf(await f.text()) : -1; };
     const ok = async (d) => { try{ let p = await d.queryPermission({ mode: 'readwrite' }); if(p !== 'granted' && !quiet) p = await d.requestPermission({ mode: 'readwrite' }); return p === 'granted'; }catch(e){ return false; } };
     const tried = [];
     const cand = [projectFolderHandle, pendingProjectFolderHandle];
@@ -22473,13 +22508,20 @@
       tried.push(d);
       if(await ok(d) && (await mine(d)) >= 0) return d;
     }
+    try{ await idbSet('saideckAppFolder', null); }catch(e){}            // (whatever was remembered isn't this SaiDeck's folder)
     if(quiet) return null;
     if(!window.showDirectoryPicker) throw new Error("This browser can't save files — use Chrome or Edge.");
-    toast(`Pick the folder that has this “${name}” in it (the one you opened) — SaiDeck saves the new version there.`, 5000);
+    // (the browser can't open a folder by itself — it has to be picked once — so say exactly which one)
+    const where = H.path || 'the folder this SaiDeck is in';
+    if(say) say(`Pick SaiDeck's own folder in the window that opens: “${H.folder || '…'}” (${where}).`);
+    else if(!(await lyrConfirm('Connect SaiDeck’s own folder', `To install updates, SaiDeck needs the folder it's in — the one with the file you opened:\n\n${where}\n\nPick exactly that folder (“${H.folder || '…'}”) in the next window. It's remembered after that.`, 'Choose the folder'))){ const e = new Error('cancelled'); e.name = 'AbortError'; throw e; }
     const d = await window.showDirectoryPicker({ id: 'saideck-app', mode: 'readwrite' });
-    const b = await fileBuild(d);
-    if(b < 0) throw new Error(`That folder doesn't have “${name}” in it.`);
-    if(b !== SD_BUILD && !(newBuild && b >= newBuild)) throw new Error(`The “${name}” in that folder is a different copy (build ${b}, but the one open is build ${SD_BUILD}). Pick the folder of the file you opened.`);
+    if((await mine(d)) < 0){
+      const b = await fileBuild(d);
+      if(H.folder && d.name !== H.folder) throw new Error(`that's the folder “${d.name}”, but this SaiDeck is in “${H.folder}” (${where}). Press Update again and pick that one.`);
+      if(b < 0) throw new Error(`that folder doesn't have “${name}” in it. This SaiDeck is in ${where}.`);
+      throw new Error(`the “${name}” in that folder is another copy of SaiDeck, not the one you have open (${where}). Press Update again and pick that folder.`);
+    }
     try{ await idbSet('saideckAppFolder', d); }catch(e){}
     return d;
   }
@@ -22490,7 +22532,7 @@
     sdBusy = true; sdBtn.classList.add('busy');
     try{
       const want = v.build | 0;
-      const dir = await sdAppFolder(here, want, !!opts.quiet);
+      const dir = await sdAppFolder(here, want, !!opts.quiet, opts.auto ? opts.step : null);
       if(!dir){ const e = new Error('needs a click'); e.needClick = true; throw e; }
       if(opts.step) opts.step('Downloading the new SaiDeck…');
       // already written by an earlier try (but this page wasn't reloaded)?
@@ -22627,7 +22669,7 @@
       catch(err){
         if(!sdOv) sdOverlay(title, '');
         if(err && err.needClick){
-          step('SaiDeck needs your OK to save the new version into its folder.'); sdOv.classList.add('err');
+          { const H = sdHere() || {}; step(`SaiDeck needs your OK to save the new version into its own folder${H.path ? ` (${H.path})` : ''}.`); } sdOv.classList.add('err');
           sdOverlayButtons([['Continue update', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true]]);
         } else {
           step(err && err.name === 'AbortError' ? 'The update was cancelled.' : `Couldn't update: ${(err && err.message) || err}`); sdOv.classList.add('err');
@@ -24013,7 +24055,7 @@
   const POKE_EMO = ['👋', '❤️', '😂', '🔥', '👏', '🎉', '😮', '🎵'];
   const chatFxOn = () => chatLS('fx') !== '0';
   let pokeMenuEl = null;
-  function chatPokeClose(){ if(pokeMenuEl){ pokeMenuEl.remove(); pokeMenuEl = null; document.removeEventListener('pointerdown', chatPokeOutside, true); window.removeEventListener('keydown', chatPokeKey, true); } }
+  function chatPokeClose(){ if(pokeMenuEl){ const old = pokeMenuEl; old.style.pointerEvents = 'none'; old.classList.remove('in'); old.classList.add('out'); setTimeout(() => old.remove(), 130); pokeMenuEl = null; document.removeEventListener('pointerdown', chatPokeOutside, true); window.removeEventListener('keydown', chatPokeKey, true); } }
   function chatPokeOutside(e){ if(pokeMenuEl && !pokeMenuEl.contains(e.target)) chatPokeClose(); }
   function chatPokeKey(e){ if(e.key === 'Escape' && pokeMenuEl){ e.preventDefault(); e.stopImmediatePropagation(); const a = pokeMenuEl._anchor; chatPokeClose(); if(a) a.focus(); } }
   function chatPokeMenu(uid, name, anchor){
@@ -24022,37 +24064,40 @@
     const p = PRES.list && PRES.list[uid], off = !!(p && p.x === false), on = !!(p && typeof p.t === 'number' && Date.now() + PRES.offset - p.t < 150000);
     const m = document.createElement('div'); m.className = 'chat-poke'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', `Send ${name} an emoji`);
     m._uid = uid; m._anchor = anchor;
-    m.innerHTML = `<div class="chat-poke-h"><b></b><span>${off ? 'has emoji effects turned off' : on ? 'online now — it pops up on their screen' : "isn't online — they'll see it next time"}</span></div><div class="chat-poke-row"></div>`;
+    m.innerHTML = `<div class="chat-poke-h"><i class="cp-dot${on ? ' on' : ''}" title="${off ? 'Has emoji effects turned off' : on ? 'Online now' : "Offline — they'll see your emoji next time"}"></i><b></b><div class="chat-poke-acts"></div></div><div class="chat-poke-row"></div>`;
     m.querySelector('b').textContent = name;
     const row = m.querySelector('.chat-poke-row');
     POKE_EMO.forEach((em, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = em; b.disabled = off || chatBanned(chatUid());
-      b.setAttribute('aria-label', `Send ${em}`);
+      b.setAttribute('aria-label', `Send ${em}`); b.style.setProperty('--i', i);
       b.addEventListener('click', () => { chatPokeSend(uid, name, i); chatPokeClose(); });
       row.appendChild(b);
     });
     const ioff = !!(p && p.i === false), ib = document.createElement('button'); ib.type = 'button'; ib.className = 'chat-infil-btn';
-    ib.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3l7.5 18 2.4-7.1L21 11.5z"/></svg><span>Infiltrate</span>';
+    ib.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3l7.5 18 2.4-7.1L21 11.5z"/></svg>'; ib.setAttribute('aria-label', 'Infiltrate');
+    const acts = m.querySelector('.chat-poke-acts');
     ib.disabled = ioff || chatBanned(chatUid()) || !!INF.me;
-    ib.title = ioff ? `${name} has infiltrating turned off` : INF.me ? "You're already infiltrating someone" : `Fly your picture around ${name}'s screen — copying your mouse. Click anywhere to leave.`;
+    ib.title = ioff ? `${name} has infiltrating turned off` : INF.me ? "You're already infiltrating someone" : `Infiltrate ${name}'s screen`;
     ib.addEventListener('click', () => { chatPokeClose(); infStart(uid, name); });
-    m.appendChild(ib);
+    acts.appendChild(ib);
     const gb = document.createElement('button'); gb.type = 'button'; gb.className = 'chat-infil-btn chat-gift-btn';
-    gb.innerHTML = '<span aria-hidden="true">💸</span><span>Send points</span>'; gb.title = `Send ${name} some of your points`;
+    gb.innerHTML = '<span aria-hidden="true">💸</span>'; gb.title = `Send ${name} points`; gb.setAttribute('aria-label', 'Send points');
     gb.disabled = chatBanned(chatUid());
     gb.addEventListener('click', () => { chatPokeClose(); gpOpen(uid, name, anchor); });
-    m.appendChild(gb);
+    acts.appendChild(gb);
     const rb = document.createElement('button'); rb.type = 'button'; rb.className = 'chat-infil-btn chat-gift-btn chat-rps-btn';
-    rb.innerHTML = '<span aria-hidden="true">✊</span><span>Rock Paper Scissors</span>'; rb.title = `Challenge ${name} to Rock Paper Scissors for points`;
+    rb.innerHTML = '<span aria-hidden="true">✊</span>'; rb.title = `Rock Paper Scissors with ${name}`; rb.setAttribute('aria-label', 'Rock Paper Scissors');
     rb.disabled = chatBanned(chatUid());
     rb.addEventListener('click', () => { chatPokeClose(); rpsOpenInvite(uid, name, anchor); });
-    m.appendChild(rb);
-    if(ioff){ const q = document.createElement('div'); q.className = 'chat-poke-note'; q.textContent = 'has infiltrating turned off'; m.appendChild(q); }
+    acts.appendChild(rb);
+    
     chatPanel.appendChild(m); pokeMenuEl = m;
     const pr = chatPanel.getBoundingClientRect(), r = anchor.getBoundingClientRect();
     const x = Math.max(8, Math.min(pr.width - m.offsetWidth - 8, r.left - pr.left));
-    let y = r.bottom - pr.top + 6; if(y + m.offsetHeight > pr.height - 8) y = r.top - pr.top - m.offsetHeight - 6;
+    let y = r.bottom - pr.top + 6, up = false; if(y + m.offsetHeight > pr.height - 8){ y = r.top - pr.top - m.offsetHeight - 6; up = true; }
     m.style.left = x + 'px'; m.style.top = Math.max(8, y) + 'px';
+    m.style.transformOrigin = `${Math.max(12, Math.min(m.offsetWidth - 12, r.left - pr.left - x + r.width / 2))}px ${up ? '100%' : '0'}`;
+    m.classList.add('in');
     setTimeout(() => { document.addEventListener('pointerdown', chatPokeOutside, true); window.addEventListener('keydown', chatPokeKey, true); const f = row.querySelector('button:not(:disabled)'); if(f) f.focus(); }, 0);
   }
   async function chatPokeSend(uid, name, e){
