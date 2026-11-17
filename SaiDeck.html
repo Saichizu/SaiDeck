@@ -15499,7 +15499,9 @@
   function fdVis(ctx){
     const M = ctx.getTransform().inverse(), cw = ctx.canvas.width, ch = ctx.canvas.height;
     const P = [[0, 0], [cw, 0], [0, ch], [cw, ch]].map(([x, y]) => M.transformPoint(new DOMPoint(x, y)));
-    return { x0: Math.min(...P.map(p => p.x)) - 2, y0: Math.min(...P.map(p => p.y)) - 2, x1: Math.max(...P.map(p => p.x)) + 2, y1: Math.max(...P.map(p => p.y)) + 2 };
+    const y1 = Math.max(...P.map(p => p.y)) + 2;
+    // gy: where a scene's ground goes — the bottom of the frame, or higher when "Freedit design moves with the margins" has moved the scene up
+    return { x0: Math.min(...P.map(p => p.x)) - 2, y0: Math.min(...P.map(p => p.y)) - 2, x1: Math.max(...P.map(p => p.x)) + 2, y1, gy: y1 + (fdShiftY < 0 ? fdShiftY : 0) };
   }
   // draw an image into a rect, then stretch its edge rows / columns out to
   // whatever else is visible, so nothing beyond it ever shows through
@@ -18014,7 +18016,7 @@
     if(fdBgOn('sg')) drawSageBack(ctx, u, pt);                // Forest 2: the green robe, the sash and gold, behind the tracks
     drawStyleBack(ctx, u, pt);               // the other styles' scenes, behind the tracks
     drawFrierenFightBg(ctx, u, pt, false);   // Frieren: the hall behind a fight
-    } finally { if(fdShiftY) ctx.restore(); }
+    } finally { if(fdShiftY) ctx.restore(); fdShiftY = 0; }
     // With a Freedit on, the safe margins only keep the tracks, lyrics and titles
     // out — the Freedit's scene runs right to the edges. So the scene in the
     // margin bands is kept now (before any tracks are drawn) and put back there
@@ -22575,7 +22577,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 133;                 // ← goes up by one with every published version
+  const SD_BUILD = 134;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

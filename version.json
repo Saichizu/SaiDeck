@@ -1,6 +1,6 @@
 {
-  "build": 133,
+  "build": 134,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🎰 No more cap on slot spins (always 2% of your points, at least 10) and no more 1,000,000 cap on blackjack bets against the bot. Fixed points showing wrong for anyone above about 2.1 billion."
+  "notes": "'Freedit design moves with the margins' now moves the whole scene — the ground and buildings too (Freedits can use the new ground line). Plus: no cap on slot spins or blackjack bets vs the bot."
 }
