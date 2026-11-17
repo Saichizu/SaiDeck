@@ -1,6 +1,6 @@
 {
-  "build": 118,
+  "build": 120,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "Tidier menu when you click someone's picture in the chat: just two small rows — their name with Infiltrate, Send points and Rock Paper Scissors as icons, then the emojis — and it springs open with the emojis popping in. Updates now always go into the exact SaiDeck you have open: SaiDeck shows you the folder it's in, and only accepts that folder — another copy of SaiDeck somewhere else is refused instead of being updated by mistake (which used to make updates go round in circles). Also: premium chat bubbles with proper artwork, click a bubble's picture to see it in a little chat, unlimited point gifts, and a much lighter chat."
+  "notes": "🔗 Link your devices: ⚙️ Settings › Link devices shows a code. Type it into Link devices on your other device, pick which account stays, and the other one's points move into it — both devices then use the same account. Works for 3 or more accounts too (link them one after another). Also new: 🏰 Tower Defense (solo or team, with its own leaderboards) in the games menu, and the chat's on/off switches are now inside the ⚙️ settings button."
 }

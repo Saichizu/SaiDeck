@@ -184,8 +184,14 @@
   .chat-send svg{width:18px;height:18px;fill:currentColor;}
   .chat-send:disabled{opacity:.4;cursor:default;}
   .chat-send:focus-visible{outline:2px solid #fff;outline-offset:2px;}
-  .chat-opts{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8px 12px;font-size:11.5px;color:var(--text-dim);}
-  .chat-opts label{display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .chat-opts{display:flex;justify-content:flex-end;font-size:11.5px;color:var(--text-dim);}
+  .chat-setmenu{position:absolute;z-index:60;top:52px;right:10px;width:230px;box-sizing:border-box;padding:6px;border-radius:14px;background:#1f2029;border:1px solid rgba(180,140,255,.35);box-shadow:0 12px 30px rgba(0,0,0,.55);transform-origin:calc(100% - 50px) 0;}
+  .chat-setmenu.in{animation:pokeIn .2s cubic-bezier(.2,.9,.3,1.25) both;}
+  .chat-setmenu-me{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;border-radius:9px;cursor:pointer;font:700 12.5px 'Inter',sans-serif;color:var(--text);} .chat-setmenu-me:hover{background:rgba(255,255,255,.07);}
+  .chat-setmenu-h{margin:4px 9px 2px;font:800 10px 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);}
+  .chat-setmenu-opts{display:flex;flex-direction:column;}
+  .chat-setmenu-opts label{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:9px;cursor:pointer;font-size:12px;color:var(--text-dim);} .chat-setmenu-opts label:hover{background:rgba(255,255,255,.05);color:var(--text);}
+  .chat-setmenu .switch{flex:none;} .chat-setmenu .switch input:not(:checked) ~ .track{background:#2c2d3a;border-color:rgba(255,255,255,.2);}
   .chat-count{grid-column:1 / -1;justify-self:end;margin:-4px 0 -2px;font:600 11px 'JetBrains Mono',monospace;color:var(--text-faint);font-variant-numeric:tabular-nums;}
   .chat-count.full{color:#f5d04a;}
   .chat-setup{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
@@ -194,7 +200,7 @@
   .chat-setup input{box-sizing:border-box;width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:13px 'Inter',sans-serif;outline:none;}
   .chat-setup input:focus{border-color:#b48cff;outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.25);}
   .chat-compose textarea:focus{outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.2);}
-  .chat-opts .switch input:checked ~ .track{background:rgba(180,140,255,.55);border-color:#b48cff;}
+  .chat-setmenu .switch input:checked ~ .track{background:rgba(180,140,255,.55);border-color:#b48cff;}
   .chat-row{display:flex;gap:8px;}
   .chat-row > *{flex:1;}
   .chat-pbtn{all:unset;box-sizing:border-box;text-align:center;padding:9px 12px;border-radius:9px;cursor:pointer;font:700 12.5px 'Inter',sans-serif;background:#b48cff;color:#16102a;}
@@ -802,6 +808,51 @@
   .chat-av.poke{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;}
   .chat-av.poke:hover{transform:scale(1.1);box-shadow:0 0 0 2px rgba(180,140,255,.7);}
   .chat-av.poke:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
+  /* Tower Defense */
+  .td-win{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;}
+  .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
+  .td-box{position:relative;width:min(1000px, 96vw);max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
+  .td-win:focus{outline:none;}
+  .td-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--border);}
+  .td-head b{font:800 15px 'Manrope',sans-serif;} .td-mode{font-size:11.5px;color:var(--text-faint);}
+  .td-leave{all:unset;margin-left:auto;cursor:pointer;padding:5px 11px;border-radius:8px;font:700 11.5px 'Inter',sans-serif;color:var(--text-dim);border:1px solid var(--border);} .td-leave:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+  .td-leave[hidden]{display:none;}
+  .td-x{all:unset;cursor:pointer;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);} .td-head .td-leave[hidden] + .td-x{margin-left:auto;} .td-x:hover{background:rgba(255,255,255,.08);color:#fff;} .td-x svg{width:16px;height:16px;}
+  .td-main{flex:1;min-height:0;overflow:auto;}
+  .td-btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border-radius:10px;font:800 12.5px 'Inter',sans-serif;color:var(--text);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);text-align:center;transition:transform .12s, background .12s;}
+  .td-btn:hover:not(:disabled){background:rgba(255,255,255,.12);transform:translateY(-1px);} .td-btn:disabled{opacity:.45;cursor:default;}
+  .td-btn.pri{color:#1b1206;background:linear-gradient(135deg,#ffd76a,#ff9a3c);border-color:transparent;} .td-btn.pri:hover:not(:disabled){background:linear-gradient(135deg,#ffe08a,#ffad5c);}
+  .td-dim{font-size:11.5px;color:var(--text-faint);margin:0;}
+  .td-lobby{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:16px;}
+  .td-intro{margin:0 0 12px;font-size:13px;line-height:1.55;color:var(--text-dim);}
+  .td-lob-btns{display:flex;gap:8px;margin-bottom:14px;} .td-lob-btns .td-btn{padding:11px 18px;font-size:13.5px;}
+  .td-sub{font:800 10.5px 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 6px;}
+  .td-open{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .td-oteam{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);} .td-oteam span{flex:1;display:flex;flex-direction:column;} .td-oteam b{font-size:12.5px;} .td-oteam i{font-style:normal;font-size:11px;color:var(--text-faint);}
+  .td-note{margin-top:8px;}
+  .td-lbtabs{display:flex;gap:4px;margin-bottom:8px;} .td-lbtabs button{all:unset;cursor:pointer;flex:1;text-align:center;padding:7px;border-radius:9px;font:800 12px 'Inter',sans-serif;color:var(--text-dim);background:rgba(255,255,255,.04);} .td-lbtabs button.on{color:#1b1206;background:linear-gradient(135deg,#ffd76a,#ff9a3c);}
+  .td-lb{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;} .td-lb li{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:9px;background:rgba(255,255,255,.03);font-size:12.5px;} .td-lb li.me{background:rgba(255,215,106,.12);}
+  .td-lb .td-rk{width:22px;text-align:center;font-weight:800;color:var(--text-faint);} .td-lb b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .td-lb i{font-style:normal;font-size:11px;color:#ffd76a;}
+  .td-credit{margin:0;padding:0 16px 12px;font-size:10px;color:var(--text-faint);opacity:.6;}
+  .td-game{display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px;}
+  .td-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--text-dim);} .td-bar b{color:var(--text);font-variant-numeric:tabular-nums;}
+  .td-diff{font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(255,154,60,.14);color:#ffb070;}
+  .td-players{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;} .td-pl{display:flex;align-items:center;gap:5px;font-size:11.5px;padding:2px 8px 2px 2px;border-radius:999px;background:rgba(255,255,255,.05);} .td-pl.me{background:rgba(255,215,106,.12);}
+  .td-pl i{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 10px 'Inter',sans-serif;font-style:normal;color:#111;}
+  .td-stage{position:relative;width:100%;aspect-ratio:18 / 11;max-height:calc(96vh - 230px);display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#244a28;}
+  .td-cv{display:block;cursor:pointer;}
+  .td-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,8,14,.72);text-align:center;animation:chatPopIn .3s ease-out both;}
+  .td-msg b{font:900 24px 'Manrope',sans-serif;color:#fff;} .td-msg span{font-size:14px;color:var(--text-dim);} .td-msg em{font-style:normal;font-weight:900;color:#ffd76a;font-size:18px;} .td-msg div{display:flex;gap:8px;}
+  .td-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .td-troops{display:flex;gap:6px;}
+  .td-tb{all:unset;cursor:pointer;display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:7px;align-items:center;padding:6px 10px 6px 7px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:transform .12s, background .12s;}
+  .td-tb:hover:not(:disabled){background:rgba(255,255,255,.1);transform:translateY(-1px);} .td-tb.on{border-color:#ffd76a;background:rgba(255,215,106,.12);} .td-tb:disabled{opacity:.4;cursor:default;}
+  .td-ti{grid-row:1 / 3;width:30px;height:30px;color:var(--c);} .td-ti svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));}
+  .td-tb b{font:800 12px 'Inter',sans-serif;color:var(--text);} .td-tb i{font-style:normal;font-size:11px;color:#ffd76a;}
+  .td-act{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  .td-pickinfo{display:flex;flex-direction:column;} .td-pickinfo b{font-size:12.5px;} .td-pickinfo i{font-style:normal;font-size:11px;color:var(--text-faint);}
+  .arc-cas-join.td{background:linear-gradient(135deg,#7dffb2,#35d0b8);}
+  @media (max-width: 760px){ .td-lobby{grid-template-columns:1fr;} .td-tb b{display:none;} }
   /* the little menu on someone's picture: emojis to send, and what else you can do to them */
   .chat-poke{position:absolute;z-index:6;width:228px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:6px 6px 5px;border-radius:14px;background:#1f2029;border:1px solid rgba(180,140,255,.35);box-shadow:0 10px 26px rgba(0,0,0,.5);}
   .chat-poke.in{animation:pokeIn .22s cubic-bezier(.2,.9,.3,1.25) both;}
@@ -1325,6 +1376,18 @@
   .bubp-chat{position:relative;overflow:hidden;height:300px;padding:70px 12px 14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;background:#101016;}
   .bubp-chat .chat-msg.me{align-self:flex-end;flex-direction:row-reverse;}
   .bubp-f{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--border);}
+  .lk-box{width:min(400px, calc(100vw - 32px));}
+  .lk-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(180,140,255,.15);flex:none;}
+  .lk-sec{padding:12px 14px;border-bottom:1px solid var(--border);} .lk-sec:last-child{border-bottom:0;}
+  .lk-h{font:800 10.5px 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
+  .lk-code{display:flex;align-items:center;gap:10px;} .lk-code b{flex:1;font:800 26px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#ffd76a;user-select:all;}
+  .lk-st{margin:8px 0 0;font-size:11.5px;line-height:1.45;color:var(--text-faint);} .lk-box > .lk-st{padding:0 14px;}
+  .lk-in{display:flex;gap:8px;} .lk-in input{flex:1;min-width:0;box-sizing:border-box;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:700 15px 'JetBrains Mono',monospace;letter-spacing:.08em;outline:none;} .lk-in input:focus{border-color:#b48cff;box-shadow:0 0 0 3px rgba(180,140,255,.25);}
+  .lk-accs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0;}
+  .lk-acc{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px 10px;border-radius:12px;border:1.5px solid var(--border);background:rgba(255,255,255,.03);text-align:center;transition:border-color .12s, background .12s, transform .12s;}
+  .lk-acc:hover{transform:translateY(-1px);} .lk-acc.on{border-color:#ffd76a;background:rgba(255,215,106,.1);}
+  .lk-acc i{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px 'Inter',sans-serif;font-style:normal;color:#111;}
+  .lk-acc b{font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .lk-acc span{font-size:12px;color:#ffd76a;} .lk-acc em{font-style:normal;font-size:10.5px;color:var(--text-faint);}
   .bubfx-flash{position:absolute;inset:0;background:#e6d6ff;}
   @media (prefers-reduced-motion: reduce){
     .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-modal-back, .chat-replying:not([hidden]),
@@ -22436,7 +22499,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 118;                 // ← goes up by one with every published version
+  const SD_BUILD = 120;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23116,8 +23179,14 @@
           <button type="button" class="chat-icon chat-bell" title="Alerts — infiltrations and swats" aria-label="Alerts" aria-expanded="false">${ICON_BELL}<span class="chat-bell-n" hidden></span></button>
           <button type="button" class="chat-icon chat-arc" title="Arcade — your points, the shop and the leaderboard" aria-label="Arcade: points, shop and leaderboard" aria-expanded="false">${ICON_TROPHY}</button>
           <button type="button" class="chat-icon chat-rooms" title="Rooms — Everyone, or a group chat with a code" aria-label="Rooms and group chats" aria-expanded="false">${ICON_ROOMS}</button>
-          <button type="button" class="chat-icon chat-set" title="Your name and profile picture" aria-label="Your chat name and picture">${ICON_GEAR}</button>
+          <button type="button" class="chat-icon chat-set" title="Settings — your name and picture, notifications, sounds" aria-label="Chat settings" aria-expanded="false">${ICON_GEAR}</button>
           <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+        <div class="chat-setmenu" hidden><button type="button" class="chat-setmenu-me">✏️ <span>Name &amp; picture</span></button><button type="button" class="chat-setmenu-me chat-setmenu-link">🔗 <span>Link devices</span></button><div class="chat-setmenu-h">Chat settings</div><div class="chat-setmenu-opts"><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
+            <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
+            <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label>
+            <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label>
+            <label title="Let people fly their picture around your screen (Infiltrate). You can always swat them out by clicking their picture."><span class="switch"><input type="checkbox" class="chat-o-inf"><span class="track"></span><span class="knob"></span></span>Let people infiltrate</label>
+            <label title="Sounds for the games: someone infiltrating you, slime shots and splats, jackpots"><span class="switch"><input type="checkbox" class="chat-o-sfx"><span class="track"></span><span class="knob"></span></span>Game sounds</label></div></div>
         <div class="chat-roombar"></div>
         <div class="chat-who" hidden></div>
         <div class="chat-side" hidden></div>
@@ -23135,15 +23204,17 @@
           <div class="chat-replying" hidden></div>
           <div class="chat-compose"><button type="button" class="chat-emo-btn" title="Emojis" aria-label="Emojis">😊</button><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
             <button type="button" class="chat-send" title="Send (Enter)" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 20.5 21.5 12 3 3.5v6.6l13 1.9-13 1.9z"/></svg></button></div>
-          <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span><label><span class="switch"><input type="checkbox" class="chat-o-pop"><span class="track"></span><span class="knob"></span></span>Pop-up notifications</label>
-            <label><span class="switch"><input type="checkbox" class="chat-o-snd"><span class="track"></span><span class="knob"></span></span>Sound</label>
-            <label title="Let others see that you're using SaiDeck right now"><span class="switch"><input type="checkbox" class="chat-o-vis"><span class="track"></span><span class="knob"></span></span>Show me online</label>
-            <label title="Let emojis other people send you pop up on your screen"><span class="switch"><input type="checkbox" class="chat-o-fx"><span class="track"></span><span class="knob"></span></span>Emoji effects</label>
-            <label title="Let people fly their picture around your screen (Infiltrate). You can always swat them out by clicking their picture."><span class="switch"><input type="checkbox" class="chat-o-inf"><span class="track"></span><span class="knob"></span></span>Let people infiltrate</label>
-            <label title="Sounds for the games: someone infiltrating you, slime shots and splats, jackpots"><span class="switch"><input type="checkbox" class="chat-o-sfx"><span class="track"></span><span class="knob"></span></span>Game sounds</label></div>
+          <div class="chat-opts"><span class="chat-count">0 / ${CHAT_MAX}</span></div>
         </div>`;
       chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
-      chatPanel.querySelector('.chat-set').addEventListener('click', () => chatRenderSetup(true));
+      // the gear: a little menu with your name & picture and the chat's on/off switches
+      { const gear = chatPanel.querySelector('.chat-set'), menu = chatPanel.querySelector('.chat-setmenu');
+        const close = () => { menu.hidden = true; gear.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', out, true); window.removeEventListener('keydown', esc, true); };
+        const out = (e) => { if(!menu.contains(e.target) && !gear.contains(e.target)) close(); };
+        const esc = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); close(); gear.focus(); } };
+        gear.addEventListener('click', () => { gear.blur(); if(!menu.hidden){ close(); return; } menu.hidden = false; gear.setAttribute('aria-expanded', 'true'); menu.classList.remove('in'); void menu.offsetWidth; menu.classList.add('in'); document.addEventListener('pointerdown', out, true); window.addEventListener('keydown', esc, true); });
+        menu.querySelector('.chat-setmenu-me:not(.chat-setmenu-link)').addEventListener('click', () => { close(); chatRenderSetup(true); });
+        menu.querySelector('.chat-setmenu-link').addEventListener('click', () => { close(); lkOpen(); }); }
       const rb = chatPanel.querySelector('.chat-rooms');
       rb.addEventListener('click', () => chatSideTo('rooms'));
       chatPanel.querySelector('.chat-bell').addEventListener('click', () => chatSideTo('alerts'));
@@ -23153,6 +23224,7 @@
       chatPanel.querySelector('.chat-arcade').addEventListener('click', (e) => {
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
+        if(e.target.closest('[data-td-join]')){ tdOpen(); return; }
         { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
         const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); dockRender(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
@@ -26025,6 +26097,7 @@
     const m = document.createElement('div'); m.className = 'chat-games-m'; m.setAttribute('role', 'menu');
     m.innerHTML = `<button type="button" role="menuitem" data-g="slots"><span>🎰</span><b>Slots</b><i>${nS ? nS + ' playing' : ''}</i></button>
       <button type="button" role="menuitem" data-g="bj"><span>🃏</span><b>Blackjack</b><i>${nB ? nB + ' at the table' : ''}</i></button>
+      <button type="button" role="menuitem" data-g="td"><span>🏰</span><b>Tower Defense</b><i>solo or team</i></button>
       <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
     btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
     m.animate([{ opacity: 0, transform: 'translateY(6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 160, easing: 'ease-out' });
@@ -26035,8 +26108,457 @@
       const b = e.target.closest('[data-g]'); if(!b) return; close();
       if(b.dataset.g === 'slots'){ if(!CAS.on) casJoin(); }
       else if(b.dataset.g === 'bj'){ if(!BJ.on) bjJoin(); }
+      else if(b.dataset.g === 'td') tdOpen();
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
+  }
+  // ----- Tower Defense: the battle (the same on every computer) -----
+  // A wave is worked out step by step (30 steps a second) from the wave number, the troops on the map and the
+  // difficulty — nothing random except a seeded shuffle — so everyone in a team sees exactly the same fight, and
+  // anyone can work out how it ends.
+  const TD_COLS = 18, TD_ROWS = 11, TD_DT = 1 / 30, TD_LIVES = 20, TD_START_GOLD = 160;
+  // the road: from the left edge, winding, to the castle on the right
+  const TD_ROUTE = [[-0.6, 2], [4, 2], [4, 7], [8, 7], [8, 3], [12, 3], [12, 8], [16, 8]];
+  const TD_CASTLE = [16.6, 8];
+  const TD_TROOPS = [
+    { k: 'archer', name: 'Archer', ic: 'bowman', col: '#7dffb2', cost: 50, range: 2.6, dmg: 8, rate: 0.55, desc: 'Fast arrows at the enemy furthest along.' },
+    { k: 'cannon', name: 'Cannon', ic: 'cannon', col: '#ffb02e', cost: 90, range: 2.2, dmg: 20, rate: 1.4, splash: 1.1, desc: 'Slow, but hits everything around where it lands.' },
+    { k: 'frost', name: 'Frost mage', ic: 'frozen-orb', col: '#7ce8ff', cost: 70, range: 2.3, dmg: 4, rate: 0.9, slow: 0.45, slowT: 1.6, desc: 'Slows enemies down so your other troops get more hits.' },
+    { k: 'ballista', name: 'Ballista', ic: 'ballista', col: '#ff7ab6', cost: 125, range: 4.3, dmg: 46, rate: 2.0, strong: true, desc: 'Long range, big hits on the toughest enemy in reach.' },
+  ];
+  const TD_FOES = {
+    grunt: { name: 'Goblin', ic: 'goblin-head', col: '#9be36b', hp: 32, sp: 1.2, gold: 3, hurt: 1, r: 0.32 },
+    runner: { name: 'Wolf', ic: 'wolf-head', col: '#c9c1ad', hp: 19, sp: 2.05, gold: 3, hurt: 1, r: 0.28 },
+    tank: { name: 'Ogre', ic: 'ogre', col: '#e0a070', hp: 120, sp: 0.72, gold: 8, hurt: 2, r: 0.4 },
+    boss: { name: 'Skull king', ic: 'crowned-skull', col: '#ffd76a', hp: 620, sp: 0.55, gold: 50, hurt: 6, r: 0.5 },
+  };
+  const tdTroop = (k) => TD_TROOPS.find(t => t.k === k);
+  // a troop at level lv (1–3)
+  function tdStats(k, lv){
+    const t = tdTroop(k); lv = lv || 1;
+    return { range: t.range + (lv - 1) * 0.3, dmg: t.dmg * Math.pow(1.7, lv - 1), rate: t.rate * Math.pow(0.88, lv - 1), splash: t.splash, slow: t.slow, slowT: t.slowT, strong: t.strong };
+  }
+  // what things cost (sc = the difficulty from the team's points)
+  const tdCost = (k, sc) => Math.round(tdTroop(k).cost * (sc || 1));
+  const tdUpCost = (k, lv, sc) => Math.round(tdTroop(k).cost * 0.85 * lv * (sc || 1));
+  const tdSpent = (k, lv, sc) => { let c = tdCost(k, sc); for(let l = 1; l < lv; l++) c += tdUpCost(k, l, sc); return c; };
+  const tdSellFor = (tw, sc) => Math.floor((tw.c || tdSpent(tw.k, tw.lv, sc)) * 0.6);
+  // the road as points along it
+  const TD_SEGS = (() => { const out = []; let d = 0; for(let i = 0; i < TD_ROUTE.length - 1; i++){ const [x1, y1] = TD_ROUTE[i], [x2, y2] = TD_ROUTE[i + 1], L = Math.hypot(x2 - x1, y2 - y1); out.push({ x1, y1, x2, y2, d0: d, L }); d += L; } out.total = d; return out; })();
+  function tdAt(d){
+    for(const s of TD_SEGS){ if(d <= s.d0 + s.L){ const u = Math.max(0, (d - s.d0) / s.L); return [s.x1 + (s.x2 - s.x1) * u, s.y1 + (s.y2 - s.y1) * u]; } }
+    const s = TD_SEGS[TD_SEGS.length - 1]; return [s.x2, s.y2];
+  }
+  // which tiles are road, and which you can build on (the ones right beside the road)
+  const TD_ROAD = (() => { const r = new Set(); for(const s of TD_SEGS){ const n = Math.ceil(s.L * 4); for(let i = 0; i <= n; i++){ const u = i / n, x = Math.round(s.x1 + (s.x2 - s.x1) * u), y = Math.round(s.y1 + (s.y2 - s.y1) * u); if(x >= 0 && x < TD_COLS) r.add(x + '_' + y); } } return r; })();
+  const TD_BUILD = (() => { const b = new Set(); for(const k of TD_ROAD){ const [x, y] = k.split('_').map(Number); for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++){ const nx = x + dx, ny = y + dy, nk = nx + '_' + ny; if(nx >= 0 && ny >= 0 && nx < TD_COLS && ny < TD_ROWS && !TD_ROAD.has(nk) && !(nx >= 16 && ny >= 7 && ny <= 9)) b.add(nk); } } return b; })();
+  // a little seeded random (the same everywhere)
+  const tdRng = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  // who comes in wave w
+  function tdWave(w){
+    const list = [], n = Math.min(44, 6 + w * 2), rnd = tdRng(w * 7919 + 13);
+    for(let i = 0; i < n; i++){
+      const r = rnd(); let k = 'grunt';
+      if(w >= 3 && r < Math.min(0.35, 0.12 + w * 0.02)) k = 'runner';
+      else if(w >= 4 && r > 1 - Math.min(0.3, 0.06 + w * 0.02)) k = 'tank';
+      list.push(k);
+    }
+    if(w % 5 === 0) list.push('boss');
+    const gap = Math.max(0.42, 0.95 - w * 0.025);
+    return list.map((k, i) => ({ k, at: i * gap + (k === 'boss' ? 1.5 : 0) }));
+  }
+  // how tough the enemies are: the wave, the difficulty, and how many are playing (more players = more troops)
+  const tdHpMul = (w, sc, np) => Math.pow(1.15, w - 1) * (sc || 1) * (1 + 0.7 * Math.max(0, (np || 1) - 1));
+  const tdWaveGold = (w) => 45 + w * 9;
+  // The fight. towers: { cell: { k, lv, o } }. Returns a stepper: step(seconds) moves it on; .done, .lives (lost), .gold { owner: earned }.
+  function tdBattle(w, towers, sc, np, lives){
+    const hm = tdHpMul(w, sc, np), plan = tdWave(w);
+    const T = Object.keys(towers || {}).sort().map(c => { const [x, y] = c.split('_').map(Number), t = towers[c]; return { c, x, y, k: t.k, o: t.o, s: tdStats(t.k, t.lv), cd: 0, aim: null }; });
+    const st = { t: 0, foes: [], next: 0, lost: 0, lives: lives == null ? TD_LIVES : lives, gold: {}, kills: 0, done: false, shots: [], booms: [] };
+    let id = 0;
+    const tick = () => {
+      st.t += TD_DT;
+      while(st.next < plan.length && plan[st.next].at <= st.t){ const F = TD_FOES[plan[st.next].k]; st.foes.push({ id: id++, k: plan[st.next].k, hp: F.hp * hm, max: F.hp * hm, d: 0, slowT: 0, slowF: 1 }); st.next++; }
+      for(const f of st.foes){
+        if(f.hp <= 0) continue;
+        const sp = TD_FOES[f.k].sp * (f.slowT > 0 ? f.slowF : 1); if(f.slowT > 0) f.slowT -= TD_DT;
+        f.d += sp * TD_DT;
+        if(f.d >= TD_SEGS.total){ f.hp = 0; f.gone = true; st.lost += TD_FOES[f.k].hurt; }
+      }
+      for(const tw of T){
+        tw.cd -= TD_DT; if(tw.cd > 0) continue;
+        let best = null, bv = -1;
+        for(const f of st.foes){
+          if(f.hp <= 0) continue;
+          const [fx, fy] = tdAt(f.d); if(Math.hypot(fx - tw.x, fy - tw.y) > tw.s.range) continue;
+          const v = tw.s.strong ? f.hp * 1000 + f.d : f.d;
+          if(v > bv){ bv = v; best = f; }
+        }
+        if(!best) continue;
+        tw.cd = tw.s.rate;
+        const hit = (f, dmg) => { if(f.hp <= 0) return; f.hp -= dmg; if(tw.s.slow){ f.slowT = tw.s.slowT; f.slowF = Math.min(f.slowF < 1 && f.slowT > 0 ? f.slowF : 1, 1 - tw.s.slow); } if(f.hp <= 0){ st.kills++; st.gold[tw.o] = (st.gold[tw.o] || 0) + TD_FOES[f.k].gold; } };
+        const [bx, by] = tdAt(best.d);
+        if(tw.s.splash){ for(const f of st.foes){ if(f.hp <= 0) continue; const [fx, fy] = tdAt(f.d); if(Math.hypot(fx - bx, fy - by) <= tw.s.splash) hit(f, f === best ? tw.s.dmg : tw.s.dmg * 0.6); } st.booms.push({ x: bx, y: by, t: st.t, k: tw.k }); }
+        else hit(best, tw.s.dmg);
+        st.shots.push({ x1: tw.x, y1: tw.y, x2: bx, y2: by, t: st.t, k: tw.k });
+      }
+      if(st.shots.length > 60) st.shots.splice(0, st.shots.length - 60);
+      if(st.booms.length > 20) st.booms.splice(0, st.booms.length - 20);
+      st.foes = st.foes.filter(f => f.hp > 0 || st.t - (f.deadAt || (f.deadAt = st.t)) < 0.35);
+      if(st.lives - st.lost <= 0 || (st.next >= plan.length && !st.foes.some(f => f.hp > 0))) st.done = true;
+    };
+    st.step = (secs) => { let n = Math.round(secs / TD_DT); while(n-- > 0 && !st.done) tick(); return st; };
+    st.runTo = (secs) => { while(!st.done && st.t + TD_DT / 2 < secs) tick(); return st; };
+    st.towers = T; st.total = plan.length;
+    return st;
+  }
+  // ----- Tower Defense: the game window, the team room and the leaderboards -----
+  // td/r/<room> = { m: 'solo'|'team', h: host, st: 'lobby'|'build'|'run'|'over', w: the next wave, lv: castle lives,
+  //   sc: difficulty, np: players this wave, t0: when the wave started (server time), cw: the last wave counted,
+  //   best: waves survived, tw: { 'x_y': { k, lv, o: owner, c: gold spent } }, pl: { uid: { n, g: gold, hb } } }
+  // td/open/<room> = an open team people can join; td/lb/s/<uid> and td/lb/t/<room> = the leaderboards.
+  // Troops are only placed between waves, so a wave is worked out the same on every computer (tdBattle).
+  // Difficulty: the team's average points (what they can spend) make enemies tougher and troops dearer — a little.
+  const TDG = { on: false, rid: '', room: null, sel: 'archer', pick: '', hover: '', battle: null, bKey: '', poll: 0, hb: 0, raf: 0, lb: null, lbTab: 's', open: null, view: 'lobby', committing: false, spr: new Map(), bg: null };
+  const TD_ART = {"bowman":"m281.28 15.28l-4.655 7.5l-56.28 90.44c-7.312-18.505-21.67-30.9-37.126-30.44c-.66.02-1.308.06-1.97.126c-21.174 2.14-35.927 27.865-32.938 57.47c1.005 9.948 3.91 19.074 8.094 26.718c-44.558 1.188-76.495 11.61-92.812 38.25c20.32 19.086 59.816 22.993 91.844 18.625l4.843 3.124l.126.094l18.906 51.375l-52.78 212.718h34.156l61.125-168.905L332 491.28h33.563L261.438 292.19l97.156 62.53c-.08.262-.17.52-.25.782c.173-.202.328-.422.5-.625l6.937 4.47l9 5.78l4.533-9.656c32.03-68.4 40.24-134.49 25.843-192.064l23.938-4.812l6.187 23.812l55.408-46.656l-73.875-24.313l7.562 29.032l-24.563 4.968C381.796 93.172 343.996 49.38 289.033 19.5l-7.75-4.22zm3.408 29.907c31.818 30.565 54.66 66.986 69.093 106.094l-136.686 21.25c5.196-8.662 8.24-19.857 8.28-32.06l59.314-95.282zm77.5 132.688c13.773 51.64 13.89 106.532 1.562 157.906l-113.625-73.124l-4.125-61.72l116.188-23.06z","cannon":"m142.373 116.285l-15.92 9.79l19.223 31.257c-17.208 13.06-28.326 33.725-28.326 56.994c0 21.555 9.55 40.866 24.632 53.977l-71.76 92.16L20.66 379.69v17.828h71.834l73.588-95.78h8.22c-5.383 42.56 21.434 83.807 63.995 95.21c46.448 12.447 94.437-15.26 106.883-61.708a86.7 86.7 0 0 0 2.273-33.502h35.3v-30.61l109.858-7.968v-96.365l-286.655-21.91a71.6 71.6 0 0 0-17.094-2.072c-9.53 0-18.62 1.88-26.934 5.265l-19.553-31.793zM260.637 244.04a69 69 0 0 1 17.998 2.37c36.692 9.832 58.323 47.3 48.492 83.992s-47.3 58.326-83.992 48.494c-36.692-9.83-58.326-47.3-48.494-83.992c7.99-29.812 34.222-49.684 63.46-50.814q1.266-.05 2.537-.05zm3.633 19.747l-8.225 30.697l-22.47-22.47l-13.216 13.215l22.47 22.47l-30.695 8.226l4.838 18.053l30.695-8.226l-8.225 30.695l18.053 4.835l8.225-30.693l22.47 22.47l13.214-13.216l-22.468-22.47l30.695-8.226l-4.837-18.052l-30.695 8.224l8.224-30.697l-18.052-4.838z","frozen-orb":"M255.063 15.47c-131.508 0-238.657 107.12-238.657 238.624S123.558 491.75 255.062 491.75S493.687 385.6 493.687 254.094c0-131.504-107.117-238.625-238.625-238.625zm0 18.343c121.407 0 219.28 98.877 219.28 220.28c0 121.408-97.877 219.313-219.28 219.313S35.75 375.496 35.75 254.094c0-121.404 97.905-220.28 219.313-220.28zm-.032 19.28c-110.986 0-200.75 89.763-200.75 200.75c0 110.988 89.764 200.75 200.75 200.75c110.99 0 200.75-89.762 200.75-200.75c0-110.987-89.76-200.75-200.75-200.75m-.843 16.532l12.313 62.72l51-21.095l-46.094 46.094l6.22 31.687l-12.5 3.345L273 221.72l29.313-7.876l-3.25-12.094l31.343-10.72l16.813-62.81l7.217 54.56l60.313-20.624l-48.313 42.156l42.375 33l-61.625-16.187l-24.25 21.156l-10.03-10.03l-21.47 21.5l21.47 21.47l9.218-9.22l24.688 21.563L409.5 270.78l-43.563 33.47l48.22 42.063l-60.97-20.844l-7.406 53.186l-16.81-61.5l-30.22-10.312l3.563-13.313L273 285.657L265.125 315l12.5 3.344l-6.22 31.625l46.095 46.06l-51-21.06l-12.313 62.75l-12.375-63.033l-49.593 20.125l44.686-45.093l-6.125-31.19l13.157-3.53l-7.875-29.344l-29.343 7.875l3.624 13.533l-29.28 10.03L164.28 378.5l-7.374-53.156L96 346.188l48.188-42.063l-43.594-33.5l62.75 16.813l24.03-20.97l8.75 8.75l21.47-21.468l-21.47-21.5l-9.593 9.594l-23.56-20.563l-61.72 16.22l42.47-33.03l-48.345-42.19l60.28 20.626l7.19-54.53l16.81 62.75l30.376 10.374l-3.31 12.344l29.343 7.875l7.875-29.345l-13.188-3.53l6.156-31.25l-44.687-45.126l49.593 20.124l12.375-62.97z","ballista":"m58.076 315.052l24.923 23.666l-20.873 7.685l-40.947-38.87l13.729-14.465l.633.602l10.24 25.64zm212.883-27.218c-32.144 11.865-49.901 46.32-40.914 79.375c8.987 33.053 41.738 53.748 75.463 47.709c33.725-6.04 57.258-36.815 54.215-70.933c-3.043-34.12-31.654-60.27-65.918-60.243a66.2 66.2 0 0 0-22.846 4.092m81 3.115l-10.894-29.575l-24.341 8.962a82.94 82.94 0 0 1 35.255 20.644zM224.851 304.2L30.858 375.636l14.34 39.015l165.884-61.082a83.08 83.08 0 0 1 13.77-49.368zm246.84-46.574L457.32 218.6l-33.085 12.202l14.372 39.025zm19.129-133.348l-54.754-2.415l11.59 9.086l-53.564 21.486l6.995 17.552l53.937-21.631l-2.15 14.538zM202.255 229.161L52.368 293.996l2.966 6.43l153.484-55.023a32.9 32.9 0 0 1-6.553-16.294zM356.88 96l-51.923 19.128l11.994 32.577l23.656-11.268l16.429-7.82l6.303 17.063l21.029 56.949l6.303 17.061l-17.57 4.736l-25.38 6.833l40.167 109.162l51.923-19.128zm11.88 112.392l-124.252 33.5c-2.092.569-4.25.858-6.417.863c-8.308 0-15.743-4.424-18.402-11.642c-3.333-9.034 1.787-19.533 11.86-24.33l116.182-55.34zm-126.401 16.2c-.53-5.94-7.973-8.276-11.804-3.708c-3.83 4.569-.233 11.49 5.708 10.977a6.7 6.7 0 0 0 6.096-7.27z","goblin-head":"M256 33c-8.5 0-21.318 5.745-35.06 16.17s-28.429 25.055-42.167 40.756c-19.597 22.397-37.26 47.053-48.41 64.597l49.582 37.188l49.23 12.307l2.288-6.864l17.074 5.692l-14.957 44.873l22.42 56.05l22.42-56.05l-14.957-44.873l17.074-5.692l2.287 6.864l49.23-12.307l49.583-37.188c-11.15-17.544-28.813-42.2-48.41-64.597c-13.738-15.7-28.424-30.33-42.166-40.756C277.318 38.745 264.5 33 256 33m-91.49 95.213l76 44l-9.02 15.574l-76-44zm182.98 0l9.02 15.574l-76 44l-9.02-15.574zM17.21 146.625c31.804 32.973 63.213 73.408 76.3 111.857c1.59-2.708 3.38-5.333 5.292-7.882c5.009-6.68 11.036-12.972 17.14-19.153c-8.95-12.884-11.752-29.088-12.605-42.886c-29.308-24.142-53.916-37.693-86.127-41.936m477.582 0c-32.21 4.243-56.819 17.794-86.127 41.936c-.853 13.798-3.654 30.002-12.605 42.886c6.104 6.181 12.131 12.474 17.14 19.153c1.912 2.55 3.703 5.174 5.291 7.882c13.088-38.449 44.497-78.884 76.301-111.857m-373.645 23.484c-.023.045-.054.1-.078.145c.137 16.376 2.007 44.095 13.295 55.383l6.364 6.363l-6.364 6.363c-8 8-15.74 15.805-21.164 23.037c-4.688 6.251-7.327 11.823-7.965 16.452l81.118 30.418c4.7-6.847 9.904-13.253 15.285-18.633l16.029-16.03l-.67 22.659c-.25 8.431-.383 16.131-.232 23.41l30.84 11.564L214.707 249h-50.98l-13.364 13.363l-12.726-12.726l11.312-11.313l-13.531-57.512zm269.708 0l-14.272 10.703l-13.531 57.512l11.312 11.313l-12.726 12.726L348.273 249h-50.98l-32.897 82.24l30.842-11.566c.15-7.278.018-14.978-.232-23.408l-.672-22.659l16.03 16.03c5.38 5.38 10.584 11.788 15.284 18.634l55.192-20.697l25.926-9.722c-.638-4.63-3.277-10.2-7.965-16.452c-5.424-7.232-13.164-15.037-21.164-23.037L371.273 232l6.364-6.363c11.288-11.288 13.158-39.007 13.295-55.383c-.024-.045-.055-.1-.078-.145zM157.867 197.65l7.848 33.35H183v-19.975l-10.945-2.736zm196.266 0l-14.188 10.64L329 211.024V231h17.285zM201 215.525V231h19.18l3.287-9.857zm110 0l-22.467 5.618L291.82 231H311zm-205.791 62.51a16 16 0 0 0-.117 1.256c7.79 37.424 34.985 88.461 66.066 129.256c15.682 20.582 32.34 38.649 47.582 51.271C233.983 472.441 248 479 256 479s22.017-6.559 37.26-19.182s31.9-30.689 47.582-51.271c31.081-40.795 58.277-91.832 66.066-129.256c-.02-.41-.063-.83-.117-1.256l-48.027 72.043L256 435.715l-102.764-85.637zm45.756 36.188l15.799 23.699l2.968 2.474c1.753-5.409 4.259-10.906 7.176-16.445zm210.07 0l-25.943 9.728c2.917 5.539 5.423 11.036 7.176 16.445l2.968-2.474zm-162.129 7.73c-1.782 2.76-3.48 5.558-5.006 8.356c-4.27 7.83-7.176 15.717-8.328 21.255l19.67 13.114c-4.116-14.232-5.864-28.048-6.336-42.725m114.188 0c-.472 14.677-2.22 28.493-6.336 42.725l19.67-13.114c-1.152-5.538-4.057-13.425-8.328-21.255c-1.527-2.798-3.224-5.596-5.006-8.356m-19.227 17.457L265 350.236v54.55l7.793-6.495l7.158-14.316c8.04-16.081 12.051-29.95 13.916-44.565m-75.734.002c1.864 14.614 5.876 28.483 13.916 44.563l7.158 14.316l7.793 6.494v-54.549z","wolf-head":"M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6","ogre":"M256 25c-28.625 0-56.434 16.22-82.44 43.912c-26.005 27.692-49.672 66.468-69.4 108.883C64.705 262.625 41 362.57 41 416c0 7 6.83 16.013 21.684 25.064c14.854 9.052 36.296 17.43 59.836 24.295C169.598 479.091 225.5 487 256 487s86.402-7.91 133.48-21.64c23.54-6.866 44.982-15.244 59.836-24.296C464.171 432.013 471 423 471 416c0-53.429-23.705-153.376-63.16-238.205c-19.728-42.415-43.395-81.191-69.4-108.883C312.433 41.221 284.624 25 256 25m-77.154 142.46S227 183 256 183s77.154-15.54 77.154-15.54l5.692 17.08S291 201 256 201s-82.846-16.46-82.846-16.46zM133.4 184.8l63.32 47.491C228.18 248.012 243.108 255 256 255s27.821-6.988 59.28-22.709l63.32-47.49l10.8 14.398l-45.875 34.406c-5.22 22.311-12.93 40.726-21.722 54.29c-5.809 8.961-12.03 16.3-19.078 20.683l12.673 31.684l-7.285 3.742s-8.11 4.173-18.414 8.34S267.28 361 256 361s-23.395-4.49-33.7-8.656c-10.303-4.167-18.413-8.34-18.413-8.34l-7.285-3.742l12.673-31.684c-7.049-4.383-13.27-11.722-19.078-20.683c-8.791-13.564-16.502-31.979-21.722-54.29L122.6 199.2l10.8-14.398zm-86.455 9.798c-2.155.07-4.096.84-5.916 1.927c.008 23.442.097 52.783 1.944 76.786c.407 5.3.947 10.084 1.56 14.496a808 808 0 0 1 24.86-74.29c-2.305-7.398-6.916-12.736-12.024-15.8c-3.638-2.183-7.184-3.224-10.424-3.12zm418.11 0c-3.24-.105-6.786.936-10.424 3.119c-5.108 3.064-9.72 8.402-12.024 15.8a808 808 0 0 1 24.86 74.29a236 236 0 0 0 1.56-14.496c1.847-24.003 1.936-53.344 1.944-76.786c-1.82-1.088-3.761-1.857-5.916-1.927m-273.07 55.459c3.988 11.3 8.61 20.784 13.318 28.048c3.836 5.919 7.759 10.042 11.066 12.74l9.838-24.591c-9.536-3.85-20.536-9.347-34.223-16.197zm128.03 0c-13.686 6.85-24.686 12.348-34.222 16.197l9.838 24.592c3.307-2.699 7.23-6.822 11.066-12.74c4.709-7.265 9.33-16.75 13.319-28.05zM138.34 269.313c12.116.012 25.91 3.348 41.433 10.517l-7.546 16.34c-19.592-9.048-33.85-10.228-43.932-7.682s-16.82 8.716-21.684 17.455c-9.728 17.48-8.685 45.782-2.56 58.032l-16.102 8.05c-9.875-19.75-10.503-50.693 2.934-74.836c6.718-12.071 17.773-22.306 33.004-26.152c3.807-.961 7.824-1.531 12.052-1.683a65 65 0 0 1 2.4-.041zm235.32 0a65 65 0 0 1 2.4.04c4.229.153 8.246.723 12.053 1.684c15.23 3.846 26.286 14.081 33.004 26.152c13.437 24.143 12.809 55.086 2.934 74.836l-16.102-8.05c6.125-12.25 7.168-40.552-2.56-58.032c-4.864-8.74-11.601-14.909-21.684-17.455s-24.34-1.366-43.932 7.682l-7.546-16.34c15.524-7.17 29.317-10.505 41.433-10.517m-130.236 2.355l-23.922 59.805c2.786 1.28 5.783 2.661 9.547 4.183C238.529 339.49 250.413 343 256 343s17.471-3.51 26.951-7.344c3.764-1.522 6.761-2.902 9.547-4.183l-23.922-59.805c-4.217.864-8.35 1.332-12.576 1.332s-8.36-.468-12.576-1.332m-107.549 60.207l94.418 47.21C238.301 376.514 246.871 375 256 375s17.699 1.513 25.707 4.086l94.418-47.211l-41.537 83.076c10.698 11.12 18.648 21.558 23.775 26.686l-12.726 12.726C327.515 436.242 298 393 256 393s-71.515 43.242-89.637 61.363l-12.726-12.726c5.128-5.128 13.078-15.567 23.777-26.688zm40.252 40.252l14.34 28.68l14.34-14.34zm159.746 0l-28.68 14.34l14.34 14.34z","crowned-skull":"m92.406 13.02l-.164 156.353c3.064.507 6.208 1.38 9.39 2.627c36.496 14.306 74.214 22.435 111.864 25.473l43.402-60.416l42.317 58.906c36.808-4.127 72.566-12.502 105.967-24.09c3.754-1.302 7.368-2.18 10.818-2.6l1.523-156.252l-75.82 95.552l-34.084-95.55l-53.724 103.74l-53.722-103.74l-35.442 95.55l-72.32-95.55h-.006zm164.492 156.07l-28.636 39.86l28.634 39.86l28.637-39.86zM86.762 187.55c-2.173-.08-3.84.274-5.012.762c-2.345.977-3.173 2.19-3.496 4.196c-.645 4.01 2.825 14.35 23.03 21.36c41.7 14.468 84.262 23.748 126.778 26.833l-17.75-24.704c-38.773-3.285-77.69-11.775-115.5-26.596c-3.197-1.253-5.877-1.77-8.05-1.85zm333.275.19c-2.156.052-5.048.512-8.728 1.79c-33.582 11.65-69.487 20.215-106.523 24.646l-19.264 26.818c40.427-2.602 80.433-11.287 119.22-26.96c15.913-6.43 21.46-17.81 21.36-22.362c-.052-2.276-.278-2.566-1.753-3.274c-.738-.353-2.157-.71-4.313-.658zm-18.117 47.438c-42.5 15.87-86.26 23.856-130.262 25.117l-14.76 20.547l-14.878-20.71c-44.985-1.745-89.98-10.23-133.905-24.306c-12.78 28.51-18.94 61.14-19.603 93.44c37.52 17.497 62.135 39.817 75.556 64.63C177 417.8 179.282 443.62 174.184 467.98c7.72 5.007 16.126 9.144 24.98 12.432l5.557-47.89l18.563 2.154l-5.935 51.156c9.57 2.21 19.443 3.53 29.377 3.982v-54.67h18.69v54.49c9.903-.638 19.705-2.128 29.155-4.484l-5.857-50.474l18.564-2.155l5.436 46.852c8.747-3.422 17.004-7.643 24.506-12.69c-5.758-24.413-3.77-49.666 9.01-72.988c13.28-24.234 37.718-46 74.803-64.29c-.62-33.526-6.687-66.122-19.113-94.23zm-266.733 47.006c34.602.23 68.407 12.236 101.358 36.867c-46.604 33.147-129.794 34.372-108.29-36.755q3.472-.135 6.933-.11zm242.825 0q3.46-.023 6.93.11c21.506 71.128-61.684 69.903-108.288 36.757c32.95-24.63 66.756-36.637 101.358-36.866zM255.164 332.14c11.77 21.725 19.193 43.452 25.367 65.178h-50.737c4.57-21.726 13.77-43.45 25.37-65.18z","guarded-tower":"M71.604 21.99v111.12l61.156 75.814v188.654H93.408l-28.7 92.836h151.1l-6.103-92.613h.043l-1.17-119.35l-18.687.185l.848 86.545h-22.92c-13.43-71.44 4.462-150.097 60.967-158.86c-9.133-11.458-15.006-27.38-15.006-45.02c0-34.844 22.177-62.962 49.413-62.962c1.703 0 3.466-.262 5.123 0h.002c24.873 3.23 44.29 30.293 44.29 62.96c0 18.09-6.196 34.244-15.74 45.755c51.727 9.73 76.564 84.763 61.333 158.127h-24.616l.85-86.545l-18.688-.184l-1.115 113.64l-7.323 98.324h146.54l-28.702-92.836H385.79V208.924l61.155-75.813V21.99H382.52v52.414h-39.213V21.99h-65.123v52.414H239.67V21.99h-65.125v52.414h-38.512V21.99h-64.43zm180.652 326.62v142.245h18.69V348.61z","two-coins":"M264.4 95.01c-35.6-.06-80.2 11.19-124.2 34.09C96.27 152 61.45 182 41.01 211.3c-20.45 29.2-25.98 56.4-15.92 75.8c10.07 19.3 35.53 30.4 71.22 30.4c35.69.1 80.29-11.2 124.19-34c44-22.9 78.8-53 99.2-82.2c20.5-29.2 25.9-56.4 15.9-75.8c-10.1-19.3-35.5-30.49-71.2-30.49m91.9 70.29c-3.5 15.3-11.1 31-21.8 46.3c-22.6 32.3-59.5 63.8-105.7 87.8c-46.2 24.1-93.1 36.2-132.5 36.2c-18.6 0-35.84-2.8-50.37-8.7l10.59 20.4c10.08 19.4 35.47 30.5 71.18 30.5c35.7 0 80.3-11.2 124.2-34.1c44-22.8 78.8-52.9 99.2-82.2c20.4-29.2 26-56.4 15.9-75.7zm28.8 16.8c11.2 26.7 2.2 59.2-19.2 89.7c-18.9 27.1-47.8 53.4-83.6 75.4c11.1 1.2 22.7 1.8 34.5 1.8c49.5 0 94.3-10.6 125.9-27.1c31.7-16.5 49.1-38.1 49.1-59.9s-17.4-43.4-49.1-59.9c-16.1-8.4-35.7-15.3-57.6-20m106.7 124.8c-10.2 11.9-24.2 22.4-40.7 31c-35 18.2-82.2 29.1-134.3 29.1c-21.2 0-41.6-1.8-60.7-5.2c-23.2 11.7-46.5 20.4-68.9 26.1c1.2.7 2.4 1.3 3.7 2c31.6 16.5 76.4 27.1 125.9 27.1s94.3-10.6 125.9-27.1c31.7-16.5 49.1-38.1 49.1-59.9z","heart-plus":"M372.48 31.215c-77.65 0-116.48 65.73-116.48 65.73s-38.83-65.72-116.48-65.72c-37.14 0-107.77 33.72-107.77 125.13c0 161.24 224.25 324.43 224.25 324.43s224.25-163.19 224.25-324.43c0-91.42-70.63-125.13-107.77-125.14m-145.492 115.02h60.698v79.415h79.238v60.7h-79.238v79.884h-60.698V286.35h-80.064v-60.7h80.064z"};
+  const tdScaleFor = (avg) => Math.min(1.3, 1 + 0.075 * Math.log10(1 + Math.max(0, avg) / 1000));
+  const tdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
+  const tdMe = () => chatUid();
+  const tdLive = (p) => p && typeof p.hb === 'number' && tdNow() - p.hb < 30000;
+  async function tdGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('the server answered ' + r.status); return r.json(); }
+  async function tdPatch(body){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }); return r.ok; }
+  const tdP = (k) => `td/r/${TDG.rid}/${k}`;
+  // the difficulty for these players: from their average points right now
+  async function tdScaleNow(uids){
+    try{ await scAllLoad(true); }catch(e){}
+    const bals = uids.map(u => (SCALL.m && SCALL.m[u] ? SCALL.m[u].b : 0));
+    return Math.round(tdScaleFor(bals.reduce((a, b) => a + b, 0) / Math.max(1, bals.length)) * 100) / 100;
+  }
+  // ----- the window -----
+  function tdOpen(){
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(TDG.on){ return; }
+    TDG.on = true; TDG.view = 'lobby';
+    const w = document.createElement('div'); w.className = 'td-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Tower Defense');
+    w.innerHTML = `<div class="td-back"></div><div class="td-box"><div class="td-head"><b>🏰 Tower Defense</b><span class="td-mode"></span><button type="button" class="td-leave" hidden>Leave game</button><button type="button" class="td-x" aria-label="Close">${ICON_X}</button></div><div class="td-main"></div></div>`;
+    document.body.appendChild(w); TDG.win = w;
+    w.querySelector('.td-x').addEventListener('click', tdClose);
+    w.querySelector('.td-back').addEventListener('click', tdClose);
+    w.querySelector('.td-leave').addEventListener('click', () => tdLeave());
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); if(TDG.pick){ TDG.pick = ''; tdUi(); } else tdClose(); } else if(/^[1-4]$/.test(e.key) && TDG.view === 'game'){ TDG.sel = TD_TROOPS[+e.key - 1].k; TDG.pick = ''; tdUi(); } });
+    w.tabIndex = -1; w.focus();
+    tdLobby();
+  }
+  function tdClose(){
+    if(!TDG.on) return;
+    if(TDG.rid && TDG.room && TDG.room.st !== 'over' && TDG.room.m === 'team'){ toast('You left the window — you\'re still in the team. Open Tower Defense again to get back in.', 3500); }
+    TDG.on = false; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = TDG.raf = 0;
+    if(TDG.win){ TDG.win.remove(); TDG.win = null; }
+  }
+  // ----- the lobby: play solo, start or join a team, the leaderboards -----
+  async function tdLobby(){
+    TDG.view = 'lobby'; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = 0;
+    const main = TDG.win && TDG.win.querySelector('.td-main'); if(!main) return;
+    TDG.win.querySelector('.td-leave').hidden = true; TDG.win.querySelector('.td-mode').textContent = '';
+    main.innerHTML = `<div class="td-lobby"><div class="td-lob-l"><p class="td-intro">Enemies march down the road to your castle. Put troops beside the road to stop them — between waves you can build, upgrade and sell. Every wave you clear gives you gold. Play alone or as a team: in a team everyone has their own gold, and the castle is shared.</p>
+      <div class="td-lob-btns"><button type="button" class="td-btn pri" data-td="solo">⚔️ Play solo</button><button type="button" class="td-btn" data-td="team">👥 Start a team</button></div>
+      <div class="td-sub">Open teams</div><div class="td-open"><p class="td-dim">Looking…</p></div>
+      <p class="td-dim td-note">Difficulty follows your points: the more points the players have, the tougher the enemies and the dearer the troops (up to ×1.3).</p></div>
+      <div class="td-lob-r"><div class="td-lbtabs"><button type="button" data-lb="s" class="${TDG.lbTab === 's' ? 'on' : ''}">Solo</button><button type="button" data-lb="t" class="${TDG.lbTab === 't' ? 'on' : ''}">Team</button></div><ol class="td-lb"><li class="td-dim">Loading…</li></ol></div></div>
+      <p class="td-credit">Pictures: icons by Lorc, Delapouite, Skoll and Zeromancer from game-icons.net (CC BY 3.0).</p>`;
+    main.querySelector('[data-td="solo"]').addEventListener('click', tdSolo);
+    main.querySelector('[data-td="team"]').addEventListener('click', tdTeamNew);
+    main.querySelectorAll('[data-lb]').forEach(b => b.addEventListener('click', () => { TDG.lbTab = b.dataset.lb; tdLobbyLb(); main.querySelectorAll('[data-lb]').forEach(x => x.classList.toggle('on', x === b)); }));
+    // a game you're still in?
+    try{ const mine = await tdGet(`td/r/s${tdMe()}`); if(mine && mine.st && mine.st !== 'over' && TDG.view === 'lobby'){ const b = main.querySelector('[data-td="solo"]'); b.textContent = `⚔️ Carry on solo (wave ${mine.w})`; } }catch(e){}
+    tdLobbyLb(); tdLobbyOpen();
+    TDG.poll = setInterval(() => { if(TDG.view === 'lobby') tdLobbyOpen(); }, 5000);
+  }
+  async function tdLobbyLb(){
+    const ol = TDG.win && TDG.win.querySelector('.td-lb'); if(!ol) return;
+    let d = null; try{ d = await tdGet(`td/lb/${TDG.lbTab}`); }catch(e){}
+    if(!TDG.win) return;
+    const rows = Object.entries(d || {}).map(([k, v]) => ({ k, n: v && v.n || '?', w: (v && v.w) | 0, sc: v && v.sc })).filter(x => x.w > 0).sort((a, b) => b.w - a.w).slice(0, 10);
+    ol.innerHTML = rows.length ? rows.map((x, i) => `<li class="${x.k === tdMe() ? 'me' : ''}"><span class="td-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b>${escapeHtml(x.n)}</b><i>wave ${x.w}${x.sc && x.sc > 1 ? ` · ×${x.sc}` : ''}</i></li>`).join('') : `<li class="td-dim">Nobody yet — be the first!</li>`;
+  }
+  async function tdLobbyOpen(){
+    const box = TDG.win && TDG.win.querySelector('.td-open'); if(!box) return;
+    let d = null; try{ d = await tdGet('td/open'); }catch(e){}
+    if(!TDG.win || TDG.view !== 'lobby') return;
+    const now = tdNow(), list = Object.entries(d || {}).filter(([k, v]) => v && now - (v.t || 0) < 45000);
+    box.innerHTML = list.length ? list.map(([k, v]) => `<div class="td-oteam"><span><b>${escapeHtml(v.n || 'A team')}</b><i>${v.c || 1} player${(v.c || 1) === 1 ? '' : 's'} · ${v.w > 1 ? 'wave ' + v.w : 'not started'}</i></span><button type="button" class="td-btn" data-join="${escapeHtml(k)}">Join</button></div>`).join('') : `<p class="td-dim">No teams right now — start one and your friends can join from here.</p>`;
+    box.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', () => tdJoin(b.dataset.join)));
+  }
+  // ----- starting / joining -----
+  const tdNewRoom = (m, st, sc) => ({ m, h: tdMe(), st, w: 1, lv: TD_LIVES, sc, np: 1, best: 0, t: bjSv, pl: { [tdMe()]: { n: chatName().slice(0, CHAT_NAME_MAX), g: TD_START_GOLD, hb: bjSv } } });
+  async function tdSolo(){
+    const rid = 's' + tdMe();
+    let cur = null; try{ cur = await tdGet(`td/r/${rid}`); }catch(e){}
+    if(!cur || !cur.st || cur.st === 'over'){
+      const sc = await tdScaleNow([tdMe()]);
+      if(!(await tdPatch({ [`td/r/${rid}`]: tdNewRoom('solo', 'build', sc) }))){ toast("Couldn't start the game — check your connection.", 2600); return; }
+    }
+    tdEnter(rid);
+  }
+  async function tdTeamNew(){
+    const rid = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const sc = await tdScaleNow([tdMe()]);
+    const ok = await tdPatch({ [`td/r/${rid}`]: tdNewRoom('team', 'lobby', sc), [`td/open/${rid}`]: { n: `${chatName().slice(0, CHAT_NAME_MAX)}'s team`, c: 1, w: 1, t: bjSv } });
+    if(!ok){ toast("Couldn't start a team — check your connection.", 2600); return; }
+    tdEnter(rid);
+  }
+  async function tdJoin(rid){
+    let r = null; try{ r = await tdGet(`td/r/${rid}`); }catch(e){}
+    if(!r || !r.st || r.st === 'over'){ toast('That team has finished.', 2000); tdLobbyOpen(); return; }
+    const me = tdMe(), have = r.pl && r.pl[me];
+    if(!(await tdPatch({ [`td/r/${rid}/pl/${me}`]: { n: chatName().slice(0, CHAT_NAME_MAX), g: have ? have.g : TD_START_GOLD, hb: bjSv } }))){ toast("Couldn't join — check your connection.", 2400); return; }
+    tdEnter(rid);
+  }
+  function tdEnter(rid){
+    TDG.rid = rid; TDG.view = 'game'; TDG.room = null; TDG.battle = null; TDG.bKey = ''; TDG.pick = ''; TDG.committing = false;
+    clearInterval(TDG.poll); clearInterval(TDG.hb);
+    const main = TDG.win.querySelector('.td-main');
+    TDG.win.querySelector('.td-leave').hidden = false;
+    main.innerHTML = `<div class="td-game"><div class="td-bar"><span class="td-lives" title="Castle health">❤️ <b>–</b></span><span class="td-wave" title="Wave">🌊 <b>–</b></span><span class="td-gold" title="Your gold">💰 <b>–</b></span><span class="td-diff" title="Difficulty, from the players' average points: enemies are this much tougher and troops this much dearer"></span><span class="td-players"></span></div>
+      <div class="td-stage"><canvas class="td-cv"></canvas><div class="td-msg" hidden></div></div>
+      <div class="td-foot"><div class="td-troops"></div><div class="td-act"></div></div></div>`;
+    const cv = main.querySelector('.td-cv'); TDG.cv = cv; TDG.bg = null;
+    cv.addEventListener('pointermove', (e) => { TDG.hover = tdCellAt(e); });
+    cv.addEventListener('pointerleave', () => { TDG.hover = ''; });
+    cv.addEventListener('click', (e) => tdClick(tdCellAt(e)));
+    tdPoll(); TDG.poll = setInterval(tdPoll, 800);
+    TDG.hb = setInterval(tdBeat, 8000); tdBeat();
+    cancelAnimationFrame(TDG.raf); const loop = () => { if(!TDG.on || TDG.view !== 'game') return; tdFrame(); TDG.raf = requestAnimationFrame(loop); }; TDG.raf = requestAnimationFrame(loop);
+  }
+  async function tdLeave(){
+    const rid = TDG.rid, r = TDG.room, me = tdMe(); TDG.rid = ''; TDG.room = null;
+    if(rid && r){
+      const others = Object.keys(r.pl || {}).filter(u => u !== me && tdLive(r.pl[u]));
+      if(r.m === 'solo'){ /* (kept: you can carry on later) */ }
+      else if(!others.length) tdPatch({ [`td/r/${rid}`]: null, [`td/open/${rid}`]: null });
+      else tdPatch({ [`td/r/${rid}/pl/${me}`]: null, ...(r.h === me ? { [`td/r/${rid}/h`]: others.sort()[0] } : {}) });
+    }
+    if(TDG.on) tdLobby();
+  }
+  // still here (and the host keeps the open-team notice fresh; takes over if the host has gone)
+  async function tdBeat(){
+    const r = TDG.room, me = tdMe(); if(!TDG.rid) return;
+    const body = { [tdP(`pl/${me}/hb`)]: bjSv };
+    if(r && r.h !== me && r.pl && !tdLive(r.pl[r.h]) && Object.keys(r.pl).filter(u => tdLive(r.pl[u])).sort()[0] === me) body[tdP('h')] = me;
+    if(r && r.m === 'team' && (r.h === me || body[tdP('h')]) && r.st !== 'over') body[`td/open/${TDG.rid}`] = { n: `${(r.pl[me] || {}).n || 'A'}'s team`, c: Object.values(r.pl || {}).filter(tdLive).length || 1, w: r.w || 1, t: bjSv };
+    tdPatch(body);
+  }
+  async function tdPoll(){
+    if(!TDG.rid || TDG.polling) return; TDG.polling = true;
+    try{
+      const r = await tdGet(`td/r/${TDG.rid}`);
+      if(!TDG.rid) return;
+      if(!r){ toast('That game has ended.', 2000); TDG.rid = ''; tdLobby(); return; }
+      const was = TDG.room; TDG.room = r;
+      if(r.pl && !r.pl[tdMe()] && r.m === 'team'){ toast('You were taken out of the team (away too long).', 2600); TDG.rid = ''; tdLobby(); return; }
+      if(!was || was.st !== r.st || was.w !== r.w || JSON.stringify(was.tw || {}) !== JSON.stringify(r.tw || {}) || JSON.stringify(was.pl || {}) !== JSON.stringify(r.pl || {})) tdUi();
+      tdAdvance();
+    }catch(e){}
+    TDG.polling = false;
+  }
+  // ----- the bars and buttons -----
+  function tdUi(){
+    const r = TDG.room, W = TDG.win; if(!W || !r || TDG.view !== 'game') return;
+    const me = tdMe(), my = (r.pl || {})[me] || {}, sc = r.sc || 1, build = r.st === 'build' || r.st === 'lobby';
+    W.querySelector('.td-mode').textContent = r.m === 'team' ? 'Team game' : 'Solo';
+    W.querySelector('.td-lives b').textContent = Math.max(0, r.lv | 0);
+    W.querySelector('.td-wave b').textContent = r.w;
+    W.querySelector('.td-gold b').textContent = (my.g | 0).toLocaleString();
+    W.querySelector('.td-diff').textContent = sc > 1 ? `Difficulty ×${sc}` : 'Difficulty ×1';
+    const live = Object.entries(r.pl || {}).filter(([u, p]) => tdLive(p) || u === me);
+    W.querySelector('.td-players').innerHTML = r.m === 'team' ? live.map(([u, p]) => `<span class="td-pl${u === me ? ' me' : ''}" title="${escapeHtml(p.n || '')}: ${p.g | 0} gold"><i style="background:${chatColor(p.n || '')}">${escapeHtml((p.n || '?').slice(0, 1).toUpperCase())}</i>${(p.g | 0).toLocaleString()}</span>`).join('') : '';
+    // the troops to buy
+    const tr = W.querySelector('.td-troops');
+    tr.innerHTML = TD_TROOPS.map((t, i) => { const c = tdCost(t.k, sc); return `<button type="button" class="td-tb${TDG.sel === t.k && !TDG.pick ? ' on' : ''}" data-k="${t.k}" ${!build || (my.g | 0) < c ? 'disabled' : ''} title="${escapeHtml(t.name)} (${i + 1}) — ${escapeHtml(t.desc)}"><span class="td-ti" style="--c:${t.col}">${tdIconSvg(t.ic)}</span><b>${escapeHtml(t.name)}</b><i>💰 ${c}</i></button>`; }).join('');
+    tr.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { TDG.sel = b.dataset.k; TDG.pick = ''; tdUi(); }));
+    // what you can do now
+    const act = W.querySelector('.td-act'), tw = TDG.pick && (r.tw || {})[TDG.pick];
+    let h = '';
+    if(tw && build){
+      const own = tw.o === me, t = tdTroop(tw.k), up = tw.lv < 3 ? tdUpCost(tw.k, tw.lv, sc) : 0, sell = tdSellFor(tw, sc), on = (r.pl || {})[tw.o];
+      h += `<div class="td-pickinfo"><b>${escapeHtml(t.name)} · level ${tw.lv}</b><i>${own ? 'yours' : 'built by ' + escapeHtml(on ? on.n : 'someone')}</i></div>`;
+      if(own){ h += tw.lv < 3 ? `<button type="button" class="td-btn" data-a="up" ${(my.g | 0) < up ? 'disabled' : ''}>⬆️ Upgrade · ${up}</button>` : `<span class="td-dim">Max level</span>`; h += `<button type="button" class="td-btn" data-a="sell">Sell · +${sell}</button>`; }
+    }
+    if(r.st === 'lobby') h += `<span class="td-dim">${live.length} in the team — friends can join from Tower Defense › Open teams. Build first if you like.</span><button type="button" class="td-btn pri" data-a="go">▶ Start wave 1</button>`;
+    else if(r.st === 'build') h += `<button type="button" class="td-btn pri" data-a="go">▶ ${r.w === 1 ? 'Start' : 'Next wave'} · wave ${r.w}</button>`;
+    else if(r.st === 'run') h += `<span class="td-dim td-left"></span>`;
+    act.innerHTML = h;
+    act.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { b.disabled = true; ({ up: tdUpgrade, sell: tdSell, go: tdGo })[b.dataset.a](); }));
+    // game over
+    const msg = W.querySelector('.td-msg');
+    if(r.st === 'over'){ msg.hidden = false; msg.innerHTML = `<b>🏰 The castle fell</b><span>${r.m === 'team' ? 'Your team' : 'You'} survived <em>${r.best | 0}</em> wave${(r.best | 0) === 1 ? '' : 's'}.</span><div><button type="button" class="td-btn pri" data-a="again">Play again</button><button type="button" class="td-btn" data-a="lobby">Back</button></div>`;
+      msg.querySelector('[data-a="again"]').addEventListener('click', tdAgain); msg.querySelector('[data-a="lobby"]').addEventListener('click', () => tdLeave()); }
+    else msg.hidden = true;
+  }
+  const tdIconSvg = (n) => `<svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="${TD_ART[n]}"/></svg>`;
+  // ----- your moves -----
+  function tdClick(cell){
+    const r = TDG.room; if(!r || !cell) return;
+    const tw = (r.tw || {})[cell];
+    if(tw){ TDG.pick = TDG.pick === cell ? '' : cell; tdUi(); return; }
+    TDG.pick = '';
+    if(!(r.st === 'build' || r.st === 'lobby')){ toast('Wait for this wave to end, then build.', 1600); tdUi(); return; }
+    if(!TD_BUILD.has(cell)){ toast('Troops go right beside the road.', 1400); tdUi(); return; }
+    tdPlace(cell);
+  }
+  async function tdPlace(cell){
+    const r = TDG.room, me = tdMe(), my = (r.pl || {})[me] || {}, c = tdCost(TDG.sel, r.sc || 1);
+    if((my.g | 0) < c){ toast(`A ${tdTroop(TDG.sel).name} costs ${c} gold — you have ${my.g | 0}.`, 1800); return; }
+    const t = { k: TDG.sel, lv: 1, o: me, c };
+    r.tw = r.tw || {}; r.tw[cell] = t; my.g -= c; tdUi();       // (show it straight away)
+    const ok = await tdPatch({ [tdP(`tw/${cell}`)]: t, [tdP(`pl/${me}/g`)]: my.g });
+    if(!ok){ toast("Couldn't place it there (someone may have just built on it).", 2000); }
+    tdPoll();
+  }
+  async function tdUpgrade(){
+    const r = TDG.room, me = tdMe(), my = (r.pl || {})[me] || {}, cell = TDG.pick, tw = (r.tw || {})[cell]; if(!tw || tw.o !== me || tw.lv >= 3) return;
+    const u = tdUpCost(tw.k, tw.lv, r.sc || 1); if((my.g | 0) < u) return;
+    const ok = await tdPatch({ [tdP(`tw/${cell}`)]: { k: tw.k, lv: tw.lv + 1, o: me, c: (tw.c || 0) + u }, [tdP(`pl/${me}/g`)]: (my.g | 0) - u });
+    if(!ok) toast("Couldn't upgrade it.", 1600);
+    tdPoll();
+  }
+  async function tdSell(){
+    const r = TDG.room, me = tdMe(), my = (r.pl || {})[me] || {}, cell = TDG.pick, tw = (r.tw || {})[cell]; if(!tw || tw.o !== me) return;
+    TDG.pick = '';
+    const ok = await tdPatch({ [tdP(`tw/${cell}`)]: null, [tdP(`pl/${me}/g`)]: (my.g | 0) + tdSellFor(tw, r.sc || 1) });
+    if(!ok) toast("Couldn't sell it.", 1600);
+    tdPoll();
+  }
+  async function tdGo(){
+    const r = TDG.room; if(!r || !(r.st === 'build' || r.st === 'lobby')) return;
+    const players = Object.keys(r.pl || {}).filter(u => tdLive(r.pl[u]) || u === tdMe());
+    const sc = await tdScaleNow(players);
+    const ok = await tdPatch({ [tdP('st')]: 'run', [tdP('t0')]: bjSv, [tdP('sc')]: sc, [tdP('np')]: Math.max(1, players.length) });
+    if(!ok) toast("Couldn't start the wave.", 1600);
+    tdPoll();
+  }
+  async function tdAgain(){
+    const r = TDG.room; if(!r) return;
+    const me = tdMe(), pl = {};
+    for(const [u, p] of Object.entries(r.pl || {})) if(tdLive(p) || u === me) pl[u] = { n: p.n, g: TD_START_GOLD, hb: bjSv };
+    const sc = await tdScaleNow(Object.keys(pl));
+    await tdPatch({ [`td/r/${TDG.rid}`]: { m: r.m, h: me, st: r.m === 'team' ? 'lobby' : 'build', w: 1, lv: TD_LIVES, sc, np: Object.keys(pl).length, best: 0, t: bjSv, pl } });
+    TDG.battle = null; TDG.bKey = ''; tdPoll();
+  }
+  // a wave has been fought to the end: count it (the host does it straight away; anyone else if the host doesn't)
+  async function tdCommit(b){
+    const r = TDG.room; if(!r || r.st !== 'run' || TDG.committing) return;
+    const me = tdMe();
+    if(r.h !== me && tdNow() - (b.endAt || tdNow()) < 3500) return;
+    TDG.committing = true;
+    const lv = (r.lv | 0) - b.lost, over = lv <= 0, body = {};
+    body[tdP('cw')] = r.w; body[tdP('lv')] = Math.max(0, lv); body[tdP('st')] = over ? 'over' : 'build';
+    if(!over){ body[tdP('w')] = r.w + 1; body[tdP('best')] = r.w; }
+    for(const [u, p] of Object.entries(r.pl || {})) body[tdP(`pl/${u}/g`)] = (p.g | 0) + (b.gold[u] || 0) + (over ? 0 : tdWaveGold(r.w));
+    const best = over ? (r.best | 0) : r.w;
+    if(best > 0){
+      const names = Object.values(r.pl || {}).map(p => p.n).filter(Boolean).join(', ').slice(0, 60) || '?';
+      if(r.m === 'solo') body[`td/lb/s/${me}`] = { n: chatName().slice(0, CHAT_NAME_MAX), w: best, sc: r.sc || 1, t: bjSv };
+      else body[`td/lb/t/${TDG.rid}`] = { n: names, w: best, sc: r.sc || 1, t: bjSv };
+    }
+    if(over && r.m === 'team') body[`td/open/${TDG.rid}`] = null;
+    let ok = await tdPatch(body);
+    if(!ok && best > 0){ delete body[`td/lb/s/${me}`]; delete body[`td/lb/t/${TDG.rid}`]; ok = await tdPatch(body); }     // (a better score was already on the board)
+    TDG.committing = false;
+    if(ok && over) try{ if(!chatBlock()) tdPost(r, best); }catch(e){}
+    tdPoll();
+  }
+  function tdPost(r, best){
+    const txt = `${r.m === 'team' ? 'and team held' : 'held'} the castle for ${best} wave${best === 1 ? '' : 's'} in Tower Defense 🏰`.slice(0, chatMaxLen());
+    chatAuth().then(tk => fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tk)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: txt, t: bjSv, u: chatUid() }) })).catch(() => {});
+  }
+  // the fight, worked out up to now — from the drawing loop and from the poll too (a tab in the background doesn't draw)
+  function tdAdvance(){
+    const r = TDG.room; if(!r || r.st !== 'run' || !r.t0) return null;
+    const key = r.w + '|' + r.t0;
+    if(TDG.bKey !== key){ TDG.bKey = key; TDG.battle = tdBattle(r.w, r.tw || {}, r.sc || 1, r.np || 1, r.lv); }
+    const B = TDG.battle; B.runTo(Math.max(0, (tdNow() - r.t0) / 1000));
+    if(B.done){ if(!B.endAt) B.endAt = tdNow(); tdCommit(B); }
+    return B;
+  }
+  // ----- drawing -----
+  function tdCellAt(e){
+    const cv = TDG.cv; if(!cv) return '';
+    const b = cv.getBoundingClientRect(), x = Math.floor((e.clientX - b.left) / b.width * TD_COLS), y = Math.floor((e.clientY - b.top) / b.height * TD_ROWS);
+    return x >= 0 && y >= 0 && x < TD_COLS && y < TD_ROWS ? x + '_' + y : '';
+  }
+  // a picture (game-icons path) in one colour, cached at the size it's drawn
+  function tdSprite(n, col, px){
+    const key = n + col + px; let c = TDG.spr.get(key); if(c) return c;
+    c = document.createElement('canvas'); c.width = c.height = px; const x = c.getContext('2d');
+    x.scale(px / 512, px / 512); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 18; x.shadowOffsetY = 10; x.fillStyle = col; x.fill(new Path2D(TD_ART[n]));
+    if(TDG.spr.size > 80) TDG.spr.clear(); TDG.spr.set(key, c); return c;
+  }
+  function tdBackground(W, H, u){
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    for(let gy = 0; gy < TD_ROWS; gy++) for(let gx = 0; gx < TD_COLS; gx++){ x.fillStyle = (gx + gy) % 2 ? '#2f5a33' : '#33613a'; x.fillRect(gx * u, gy * u, u + 1, u + 1); }
+    // little tufts
+    const rnd = tdRng(7); x.fillStyle = 'rgba(160,220,120,.18)'; for(let i = 0; i < 160; i++){ x.beginPath(); x.arc(rnd() * W, rnd() * H, u * (0.04 + rnd() * 0.06), 0, 7); x.fill(); }
+    // the road
+    x.lineCap = 'round'; x.lineJoin = 'round';
+    const road = () => { x.beginPath(); TD_ROUTE.forEach(([px, py], i) => { const X = (px + .5) * u, Y = (py + .5) * u; if(i) x.lineTo(X, Y); else x.moveTo(X, Y); }); };
+    road(); x.strokeStyle = '#6b4f2a'; x.lineWidth = u * 0.98; x.stroke();
+    road(); x.strokeStyle = '#c9a76a'; x.lineWidth = u * 0.82; x.stroke();
+    road(); x.setLineDash([u * .18, u * .32]); x.strokeStyle = 'rgba(120,90,50,.35)'; x.lineWidth = u * 0.06; x.stroke(); x.setLineDash([]);
+    // the castle
+    const cs = u * 2.1; x.drawImage(tdSprite('guarded-tower', '#e9e4d8', Math.round(cs)), (TD_CASTLE[0] + .5) * u - cs / 2, (TD_CASTLE[1] + .5) * u - cs * .62, cs, cs);
+    // where they come from
+    x.fillStyle = 'rgba(255,90,90,.85)'; x.beginPath(); const sy = (TD_ROUTE[0][1] + .5) * u; x.moveTo(u * .05, sy - u * .28); x.lineTo(u * .42, sy); x.lineTo(u * .05, sy + u * .28); x.fill();
+    return c;
+  }
+  function tdFrame(){
+    const cv = TDG.cv, r = TDG.room; if(!cv || !cv.isConnected) return;
+    const box = cv.parentElement.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const u = Math.floor(Math.min(box.width / TD_COLS, (box.height || 9999) / TD_ROWS) * dpr), W = u * TD_COLS, H = u * TD_ROWS;
+    if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; cv.style.width = W / dpr + 'px'; cv.style.height = H / dpr + 'px'; TDG.bg = null; }
+    const x = cv.getContext('2d');
+    if(!TDG.bg || TDG.bg.width !== W) TDG.bg = tdBackground(W, H, u);
+    x.drawImage(TDG.bg, 0, 0);
+    if(!r) return;
+    const build = r.st === 'build' || r.st === 'lobby', me = tdMe();
+    // where you can build
+    if(build){ x.strokeStyle = 'rgba(255,255,255,.13)'; x.lineWidth = Math.max(1, u * .03); for(const k of TD_BUILD){ if((r.tw || {})[k]) continue; const [gx, gy] = k.split('_').map(Number); x.strokeRect(gx * u + u * .12, gy * u + u * .12, u * .76, u * .76); } }
+    // the fight (worked out up to now)
+    const B = tdAdvance();
+    if(B){
+      const left = TDG.win.querySelector('.td-left'); if(left){ const n = B.foes.filter(f => f.hp > 0).length + (B.total - B.next); left.textContent = B.done ? 'Wave over — counting…' : `Wave ${r.w}: ${n} enem${n === 1 ? 'y' : 'ies'} left${B.lost ? ` · ${B.lost} got through` : ''}`; }
+      const lb = TDG.win.querySelector('.td-lives b'); if(lb) lb.textContent = Math.max(0, (r.lv | 0) - B.lost);
+    }
+    // troops
+    for(const [k, tw] of Object.entries(r.tw || {})){
+      const [gx, gy] = k.split('_').map(Number), t = tdTroop(tw.k); if(!t) continue;
+      const cx = (gx + .5) * u, cy = (gy + .5) * u;
+      x.fillStyle = tw.o === me ? 'rgba(20,18,30,.82)' : 'rgba(30,24,40,.7)'; x.beginPath(); x.arc(cx, cy, u * .44, 0, 7); x.fill();
+      x.lineWidth = Math.max(1, u * .06); x.strokeStyle = TDG.pick === k ? '#fff' : tw.o === me ? t.col : 'rgba(255,255,255,.25)'; x.stroke();
+      let rot = 0;
+      if(B){ const T = B.towers.find(q => q.c === k), s = T && [...B.shots].reverse().find(q => q.x1 === gx && q.y1 === gy); if(s) rot = Math.atan2(s.y2 - gy, s.x2 - gx) * 0.12; }
+      const sp = tdSprite(t.ic, t.col, Math.round(u * .72));
+      x.save(); x.translate(cx, cy); x.rotate(rot); x.drawImage(sp, -u * .36, -u * .38, u * .72, u * .72); x.restore();
+      for(let i = 0; i < tw.lv; i++){ x.fillStyle = '#ffd76a'; x.beginPath(); x.arc(cx - u * .2 + i * u * .2, cy + u * .42, u * .07, 0, 7); x.fill(); }
+    }
+    // the range of what you're about to place / have picked
+    const ring = (k, rng, col) => { const [gx, gy] = k.split('_').map(Number); x.beginPath(); x.arc((gx + .5) * u, (gy + .5) * u, rng * u, 0, 7); x.fillStyle = col + '22'; x.fill(); x.strokeStyle = col + 'aa'; x.lineWidth = Math.max(1, u * .03); x.stroke(); };
+    if(TDG.pick && (r.tw || {})[TDG.pick]){ const tw = r.tw[TDG.pick]; ring(TDG.pick, tdStats(tw.k, tw.lv).range, '#ffffff'); }
+    else if(build && TDG.hover && TD_BUILD.has(TDG.hover) && !(r.tw || {})[TDG.hover]){ const t = tdTroop(TDG.sel); ring(TDG.hover, t.range, t.col); const [gx, gy] = TDG.hover.split('_').map(Number); x.globalAlpha = .55; x.drawImage(tdSprite(t.ic, t.col, Math.round(u * .72)), (gx + .14) * u, (gy + .12) * u, u * .72, u * .72); x.globalAlpha = 1; }
+    if(!B) return;
+    // shots and blasts
+    for(const s of B.shots){ const a = 1 - (B.t - s.t) / 0.14; if(a <= 0) continue; const t = tdTroop(s.k); x.globalAlpha = a; x.strokeStyle = t.col; x.lineWidth = Math.max(1.5, u * (s.k === 'ballista' ? .08 : .05)); x.beginPath(); x.moveTo((s.x1 + .5) * u, (s.y1 + .5) * u); x.lineTo((s.x2 + .5) * u, (s.y2 + .5) * u); x.stroke(); }
+    for(const bm of B.booms){ const a = (B.t - bm.t) / 0.35; if(a >= 1) continue; x.globalAlpha = 1 - a; x.fillStyle = '#ffb02e'; x.beginPath(); x.arc((bm.x + .5) * u, (bm.y + .5) * u, u * (0.3 + a * 1.0), 0, 7); x.fill(); }
+    x.globalAlpha = 1;
+    // enemies
+    for(const f of B.foes){
+      const F = TD_FOES[f.k], [fx, fy] = tdAt(f.d), cx = (fx + .5) * u, cy = (fy + .5) * u, sz = u * F.r * 2.3, dead = f.hp <= 0;
+      if(dead){ const a = 1 - (B.t - (f.deadAt || B.t)) / 0.35; if(a <= 0 || f.gone) continue; x.globalAlpha = a; }
+      const bob = Math.sin(B.t * 9 + f.id) * u * .04;
+      x.drawImage(tdSprite(F.ic, f.slowT > 0 ? '#bdf3ff' : F.col, Math.round(sz)), cx - sz / 2, cy - sz / 2 + bob, sz, sz);
+      if(!dead){ const w = u * .7, p = Math.max(0, f.hp / f.max); x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(cx - w / 2, cy - sz / 2 - u * .14, w, u * .08); x.fillStyle = p > .5 ? '#7dffb2' : p > .25 ? '#ffd76a' : '#ff5e5e'; x.fillRect(cx - w / 2, cy - sz / 2 - u * .14, w * p, u * .08); }
+      x.globalAlpha = 1;
+    }
   }
   chatPanel.addEventListener('click', (e) => { const g = e.target.closest('.chat-games'); if(g){ g.blur(); chatGamesMenu(g); } const eb = e.target.closest('.chat-emo-btn'); if(eb){ eb.blur(); emoPicker(eb); } });
   function bjSessionPost(S){
@@ -26905,6 +27427,151 @@
     if(ok){ SC.s += amt; try{ questEv('gift'); }catch(e){} gpClose(); toast(`💸 Sent ${amt} points to ${bjName(name)}.`, 2400); sfxChip(); chatRenderArcade(); bjCtl(); }
     else { await scLoad(); if(btn){ btn.disabled = false; btn.textContent = 'Send'; } toast("Couldn't send — check your points and connection.", 2400); }
   }
+  // ----- linking devices: one account on several computers/phones -----
+  // Device 1 shows a code (link/c/<code>, 10 minutes). Device 2 types it in and picks which account stays (the main one).
+  // The other account sends everything it can spend to the main one as a gift that's accepted on its own (lk: true),
+  // marks itself merged (scores/<id>/mg, so it drops off the leaderboards), and the device switches to the main account.
+  // Each side's sign-in travels locked with the code (AES-GCM, key from the code), so only someone with the code can use it.
+  // Works again and again: link a third account to either of the first two later.
+  const LK = { code: '', made: 0, watch: 0, busy: false };
+  const LK_LIFE = 10 * 60 * 1000;
+  const lkFrom = () => { try{ const a = JSON.parse(chatLS('lkfrom') || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } };
+  const lkFromAdd = (u) => { const a = lkFrom().filter(x => x !== u); a.unshift(u); chatLS('lkfrom', JSON.stringify(a.slice(0, 20))); };
+  const lkB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const lkUnB64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function lkKey(code){
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: new TextEncoder().encode('saideck-link-v1'), iterations: 120000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function lkLock(code, text){ const iv = crypto.getRandomValues(new Uint8Array(12)), ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await lkKey(code), new TextEncoder().encode(text)); return lkB64(iv) + '.' + lkB64(ct); }
+  async function lkUnlock(code, s){ const [iv, ct] = String(s || '').split('.'); const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: lkUnB64(iv) }, await lkKey(code), lkUnB64(ct)); return new TextDecoder().decode(pt); }
+  const lkNewCode = () => { const A = 'abcdefghijkmnpqrstuvwxyz23456789', r = crypto.getRandomValues(new Uint8Array(8)); return [...r].map(x => A[x % A.length]).join(''); };
+  async function lkGet(code){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/link/c/${code}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('the server answered ' + r.status); return r.json(); }
+  // the window
+  function lkOpen(){
+    document.querySelector('.lk-pop')?.remove();
+    const w = document.createElement('div'); w.className = 'bubp lk-pop'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Link devices');
+    w.innerHTML = `<div class="bubp-back"></div><div class="bubp-box lk-box"><div class="bubp-h"><span class="lk-ic">🔗</span><div><b>Link your devices</b><span>Use one account (and one lot of points) everywhere</span></div><button type="button" class="bubp-x" aria-label="Close">${ICON_X}</button></div>
+      <div class="lk-sec"><div class="lk-h">This device's code</div><div class="lk-code"><b>…</b><button type="button" class="chat-sbtn lk-copy">Copy</button></div><p class="lk-st">Type it into ⚙️ › Link devices on your other device. It works for 10 minutes — keep SaiDeck open here until it's done.</p></div>
+      <div class="lk-sec"><div class="lk-h">Got a code from your other device?</div><div class="lk-in"><input type="text" maxlength="12" placeholder="e.g. qwertyui" spellcheck="false" autocomplete="off" aria-label="Code from your other device"><button type="button" class="arc-buy lk-go">Link</button></div></div></div>`;
+    const close = () => w.remove();
+    w.querySelector('.bubp-back').addEventListener('click', close); w.querySelector('.bubp-x').addEventListener('click', close);
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); close(); } });
+    const inp = w.querySelector('.lk-in input'), go = () => { const c = inp.value.trim().toLowerCase().replace(/[^a-z0-9]/g, ''); if(c.length !== 8){ toast('The code has 8 letters and numbers.', 1800); return; } close(); lkEnter(c); };
+    w.querySelector('.lk-go').addEventListener('click', go);
+    inp.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter') go(); });
+    w.querySelector('.lk-copy').addEventListener('click', (e) => { e.currentTarget.blur(); if(LK.code) navigator.clipboard.writeText(LK.code).then(() => toast('Code copied.', 1200)).catch(() => {}); });
+    chatPanel.appendChild(w); inp.focus();
+    lkMake().then(() => { const b = w.querySelector('.lk-code b'); if(b) b.textContent = LK.code ? LK.code : "couldn't make one"; }).catch(() => {});
+  }
+  // make (or keep) this device's code, and watch for the other device's answer
+  async function lkMake(){
+    if(LK.code && Date.now() - LK.made < LK_LIFE - 60000) return;
+    await chatAuth(); if(!SC.loaded) await scLoad();
+    const code = lkNewCode(), tok = await chatAuth();
+    const body = { u: chatUid(), n: chatName().slice(0, CHAT_NAME_MAX), b: scBal(), k: await lkLock(code, chatLS('rt') || ''), t: Date.now() + (PRES.offset || 0) };
+    const r = await fetch(`${CHAT_DB}/link/c/${code}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify(body) });
+    if(!r.ok){ LK.code = ''; throw new Error('no'); }
+    if(LK.code) lkDrop(LK.code);
+    LK.code = code; LK.made = Date.now(); chatLS('lkcode', JSON.stringify({ c: code, t: LK.made }));
+    clearInterval(LK.watch); LK.watch = setInterval(lkWatch, 2500);
+  }
+  function lkDrop(code){ chatAuth().then(tok => fetch(`${CHAT_DB}/link/c/${code}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {}); }
+  async function lkWatch(){
+    if(!LK.code || LK.busy) return;
+    if(Date.now() - LK.made > LK_LIFE){ clearInterval(LK.watch); lkDrop(LK.code); LK.code = ''; return; }
+    let d = null; try{ d = await lkGet(LK.code); }catch(e){ return; }
+    const a = d && d.ans; if(!a) return;
+    LK.busy = true; clearInterval(LK.watch); const code = LK.code; LK.code = ''; chatLS('lkcode', null);
+    try{
+      if(a.m === chatUid()){
+        // this account stays: the other device sends its points over and becomes this account
+        lkFromAdd(a.f); lkDrop(code);
+        toast(`🔗 Linked! ${a.n ? bjName(a.n) + "'s" : 'The other'} device is now this account — its points are on the way.`, 4500);
+        setTimeout(giftCheck, 4000); setTimeout(giftCheck, 12000);
+      } else {
+        // the other account stays: send everything there and switch to it
+        await lkMergeInto(a.m, await lkUnlock(code, a.k), a.n, code);
+      }
+    }catch(e){ console.error(e); toast("Linking didn't finish — try again with a new code.", 3000); }
+    LK.busy = false;
+  }
+  // the code from the other device: pick which account stays
+  async function lkEnter(code){
+    let d = null;
+    try{ d = await lkGet(code); }catch(e){ toast("Couldn't check that code — check your connection.", 2400); return; }
+    if(!d || !d.u){ toast("That code doesn't exist (or it's been used). Make a new one on the other device.", 3200); return; }
+    if(Date.now() + (PRES.offset || 0) - (d.t || 0) > LK_LIFE){ toast('That code has run out — make a new one on the other device.', 2800); return; }
+    if(d.u === chatUid()){ toast("That's this account's own code — type it on your other device.", 2600); return; }
+    if(d.ans){ toast('That code has already been used.', 2200); return; }
+    if(!SC.loaded) await scLoad();
+    const mine = { u: chatUid(), n: chatName() || 'This device', b: scBal() }, theirs = { u: d.u, n: d.n || 'Other device', b: d.b | 0 };
+    const pick = await lkChoose(mine, theirs); if(!pick) return;
+    try{
+      if(pick === 'mine'){
+        const tok = await chatAuth();
+        const ans = { m: mine.u, f: mine.u, n: chatName().slice(0, CHAT_NAME_MAX), b: mine.b, k: await lkLock(code, chatLS('rt') || ''), t: { '.sv': 'timestamp' } };
+        const r = await fetch(`${CHAT_DB}/link/c/${code}/ans.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify(ans) });
+        if(!r.ok) throw new Error('answer ' + r.status);
+        lkFromAdd(theirs.u);
+        toast(`🔗 Linking… ${bjName(theirs.n)}'s points move over here as soon as SaiDeck is open on that device.`, 5000);
+        setTimeout(giftCheck, 6000); setTimeout(giftCheck, 15000);
+      } else {
+        const tok = await chatAuth();
+        const r = await fetch(`${CHAT_DB}/link/c/${code}/ans.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ m: theirs.u, f: mine.u, n: chatName().slice(0, CHAT_NAME_MAX), b: mine.b, t: { '.sv': 'timestamp' } }) });
+        if(!r.ok) throw new Error('answer ' + r.status);
+        await lkMergeInto(theirs.u, await lkUnlock(code, d.k), theirs.n, '');
+      }
+    }catch(e){ console.error(e); toast("Linking didn't work — make a new code on the other device and try again.", 3200); }
+  }
+  function lkChoose(mine, theirs){
+    return new Promise(resolve => {
+      const w = document.createElement('div'); w.className = 'bubp lk-pop'; w.setAttribute('role', 'dialog');
+      const card = (who, x, tag) => `<button type="button" class="lk-acc${who === 'mine' ? ' on' : ''}" data-who="${who}"><i style="background:${chatColor(x.n)}">${escapeHtml((x.n || '?').slice(0, 1).toUpperCase())}</i><b></b><span>🪙 ${(x.b | 0).toLocaleString()} points</span><em>${tag}</em></button>`;
+      w.innerHTML = `<div class="bubp-back"></div><div class="bubp-box lk-box"><div class="bubp-h"><span class="lk-ic">🔗</span><div><b>Which account stays?</b><span>The other one's points move into it, and both devices use it from now on</span></div><button type="button" class="bubp-x" aria-label="Close">${ICON_X}</button></div>
+        <div class="lk-accs">${card('mine', mine, 'this device')}${card('theirs', theirs, 'the other device')}</div>
+        <p class="lk-st">Items bought on the other account (bubbles, bullets…) don't carry over — keep the one with the things you want.</p>
+        <div class="bubp-f"><button type="button" class="chat-sbtn lk-no">Cancel</button><button type="button" class="arc-buy lk-yes">Link — keep <span></span></button></div></div>`;
+      w.querySelector('[data-who="mine"] b').textContent = mine.n; w.querySelector('[data-who="theirs"] b').textContent = theirs.n;
+      let sel = 'mine'; const nm = () => { w.querySelector('.lk-yes span').textContent = sel === 'mine' ? mine.n : theirs.n; };
+      w.querySelectorAll('.lk-acc').forEach(b => b.addEventListener('click', () => { sel = b.dataset.who; w.querySelectorAll('.lk-acc').forEach(x => x.classList.toggle('on', x === b)); nm(); }));
+      nm();
+      const done = (v) => { w.remove(); resolve(v); };
+      w.querySelector('.bubp-back').addEventListener('click', () => done(null)); w.querySelector('.bubp-x').addEventListener('click', () => done(null));
+      w.querySelector('.lk-no').addEventListener('click', () => done(null)); w.querySelector('.lk-yes').addEventListener('click', () => done(sel));
+      w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); done(null); } });
+      chatPanel.appendChild(w); w.querySelector('.lk-yes').focus();
+    });
+  }
+  // this device's account goes into another one: send what it can spend, mark it merged, switch to the other account
+  async function lkMergeInto(mainUid, mainRt, mainName, dropCode){
+    if(!mainUid || !mainRt) throw new Error('no main account');
+    await scLoad();
+    const me = chatUid(), bal = scBal(), id = 'lk' + Date.now().toString(36);
+    const body = { [`scores/${me}/mg`]: mainUid, [`scores/${me}/n`]: (chatName() || 'Someone').slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+    if(bal > 0){ body[`gifts/${mainUid}/${id}`] = { f: me, n: (chatName() || 'Someone').slice(0, CHAT_NAME_MAX), a: bal, t: bjSv, lk: true }; body[`scores/${me}/s`] = SC.s + bal; }
+    if(!(await bjPatch(body))) throw new Error("couldn't send the points");
+    if(dropCode) lkDrop(dropCode);
+    if(LK.code){ lkDrop(LK.code); LK.code = ''; clearInterval(LK.watch); chatLS('lkcode', null); }      // (this device's own code isn't needed any more)
+    lkFromAdd(me);
+    // become the main account
+    chatLS('rt', mainRt); chatLS('auid', mainUid); if(mainName) chatLS('name', String(mainName).slice(0, CHAT_NAME_MAX));
+    Object.assign(CHAT_AUTH, { tok: '', exp: 0, uid: mainUid, p: null });
+    SC.loaded = false;
+    try{ chatToggle(false); }catch(e){}
+    const work = (typeof tracks !== 'undefined' && tracks.length) || (typeof projVideo !== 'undefined' && projVideo);
+    if(await lyrConfirm('🔗 Linked!', `This device is now ${mainName || 'the main account'}${bal > 0 ? `, and its ${bal.toLocaleString()} points went with it` : ''}.\n\nSaiDeck reloads to finish switching.${work ? ' Save your project first if you need to — press Later, save, then reload.' : ''}`, 'Reload now')){ sdReloading = true; location.reload(); }
+    else toast('Reload SaiDeck when you can to finish switching accounts.', 4000);
+  }
+  // points from your own linked devices are accepted straight away
+  async function lkAutoAccept(id, g){
+    await scLoad();
+    const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: (chatName() || 'Someone').slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+    if(await bjPatch(body).catch(() => null)){ SC.p += g.a; sfxChip(); toast(`🔗 ${g.a.toLocaleString()} points came over from your linked device.`, 4000); chatRenderArcade(); bjCtl(); return true; }
+    return false;
+  }
+  // (a code made before a reload is still watched for 10 minutes)
+  setTimeout(() => { try{ const x = JSON.parse(chatLS('lkcode') || 'null'); if(x && x.c && Date.now() - x.t < LK_LIFE){ LK.code = x.c; LK.made = x.t; LK.watch = setInterval(lkWatch, 2500); } else chatLS('lkcode', null); }catch(e){} }, 3000);
   // points people sent you: a popup to accept or decline each one (checked when the chat starts, then every 20 s).
   // Declining sends them back — the sender gets them back automatically (it undoes their spend, it doesn't count as new points).
   let giftBusy = false; const giftAsked = new Map();
@@ -26925,7 +27592,7 @@
         }
         chatRenderArcade(); bjCtl();
       }
-      for(const [id, g] of Object.entries(d)) if(g && g.r !== true && g.a > 0 && !giftAsked.has(id)) giftAsk(id, g);
+      for(const [id, g] of Object.entries(d)) if(g && g.r !== true && g.a > 0 && !giftAsked.has(id)){ if(g.lk === true && lkFrom().includes(g.f) && await lkAutoAccept(id, g)) continue; giftAsk(id, g); }
     }catch(e){}
     giftBusy = false;
   }
@@ -27313,7 +27980,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
+      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg) m[u] = { b: Math.max(0, (v.p | 0) - (v.s | 0)), p: v.p | 0, n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
     try{ if(!CAS.pity && !CAS.pityRead){ CAS.pityRead = true; casPityLoad().then(casPityUpdate); } else casPityUpdate(); }catch(e){}
@@ -27762,7 +28429,7 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=25&auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      SC.board = Object.entries(d || {}).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: (v && v.p) | 0 })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
+      SC.board = Object.entries(d || {}).filter(([u, v]) => !(v && v.mg)).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: (v && v.p) | 0 })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
       SC.boardAt = Date.now();
     }catch(e){ SC.board = SC.board || []; }
     chatRenderArcade();
@@ -27834,7 +28501,7 @@
       h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
         <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
         <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
-        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button></div>
+        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button></div>
         <p class="chat-side-p">Blackjack: one table for everyone, with a bot dealer — or take the dealer's seat yourself. Blackjack pays 3 to 2, a win 2 to 1.</p></div>`;
       if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {
