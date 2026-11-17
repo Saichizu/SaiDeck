@@ -1300,6 +1300,15 @@
   .arc-prem .arc-ult{background:linear-gradient(#17151d,#17151d) padding-box,linear-gradient(120deg,#ffd76a,#ff5fa2,#9b5cff,#35d0b8,#ffd76a) border-box;border:1.5px solid transparent;}
   .arc-prem .arc-ult .arc-t b{font-size:14px;}
   .arc-prem .arc-buy:not(.own){background:linear-gradient(135deg,#ffd76a,#ff9a3c);color:#2a1600;}
+  .bubp{position:fixed;inset:0;z-index:450;display:flex;align-items:center;justify-content:center;}
+  .bubp-back{position:absolute;inset:0;background:rgba(6,6,12,.7);}
+  .bubp-box{position:relative;width:min(420px, calc(100vw - 32px));border-radius:16px;background:#17171f;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden;animation:chatPopIn .18s ease-out both;}
+  .bubp-h{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px;border-bottom:1px solid var(--border);}
+  .bubp-h > div{flex:1;min-width:0;display:flex;flex-direction:column;} .bubp-h b{font-size:14px;} .bubp-h > div span{font-size:11.5px;color:var(--text-dim, #9aa0ad);}
+  .bubp-x{all:unset;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dim, #9aa0ad);} .bubp-x:hover{background:rgba(255,255,255,.08);color:#fff;} .bubp-x svg{width:16px;height:16px;}
+  .bubp-chat{position:relative;overflow:hidden;height:300px;padding:70px 12px 14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;background:#101016;}
+  .bubp-chat .chat-msg.me{align-self:flex-end;flex-direction:row-reverse;}
+  .bubp-f{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--border);}
   .bubfx-flash{position:absolute;inset:0;background:#e6d6ff;}
   @media (prefers-reduced-motion: reduce){
     .chat-panel:not([hidden]), .chat-msg.in, .chat-event.in, .chat-react.in, .chat-send.fly, .chat-send.fly svg, .chat-who:not([hidden]), .chat-side:not([hidden]), .chat-modal-back, .chat-replying:not([hidden]),
@@ -22411,7 +22420,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 113;                 // ← goes up by one with every published version
+  const SD_BUILD = 114;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23104,7 +23113,7 @@
         const rxb = e.target.closest('[data-rx]'); if(rxb){ rxb.blur(); scBuy('rx', rxb.dataset.rx); return; }
         const sb2 = e.target.closest('[data-snd-buy]'); if(sb2){ sb2.blur(); scBuy('snd', sb2.dataset.sndBuy); return; }
         const sp2 = e.target.closest('[data-sndprev]'); if(sp2){ sp2.blur(); const pv = new Audio(SND_SRC[sp2.dataset.sndprev]); pv.volume = 0.6; pv.play().catch(() => {}); return; }
-        const pv = e.target.closest('[data-prev]'); if(pv){ pv.blur(); if(performance.now() >= (pv._fxUntil || 0)){ pv._fxUntil = performance.now() + 2600; chatBubbleFx(pv, pv.dataset.prev, false); } return; }
+        const pv = e.target.closest('[data-prev]'); if(pv){ pv.blur(); bubPreview(pv.dataset.prev); return; }
         const bb = e.target.closest('[data-bub]'); if(bb){ bb.blur(); const k = bb.dataset.bub; if(!k || bubOwned(k)){ chatLS('bubble', k); chatRenderArcade(); } else scBuy('bub', k); }
       });
       const ta = chatPanel.querySelector('textarea'), send = chatPanel.querySelector('.chat-send');
@@ -24543,11 +24552,53 @@
   priced(BUBBLES, 'bub');
   const bubOwned = (k) => !!(SC.bub && SC.bub[k]);
   const bubNow = () => { const k = chatLS('bubble') || ''; return BUBBLES.some(b => b.k === k) && bubOwned(k) ? k : ''; };
+  // the preview window (click a bubble's picture in the shop): a little chat with two messages in that bubble —
+  // someone else's and yours — arriving the way everyone will see them
+  function bubPreview(k){
+    const b = BUBBLES.find(x => x.k === k); if(!b) return;
+    bubPreviewClose();
+    const me = chatName() || 'You', own = bubOwned(k), on = own && bubNow() === k;
+    const w = document.createElement('div'); w.className = 'bubp'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', b.name + ' preview');
+    w.innerHTML = `<div class="bubp-back"></div><div class="bubp-box"><div class="bubp-h"><span class="arc-em bub-sw bub-${b.k}">${b.em}</span><div><b></b><span>${b.prem ? '💎 Premium · ' : ''}${b.price.toLocaleString()} points</span></div><button type="button" class="bubp-x" aria-label="Close">${ICON_X}</button></div>
+      <div class="bubp-chat"></div>
+      <div class="bubp-f"><button type="button" class="chat-sbtn bubp-again">↻ Play again</button><button type="button" class="arc-buy bubp-buy${own ? ' own' : ''}" ${on ? 'disabled' : ''}>${on ? 'In use' : own ? 'Use it' : 'Buy · ' + b.price.toLocaleString() + ' pts'}</button></div></div>`;
+    w.querySelector('.bubp-h b').textContent = b.name;
+    const chat = w.querySelector('.bubp-chat');
+    const msg = (name, text, mine, bk) => {
+      const row = document.createElement('div'); row.className = 'chat-msg' + (mine ? ' me' : '') + (bk ? ' bub-' + bk : '');
+      const av = document.createElement('div'); av.className = 'chat-av'; av.textContent = (name || '?').slice(0, 1).toUpperCase(); av.style.background = chatColor(name);
+      const bub = document.createElement('div'); bub.className = 'chat-bub';
+      const meta = document.createElement('div'); meta.className = 'chat-meta';
+      const nb = document.createElement('b'); nb.textContent = name; nb.style.color = chatColor(name); meta.appendChild(nb);
+      const tm = document.createElement('span'); tm.textContent = chatFmtTime(Date.now()); meta.appendChild(tm);
+      const tx = document.createElement('div'); tx.textContent = text;
+      bub.append(meta, tx);
+      const col = document.createElement('div'); col.className = 'chat-col'; col.appendChild(bub);
+      row.append(av, col); chat.appendChild(row); return row;
+    };
+    const play = () => {
+      chat.innerHTML = '';
+      msg('Kuro', 'anyone up for blackjack?', false, '');
+      const a = msg('Zo', 'look what I just got 😳', false, k), c = msg(me, `${b.name.toLowerCase()} bubble goes hard`, true, k);
+      a.style.visibility = c.style.visibility = 'hidden';
+      clearTimeout(w._t1); clearTimeout(w._t2);
+      w._t1 = setTimeout(() => { if(!w.isConnected) return; a.style.visibility = ''; chatBubbleFx(a.querySelector('.chat-bub'), k, false); }, 350);
+      w._t2 = setTimeout(() => { if(!w.isConnected) return; c.style.visibility = ''; chatBubbleFx(c.querySelector('.chat-bub'), k, true); }, 2900);
+    };
+    w.querySelector('.bubp-back').addEventListener('click', bubPreviewClose);
+    w.querySelector('.bubp-x').addEventListener('click', bubPreviewClose);
+    w.querySelector('.bubp-again').addEventListener('click', (e) => { e.currentTarget.blur(); play(); });
+    w.querySelector('.bubp-buy').addEventListener('click', () => { bubPreviewClose(); if(bubOwned(k)){ chatLS('bubble', k); chatRenderArcade(); } else scBuy('bub', k); });
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); bubPreviewClose(); } });
+    chatPanel.appendChild(w); w.querySelector('.bubp-x').focus({ preventScroll: true });
+    play();
+  }
+  function bubPreviewClose(){ const w = chatPanel.querySelector('.bubp'); if(w){ clearTimeout(w._t1); clearTimeout(w._t2); w.remove(); } }
   // the entrance: plays over the bubble that just arrived (el), inside the chat panel
   function chatBubbleFx(el, k, fromRight){
     if(!el || !el.isConnected) return;
     if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const host = el.closest('.chat-panel') || el.closest('.chat-arcade') || document.body;
+    const host = el.closest('.bubp-chat') || el.closest('.chat-panel') || el.closest('.chat-arcade') || document.body;
     const hr = host.getBoundingClientRect(), r = el.getBoundingClientRect();
     const L = document.createElement('div'); L.className = 'bubfx'; host.appendChild(L);
     const cx = r.left - hr.left + r.width / 2, cy = r.top - hr.top + r.height / 2, top = r.top - hr.top, bot = r.bottom - hr.top, side = fromRight ? 1 : -1, W = r.width, H = r.height;
@@ -25914,12 +25965,6 @@
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
-  // hovering a chat bubble's picture in the shop plays its entrance (once per hover; it can't restart while it's still playing)
-  chatPanel.addEventListener('mouseover', (e) => {
-    const pv = e.target.closest && e.target.closest('[data-prev]'); if(!pv || (e.relatedTarget && pv.contains(e.relatedTarget))) return;
-    const now = performance.now(); if(now < (pv._fxUntil || 0)) return;
-    pv._fxUntil = now + 2600; chatBubbleFx(pv, pv.dataset.prev, false);
-  });
   chatPanel.addEventListener('click', (e) => { const g = e.target.closest('.chat-games'); if(g){ g.blur(); chatGamesMenu(g); } const eb = e.target.closest('.chat-emo-btn'); if(eb){ eb.blur(); emoPicker(eb); } });
   function bjSessionPost(S){
     if(!chatName() || chatBlock()) return;
@@ -27664,7 +27709,7 @@
       <div class="arc-tabs" role="tablist"><button type="button" data-tab="shop" class="${SC.tab === 'shop' ? 'on' : ''}">Shop</button><button type="button" data-tab="quests" class="${SC.tab === 'quests' ? 'on' : ''}">Quests</button><button type="button" data-tab="board" class="${SC.tab === 'board' ? 'on' : ''}">Leaderboard</button><button type="button" data-tab="casino" class="${SC.tab === 'casino' ? 'on' : ''}">🎰 Casino</button></div></div>`;
     if(SC.tab === 'shop'){
       { const curP = bubNow();
-        h += `<div class="arc-prem"><div class="chat-who-h">💎 Premium shop</div><p class="chat-side-p">Rare things for the richest players: 1 million points and up, the legendary ones 10 million and up. Hover over a bubble's picture to preview its entrance.</p>`;
+        h += `<div class="arc-prem"><div class="chat-who-h">💎 Premium shop</div><p class="chat-side-p">Rare things for the richest players: 1 million points and up, the legendary ones 10 million and up. Click a bubble's picture to see how it looks in the chat.</p>`;
         for(const b of BUBBLES.filter(x => x.prem)){
           const own = bubOwned(b.k), on = own && curP === b.k;
           h += `<div class="arc-item${on ? ' on' : ''}${b.ult ? ' arc-ult' : ''}"><button type="button" class="arc-em bub-sw bub-${b.k}" data-prev="${b.k}" title="Preview">${b.em}</button><div class="arc-t"><b>${escapeHtml(b.name)} <i>${b.ult ? 'the ultimate chat bubble' : /legendary/i.test(b.name) ? 'chat bubble' : b.price >= 10000000 ? 'legendary chat bubble' : 'rare chat bubble'}</i></b><span>${escapeHtml(b.desc)}</span></div>
@@ -27690,7 +27735,7 @@
       h += `<div class="chat-who-h" style="margin-top:6px">Halloween</div><p class="chat-side-p">Plant it on someone's screen while you infiltrate them (press Space). It hides there — even if they're offline — until their mouse touches it. Then: bats!</p>`;
       h += `<div class="arc-item"><span class="arc-em">🎃</span><div class="arc-t"><b>Trick or Treat${SC.tot ? ` · you have ${SC.tot}` : ''}</b><span>Single use, stack as many as you like.</span></div><button type="button" class="arc-buy" data-tot>${totPrice()} pts</button></div>`;
       const curB = bubNow();
-      h += `<div class="chat-who-h" style="margin-top:6px">Chat bubbles</div><p class="chat-side-p">Your messages get their own colour, and everyone sees them arrive with the bubble's entrance. Hover over a bubble's picture to preview it.</p>`;
+      h += `<div class="chat-who-h" style="margin-top:6px">Chat bubbles</div><p class="chat-side-p">Your messages get their own colour, and everyone sees them arrive with the bubble's entrance. Click a bubble's picture to see how it looks in the chat.</p>`;
       h += `<div class="arc-item${!curB ? ' on' : ''}"><span class="arc-em bub-sw">💬</span><div class="arc-t"><b>Plain</b><span>The normal bubble.</span></div><button type="button" class="arc-buy own" data-bub="" ${!curB ? 'disabled' : ''}>${!curB ? 'In use' : 'Use'}</button></div>`;
       for(const b of BUBBLES.filter(x => !x.prem)){
         const own = bubOwned(b.k), on = own && curB === b.k;
