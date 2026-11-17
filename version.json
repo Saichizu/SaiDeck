@@ -1,6 +1,6 @@
 {
-  "build": 125,
+  "build": 126,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🏰 Tower Defense: troops now have very different ranges (Frost short, Cannon short-medium, Archer long, Ballista very long), and you can build anywhere up to 3 squares from the road. 🏰 Tower Defense, bigger and darker: a big night-time map (roads about 90 squares long, room for whole teams) with pine trees, dead trees, rocks, glowing mushrooms and fireflies. Every troop now hits groups — archer volleys, bigger cannon blasts, frost novas and ballista bolts that pierce a whole line. A warning before every boss wave, and a brand-new game-style lobby."
+  "notes": "Fixed Tower Defense refusing to place troops in games started on an older SaiDeck. 🏰 Tower Defense: troops now have very different ranges (Frost short, Cannon short-medium, Archer long, Ballista very long), and you can build anywhere up to 3 squares from the road. 🏰 Tower Defense, bigger and darker: a big night-time map (roads about 90 squares long, room for whole teams) with pine trees, dead trees, rocks, glowing mushrooms and fireflies. Every troop now hits groups — archer volleys, bigger cannon blasts, frost novas and ballista bolts that pierce a whole line. A warning before every boss wave, and a brand-new game-style lobby."
 }

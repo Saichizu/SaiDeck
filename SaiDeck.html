@@ -22530,7 +22530,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 125;                 // ← goes up by one with every published version
+  const SD_BUILD = 126;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26405,7 +26405,7 @@
   async function tdSolo(){
     const rid = 's' + tdMe();
     let cur = null; try{ cur = await tdGet(`td/r/${rid}`); }catch(e){}
-    if(!cur || !cur.st || cur.st === 'over'){
+    if(!cur || !cur.st || cur.st === 'over' || !cur.k){
       const D = await tdScaleNow([tdMe()]);
       if(!(await tdPatchRoom({ [`td/r/${rid}`]: tdNewRoom('solo', 'build', D) }))){ toast("Couldn't start the game — check your connection.", 2600); return; }
     }
@@ -26472,6 +26472,8 @@
       if((r.rs || 0) !== TDG.rs){ TDG.rs = r.rs || 0; tdSetRoute(tdMakeRoute(TDG.rs)); TDG.bg = null; TDG.bKey = ''; }
       if(r.pl && !r.pl[tdMe()] && r.m === 'team'){ toast('You were taken out of the team (away too long).', 2600); TDG.rid = ''; tdLobby(); return; }
       tdClaim(r);
+      // (an old team game without a price unit gets one, so troops can be bought)
+      if(!r.k && !TDG.fixingK){ TDG.fixingK = true; tdScaleNow(Object.keys(r.pl || {}).filter(u => tdLive(r.pl[u]) || u === tdMe())).then(D => tdPatch({ [tdP('k')]: D.k })).finally(() => { TDG.fixingK = false; }); }
       if(!was || was.st !== r.st || was.w !== r.w || JSON.stringify(was.tw || {}) !== JSON.stringify(r.tw || {}) || JSON.stringify(was.pl || {}) !== JSON.stringify(r.pl || {})) tdUi();
       tdAdvance();
     }catch(e){}
@@ -26533,7 +26535,10 @@
     const t = { k: TDG.sel, lv: 1, o: me, c };
     r.tw = r.tw || {}; r.tw[cell] = t; tdUi();       // (show it straight away)
     const ok = await tdPatch(Object.assign({ [tdP(`tw/${cell}`)]: t }, tdSpend(c)));
-    if(ok){ SC.s += c; } else { toast("Couldn't place it there (someone may have just built on it).", 2000); await scLoad(); }
+    if(ok){ SC.s += c; } else {
+      await scLoad(); let now = null; try{ now = await tdGet(tdP(`tw/${cell}`)); }catch(e){}
+      toast(now && now.o && now.o !== me ? 'Someone just built on that square.' : !r.k ? "This game is from an older SaiDeck — leave it and start a new one." : scBal() < c ? `Not enough points — that costs ${c.toLocaleString()}.` : "The server didn't accept that — try again in a moment.", 2800);
+    }
     tdPoll(); tdUi();
   }
   async function tdUpgrade(){
