@@ -1,6 +1,6 @@
 {
-  "build": 128,
+  "build": 130,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🏰 Tower Defense got chaotic: you're a HERO on the map now (your picture, a sword, click to walk, Space to STOMP), troll your teammates mid-wave (rubber-duck their troop, slap them, turn them into a chicken, fart, pickpocket, flip their screen), surprise PLOT TWISTS (traitor troops, gold goblin, chicken rain, lights out, troop party…), bet on who'll be MVP, MVP and 🥔 most useless after every wave, 4 new troops (Tesla coil, Clown, Banana peel, Bomb chicken), emotes, better troop art — and no more daily pay limit."
+  "notes": "🏰 Fixed Tower Defense getting stuck on a grey map with no buttons after leaving a game. Open teams in the lobby (and the players in a game) now show everyone's profile pictures. 🎨 Lyrics look changes from the last update are included."
 }
