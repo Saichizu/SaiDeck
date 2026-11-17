@@ -1,6 +1,6 @@
 {
-  "build": 134,
+  "build": 135,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "'Freedit design moves with the margins' now moves the whole scene — the ground and buildings too (Freedits can use the new ground line). Plus: no cap on slot spins or blackjack bets vs the bot."
+  "notes": "'Freedit design moves with the margins': the scene's ground (like Troy's castle) now sits right on the bottom margin line."
 }
