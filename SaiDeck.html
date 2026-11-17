@@ -823,6 +823,32 @@
   .td-btn:hover:not(:disabled){background:rgba(255,255,255,.12);transform:translateY(-1px);} .td-btn:disabled{opacity:.45;cursor:default;}
   .td-btn.pri{color:#1b1206;background:linear-gradient(135deg,#ffd76a,#ff9a3c);border-color:transparent;} .td-btn.pri:hover:not(:disabled){background:linear-gradient(135deg,#ffe08a,#ffad5c);}
   .td-dim{font-size:11.5px;color:var(--text-faint);margin:0;}
+  .tdl{padding:0 0 10px;}
+  .tdl-hero{position:relative;height:190px;overflow:hidden;background:#0e1018;}
+  .tdl-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .tdl-title{position:absolute;left:22px;top:26px;font:900 38px/0.95 'Manrope',sans-serif;letter-spacing:.02em;color:#ffe9a8;text-shadow:0 3px 0 #8a5a00, 0 6px 18px rgba(0,0,0,.7);}
+  .tdl-title small{display:block;font:800 11px 'Inter',sans-serif;letter-spacing:.3em;color:#b48cff;text-shadow:none;margin-bottom:6px;}
+  .tdl-stats{position:absolute;left:22px;bottom:14px;display:flex;gap:8px;}
+  .tdl-stats span{padding:5px 11px;border-radius:999px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);font-size:12.5px;color:#ddd;backdrop-filter:blur(4px);} .tdl-stats b{color:#ffd76a;}
+  .tdl-help{all:unset;position:absolute;right:14px;top:14px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font:900 15px 'Inter',sans-serif;color:#fff;background:rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.25);} .tdl-help:hover{background:rgba(180,140,255,.4);}
+  .tdl-how{position:absolute;right:14px;top:52px;z-index:2;width:270px;padding:12px 14px;border-radius:14px;background:rgba(20,18,30,.96);border:1px solid rgba(180,140,255,.4);box-shadow:0 12px 30px rgba(0,0,0,.6);font-size:12.5px;color:var(--text-dim);display:flex;flex-direction:column;gap:6px;animation:pokeIn .2s ease-out both;transform-origin:top right;} .tdl-how b{color:#fff;font-size:13px;}
+  .tdl-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 16px 6px;}
+  .tdl-big{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:16px 10px 13px;border-radius:16px;text-align:center;transition:transform .1s, filter .15s, box-shadow .1s;}
+  .tdl-big b{font:900 21px 'Manrope',sans-serif;letter-spacing:.04em;text-shadow:0 2px 0 rgba(0,0,0,.3);} .tdl-big i{font:700 11.5px 'Inter',sans-serif;font-style:normal;opacity:.85;}
+  .tdl-big.solo{color:#2a1600;background:linear-gradient(180deg,#ffe08a,#ffb02e);box-shadow:0 6px 0 #a8650a, 0 10px 22px rgba(255,170,40,.3);}
+  .tdl-big.team{color:#fff;background:linear-gradient(180deg,#b48cff,#7a4ae0);box-shadow:0 6px 0 #4a2a9a, 0 10px 22px rgba(140,90,255,.3);}
+  .tdl-big:hover{transform:translateY(-2px);filter:brightness(1.06);} .tdl-big:active{transform:translateY(4px);} .tdl-big.solo:active{box-shadow:0 2px 0 #a8650a;} .tdl-big.team:active{box-shadow:0 2px 0 #4a2a9a;}
+  .tdl-big:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+  .tdl-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 16px 4px;}
+  .tdl-panel{padding:10px 12px 12px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);min-height:160px;}
+  .tdl-ph{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;font:900 12px 'Manrope',sans-serif;letter-spacing:.12em;color:#ffd76a;}
+  .tdl-ph .td-lbtabs{margin:0;flex:none;} .tdl-ph .td-lbtabs button{flex:none;padding:4px 10px;font-size:10.5px;letter-spacing:.08em;}
+  .tdl-tav{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:900 13px 'Inter',sans-serif;color:#111;}
+  .tdl-join{all:unset;cursor:pointer;padding:7px 14px;border-radius:10px;font:900 12px 'Manrope',sans-serif;letter-spacing:.08em;color:#14301f;background:linear-gradient(180deg,#9dffc4,#35d07e);box-shadow:0 3px 0 #1d7a48;transition:transform .1s;} .tdl-join:hover{transform:translateY(-1px);} .tdl-join:active{transform:translateY(2px);box-shadow:0 1px 0 #1d7a48;}
+  .tdl-empty{padding:18px 6px;text-align:center;}
+  .td-lb li.top1{background:linear-gradient(90deg,rgba(255,215,106,.22),rgba(255,215,106,.04));} .td-lb li.top2{background:linear-gradient(90deg,rgba(207,216,230,.18),rgba(207,216,230,.03));} .td-lb li.top3{background:linear-gradient(90deg,rgba(224,154,98,.18),rgba(224,154,98,.03));}
+  .td-lb li.me{outline:1.5px solid rgba(255,215,106,.6);}
+  @media (max-width: 760px){ .tdl-cols, .tdl-btns{grid-template-columns:1fr;} .tdl-title{font-size:30px;} }
   .td-lobby{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:16px;}
   .td-intro{margin:0 0 12px;font-size:13px;line-height:1.55;color:var(--text-dim);}
   .td-lob-btns{display:flex;gap:8px;margin-bottom:14px;} .td-lob-btns .td-btn{padding:11px 18px;font-size:13.5px;}
@@ -839,10 +865,14 @@
   .td-diff{font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(255,154,60,.14);color:#ffb070;}
   .td-players{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;} .td-pl{display:flex;align-items:center;gap:5px;font-size:11.5px;padding:2px 8px 2px 2px;border-radius:999px;background:rgba(255,255,255,.05);} .td-pl.me{background:rgba(255,215,106,.12);}
   .td-pl i{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 10px 'Inter',sans-serif;font-style:normal;color:#111;}
-  .td-stage{position:relative;width:100%;aspect-ratio:18 / 11;max-height:calc(96vh - 230px);display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#244a28;}
+  .td-stage{position:relative;width:100%;aspect-ratio:18 / 11;max-height:calc(96vh - 230px);display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#0c0e15;}
   .td-cv{display:block;cursor:pointer;}
   .td-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,8,14,.72);text-align:center;animation:chatPopIn .3s ease-out both;}
-  .td-msg[hidden], .td-leave[hidden]{display:none !important;}
+  .td-msg[hidden], .td-leave[hidden], .td-warn[hidden], .tdl-how[hidden]{display:none !important;}
+  .td-warn{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;padding:8px 18px;border-radius:12px;background:rgba(60,0,14,.85);border:1.5px solid #ff4d6a;color:#ff8a9c;font:900 15px 'Manrope',sans-serif;letter-spacing:.06em;box-shadow:0 0 24px rgba(255,40,80,.45);animation:tdWarn 1.2s ease-in-out infinite;pointer-events:none;}
+  .td-warn i{font:600 11px 'Inter',sans-serif;font-style:normal;letter-spacing:0;color:#ffd0d8;}
+  @keyframes tdWarn{0%,100%{box-shadow:0 0 14px rgba(255,40,80,.35);}50%{box-shadow:0 0 32px rgba(255,40,80,.75);}}
+  .td-btn.pri.boss{background:linear-gradient(135deg,#ff4d6a,#b0123a);color:#fff;animation:tdWarn 1.2s ease-in-out infinite;}
   .td-msg b{font:900 24px 'Manrope',sans-serif;color:#fff;} .td-msg span{font-size:14px;color:var(--text-dim);} .td-msg em{font-style:normal;font-weight:900;color:#ffd76a;font-size:18px;} .td-msg div{display:flex;gap:8px;}
   .td-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .td-troops{display:flex;gap:6px;}
@@ -22500,7 +22530,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 123;                 // ← goes up by one with every published version
+  const SD_BUILD = 125;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26117,28 +26147,29 @@
   // A wave is worked out step by step (30 steps a second) from the wave number, the troops on the map and the
   // difficulty — nothing random except a seeded shuffle — so everyone in a team sees exactly the same fight, and
   // anyone can work out how it ends.
-  const TD_COLS = 18, TD_ROWS = 11, TD_DT = 1 / 30, TD_LIVES = 20, TD_START_GOLD = 160;
+  // a big map of small squares (32 × 20), roads about 90 squares long — room for a whole team's troops
+  const TD_COLS = 32, TD_ROWS = 20, TD_DT = 1 / 30, TD_LIVES = 20, TD_START_GOLD = 160;
   // the road: from the left edge, winding, to the castle on the right
   // the road (a new one every game, from the room's seed — see tdMakeRoute), and the castle at its end
-  const TD_ROUTE0 = [[-0.6, 2], [4, 2], [4, 7], [8, 7], [8, 3], [12, 3], [12, 8], [16, 8]];
-  let TD_ROUTE = TD_ROUTE0, TD_CASTLE = [16.6, 8], TD_SEGS = null, TD_ROAD = null, TD_BUILD = null;
+  const TD_ROUTE0 = [[-0.6, 2], [27, 2], [27, 6], [12, 6], [12, 9], [4, 9], [4, 15], [19, 15], [19, 12], [29, 12]];
+  let TD_ROUTE = TD_ROUTE0, TD_CASTLE = [30.6, 12], TD_SEGS = null, TD_ROAD = null, TD_BUILD = null;
   const TD_TROOPS = [
-    { k: 'archer', name: 'Archer', ic: 'bowman', col: '#7dffb2', cost: 50, range: 2.6, dmg: 8, rate: 0.55, desc: 'Fast arrows at the enemy furthest along.' },
-    { k: 'cannon', name: 'Cannon', ic: 'cannon', col: '#ffb02e', cost: 90, range: 2.2, dmg: 20, rate: 1.4, splash: 1.1, desc: 'Slow, but hits everything around where it lands.' },
-    { k: 'frost', name: 'Frost mage', ic: 'frozen-orb', col: '#7ce8ff', cost: 70, range: 2.3, dmg: 4, rate: 0.9, slow: 0.45, slowT: 1.6, desc: 'Slows enemies down so your other troops get more hits.' },
-    { k: 'ballista', name: 'Ballista', ic: 'ballista', col: '#ff7ab6', cost: 125, range: 4.3, dmg: 46, rate: 2.0, strong: true, desc: 'Long range, big hits on the toughest enemy in reach.' },
+    { k: 'archer', name: 'Archer', ic: 'bowman', col: '#7dffb2', cost: 50, range: 5.5, dmg: 3.6, rate: 0.55, volley: 3, desc: 'Volleys of 3 arrows at 3 different enemies.' },
+    { k: 'cannon', name: 'Cannon', ic: 'cannon', col: '#ffb02e', cost: 90, range: 3.2, dmg: 25, rate: 1.4, splash: 2.1, desc: 'Big blasts that hit everything around where they land.' },
+    { k: 'frost', name: 'Frost mage', ic: 'frozen-orb', col: '#7ce8ff', cost: 70, range: 2.6, dmg: 3, rate: 1.1, slow: 0.45, slowT: 1.6, nova: true, desc: 'A frost nova that hits and slows every enemy around it.' },
+    { k: 'ballista', name: 'Ballista', ic: 'ballista', col: '#ff7ab6', cost: 125, range: 10, dmg: 40, rate: 2.0, strong: true, pierce: 0.85, desc: 'Huge bolts that pierce through every enemy in a line.' },
   ];
   const TD_FOES = {
-    grunt: { name: 'Goblin', ic: 'goblin-head', col: '#9be36b', hp: 32, sp: 1.2, gold: 3, hurt: 1, r: 0.32 },
-    runner: { name: 'Wolf', ic: 'wolf-head', col: '#c9c1ad', hp: 19, sp: 2.05, gold: 3, hurt: 1, r: 0.28 },
-    tank: { name: 'Ogre', ic: 'ogre', col: '#e0a070', hp: 120, sp: 0.72, gold: 8, hurt: 2, r: 0.4 },
-    boss: { name: 'Skull king', ic: 'crowned-skull', col: '#ffd76a', hp: 620, sp: 0.55, gold: 50, hurt: 6, r: 0.5 },
+    grunt: { name: 'Goblin', ic: 'goblin-head', col: '#9be36b', hp: 32, sp: 2.2, gold: 3, hurt: 1, r: 0.5 },
+    runner: { name: 'Wolf', ic: 'wolf-head', col: '#c9c1ad', hp: 19, sp: 3.7, gold: 3, hurt: 1, r: 0.45 },
+    tank: { name: 'Ogre', ic: 'ogre', col: '#e0a070', hp: 120, sp: 1.3, gold: 8, hurt: 2, r: 0.62 },
+    boss: { name: 'Skull king', ic: 'crowned-skull', col: '#ffd76a', hp: 620, sp: 1.0, gold: 50, hurt: 6, r: 0.8 },
   };
   const tdTroop = (k) => TD_TROOPS.find(t => t.k === k);
   // a troop at level lv (1–3)
   function tdStats(k, lv){
     const t = tdTroop(k); lv = lv || 1;
-    return { range: t.range + (lv - 1) * 0.3, dmg: t.dmg * Math.pow(1.7, lv - 1), rate: t.rate * Math.pow(0.88, lv - 1), splash: t.splash, slow: t.slow, slowT: t.slowT, strong: t.strong };
+    return { range: t.range + (lv - 1) * 0.55, dmg: t.dmg * Math.pow(1.7, lv - 1), rate: t.rate * Math.pow(0.88, lv - 1), splash: t.splash, slow: t.slow, slowT: t.slowT, strong: t.strong, volley: t.volley, nova: t.nova, pierce: t.pierce };
   }
   // what things cost (sc = the difficulty from the team's points)
   const tdCost = (k, sc, K) => Math.round(tdTroop(k).cost * (sc || 1)) * (K || 1);
@@ -26158,24 +26189,32 @@
     TD_ROUTE = route; const last = route[route.length - 1]; TD_CASTLE = [last[0] + .6, last[1]];
     const out = []; let d = 0; for(let i = 0; i < route.length - 1; i++){ const [x1, y1] = route[i], [x2, y2] = route[i + 1], L = Math.hypot(x2 - x1, y2 - y1); out.push({ x1, y1, x2, y2, d0: d, L }); d += L; } out.total = d; TD_SEGS = out;
     const r = new Set(); for(const s of out){ const n = Math.ceil(s.L * 4); for(let i = 0; i <= n; i++){ const u = i / n, x = Math.round(s.x1 + (s.x2 - s.x1) * u), y = Math.round(s.y1 + (s.y2 - s.y1) * u); if(x >= 0 && x < TD_COLS) r.add(x + '_' + y); } } TD_ROAD = r;
-    const cy = TD_CASTLE[1], b = new Set(); for(const k of r){ const [x, y] = k.split('_').map(Number); for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++){ const nx = x + dx, ny = y + dy, nk = nx + '_' + ny; if(nx >= 0 && ny >= 0 && nx < TD_COLS && ny < TD_ROWS && !r.has(nk) && !(nx >= 15 && ny >= cy - 2 && ny <= cy + 1)) b.add(nk); } } TD_BUILD = b;
+    const cy = TD_CASTLE[1], b = new Set(); for(const k of r){ const [x, y] = k.split('_').map(Number); for(let dx = -3; dx <= 3; dx++) for(let dy = -3; dy <= 3; dy++){ const nx = x + dx, ny = y + dy, nk = nx + '_' + ny; if(nx >= 0 && ny >= 0 && nx < TD_COLS && ny < TD_ROWS && !r.has(nk) && !(nx >= 28 && ny >= cy - 3 && ny <= cy + 2)) b.add(nk); } } TD_BUILD = b;
   }
   // a winding road from the left edge to the castle, from a seed (0 = the original road). Its length stays about the same, so every road is fair.
   function tdMakeRoute(seed){
     if(!seed) return TD_ROUTE0;
-    for(let tries = 0; tries < 60; tries++){
+    for(let tries = 0; tries < 80; tries++){
       const rnd = tdRng(seed * 31 + tries * 977 + 7), pick = (a, b) => a + Math.floor(rnd() * (b - a + 1));
-      let y = pick(2, 8), x = pick(2, 3); const pts = [[-0.6, y]];
-      while(x < 13){
-        pts.push([x, y]);
-        let ny = y, guard = 20; while(guard-- && (Math.abs(ny - y) < 3)) ny = pick(1, 9);
-        if(Math.abs(ny - y) < 3) ny = y <= 5 ? y + 3 : y - 3;
-        pts.push([x, ny]); y = ny; x += pick(3, 4);
-      }
-      if(y < 2 || y > 8){ pts.push([Math.min(14, x), y]); const ny = y < 2 ? pick(3, 6) : pick(4, 7); pts.push([Math.min(14, x), ny]); y = ny; }
-      pts.push([16, y]);
-      let L = 0; for(let i = 0; i < pts.length - 1; i++) L += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
-      if(L >= 27 && L <= 35) return pts;
+      // three long runs across the map joined by turns, with a jog or two in each run
+      const ys = [pick(1, 3)]; ys.push(ys[0] + pick(5, 6)); ys.push(ys[1] + pick(5, 6));
+      if(ys[2] > 17) continue;
+      const flip = rnd() < .5, Y = (y) => flip ? TD_ROWS - 1 - y : y;
+      const xR = pick(26, 28), xL = pick(3, 5), pts = [[-0.6, ys[0]]];
+      const run = (x0, x1, y, yLimLo, yLimHi) => {
+        // maybe a jog part-way along (up or down 2-3 squares), keeping clear of the other runs
+        let yy = y; if(rnd() < .75){ const dir = x1 > x0 ? 1 : -1, jx = Math.round(Math.max(0, x0) + dir * pick(6, Math.floor(Math.abs(x1 - Math.max(0, x0))) - 6)), up = yy - pick(2, 3) >= yLimLo, down = yy + pick(2, 3) <= yLimHi, jy = yy + ((up && (!down || rnd() < .5)) ? -1 : 1) * pick(2, 3); if(jy >= yLimLo && jy <= yLimHi){ pts.push([jx, yy]); pts.push([jx, jy]); yy = jy; } }
+        pts.push([x1, yy]); return yy;
+      };
+      let y = run(-0.6, xR, ys[0], 1, ys[1] - 3);
+      pts.push([xR, ys[1]]); y = ys[1];
+      y = run(xR, xL, y, ys[1], ys[2] - 3);
+      pts.push([xL, ys[2]]); y = ys[2];
+      y = run(xL, 29, y, ys[2], 18);
+      const route = pts.map(([x, yy]) => [x, Y(yy)]);
+      let L = 0; for(let k = 0; k < route.length - 1; k++) L += Math.hypot(route[k + 1][0] - route[k][0], route[k + 1][1] - route[k][1]);
+      const ends = route[route.length - 1][1];
+      if(L >= 84 && L <= 98 && ends >= 2 && ends <= 17) return route;
     }
     return TD_ROUTE0;
   }
@@ -26194,42 +26233,54 @@
     return list.map((k, i) => ({ k, at: i * gap + (k === 'boss' ? 1.5 : 0) }));
   }
   // how tough the enemies are: the wave, the difficulty, and how many are playing (more players = more troops)
-  const tdHpMul = (w, sc, np) => Math.pow(1.15, w - 1) * (sc || 1) * (1 + 0.7 * Math.max(0, (np || 1) - 1));
+  const tdHpMul = (w, sc, np) => Math.pow(1.15, w - 1) * (1 + 1.5 * Math.min(1, (w - 1) / 8)) * (sc || 1) * (1 + 0.7 * Math.max(0, (np || 1) - 1));
   const tdWaveGold = (w) => 45 + w * 9;
   // The fight. towers: { cell: { k, lv, o } }. Returns a stepper: step(seconds) moves it on; .done, .lives (lost), .gold { owner: earned }.
   function tdBattle(w, towers, sc, np, lives){
     const hm = tdHpMul(w, sc, np), plan = tdWave(w);
     const T = Object.keys(towers || {}).sort().map(c => { const [x, y] = c.split('_').map(Number), t = towers[c]; return { c, x, y, k: t.k, o: t.o, lv: t.lv, s: tdStats(t.k, t.lv), cd: 0, aim: 0, shotT: -9 }; });
-    const st = { t: 0, foes: [], next: 0, lost: 0, lives: lives == null ? TD_LIVES : lives, gold: {}, kills: 0, done: false, shots: [], booms: [], leaks: [] };
+    const st = { t: 0, foes: [], next: 0, lost: 0, lives: lives == null ? TD_LIVES : lives, gold: {}, kills: 0, done: false, shots: [], booms: [], novas: [], leaks: [] };
     let id = 0;
     const tick = () => {
       st.t += TD_DT;
-      while(st.next < plan.length && plan[st.next].at <= st.t){ const F = TD_FOES[plan[st.next].k]; st.foes.push({ id: id++, k: plan[st.next].k, hp: F.hp * hm, max: F.hp * hm, d: 0, slowT: 0, slowF: 1 }); st.next++; }
+      while(st.next < plan.length && plan[st.next].at <= st.t){ const F = TD_FOES[plan[st.next].k]; st.foes.push({ id: id++, k: plan[st.next].k, hp: F.hp * hm, max: F.hp * hm, d: 0, slowT: 0, slowF: 1, born: st.t }); st.next++; }
       for(const f of st.foes){
         if(f.hp <= 0) continue;
         const sp = TD_FOES[f.k].sp * (f.slowT > 0 ? f.slowF : 1); if(f.slowT > 0) f.slowT -= TD_DT;
         f.d += sp * TD_DT;
         if(f.d >= TD_SEGS.total){ f.hp = 0; f.gone = true; st.lost += TD_FOES[f.k].hurt; st.leaks.push({ t: st.t, n: TD_FOES[f.k].hurt }); if(st.leaks.length > 12) st.leaks.shift(); }
       }
+      for(const f of st.foes){ if(f.hp > 0){ const p = tdAt(f.d); f.x = p[0]; f.y = p[1]; } }
       for(const tw of T){
         tw.cd -= TD_DT; if(tw.cd > 0) continue;
-        let best = null, bv = -1;
-        for(const f of st.foes){
-          if(f.hp <= 0) continue;
-          const [fx, fy] = tdAt(f.d); if(Math.hypot(fx - tw.x, fy - tw.y) > tw.s.range) continue;
-          const v = tw.s.strong ? f.hp * 1000 + f.d : f.d;
-          if(v > bv){ bv = v; best = f; }
-        }
-        if(!best) continue;
-        tw.cd = tw.s.rate;
-        { const [ax, ay] = tdAt(best.d); tw.aim = Math.atan2(ay - tw.y, ax - tw.x); tw.shotT = st.t; }
+        const R = tw.s.range, inR = [];
+        for(const f of st.foes){ if(f.hp > 0 && Math.hypot(f.x - tw.x, f.y - tw.y) <= R) inR.push(f); }
+        if(!inR.length) continue;
+        let best = inR[0]; for(const f of inR){ const v = tw.s.strong ? f.hp * 1000 + f.d : f.d, bv = tw.s.strong ? best.hp * 1000 + best.d : best.d; if(v > bv) best = f; }
+        tw.cd = tw.s.rate; tw.aim = Math.atan2(best.y - tw.y, best.x - tw.x); tw.shotT = st.t;
         const hit = (f, dmg) => { if(f.hp <= 0) return; f.hp -= dmg; f.hitAt = st.t; if(tw.s.slow){ f.slowT = tw.s.slowT; f.slowF = Math.min(f.slowF < 1 && f.slowT > 0 ? f.slowF : 1, 1 - tw.s.slow); } if(f.hp <= 0){ st.kills++; st.gold[tw.o] = (st.gold[tw.o] || 0) + TD_FOES[f.k].gold; } };
-        const [bx, by] = tdAt(best.d);
-        if(tw.s.splash){ for(const f of st.foes){ if(f.hp <= 0) continue; const [fx, fy] = tdAt(f.d); if(Math.hypot(fx - bx, fy - by) <= tw.s.splash) hit(f, f === best ? tw.s.dmg : tw.s.dmg * 0.6); } st.booms.push({ x: bx, y: by, t: st.t, k: tw.k }); }
-        else hit(best, tw.s.dmg);
-        st.shots.push({ x1: tw.x, y1: tw.y, x2: bx, y2: by, t: st.t, k: tw.k });
+        if(tw.s.volley){
+          // a volley: one arrow each at the enemies furthest along (spare arrows go to the leader)
+          const order = inR.slice().sort((a, b) => b.d - a.d || a.id - b.id);
+          for(let i = 0; i < tw.s.volley; i++){ const f = order[i] || order[0]; hit(f, tw.s.dmg); st.shots.push({ x1: tw.x, y1: tw.y, x2: f.x, y2: f.y, t: st.t + i * 0.04, k: tw.k }); }
+        } else if(tw.s.splash){
+          const bx = best.x, by = best.y;
+          for(const f of st.foes){ if(f.hp > 0 && Math.hypot(f.x - bx, f.y - by) <= tw.s.splash) hit(f, f === best ? tw.s.dmg : tw.s.dmg * 0.65); }
+          st.booms.push({ x: bx, y: by, t: st.t, k: tw.k, r: tw.s.splash });
+          st.shots.push({ x1: tw.x, y1: tw.y, x2: bx, y2: by, t: st.t, k: tw.k });
+        } else if(tw.s.nova){
+          // a frost nova: everything in reach
+          for(const f of inR) hit(f, tw.s.dmg);
+          st.novas.push({ x: tw.x, y: tw.y, t: st.t, r: R });
+        } else if(tw.s.pierce){
+          // a bolt through everything in a line, out to the edge of its reach
+          const dx = best.x - tw.x, dy = best.y - tw.y, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+          for(const f of st.foes){ if(f.hp <= 0) continue; const ax = f.x - tw.x, ay = f.y - tw.y, al = ax * ux + ay * uy; if(al < 0 || al > R) continue; if(Math.abs(ax * uy - ay * ux) <= tw.s.pierce) hit(f, f === best ? tw.s.dmg : tw.s.dmg * 0.7); }
+          st.shots.push({ x1: tw.x, y1: tw.y, x2: tw.x + ux * R, y2: tw.y + uy * R, t: st.t, k: tw.k });
+        } else { hit(best, tw.s.dmg); st.shots.push({ x1: tw.x, y1: tw.y, x2: best.x, y2: best.y, t: st.t, k: tw.k }); }
       }
-      if(st.shots.length > 60) st.shots.splice(0, st.shots.length - 60);
+      if(st.novas.length > 30) st.novas.splice(0, st.novas.length - 30);
+      if(st.shots.length > 160) st.shots.splice(0, st.shots.length - 160);
       if(st.booms.length > 20) st.booms.splice(0, st.booms.length - 20);
       st.foes = st.foes.filter(f => f.hp > 0 || st.t - (f.deadAt || (f.deadAt = st.t)) < 0.35);
       if(st.lives - st.lost <= 0 || (st.next >= plan.length && !st.foes.some(f => f.hp > 0))) st.done = true;
@@ -26292,33 +26343,60 @@
     TDG.view = 'lobby'; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = 0;
     const main = TDG.win && TDG.win.querySelector('.td-main'); if(!main) return;
     TDG.win.querySelector('.td-leave').hidden = true; TDG.win.querySelector('.td-mode').textContent = '';
-    main.innerHTML = `<div class="td-lobby"><div class="td-lob-l"><p class="td-intro">Enemies march down the road to your castle. Put troops beside the road to stop them, and upgrade them between waves. Troops cost your real points — and every wave you clear pays points back (more the further you get, plus your kills). Play alone or as a team: in a team everyone pays for their own troops and gets their own pay, and the castle is shared.</p>
-      <div class="td-lob-btns"><button type="button" class="td-btn pri" data-td="solo">⚔️ Play solo</button><button type="button" class="td-btn" data-td="team">👥 Start a team</button></div>
-      <div class="td-sub">Open teams</div><div class="td-open"><p class="td-dim">Looking…</p></div>
-      <p class="td-dim td-note">Prices and pay follow the players' points: they're worked out from the team's average (an Archer is about 0.5% of it), so everyone plays for the same stakes. Richer teams also face a little tougher enemies (up to ×1.3). Tower Defense pays at most 3,000 + 5% of your points a day.</p></div>
-      <div class="td-lob-r"><div class="td-lbtabs"><button type="button" data-lb="s" class="${TDG.lbTab === 's' ? 'on' : ''}">Solo</button><button type="button" data-lb="t" class="${TDG.lbTab === 't' ? 'on' : ''}">Team</button></div><ol class="td-lb"><li class="td-dim">Loading…</li></ol></div></div>
-      <p class="td-credit">Pictures: icons by Lorc, Delapouite, Skoll and Zeromancer from game-icons.net (CC BY 3.0).</p>`;
+    if(!SC.loaded) try{ await scLoad(); }catch(e){}
+    main.innerHTML = `<div class="tdl">
+      <div class="tdl-hero"><canvas class="tdl-art"></canvas><div class="tdl-title"><small>SaiDeck</small>TOWER<br>DEFENSE</div>
+        <div class="tdl-stats"><span title="Your points — troops cost points, every wave pays points">🪙 <b>${SC.loaded ? scBal().toLocaleString() : '…'}</b></span><span class="tdl-best" title="Your best solo game">🏆 <b>–</b></span></div>
+        <button type="button" class="tdl-help" aria-label="How to play" title="How to play">?</button>
+        <div class="tdl-how" hidden><b>How to play</b><div>🛡️ Build troops beside the road</div><div>🌊 Press Next wave when you're ready</div><div>🪙 Troops cost points — every wave pays points</div><div>☠ Every 5th wave brings a boss</div><div>👥 Teams share the castle, everyone pays their own way</div><div>📈 Prices and pay follow the team's average points</div></div></div>
+      <div class="tdl-btns"><button type="button" class="tdl-big solo" data-td="solo"><b>⚔ PLAY SOLO</b><i>defend it alone</i></button><button type="button" class="tdl-big team" data-td="team"><b>👥 TEAM UP</b><i>start a team</i></button></div>
+      <div class="tdl-cols">
+        <div class="tdl-panel"><div class="tdl-ph">🛡️ OPEN TEAMS</div><div class="td-open"><p class="td-dim">Looking…</p></div></div>
+        <div class="tdl-panel"><div class="tdl-ph">🏆 HALL OF FAME<div class="td-lbtabs"><button type="button" data-lb="s" class="${TDG.lbTab === 's' ? 'on' : ''}">SOLO</button><button type="button" data-lb="t" class="${TDG.lbTab === 't' ? 'on' : ''}">TEAM</button></div></div><ol class="td-lb"><li class="td-dim">Loading…</li></ol></div>
+      </div>
+      <p class="td-credit">Pictures drawn for SaiDeck · menu icons from game-icons.net (CC BY 3.0)</p></div>`;
     main.querySelector('[data-td="solo"]').addEventListener('click', tdSolo);
     main.querySelector('[data-td="team"]').addEventListener('click', tdTeamNew);
+    main.querySelector('.tdl-help').addEventListener('click', (e) => { e.currentTarget.blur(); const h = main.querySelector('.tdl-how'); h.hidden = !h.hidden; });
     main.querySelectorAll('[data-lb]').forEach(b => b.addEventListener('click', () => { TDG.lbTab = b.dataset.lb; tdLobbyLb(); main.querySelectorAll('[data-lb]').forEach(x => x.classList.toggle('on', x === b)); }));
+    tdLobbyArt(main.querySelector('.tdl-art'));
     // a game you're still in?
-    try{ const mine = await tdGet(`td/r/s${tdMe()}`); if(mine && mine.st && mine.st !== 'over' && TDG.view === 'lobby'){ const b = main.querySelector('[data-td="solo"]'); b.textContent = `⚔️ Carry on solo (wave ${mine.w})`; } }catch(e){}
+    try{ const mine = await tdGet(`td/r/s${tdMe()}`); if(mine && mine.st && mine.st !== 'over' && TDG.view === 'lobby'){ const b = main.querySelector('[data-td="solo"]'); b.querySelector('b').textContent = '⚔ CARRY ON'; b.querySelector('i').textContent = `your solo game · wave ${mine.w}`; } }catch(e){}
+    try{ const best = await tdGet(`td/lb/s/${tdMe()}`); const el = main.querySelector('.tdl-best b'); if(el) el.textContent = best && best.w ? 'wave ' + best.w : 'no games yet'; }catch(e){}
     tdLobbyLb(); tdLobbyOpen();
     TDG.poll = setInterval(() => { if(TDG.view === 'lobby') tdLobbyOpen(); }, 5000);
+  }
+  // the little scene at the top of the lobby: a slice of a night map with troops and monsters
+  function tdLobbyArt(cv){
+    if(!cv) return;
+    const keep = TD_ROUTE; tdSetRoute(tdMakeRoute(4242));
+    const u = 22, W = u * TD_COLS, H = u * TD_ROWS, bg = tdBackground(W, H, u);
+    cv.width = 760; cv.height = 190; const x = cv.getContext('2d');
+    const ox = W - 760, oy = Math.max(0, Math.min(H - 190, (TD_CASTLE[1] + .5) * u - 120));
+    x.drawImage(bg, -ox, -oy);
+    x.save(); x.translate(-ox, -oy);
+    tdCastle(x, (TD_CASTLE[0] + .3) * u, (TD_CASTLE[1] + .5) * u, u);
+    const near = [...TD_BUILD].map(k => k.split('_').map(Number)).filter(([gx, gy]) => gx * u > ox + 30 && gx * u < ox + 600 && gy * u > oy + 20 && gy * u < oy + 170);
+    ['archer', 'cannon', 'frost', 'ballista', 'archer'].forEach((k, i) => { const c = near[(i * 7) % Math.max(1, near.length)]; if(c) tdDrawTroop(x, (c[0] + .5) * u, (c[1] + .5) * u, u, k, 1 + (i % 3), i * 1.3, 9, i, null, false, false); });
+    const L = TD_SEGS.total; ['grunt', 'runner', 'tank', 'grunt', 'boss'].forEach((k, i) => { const d = L - 9 - i * 2.6, [fx, fy] = tdAt(d); tdDrawFoe(x, (fx + .5) * u, (fy + .5) * u, u, { id: i, k, hp: 1, max: 1, slowT: 0 }, i * .7, 1); });
+    x.restore();
+    const fade = x.createLinearGradient(0, 0, 0, 190); fade.addColorStop(.55, 'rgba(23,23,31,0)'); fade.addColorStop(1, 'rgba(23,23,31,.95)'); x.fillStyle = fade; x.fillRect(0, 0, 760, 190);
+    const left = x.createLinearGradient(0, 0, 380, 0); left.addColorStop(0, 'rgba(12,12,18,.85)'); left.addColorStop(1, 'rgba(12,12,18,0)'); x.fillStyle = left; x.fillRect(0, 0, 380, 190);
+    tdSetRoute(keep);
   }
   async function tdLobbyLb(){
     const ol = TDG.win && TDG.win.querySelector('.td-lb'); if(!ol) return;
     let d = null; try{ d = await tdGet(`td/lb/${TDG.lbTab}`); }catch(e){}
     if(!TDG.win) return;
     const rows = Object.entries(d || {}).map(([k, v]) => ({ k, n: v && v.n || '?', w: (v && v.w) | 0, sc: v && v.sc })).filter(x => x.w > 0).sort((a, b) => b.w - a.w).slice(0, 10);
-    ol.innerHTML = rows.length ? rows.map((x, i) => `<li class="${x.k === tdMe() ? 'me' : ''}"><span class="td-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b>${escapeHtml(x.n)}</b><i>wave ${x.w}${x.sc && x.sc > 1 ? ` · ×${x.sc}` : ''}</i></li>`).join('') : `<li class="td-dim">Nobody yet — be the first!</li>`;
+    ol.innerHTML = rows.length ? rows.map((x, i) => `<li class="${x.k === tdMe() ? 'me ' : ''}${i < 3 ? 'top' + (i + 1) : ''}"><span class="td-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b>${escapeHtml(x.n)}</b><i>🌊 ${x.w}</i></li>`).join('') : `<li class="td-dim tdl-empty">Nobody yet — be the first!</li>`;
   }
   async function tdLobbyOpen(){
     const box = TDG.win && TDG.win.querySelector('.td-open'); if(!box) return;
     let d = null; try{ d = await tdGet('td/open'); }catch(e){}
     if(!TDG.win || TDG.view !== 'lobby') return;
     const now = tdNow(), list = Object.entries(d || {}).filter(([k, v]) => v && now - (v.t || 0) < 45000);
-    box.innerHTML = list.length ? list.map(([k, v]) => `<div class="td-oteam"><span><b>${escapeHtml(v.n || 'A team')}</b><i>${v.c || 1} player${(v.c || 1) === 1 ? '' : 's'} · ${v.w > 1 ? 'wave ' + v.w : 'not started'}</i></span><button type="button" class="td-btn" data-join="${escapeHtml(k)}">Join</button></div>`).join('') : `<p class="td-dim">No teams right now — start one and your friends can join from here.</p>`;
+    box.innerHTML = list.length ? list.map(([k, v]) => `<div class="td-oteam"><span class="tdl-tav" style="background:${chatColor(v.n || '')}">${escapeHtml((v.n || '?').slice(0, 1).toUpperCase())}</span><span><b>${escapeHtml(v.n || 'A team')}</b><i>👥 ${v.c || 1} · ${v.w > 1 ? '🌊 wave ' + v.w : 'waiting'}</i></span><button type="button" class="tdl-join" data-join="${escapeHtml(k)}">JOIN</button></div>`).join('') : `<p class="td-dim tdl-empty">No teams yet — press TEAM UP and your friends can join here.</p>`;
     box.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', () => tdJoin(b.dataset.join)));
   }
   // ----- starting / joining -----
@@ -26356,7 +26434,7 @@
     const main = TDG.win.querySelector('.td-main');
     TDG.win.querySelector('.td-leave').hidden = false;
     main.innerHTML = `<div class="td-game"><div class="td-bar"><span class="td-lives" title="Castle health">❤️ <b>–</b></span><span class="td-wave" title="Wave">🌊 <b>–</b></span><span class="td-gold" title="Your points — troops are paid for with them, and every wave you clear pays points back">🪙 <b>–</b></span><span class="td-diff" title="Difficulty, from the players' average points: enemies are this much tougher and troops this much dearer"></span><span class="td-players"></span></div>
-      <div class="td-stage"><canvas class="td-cv"></canvas><div class="td-msg" hidden></div></div>
+      <div class="td-stage"><canvas class="td-cv"></canvas><div class="td-warn" hidden>⚠ BOSS WAVE NEXT <i>the Skull King is coming — get ready</i></div><div class="td-msg" hidden></div></div>
       <div class="td-foot"><div class="td-troops"></div><div class="td-act"></div></div></div>`;
     const cv = main.querySelector('.td-cv'); TDG.cv = cv; TDG.bg = null;
     cv.addEventListener('pointermove', (e) => { TDG.hover = tdCellAt(e); });
@@ -26422,11 +26500,13 @@
       h += `<div class="td-pickinfo"><b>${escapeHtml(t.name)} · level ${tw.lv}</b><i>${own ? 'yours' : 'built by ' + escapeHtml(on ? on.n : 'someone')}</i></div>`;
       if(own) h += tw.lv < 3 ? `<button type="button" class="td-btn" data-a="up" ${bal < up ? 'disabled' : ''}>⬆️ Upgrade · 🪙 ${up.toLocaleString()}</button>` : `<span class="td-dim">Max level</span>`;
     }
-    if(r.st === 'lobby') h += `<span class="td-dim">${live.length} in the team — friends can join from Tower Defense › Open teams. Build first if you like.</span><button type="button" class="td-btn pri" data-a="go">▶ Start wave 1</button>`;
-    else if(r.st === 'build') h += `<button type="button" class="td-btn pri" data-a="go">▶ ${r.w === 1 ? 'Start' : 'Next wave'} · wave ${r.w}</button>`;
+    if(r.st === 'lobby') h += `<span class="td-dim">👥 ${live.length} in the team · friends join from Open teams</span><button type="button" class="td-btn pri${r.w % 5 === 0 ? ' boss' : ''}" data-a="go">${r.w % 5 === 0 ? '☠ Boss wave ' + r.w : '▶ Start wave ' + r.w}</button>`;
+    else if(r.st === 'build') h += r.w % 5 === 0 ? `<button type="button" class="td-btn pri boss" data-a="go">☠ Boss wave ${r.w}</button>` : `<button type="button" class="td-btn pri" data-a="go">▶ ${r.w === 1 ? 'Start' : 'Next wave'} · wave ${r.w}</button>`;
     else if(r.st === 'run') h += `<span class="td-dim td-left"></span>`;
     act.innerHTML = h;
     act.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { b.disabled = true; ({ up: tdUpgrade, go: tdGo })[b.dataset.a](); }));
+    // a boss wave is next
+    W.querySelector('.td-warn').hidden = !((r.st === 'build' || r.st === 'lobby') && r.w % 5 === 0);
     // game over
     const msg = W.querySelector('.td-msg');
     if(r.st === 'over'){ msg.hidden = false; msg.innerHTML = `<b>🏰 The castle fell</b><span>${r.m === 'team' ? 'Your team' : 'You'} survived <em>${r.best | 0}</em> wave${(r.best | 0) === 1 ? '' : 's'}.</span><div><button type="button" class="td-btn pri" data-a="again">Play again</button><button type="button" class="td-btn" data-a="lobby">Back</button></div>`;
@@ -26541,10 +26621,11 @@
   }
   // the team's profile pictures on the castle, like shields on its walls (initials for anyone without a picture)
   const tdFace = (uid) => { const src = chatProfile(uid); if(!src) return null; let im = TDG.faces && TDG.faces.get(uid); if(!im || im._src !== src){ im = new Image(); im._src = src; im.src = src; (TDG.faces = TDG.faces || new Map()).set(uid, im); } return im.complete && im.naturalWidth ? im : null; };
-  function tdCastleFaces(x, u, r){
+  function tdCastleFaces(x, u0, r){
+    const u = u0 * 1.5;
     const me = tdMe(), ids = Object.entries(r.pl || {}).filter(([k, p]) => tdLive(p) || k === me).map(([k]) => k).sort((a, b) => (a === r.h ? -1 : b === r.h ? 1 : a < b ? -1 : 1)).slice(0, 6);
     if(!ids.length) return;
-    const cx = (TD_CASTLE[0] + .3) * u, cy = (TD_CASTLE[1] + .5) * u, n = ids.length;
+    const cx = (TD_CASTLE[0] + .3) * u0, cy = (TD_CASTLE[1] + .5) * u0, n = ids.length;
     // two rows on the wall when there are more than three
     const per = n > 3 ? Math.ceil(n / 2) : n, rad = u * (n > 3 ? .19 : n > 2 ? .22 : n > 1 ? .26 : .32);
 
@@ -26576,7 +26657,8 @@
   // the castle: two towers, a wall between them and a gate (the team's pictures go on the wall, see tdCastleFaces)
   function tdCastle(x, cx, cy, u, hurt){
     const mix = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t).toString(16).padStart(2, '0')).join('');
-    const S = u * 2.2, base = cy + u * .62, stone = hurt ? mix('#ddd5c4', '#ff5a5a', Math.min(1, hurt) * .65) : '#ddd5c4', dark = '#8d816b', line = Math.max(1, u * .04);
+    u = u * 1.5;
+    const S = u * 2.2, base = cy + u * .62, stone = hurt ? mix('#a9a296', '#ff5a5a', Math.min(1, hurt) * .65) : '#a9a296', dark = '#5e564a', line = Math.max(1, u * .04);
     const crenels = (l, r, top, h) => { const n = Math.max(2, Math.round((r - l) / (u * .26))), w = (r - l) / (n * 2 - 1); x.beginPath(); for(let i = 0; i < n; i++) x.rect(l + i * w * 2, top - h, w, h); x.fill(); x.stroke(); };
     x.save(); x.lineJoin = 'round'; x.strokeStyle = dark; x.lineWidth = line;
     x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = u * .3; x.shadowOffsetY = u * .08;
@@ -26587,7 +26669,7 @@
     for(const side of [-1, 1]){
       const tl = side < 0 ? cx - S * .5 : cx + S * .3, tr = tl + S * .2, tt = base - S * .86;
       x.fillStyle = stone; x.shadowColor = 'rgba(0,0,0,.35)'; x.fillRect(tl, tt, tr - tl, base - tt); x.shadowColor = 'transparent'; x.strokeRect(tl, tt, tr - tl, base - tt); crenels(tl - S * .02, tr + S * .02, tt, S * .07);
-      x.fillStyle = '#3a3226'; x.beginPath(); x.roundRect ? x.roundRect((tl + tr) / 2 - S * .025, tt + S * .14, S * .05, S * .12, S * .025) : x.rect((tl + tr) / 2 - S * .025, tt + S * .14, S * .05, S * .12); x.fill();
+      x.fillStyle = '#ffcf6a'; x.shadowColor = 'rgba(255,190,90,.9)'; x.shadowBlur = u * .25; x.beginPath(); x.roundRect ? x.roundRect((tl + tr) / 2 - S * .025, tt + S * .14, S * .05, S * .12, S * .025) : x.rect((tl + tr) / 2 - S * .025, tt + S * .14, S * .05, S * .12); x.fill(); x.shadowColor = 'transparent'; x.shadowBlur = 0;
       x.fillStyle = side < 0 ? '#ff7ab6' : '#7ce8ff'; x.beginPath(); x.moveTo((tl + tr) / 2, tt - S * .07); x.lineTo((tl + tr) / 2, tt - S * .3); x.lineTo((tl + tr) / 2 + S * .13, tt - S * .25); x.lineTo((tl + tr) / 2, tt - S * .2); x.fill();
       x.strokeStyle = dark; x.beginPath(); x.moveTo((tl + tr) / 2, tt - S * .07); x.lineTo((tl + tr) / 2, tt - S * .3); x.stroke();
     }
@@ -26595,24 +26677,65 @@
     x.strokeStyle = 'rgba(141,129,107,.35)'; x.lineWidth = Math.max(1, u * .025);
     for(let yy = wt + S * .1; yy < base - S * .02; yy += S * .1){ x.beginPath(); x.moveTo(wl + line, yy); x.lineTo(wr - line, yy); x.stroke(); }
     // gate
-    const gw = S * .2, gh = S * .22; x.fillStyle = '#3a3226'; x.strokeStyle = dark; x.lineWidth = line;
+    const gw = S * .2, gh = S * .22; x.fillStyle = '#2a1c10'; x.strokeStyle = dark; x.lineWidth = line;
     x.beginPath(); x.moveTo(cx - gw / 2, base); x.lineTo(cx - gw / 2, base - gh + gw / 2); x.arc(cx, base - gh + gw / 2, gw / 2, Math.PI, 0); x.lineTo(cx + gw / 2, base); x.closePath(); x.fill(); x.stroke();
     x.restore();
   }
+  // the map at night: dark ground, a cobbled road with a faint glow, pine and dead trees, rocks and glowing mushrooms
+  // (all placed from the road's seed, so everyone sees the same map), a misty edge — drawn once and kept
   function tdBackground(W, H, u){
     const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
-    for(let gy = 0; gy < TD_ROWS; gy++) for(let gx = 0; gx < TD_COLS; gx++){ x.fillStyle = (gx + gy) % 2 ? '#2f5a33' : '#33613a'; x.fillRect(gx * u, gy * u, u + 1, u + 1); }
-    // little tufts
-    const rnd = tdRng(7); x.fillStyle = 'rgba(160,220,120,.18)'; for(let i = 0; i < 160; i++){ x.beginPath(); x.arc(rnd() * W, rnd() * H, u * (0.04 + rnd() * 0.06), 0, 7); x.fill(); }
-    // the road
+    const g = x.createRadialGradient(W * .5, H * .45, H * .1, W * .5, H * .5, W * .75); g.addColorStop(0, '#1f2433'); g.addColorStop(1, '#0c0e15'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    for(let gy = 0; gy < TD_ROWS; gy++) for(let gx = 0; gx < TD_COLS; gx++) if((gx + gy) % 2){ x.fillStyle = 'rgba(255,255,255,.018)'; x.fillRect(gx * u, gy * u, u, u); }
+    const rnd = tdRng(((TDG.rs || 7) % 100000) + 3);
+    x.fillStyle = 'rgba(140,160,200,.08)'; for(let i = 0; i < 420; i++){ x.beginPath(); x.arc(rnd() * W, rnd() * H, u * (0.03 + rnd() * 0.07), 0, 7); x.fill(); }
+    // moss patches
+    for(let i = 0; i < 26; i++){ const px = rnd() * W, py = rnd() * H, pr = u * (1 + rnd() * 2.2), mg = x.createRadialGradient(px, py, 0, px, py, pr); mg.addColorStop(0, 'rgba(60,110,90,.16)'); mg.addColorStop(1, 'rgba(60,110,90,0)'); x.fillStyle = mg; x.fillRect(px - pr, py - pr, pr * 2, pr * 2); }
+    // the road: a soft violet glow, dark kerb, cobbles
     x.lineCap = 'round'; x.lineJoin = 'round';
     const road = () => { x.beginPath(); TD_ROUTE.forEach(([px, py], i) => { const X = (px + .5) * u, Y = (py + .5) * u; if(i) x.lineTo(X, Y); else x.moveTo(X, Y); }); };
-    road(); x.strokeStyle = '#6b4f2a'; x.lineWidth = u * 0.98; x.stroke();
-    road(); x.strokeStyle = '#c9a76a'; x.lineWidth = u * 0.82; x.stroke();
-    road(); x.setLineDash([u * .18, u * .32]); x.strokeStyle = 'rgba(120,90,50,.35)'; x.lineWidth = u * 0.06; x.stroke(); x.setLineDash([]);
-    // the castle
-    // where they come from
-    x.fillStyle = 'rgba(255,90,90,.85)'; x.beginPath(); const sy = (TD_ROUTE[0][1] + .5) * u; x.moveTo(u * .05, sy - u * .28); x.lineTo(u * .42, sy); x.lineTo(u * .05, sy + u * .28); x.fill();
+    road(); x.strokeStyle = 'rgba(155,92,255,.13)'; x.lineWidth = u * 1.9; x.stroke();
+    road(); x.strokeStyle = '#08070b'; x.lineWidth = u * 1.12; x.stroke();
+    road(); x.strokeStyle = '#3d3846'; x.lineWidth = u * .94; x.stroke();
+    for(const sg of TD_SEGS){ const n = Math.ceil(sg.L * 2.2); for(let i = 0; i < n; i++){ const t = (i + rnd()) / n, X = (sg.x1 + (sg.x2 - sg.x1) * t + .5) * u + (rnd() - .5) * u * .5, Y = (sg.y1 + (sg.y2 - sg.y1) * t + .5) * u + (rnd() - .5) * u * .5; x.fillStyle = rnd() < .5 ? 'rgba(90,82,102,.9)' : 'rgba(52,47,60,.9)'; x.beginPath(); x.ellipse(X, Y, u * (.12 + rnd() * .08), u * (.09 + rnd() * .06), rnd() * 3, 0, 7); x.fill(); } }
+    // scenery on the squares that aren't road or for building
+    const items = [];
+    for(let gy = 0; gy < TD_ROWS; gy++) for(let gx = 0; gx < TD_COLS; gx++){
+      const k = gx + '_' + gy; if(TD_ROAD.has(k) || TD_BUILD.has(k)) continue;
+      if(gx >= 27 && Math.abs(gy - TD_CASTLE[1]) <= 3) continue;
+      const v = rnd(); if(v > .42) continue;
+      items.push({ x: (gx + .2 + rnd() * .6) * u, y: (gy + .3 + rnd() * .5) * u, t: v < .2 ? 'pine' : v < .27 ? 'dead' : v < .35 ? 'rock' : 'shroom', s: .8 + rnd() * .5, r: rnd() });
+    }
+    items.sort((a, b) => a.y - b.y);
+    // flat little things on the squares you can build on (they don't get in the way)
+    for(const k of TD_BUILD){ const v = rnd(); if(v > .45) continue; const [gx, gy] = k.split('_').map(Number), X = (gx + .2 + rnd() * .6) * u, Y = (gy + .2 + rnd() * .6) * u;
+      if(v < .18){ x.fillStyle = 'rgba(120,128,145,.55)'; for(let i = 0; i < 3; i++){ x.beginPath(); x.ellipse(X + (rnd() - .5) * u * .5, Y + (rnd() - .5) * u * .4, u * .07, u * .05, 0, 0, 7); x.fill(); } }
+      else if(v < .36){ x.strokeStyle = 'rgba(70,130,105,.6)'; x.lineWidth = Math.max(1, u * .04); x.lineCap = 'round'; for(let i = -1; i <= 1; i++){ x.beginPath(); x.moveTo(X + i * u * .06, Y); x.lineTo(X + i * u * .12, Y - u * (.18 + rnd() * .1)); x.stroke(); } }
+      else { const col = rnd() < .5 ? '111,247,255' : '200,130,255'; x.fillStyle = `rgba(${col},.18)`; x.beginPath(); x.arc(X, Y, u * .22, 0, 7); x.fill(); x.fillStyle = `rgb(${col})`; x.beginPath(); x.arc(X, Y, u * .05, 0, 7); x.fill(); } }
+    for(const it of items){
+      const X = it.x, Y = it.y, S = u * it.s;
+      x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(X, Y + S * .1, S * .42, S * .14, 0, 0, 7); x.fill();
+      if(it.t === 'pine'){
+        x.fillStyle = '#2a1e18'; x.fillRect(X - S * .06, Y - S * .2, S * .12, S * .3);
+        for(let k = 0; k < 3; k++){ const w = S * (.62 - k * .14), y0 = Y - S * (.15 + k * .38); x.fillStyle = ['#17322f', '#1d3f3a', '#244a45'][k]; x.beginPath(); x.moveTo(X - w / 2, y0); x.lineTo(X, y0 - S * .62); x.lineTo(X + w / 2, y0); x.closePath(); x.fill(); }
+        x.fillStyle = 'rgba(160,220,210,.12)'; x.beginPath(); x.moveTo(X, Y - S * 1.53); x.lineTo(X + S * .1, Y - S * 1.3); x.lineTo(X, Y - S * 1.32); x.fill();
+      } else if(it.t === 'dead'){
+        x.strokeStyle = '#3b3340'; x.lineCap = 'round'; x.lineWidth = S * .12; x.beginPath(); x.moveTo(X, Y + S * .05); x.lineTo(X + S * .02, Y - S * .8); x.stroke();
+        x.lineWidth = S * .06; for(const [a, l, h] of [[-.9, .4, -.5], [.7, .45, -.62], [-.5, .3, -.75], [.4, .25, -.35]]){ x.beginPath(); x.moveTo(X + S * .01, Y + S * h); x.lineTo(X + Math.sin(a) * S * l, Y + S * h - Math.cos(a) * S * l); x.stroke(); }
+      } else if(it.t === 'rock'){
+        x.fillStyle = '#3a3f4b'; x.beginPath(); x.ellipse(X, Y - S * .08, S * .3, S * .22, 0, 0, 7); x.fill();
+        x.fillStyle = '#4c5260'; x.beginPath(); x.ellipse(X - S * .06, Y - S * .14, S * .16, S * .1, -.3, 0, 7); x.fill();
+      } else {
+        const col = it.r < .5 ? '111,247,255' : '200,130,255';
+        const gl = x.createRadialGradient(X, Y - S * .1, 0, X, Y - S * .1, S * .6); gl.addColorStop(0, `rgba(${col},.32)`); gl.addColorStop(1, `rgba(${col},0)`); x.fillStyle = gl; x.fillRect(X - S * .6, Y - S * .7, S * 1.2, S * 1.2);
+        for(const [dx, h, cr] of [[-.14, .22, .12], [.1, .3, .15], [.24, .16, .09]]){ x.fillStyle = '#d9d2e6'; x.fillRect(X + dx * S - S * .025, Y - h * S, S * .05, h * S); x.fillStyle = `rgb(${col})`; x.beginPath(); x.ellipse(X + dx * S, Y - h * S, cr * S, cr * S * .65, 0, Math.PI, 0); x.fill(); }
+      }
+    }
+    // where they come from: a glowing portal
+    const sy = (TD_ROUTE[0][1] + .5) * u, pg = x.createRadialGradient(u * .3, sy, 0, u * .3, sy, u * 1.6); pg.addColorStop(0, 'rgba(255,70,110,.55)'); pg.addColorStop(1, 'rgba(255,70,110,0)'); x.fillStyle = pg; x.fillRect(0, sy - u * 1.6, u * 1.9, u * 3.2);
+    x.fillStyle = '#ff5e7e'; x.beginPath(); x.moveTo(u * .1, sy - u * .45); x.lineTo(u * .65, sy); x.lineTo(u * .1, sy + u * .45); x.fill();
+    // misty edges
+    const vg = x.createRadialGradient(W / 2, H / 2, H * .45, W / 2, H / 2, W * .62); vg.addColorStop(0, 'rgba(5,6,10,0)'); vg.addColorStop(1, 'rgba(5,6,10,.55)'); x.fillStyle = vg; x.fillRect(0, 0, W, H);
     return c;
   }
   function tdFrame(){
@@ -26628,7 +26751,7 @@
     { const H = tdCastleHits(TDG.battle && r.st === 'run' ? TDG.battle : null, TDG.battle ? TDG.battle.t : 0), sx = H.shake ? Math.sin(performance.now() / 18) * u * .08 * H.shake : 0;
       x.save(); x.translate(sx, 0); tdCastle(x, (TD_CASTLE[0] + .3) * u, (TD_CASTLE[1] + .5) * u, u, H.flash); tdCastleFaces(x, u, r); x.restore(); }
     // where you can build
-    if(build){ x.strokeStyle = 'rgba(255,255,255,.13)'; x.lineWidth = Math.max(1, u * .03); for(const k of TD_BUILD){ if((r.tw || {})[k]) continue; const [gx, gy] = k.split('_').map(Number); x.strokeRect(gx * u + u * .12, gy * u + u * .12, u * .76, u * .76); } }
+    if(build){ x.strokeStyle = 'rgba(200,190,255,.07)'; x.lineWidth = Math.max(1, u * .03); for(const k of TD_BUILD){ if((r.tw || {})[k]) continue; const [gx, gy] = k.split('_').map(Number); x.strokeRect(gx * u + u * .12, gy * u + u * .12, u * .76, u * .76); } }
     // the fight (worked out up to now)
     const B = tdAdvance();
     if(B){
@@ -26647,8 +26770,8 @@
     if(TDG.pick && (r.tw || {})[TDG.pick]){ const tw = r.tw[TDG.pick]; ring(TDG.pick, tdStats(tw.k, tw.lv).range, '#ffffff'); }
     else if(build && TDG.hover && TD_BUILD.has(TDG.hover) && !(r.tw || {})[TDG.hover]){ const t = tdTroop(TDG.sel); ring(TDG.hover, t.range, t.col); const [gx, gy] = TDG.hover.split('_').map(Number); x.globalAlpha = .55; tdDrawTroop(x, (gx + .5) * u, (gy + .5) * u, u, TDG.sel, 1, 0, 9, performance.now() / 1000, null, true, false); x.globalAlpha = 1; }
     if(!B) return;
-    // monsters (walking, facing the way they go), and the puff when one dies
-    for(const f of B.foes){
+    // monsters (walking, facing the way they go, back to front), and the puff when one dies
+    for(const f of B.foes.slice().sort((a, b) => (a.y || 0) - (b.y || 0))){
       const [fx, fy] = tdAt(f.d), cx = (fx + .5) * u, cy = (fy + .5) * u;
       if(f.hp <= 0){ if(f.gone) continue; const a = (B.t - (f.deadAt || B.t)) / 0.35; if(a < 1) tdDrawPoof(x, cx, cy, u, a, TD_FOES[f.k].col, f.id); continue; }
       const [ax] = tdAt(f.d + .3), dir = ax < fx - .01 ? -1 : 1;
@@ -26659,6 +26782,31 @@
     // shots flying, blasts, and the castle being hit
     tdDrawShots(x, B, u);
     tdDrawCastleHits(x, B, u);
+    tdFireflies(x, u, W, H);
+    tdBossBanner(x, B, u, W, H, r.w);
+  }
+  // fireflies drifting over the map
+  function tdFireflies(x, u, W, H){
+    const t = performance.now() / 1000;
+    for(let i = 0; i < 22; i++){ const px = ((i * 137.5) % 100) / 100 * W + Math.sin(t * .3 + i) * u * 1.5, py = ((i * 61.8) % 100) / 100 * H + Math.cos(t * .23 + i * 1.7) * u * 1.2, a = .25 + .35 * (.5 + .5 * Math.sin(t * 2 + i * 2.3));
+      x.globalAlpha = a; x.fillStyle = i % 3 ? '#d8ff8a' : '#8af7ff'; tdCirc(x, px, py, u * .07); x.fill(); x.globalAlpha = a * .25; tdCirc(x, px, py, u * .2); x.fill(); }
+    x.globalAlpha = 1;
+  }
+  // a boss wave: a red pulse round the edge and a big warning when it starts, and again when the boss walks in
+  function tdBossBanner(x, B, u, W, H, w){
+    if(!B || w % 5) return;
+    const boss = B.foes.find(f => f.k === 'boss'), t1 = B.t, t2 = boss ? B.t - boss.born : 99;
+    const show = (tt, big, small) => {
+      const a = tt < .3 ? tt / .3 : tt > 2.4 ? Math.max(0, 1 - (tt - 2.4) / .6) : 1; if(a <= 0) return;
+      const vg = x.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, W * .65); vg.addColorStop(0, 'rgba(255,0,40,0)'); vg.addColorStop(1, `rgba(255,0,40,${.35 * a * (.6 + .4 * Math.sin(tt * 10))})`); x.fillStyle = vg; x.fillRect(0, 0, W, H);
+      x.globalAlpha = a; x.textAlign = 'center'; x.textBaseline = 'middle';
+      const sc = 1 + Math.max(0, .3 - tt) * 1.2;
+      x.font = `900 ${Math.round(u * 2.2 * sc)}px Manrope, Inter, sans-serif`; x.lineWidth = u * .3; x.strokeStyle = 'rgba(30,0,6,.9)'; x.strokeText(big, W / 2, H * .42); x.fillStyle = '#ff4d6a'; x.fillText(big, W / 2, H * .42);
+      x.font = `800 ${Math.round(u * .8)}px Inter, sans-serif`; x.lineWidth = u * .16; x.strokeText(small, W / 2, H * .42 + u * 1.7); x.fillStyle = '#ffd76a'; x.fillText(small, W / 2, H * .42 + u * 1.7);
+      x.globalAlpha = 1;
+    };
+    if(t1 < 3) show(t1, '☠ BOSS WAVE ☠', `Wave ${w} — hold the castle!`);
+    else if(t2 < 3) show(t2, 'THE SKULL KING', 'is coming down the road');
   }
   // ----- Tower Defense: the pictures and animations (drawn in code, so they can move) -----
   const tdRR = (x, X, Y, w, h, r) => { x.beginPath(); if(x.roundRect) x.roundRect(X, Y, w, h, r); else x.rect(X, Y, w, h); };
@@ -26771,7 +26919,7 @@
     if(cold){ x.fillStyle = 'rgba(220,250,255,.9)'; for(let i = 0; i < 3; i++){ const a = t * 2 + i * 2.1 + f.id; tdCirc(x, cx + Math.cos(a) * s * .38, cy - bob + Math.sin(a) * s * .25 - s * .1, u * .03); x.fill(); } }
   }
   // the shots, flying from troop to target
-  const TD_FLY = { archer: .16, cannon: .32, frost: .2, ballista: .1 };
+  const TD_FLY = { archer: .18, cannon: .36, frost: .2, ballista: .16 };
   function tdDrawShots(x, B, u){
     for(const s of B.shots){
       const fly = TD_FLY[s.k] || .15, a = (B.t - s.t) / fly; if(a < 0 || a > 1) continue;
@@ -26780,15 +26928,24 @@
       if(s.k === 'cannon'){ Y -= Math.sin(a * Math.PI) * u * .9; x.fillStyle = 'rgba(0,0,0,.25)'; x.beginPath(); x.ellipse(X, Y1 + (Y2 - Y1) * a + u * .1, u * .08, u * .04, 0, 0, 7); x.fill(); x.fillStyle = '#1a1a1e'; tdCirc(x, X, Y, u * .09); x.fill(); x.fillStyle = 'rgba(255,255,255,.35)'; tdCirc(x, X - u * .03, Y - u * .03, u * .03); x.fill(); }
       else if(s.k === 'archer'){ x.save(); x.translate(X, Y); x.rotate(ang); x.strokeStyle = '#d9c7a3'; x.lineWidth = Math.max(1.2, u * .03); x.beginPath(); x.moveTo(-u * .22, 0); x.lineTo(u * .06, 0); x.stroke(); x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(u * .12, 0); x.lineTo(u * .04, -u * .04); x.lineTo(u * .04, u * .04); x.fill(); x.fillStyle = '#e9e4d8'; x.fillRect(-u * .24, -u * .03, u * .06, u * .06); x.restore(); }
       else if(s.k === 'frost'){ for(let i = 0; i < 3; i++){ const b = Math.max(0, a - i * .12); const XX = X1 + (X2 - X1) * b, YY = Y1 + (Y2 - Y1) * b; x.globalAlpha = 1 - i * .3; x.fillStyle = i ? '#bff4ff' : '#ffffff'; tdCirc(x, XX, YY, u * (.08 - i * .02)); x.fill(); } x.globalAlpha = 1; }
-      else { x.save(); x.translate(X, Y); x.rotate(ang); x.strokeStyle = 'rgba(255,122,182,.5)'; x.lineWidth = u * .08; x.beginPath(); x.moveTo(-u * .5, 0); x.lineTo(0, 0); x.stroke(); x.strokeStyle = '#7a5230'; x.lineWidth = u * .04; x.beginPath(); x.moveTo(-u * .3, 0); x.lineTo(u * .1, 0); x.stroke(); x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(u * .2, 0); x.lineTo(u * .08, -u * .06); x.lineTo(u * .08, u * .06); x.fill(); x.restore(); }
+      else { const tail = Math.min(1, a) * Math.hypot(X - X1, Y - Y1); x.save(); x.translate(X, Y); x.rotate(ang); const sg = x.createLinearGradient(-tail, 0, 0, 0); sg.addColorStop(0, 'rgba(255,122,182,0)'); sg.addColorStop(1, 'rgba(255,170,210,.85)'); x.strokeStyle = sg; x.lineWidth = u * .14; x.beginPath(); x.moveTo(-tail, 0); x.lineTo(0, 0); x.stroke(); x.strokeStyle = '#7a5230'; x.lineWidth = u * .04; x.beginPath(); x.moveTo(-u * .3, 0); x.lineTo(u * .1, 0); x.stroke(); x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(u * .2, 0); x.lineTo(u * .08, -u * .06); x.lineTo(u * .08, u * .06); x.fill(); x.restore(); }
     }
     // cannon blasts (when the ball lands) and frost bursts
     for(const bm of B.booms){
-      const a = (B.t - bm.t - TD_FLY.cannon) / 0.45; if(a < 0 || a >= 1) continue;
-      const X = (bm.x + .5) * u, Y = (bm.y + .5) * u;
-      x.globalAlpha = 1 - a; x.fillStyle = '#ffdd7a'; tdCirc(x, X, Y, u * (.25 + a * .9)); x.fill();
-      x.fillStyle = '#ff7a2e'; tdCirc(x, X, Y, u * (.18 + a * .6)); x.fill();
-      x.fillStyle = 'rgba(80,70,60,.8)'; for(let i = 0; i < 6; i++){ const ang = i * 1.05 + bm.t; tdCirc(x, X + Math.cos(ang) * u * a * 1.1, Y + Math.sin(ang) * u * a * 1.1 - a * u * .3, u * .05 * (1 - a)); x.fill(); }
+      const a = (B.t - bm.t - TD_FLY.cannon) / 0.5; if(a < 0 || a >= 1) continue;
+      const X = (bm.x + .5) * u, Y = (bm.y + .5) * u, R = (bm.r || 1.5) * u, e = 1 - Math.pow(1 - a, 3);
+      x.globalAlpha = (1 - a) * .9; x.strokeStyle = '#ffd27a'; x.lineWidth = u * .18 * (1 - a); tdCirc(x, X, Y, R * e); x.stroke();          // shockwave
+      x.globalAlpha = 1 - a; x.fillStyle = '#fff1b0'; tdCirc(x, X, Y, R * .35 * (1 - a * .5)); x.fill();
+      x.fillStyle = '#ff9a3c'; tdCirc(x, X, Y, R * (.22 + e * .45)); x.globalAlpha = (1 - a) * .7; x.fill();
+      x.globalAlpha = (1 - a) * .6; x.fillStyle = '#4a3f38'; for(let i = 0; i < 7; i++){ const ang = i * .9 + bm.t * 3; tdCirc(x, X + Math.cos(ang) * R * e * .8, Y + Math.sin(ang) * R * e * .8 - a * u * .5, u * (.18 + a * .25)); x.fill(); }
+      x.globalAlpha = 1;
+    }
+    for(const nv of B.novas){
+      const a = (B.t - nv.t) / 0.45; if(a < 0 || a >= 1) continue;
+      const X = (nv.x + .5) * u, Y = (nv.y + .5) * u, R = nv.r * u * (1 - Math.pow(1 - a, 2));
+      x.globalAlpha = (1 - a) * .28; x.fillStyle = '#9fe9ff'; tdCirc(x, X, Y, R); x.fill();
+      x.globalAlpha = 1 - a; x.strokeStyle = '#e6fbff'; x.lineWidth = u * .12 * (1 - a) + 1; tdCirc(x, X, Y, R); x.stroke();
+      x.fillStyle = '#ffffff'; for(let i = 0; i < 10; i++){ const ang = i * .628 + nv.t; tdCirc(x, X + Math.cos(ang) * R, Y + Math.sin(ang) * R, u * .07 * (1 - a)); x.fill(); }
       x.globalAlpha = 1;
     }
   }

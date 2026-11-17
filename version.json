@@ -1,6 +1,6 @@
 {
-  "build": 123,
+  "build": 125,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🏰 Tower Defense got a makeover: new drawn troops that turn to aim and actually shoot (arrows, cannonballs with explosions, ice shards, ballista bolts), monsters that walk, flash when hit, frost over when slowed and poof when beaten, a castle that shakes and flashes when a monster gets in, a little picture on every troop showing who built it — and a brand-new road every game. Troops cost real points and every wave pays points back."
+  "notes": "🏰 Tower Defense: troops now have very different ranges (Frost short, Cannon short-medium, Archer long, Ballista very long), and you can build anywhere up to 3 squares from the road. 🏰 Tower Defense, bigger and darker: a big night-time map (roads about 90 squares long, room for whole teams) with pine trees, dead trees, rocks, glowing mushrooms and fireflies. Every troop now hits groups — archer volleys, bigger cannon blasts, frost novas and ballista bolts that pierce a whole line. A warning before every boss wave, and a brand-new game-style lobby."
 }
