@@ -1,6 +1,6 @@
 {
-  "build": 122,
+  "build": 123,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🏰 Tower Defense now plays for real points: troops cost your points and every wave you clear pays points back (plus your kills). Prices and pay follow the team's average points (an Archer is about 0.5% of it), so everyone plays for the same stakes — up to 3,000 + 5% of your points a day. The castle now shows your team's profile pictures. Also: link your devices (⚙️ › Link devices), and the chat's on/off switches are inside ⚙️."
+  "notes": "🏰 Tower Defense got a makeover: new drawn troops that turn to aim and actually shoot (arrows, cannonballs with explosions, ice shards, ballista bolts), monsters that walk, flash when hit, frost over when slowed and poof when beaten, a castle that shakes and flashes when a monster gets in, a little picture on every troop showing who built it — and a brand-new road every game. Troops cost real points and every wave pays points back."
 }

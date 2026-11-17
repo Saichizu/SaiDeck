@@ -22500,7 +22500,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 122;                 // ← goes up by one with every published version
+  const SD_BUILD = 123;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26119,8 +26119,9 @@
   // anyone can work out how it ends.
   const TD_COLS = 18, TD_ROWS = 11, TD_DT = 1 / 30, TD_LIVES = 20, TD_START_GOLD = 160;
   // the road: from the left edge, winding, to the castle on the right
-  const TD_ROUTE = [[-0.6, 2], [4, 2], [4, 7], [8, 7], [8, 3], [12, 3], [12, 8], [16, 8]];
-  const TD_CASTLE = [16.6, 8];
+  // the road (a new one every game, from the room's seed — see tdMakeRoute), and the castle at its end
+  const TD_ROUTE0 = [[-0.6, 2], [4, 2], [4, 7], [8, 7], [8, 3], [12, 3], [12, 8], [16, 8]];
+  let TD_ROUTE = TD_ROUTE0, TD_CASTLE = [16.6, 8], TD_SEGS = null, TD_ROAD = null, TD_BUILD = null;
   const TD_TROOPS = [
     { k: 'archer', name: 'Archer', ic: 'bowman', col: '#7dffb2', cost: 50, range: 2.6, dmg: 8, rate: 0.55, desc: 'Fast arrows at the enemy furthest along.' },
     { k: 'cannon', name: 'Cannon', ic: 'cannon', col: '#ffb02e', cost: 90, range: 2.2, dmg: 20, rate: 1.4, splash: 1.1, desc: 'Slow, but hits everything around where it lands.' },
@@ -26145,16 +26146,40 @@
   const tdSpent = (k, lv, sc) => { let c = tdCost(k, sc); for(let l = 1; l < lv; l++) c += tdUpCost(k, l, sc); return c; };
   const tdSellFor = (tw, sc) => Math.floor((tw.c || tdSpent(tw.k, tw.lv, sc)) * 0.6);
   // the road as points along it
-  const TD_SEGS = (() => { const out = []; let d = 0; for(let i = 0; i < TD_ROUTE.length - 1; i++){ const [x1, y1] = TD_ROUTE[i], [x2, y2] = TD_ROUTE[i + 1], L = Math.hypot(x2 - x1, y2 - y1); out.push({ x1, y1, x2, y2, d0: d, L }); d += L; } out.total = d; return out; })();
   function tdAt(d){
     for(const s of TD_SEGS){ if(d <= s.d0 + s.L){ const u = Math.max(0, (d - s.d0) / s.L); return [s.x1 + (s.x2 - s.x1) * u, s.y1 + (s.y2 - s.y1) * u]; } }
     const s = TD_SEGS[TD_SEGS.length - 1]; return [s.x2, s.y2];
   }
   // which tiles are road, and which you can build on (the ones right beside the road)
-  const TD_ROAD = (() => { const r = new Set(); for(const s of TD_SEGS){ const n = Math.ceil(s.L * 4); for(let i = 0; i <= n; i++){ const u = i / n, x = Math.round(s.x1 + (s.x2 - s.x1) * u), y = Math.round(s.y1 + (s.y2 - s.y1) * u); if(x >= 0 && x < TD_COLS) r.add(x + '_' + y); } } return r; })();
-  const TD_BUILD = (() => { const b = new Set(); for(const k of TD_ROAD){ const [x, y] = k.split('_').map(Number); for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++){ const nx = x + dx, ny = y + dy, nk = nx + '_' + ny; if(nx >= 0 && ny >= 0 && nx < TD_COLS && ny < TD_ROWS && !TD_ROAD.has(nk) && !(nx >= 16 && ny >= 7 && ny <= 9)) b.add(nk); } } return b; })();
   // a little seeded random (the same everywhere)
   const tdRng = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  // use a road: work out its length, which tiles are road, and which you can build on (the ones right beside it)
+  function tdSetRoute(route){
+    TD_ROUTE = route; const last = route[route.length - 1]; TD_CASTLE = [last[0] + .6, last[1]];
+    const out = []; let d = 0; for(let i = 0; i < route.length - 1; i++){ const [x1, y1] = route[i], [x2, y2] = route[i + 1], L = Math.hypot(x2 - x1, y2 - y1); out.push({ x1, y1, x2, y2, d0: d, L }); d += L; } out.total = d; TD_SEGS = out;
+    const r = new Set(); for(const s of out){ const n = Math.ceil(s.L * 4); for(let i = 0; i <= n; i++){ const u = i / n, x = Math.round(s.x1 + (s.x2 - s.x1) * u), y = Math.round(s.y1 + (s.y2 - s.y1) * u); if(x >= 0 && x < TD_COLS) r.add(x + '_' + y); } } TD_ROAD = r;
+    const cy = TD_CASTLE[1], b = new Set(); for(const k of r){ const [x, y] = k.split('_').map(Number); for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++){ const nx = x + dx, ny = y + dy, nk = nx + '_' + ny; if(nx >= 0 && ny >= 0 && nx < TD_COLS && ny < TD_ROWS && !r.has(nk) && !(nx >= 15 && ny >= cy - 2 && ny <= cy + 1)) b.add(nk); } } TD_BUILD = b;
+  }
+  // a winding road from the left edge to the castle, from a seed (0 = the original road). Its length stays about the same, so every road is fair.
+  function tdMakeRoute(seed){
+    if(!seed) return TD_ROUTE0;
+    for(let tries = 0; tries < 60; tries++){
+      const rnd = tdRng(seed * 31 + tries * 977 + 7), pick = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+      let y = pick(2, 8), x = pick(2, 3); const pts = [[-0.6, y]];
+      while(x < 13){
+        pts.push([x, y]);
+        let ny = y, guard = 20; while(guard-- && (Math.abs(ny - y) < 3)) ny = pick(1, 9);
+        if(Math.abs(ny - y) < 3) ny = y <= 5 ? y + 3 : y - 3;
+        pts.push([x, ny]); y = ny; x += pick(3, 4);
+      }
+      if(y < 2 || y > 8){ pts.push([Math.min(14, x), y]); const ny = y < 2 ? pick(3, 6) : pick(4, 7); pts.push([Math.min(14, x), ny]); y = ny; }
+      pts.push([16, y]);
+      let L = 0; for(let i = 0; i < pts.length - 1; i++) L += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      if(L >= 27 && L <= 35) return pts;
+    }
+    return TD_ROUTE0;
+  }
+  tdSetRoute(TD_ROUTE0);
   // who comes in wave w
   function tdWave(w){
     const list = [], n = Math.min(44, 6 + w * 2), rnd = tdRng(w * 7919 + 13);
@@ -26174,8 +26199,8 @@
   // The fight. towers: { cell: { k, lv, o } }. Returns a stepper: step(seconds) moves it on; .done, .lives (lost), .gold { owner: earned }.
   function tdBattle(w, towers, sc, np, lives){
     const hm = tdHpMul(w, sc, np), plan = tdWave(w);
-    const T = Object.keys(towers || {}).sort().map(c => { const [x, y] = c.split('_').map(Number), t = towers[c]; return { c, x, y, k: t.k, o: t.o, s: tdStats(t.k, t.lv), cd: 0, aim: null }; });
-    const st = { t: 0, foes: [], next: 0, lost: 0, lives: lives == null ? TD_LIVES : lives, gold: {}, kills: 0, done: false, shots: [], booms: [] };
+    const T = Object.keys(towers || {}).sort().map(c => { const [x, y] = c.split('_').map(Number), t = towers[c]; return { c, x, y, k: t.k, o: t.o, lv: t.lv, s: tdStats(t.k, t.lv), cd: 0, aim: 0, shotT: -9 }; });
+    const st = { t: 0, foes: [], next: 0, lost: 0, lives: lives == null ? TD_LIVES : lives, gold: {}, kills: 0, done: false, shots: [], booms: [], leaks: [] };
     let id = 0;
     const tick = () => {
       st.t += TD_DT;
@@ -26184,7 +26209,7 @@
         if(f.hp <= 0) continue;
         const sp = TD_FOES[f.k].sp * (f.slowT > 0 ? f.slowF : 1); if(f.slowT > 0) f.slowT -= TD_DT;
         f.d += sp * TD_DT;
-        if(f.d >= TD_SEGS.total){ f.hp = 0; f.gone = true; st.lost += TD_FOES[f.k].hurt; }
+        if(f.d >= TD_SEGS.total){ f.hp = 0; f.gone = true; st.lost += TD_FOES[f.k].hurt; st.leaks.push({ t: st.t, n: TD_FOES[f.k].hurt }); if(st.leaks.length > 12) st.leaks.shift(); }
       }
       for(const tw of T){
         tw.cd -= TD_DT; if(tw.cd > 0) continue;
@@ -26197,7 +26222,8 @@
         }
         if(!best) continue;
         tw.cd = tw.s.rate;
-        const hit = (f, dmg) => { if(f.hp <= 0) return; f.hp -= dmg; if(tw.s.slow){ f.slowT = tw.s.slowT; f.slowF = Math.min(f.slowF < 1 && f.slowT > 0 ? f.slowF : 1, 1 - tw.s.slow); } if(f.hp <= 0){ st.kills++; st.gold[tw.o] = (st.gold[tw.o] || 0) + TD_FOES[f.k].gold; } };
+        { const [ax, ay] = tdAt(best.d); tw.aim = Math.atan2(ay - tw.y, ax - tw.x); tw.shotT = st.t; }
+        const hit = (f, dmg) => { if(f.hp <= 0) return; f.hp -= dmg; f.hitAt = st.t; if(tw.s.slow){ f.slowT = tw.s.slowT; f.slowF = Math.min(f.slowF < 1 && f.slowT > 0 ? f.slowF : 1, 1 - tw.s.slow); } if(f.hp <= 0){ st.kills++; st.gold[tw.o] = (st.gold[tw.o] || 0) + TD_FOES[f.k].gold; } };
         const [bx, by] = tdAt(best.d);
         if(tw.s.splash){ for(const f of st.foes){ if(f.hp <= 0) continue; const [fx, fy] = tdAt(f.d); if(Math.hypot(fx - bx, fy - by) <= tw.s.splash) hit(f, f === best ? tw.s.dmg : tw.s.dmg * 0.6); } st.booms.push({ x: bx, y: by, t: st.t, k: tw.k }); }
         else hit(best, tw.s.dmg);
@@ -26229,6 +26255,8 @@
   const tdLive = (p) => p && typeof p.hb === 'number' && tdNow() - p.hb < 30000;
   async function tdGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('the server answered ' + r.status); return r.json(); }
   async function tdPatch(body){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }); return r.ok; }
+  // (a new room with a random road; if the database doesn't know about roads yet, the same room on the classic road)
+  async function tdPatchRoom(body){ if(await tdPatch(body)) return true; let had = false; for(const v of Object.values(body)) if(v && typeof v === 'object' && 'rs' in v){ delete v.rs; had = true; } return had && tdPatch(body); }
   const tdP = (k) => `td/r/${TDG.rid}/${k}`;
   // the difficulty for these players: from their average points right now
   // the difficulty and the price unit for these players, from their average points right now
@@ -26294,20 +26322,21 @@
     box.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', () => tdJoin(b.dataset.join)));
   }
   // ----- starting / joining -----
-  const tdNewRoom = (m, st, D) => ({ m, h: tdMe(), st, w: 1, lv: TD_LIVES, sc: D.sc, k: D.k, np: 1, best: 0, t: bjSv, pl: { [tdMe()]: { n: chatName().slice(0, CHAT_NAME_MAX), hb: bjSv } } });
+  const tdSeed = () => 1 + Math.floor(Math.random() * 999999999);
+  const tdNewRoom = (m, st, D) => ({ m, h: tdMe(), st, w: 1, lv: TD_LIVES, sc: D.sc, k: D.k, rs: tdSeed(), np: 1, best: 0, t: bjSv, pl: { [tdMe()]: { n: chatName().slice(0, CHAT_NAME_MAX), hb: bjSv } } });
   async function tdSolo(){
     const rid = 's' + tdMe();
     let cur = null; try{ cur = await tdGet(`td/r/${rid}`); }catch(e){}
     if(!cur || !cur.st || cur.st === 'over'){
       const D = await tdScaleNow([tdMe()]);
-      if(!(await tdPatch({ [`td/r/${rid}`]: tdNewRoom('solo', 'build', D) }))){ toast("Couldn't start the game — check your connection.", 2600); return; }
+      if(!(await tdPatchRoom({ [`td/r/${rid}`]: tdNewRoom('solo', 'build', D) }))){ toast("Couldn't start the game — check your connection.", 2600); return; }
     }
     tdEnter(rid);
   }
   async function tdTeamNew(){
     const rid = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const D = await tdScaleNow([tdMe()]);
-    const ok = await tdPatch({ [`td/r/${rid}`]: tdNewRoom('team', 'lobby', D), [`td/open/${rid}`]: { n: `${chatName().slice(0, CHAT_NAME_MAX)}'s team`, c: 1, w: 1, t: bjSv } });
+    const ok = await tdPatchRoom({ [`td/r/${rid}`]: tdNewRoom('team', 'lobby', D), [`td/open/${rid}`]: { n: `${chatName().slice(0, CHAT_NAME_MAX)}'s team`, c: 1, w: 1, t: bjSv } });
     if(!ok){ toast("Couldn't start a team — check your connection.", 2600); return; }
     tdEnter(rid);
   }
@@ -26362,6 +26391,7 @@
       if(!TDG.rid) return;
       if(!r){ toast('That game has ended.', 2000); TDG.rid = ''; tdLobby(); return; }
       const was = TDG.room; TDG.room = r;
+      if((r.rs || 0) !== TDG.rs){ TDG.rs = r.rs || 0; tdSetRoute(tdMakeRoute(TDG.rs)); TDG.bg = null; TDG.bKey = ''; }
       if(r.pl && !r.pl[tdMe()] && r.m === 'team'){ toast('You were taken out of the team (away too long).', 2600); TDG.rid = ''; tdLobby(); return; }
       tdClaim(r);
       if(!was || was.st !== r.st || was.w !== r.w || JSON.stringify(was.tw || {}) !== JSON.stringify(r.tw || {}) || JSON.stringify(was.pl || {}) !== JSON.stringify(r.pl || {})) tdUi();
@@ -26449,7 +26479,7 @@
     const me = tdMe(), pl = {};
     for(const [u, p] of Object.entries(r.pl || {})) if(tdLive(p) || u === me) pl[u] = { n: p.n, hb: bjSv };
     const D = await tdScaleNow(Object.keys(pl));
-    await tdPatch({ [`td/r/${TDG.rid}`]: { m: r.m, h: me, st: r.m === 'team' ? 'lobby' : 'build', w: 1, lv: TD_LIVES, sc: D.sc, k: D.k, np: Object.keys(pl).length, best: 0, t: bjSv, pl } });
+    await tdPatchRoom({ [`td/r/${TDG.rid}`]: { m: r.m, h: me, st: r.m === 'team' ? 'lobby' : 'build', w: 1, lv: TD_LIVES, sc: D.sc, k: D.k, rs: tdSeed(), np: Object.keys(pl).length, best: 0, t: bjSv, pl } });
     TDG.battle = null; TDG.bKey = ''; tdPoll();
   }
   // a wave has been fought to the end: count it (the host does it straight away; anyone else if the host doesn't)
@@ -26544,8 +26574,9 @@
     if(TDG.spr.size > 80) TDG.spr.clear(); TDG.spr.set(key, c); return c;
   }
   // the castle: two towers, a wall between them and a gate (the team's pictures go on the wall, see tdCastleFaces)
-  function tdCastle(x, cx, cy, u){
-    const S = u * 2.2, base = cy + u * .62, stone = '#ddd5c4', dark = '#8d816b', line = Math.max(1, u * .04);
+  function tdCastle(x, cx, cy, u, hurt){
+    const mix = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t).toString(16).padStart(2, '0')).join('');
+    const S = u * 2.2, base = cy + u * .62, stone = hurt ? mix('#ddd5c4', '#ff5a5a', Math.min(1, hurt) * .65) : '#ddd5c4', dark = '#8d816b', line = Math.max(1, u * .04);
     const crenels = (l, r, top, h) => { const n = Math.max(2, Math.round((r - l) / (u * .26))), w = (r - l) / (n * 2 - 1); x.beginPath(); for(let i = 0; i < n; i++) x.rect(l + i * w * 2, top - h, w, h); x.fill(); x.stroke(); };
     x.save(); x.lineJoin = 'round'; x.strokeStyle = dark; x.lineWidth = line;
     x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = u * .3; x.shadowOffsetY = u * .08;
@@ -26580,7 +26611,6 @@
     road(); x.strokeStyle = '#c9a76a'; x.lineWidth = u * 0.82; x.stroke();
     road(); x.setLineDash([u * .18, u * .32]); x.strokeStyle = 'rgba(120,90,50,.35)'; x.lineWidth = u * 0.06; x.stroke(); x.setLineDash([]);
     // the castle
-    tdCastle(x, (TD_CASTLE[0] + .3) * u, (TD_CASTLE[1] + .5) * u, u);
     // where they come from
     x.fillStyle = 'rgba(255,90,90,.85)'; x.beginPath(); const sy = (TD_ROUTE[0][1] + .5) * u; x.moveTo(u * .05, sy - u * .28); x.lineTo(u * .42, sy); x.lineTo(u * .05, sy + u * .28); x.fill();
     return c;
@@ -26595,7 +26625,8 @@
     x.drawImage(TDG.bg, 0, 0);
     if(!r) return;
     const build = r.st === 'build' || r.st === 'lobby', me = tdMe();
-    tdCastleFaces(x, u, r);
+    { const H = tdCastleHits(TDG.battle && r.st === 'run' ? TDG.battle : null, TDG.battle ? TDG.battle.t : 0), sx = H.shake ? Math.sin(performance.now() / 18) * u * .08 * H.shake : 0;
+      x.save(); x.translate(sx, 0); tdCastle(x, (TD_CASTLE[0] + .3) * u, (TD_CASTLE[1] + .5) * u, u, H.flash); tdCastleFaces(x, u, r); x.restore(); }
     // where you can build
     if(build){ x.strokeStyle = 'rgba(255,255,255,.13)'; x.lineWidth = Math.max(1, u * .03); for(const k of TD_BUILD){ if((r.tw || {})[k]) continue; const [gx, gy] = k.split('_').map(Number); x.strokeRect(gx * u + u * .12, gy * u + u * .12, u * .76, u * .76); } }
     // the fight (worked out up to now)
@@ -26604,34 +26635,180 @@
       const left = TDG.win.querySelector('.td-left'); if(left){ const n = B.foes.filter(f => f.hp > 0).length + (B.total - B.next); left.textContent = B.done ? 'Wave over — counting…' : `Wave ${r.w}: ${n} enem${n === 1 ? 'y' : 'ies'} left${B.lost ? ` · ${B.lost} got through` : ''}`; }
       const lb = TDG.win.querySelector('.td-lives b'); if(lb) lb.textContent = Math.max(0, (r.lv | 0) - B.lost);
     }
-    // troops
+    // troops (they turn to their target and show when they fire; a badge says who built each one)
+    const BT = B ? new Map(B.towers.map(q => [q.c, q])) : null;
     for(const [k, tw] of Object.entries(r.tw || {})){
-      const [gx, gy] = k.split('_').map(Number), t = tdTroop(tw.k); if(!t) continue;
-      const cx = (gx + .5) * u, cy = (gy + .5) * u;
-      x.fillStyle = tw.o === me ? 'rgba(20,18,30,.82)' : 'rgba(30,24,40,.7)'; x.beginPath(); x.arc(cx, cy, u * .44, 0, 7); x.fill();
-      x.lineWidth = Math.max(1, u * .06); x.strokeStyle = TDG.pick === k ? '#fff' : tw.o === me ? t.col : 'rgba(255,255,255,.25)'; x.stroke();
-      let rot = 0;
-      if(B){ const T = B.towers.find(q => q.c === k), s = T && [...B.shots].reverse().find(q => q.x1 === gx && q.y1 === gy); if(s) rot = Math.atan2(s.y2 - gy, s.x2 - gx) * 0.12; }
-      const sp = tdSprite(t.ic, t.col, Math.round(u * .72));
-      x.save(); x.translate(cx, cy); x.rotate(rot); x.drawImage(sp, -u * .36, -u * .38, u * .72, u * .72); x.restore();
-      for(let i = 0; i < tw.lv; i++){ x.fillStyle = '#ffd76a'; x.beginPath(); x.arc(cx - u * .2 + i * u * .2, cy + u * .42, u * .07, 0, 7); x.fill(); }
+      const [gx, gy] = k.split('_').map(Number); if(!tdTroop(tw.k)) continue;
+      const q = BT && BT.get(k), p = (r.pl || {})[tw.o];
+      tdDrawTroop(x, (gx + .5) * u, (gy + .5) * u, u, tw.k, tw.lv, q ? q.aim : (TDG.aimIdle = (TDG.aimIdle || 0)) + Math.sin(performance.now() / 1400 + gx * 1.3 + gy) * .5, q ? B.t - q.shotT : 9, performance.now() / 1000, r.m === 'team' || tw.o !== me ? { u: tw.o, n: p ? p.n : '?' } : null, tw.o === me, TDG.pick === k);
     }
     // the range of what you're about to place / have picked
     const ring = (k, rng, col) => { const [gx, gy] = k.split('_').map(Number); x.beginPath(); x.arc((gx + .5) * u, (gy + .5) * u, rng * u, 0, 7); x.fillStyle = col + '22'; x.fill(); x.strokeStyle = col + 'aa'; x.lineWidth = Math.max(1, u * .03); x.stroke(); };
     if(TDG.pick && (r.tw || {})[TDG.pick]){ const tw = r.tw[TDG.pick]; ring(TDG.pick, tdStats(tw.k, tw.lv).range, '#ffffff'); }
-    else if(build && TDG.hover && TD_BUILD.has(TDG.hover) && !(r.tw || {})[TDG.hover]){ const t = tdTroop(TDG.sel); ring(TDG.hover, t.range, t.col); const [gx, gy] = TDG.hover.split('_').map(Number); x.globalAlpha = .55; x.drawImage(tdSprite(t.ic, t.col, Math.round(u * .72)), (gx + .14) * u, (gy + .12) * u, u * .72, u * .72); x.globalAlpha = 1; }
+    else if(build && TDG.hover && TD_BUILD.has(TDG.hover) && !(r.tw || {})[TDG.hover]){ const t = tdTroop(TDG.sel); ring(TDG.hover, t.range, t.col); const [gx, gy] = TDG.hover.split('_').map(Number); x.globalAlpha = .55; tdDrawTroop(x, (gx + .5) * u, (gy + .5) * u, u, TDG.sel, 1, 0, 9, performance.now() / 1000, null, true, false); x.globalAlpha = 1; }
     if(!B) return;
-    // shots and blasts
-    for(const s of B.shots){ const a = 1 - (B.t - s.t) / 0.14; if(a <= 0) continue; const t = tdTroop(s.k); x.globalAlpha = a; x.strokeStyle = t.col; x.lineWidth = Math.max(1.5, u * (s.k === 'ballista' ? .08 : .05)); x.beginPath(); x.moveTo((s.x1 + .5) * u, (s.y1 + .5) * u); x.lineTo((s.x2 + .5) * u, (s.y2 + .5) * u); x.stroke(); }
-    for(const bm of B.booms){ const a = (B.t - bm.t) / 0.35; if(a >= 1) continue; x.globalAlpha = 1 - a; x.fillStyle = '#ffb02e'; x.beginPath(); x.arc((bm.x + .5) * u, (bm.y + .5) * u, u * (0.3 + a * 1.0), 0, 7); x.fill(); }
-    x.globalAlpha = 1;
-    // enemies
+    // monsters (walking, facing the way they go), and the puff when one dies
     for(const f of B.foes){
-      const F = TD_FOES[f.k], [fx, fy] = tdAt(f.d), cx = (fx + .5) * u, cy = (fy + .5) * u, sz = u * F.r * 2.3, dead = f.hp <= 0;
-      if(dead){ const a = 1 - (B.t - (f.deadAt || B.t)) / 0.35; if(a <= 0 || f.gone) continue; x.globalAlpha = a; }
-      const bob = Math.sin(B.t * 9 + f.id) * u * .04;
-      x.drawImage(tdSprite(F.ic, f.slowT > 0 ? '#bdf3ff' : F.col, Math.round(sz)), cx - sz / 2, cy - sz / 2 + bob, sz, sz);
-      if(!dead){ const w = u * .7, p = Math.max(0, f.hp / f.max); x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(cx - w / 2, cy - sz / 2 - u * .14, w, u * .08); x.fillStyle = p > .5 ? '#7dffb2' : p > .25 ? '#ffd76a' : '#ff5e5e'; x.fillRect(cx - w / 2, cy - sz / 2 - u * .14, w * p, u * .08); }
+      const [fx, fy] = tdAt(f.d), cx = (fx + .5) * u, cy = (fy + .5) * u;
+      if(f.hp <= 0){ if(f.gone) continue; const a = (B.t - (f.deadAt || B.t)) / 0.35; if(a < 1) tdDrawPoof(x, cx, cy, u, a, TD_FOES[f.k].col, f.id); continue; }
+      const [ax] = tdAt(f.d + .3), dir = ax < fx - .01 ? -1 : 1;
+      tdDrawFoe(x, cx, cy, u, f, B.t, dir);
+      const w = u * .62, pz = Math.max(0, f.hp / f.max), top = cy - u * TD_FOES[f.k].r * 1.35 - u * .12;
+      x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(cx - w / 2, top, w, u * .07); x.fillStyle = pz > .5 ? '#7dffb2' : pz > .25 ? '#ffd76a' : '#ff5e5e'; x.fillRect(cx - w / 2, top, w * pz, u * .07);
+    }
+    // shots flying, blasts, and the castle being hit
+    tdDrawShots(x, B, u);
+    tdDrawCastleHits(x, B, u);
+  }
+  // ----- Tower Defense: the pictures and animations (drawn in code, so they can move) -----
+  const tdRR = (x, X, Y, w, h, r) => { x.beginPath(); if(x.roundRect) x.roundRect(X, Y, w, h, r); else x.rect(X, Y, w, h); };
+  const tdCirc = (x, X, Y, r) => { x.beginPath(); x.arc(X, Y, Math.max(0.1, r), 0, Math.PI * 2); };
+  // a troop: a stone platform, the troop on top facing its target (aim), with a little "just fired" kick (since)
+  function tdDrawTroop(x, cx, cy, u, k, lv, aim, since, t, owner, mine, picked){
+    const R = u * .42, fire = Math.max(0, 1 - since / 0.22);
+    // platform
+    x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(cx, cy + R * .25, R * 1.02, R * .8, 0, 0, 7); x.fill();
+    x.fillStyle = '#8f8778'; tdCirc(x, cx, cy, R); x.fill();
+    x.fillStyle = '#a69e8d'; tdCirc(x, cx, cy - R * .08, R * .86); x.fill();
+    x.lineWidth = Math.max(1, u * .05); x.strokeStyle = picked ? '#fff' : mine ? tdTroop(k).col : '#6b6456'; tdCirc(x, cx, cy, R); x.stroke();
+    // level gems round the edge
+    for(let i = 0; i < lv; i++){ const a = Math.PI * .5 + (i - (lv - 1) / 2) * .55; x.fillStyle = '#ffd76a'; tdCirc(x, cx + Math.cos(a) * R * .88, cy + Math.sin(a) * R * .88, u * .055); x.fill(); x.strokeStyle = '#8a5a00'; x.lineWidth = 1; x.stroke(); }
+    x.save(); x.translate(cx, cy - R * .08);
+    if(k === 'archer'){
+      // a hooded archer: turns to aim, draws the bow, lets go
+      x.rotate(aim);
+      const pull = fire > 0 ? 0 : Math.min(1, (since - 0.22) / 0.3);
+      x.fillStyle = '#2f6b3a'; tdCirc(x, -u * .04, 0, u * .19); x.fill();                                   // body / cloak
+      x.fillStyle = '#3f8a4b'; tdCirc(x, -u * .02, 0, u * .13); x.fill();                                   // hood
+      x.fillStyle = '#f2c79a'; tdCirc(x, u * .05, 0, u * .055); x.fill();                                   // face
+      x.strokeStyle = '#8a5a2b'; x.lineWidth = u * .045; x.beginPath(); x.arc(u * .1, 0, u * .2, -1.15, 1.15); x.stroke();   // bow
+      const sx = u * .1 + Math.cos(1.15) * u * .2 - pull * u * .12;
+      x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = Math.max(1, u * .014); x.beginPath(); x.moveTo(u * .1 + Math.cos(-1.15) * u * .2, Math.sin(-1.15) * u * .2); x.lineTo(sx, 0); x.lineTo(u * .1 + Math.cos(1.15) * u * .2, Math.sin(1.15) * u * .2); x.stroke();
+      if(pull > .2){ x.strokeStyle = '#d9c7a3'; x.lineWidth = u * .025; x.beginPath(); x.moveTo(sx, 0); x.lineTo(sx + u * .3, 0); x.stroke(); }
+    } else if(k === 'cannon'){
+      // a cannon on a wooden mount: turns, kicks back and smokes when it fires
+      x.fillStyle = '#6b4a2b'; tdRR(x, -u * .2, -u * .17, u * .34, u * .34, u * .06); x.fill();
+      x.rotate(aim);
+      const kick = fire * u * .09;
+      x.fillStyle = '#2a2a30'; tdRR(x, -u * .1 - kick, -u * .085, u * .38, u * .17, u * .05); x.fill();
+      x.fillStyle = '#44444c'; tdRR(x, u * .2 - kick, -u * .1, u * .08, u * .2, u * .03); x.fill();
+      x.fillStyle = '#1a1a1e'; tdCirc(x, -u * .08 - kick, 0, u * .11); x.fill();
+      if(fire > 0){ x.globalAlpha = fire * .8; x.fillStyle = '#e9e4d8'; tdCirc(x, u * .36 + (1 - fire) * u * .15, 0, u * (.08 + (1 - fire) * .1)); x.fill(); x.fillStyle = '#ffb02e'; x.globalAlpha = Math.max(0, fire - .5) * 2; tdCirc(x, u * .32, 0, u * .07); x.fill(); x.globalAlpha = 1; }
+    } else if(k === 'frost'){
+      // a frost crystal that glows, spins a little and flashes when it casts
+      const pulse = .5 + .5 * Math.sin(t * 4 + cx), glow = .25 + pulse * .2 + fire * .5;
+      x.fillStyle = `rgba(124,232,255,${glow})`; tdCirc(x, 0, 0, u * (.26 + fire * .08)); x.fill();
+      x.rotate(Math.sin(t * 1.5 + cy) * .25);
+      x.fillStyle = '#bff4ff'; x.beginPath(); x.moveTo(0, -u * .26); x.lineTo(u * .13, 0); x.lineTo(0, u * .2); x.lineTo(-u * .13, 0); x.closePath(); x.fill();
+      x.fillStyle = '#5fc8ea'; x.beginPath(); x.moveTo(0, -u * .26); x.lineTo(u * .13, 0); x.lineTo(0, 0); x.closePath(); x.fill();
+      x.strokeStyle = '#2d8fb5'; x.lineWidth = Math.max(1, u * .02); x.beginPath(); x.moveTo(0, -u * .26); x.lineTo(u * .13, 0); x.lineTo(0, u * .2); x.lineTo(-u * .13, 0); x.closePath(); x.stroke();
+      if(fire > 0){ x.strokeStyle = `rgba(230,250,255,${fire})`; x.lineWidth = u * .03; for(let i = 0; i < 6; i++){ const a = i * Math.PI / 3; x.beginPath(); x.moveTo(Math.cos(a) * u * .15, Math.sin(a) * u * .15); x.lineTo(Math.cos(a) * u * (.22 + (1 - fire) * .15), Math.sin(a) * u * (.22 + (1 - fire) * .15)); x.stroke(); } }
+    } else {
+      // a ballista: a big wooden crossbow that turns and snaps forward
+      x.rotate(aim);
+      const snap = fire > 0 ? 0 : Math.min(1, (since - 0.22) / 0.6);
+      x.fillStyle = '#7a5230'; tdRR(x, -u * .22, -u * .05, u * .44, u * .1, u * .03); x.fill();               // stock
+      x.strokeStyle = '#5c3d22'; x.lineWidth = u * .06; x.beginPath(); x.arc(u * .02, 0, u * .26, -1.25, 1.25); x.stroke();   // bow arms
+      const sx = u * .02 + Math.cos(1.25) * u * .26 - snap * u * .16;
+      x.strokeStyle = '#e9e4d8'; x.lineWidth = Math.max(1, u * .02); x.beginPath(); x.moveTo(u * .02 + Math.cos(-1.25) * u * .26, Math.sin(-1.25) * u * .26); x.lineTo(sx, 0); x.lineTo(u * .02 + Math.cos(1.25) * u * .26, Math.sin(1.25) * u * .26); x.stroke();
+      if(snap > .3){ x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(sx + u * .42, 0); x.lineTo(sx + u * .33, -u * .04); x.lineTo(sx + u * .33, u * .04); x.fill(); x.strokeStyle = '#7a5230'; x.lineWidth = u * .03; x.beginPath(); x.moveTo(sx, 0); x.lineTo(sx + u * .34, 0); x.stroke(); }
+    }
+    x.restore();
+    // who built it: their picture (or initial) in a little badge
+    if(owner){
+      const bx = cx + R * .78, by = cy + R * .66, br = u * .15, im = tdFace(owner.u);
+      x.save(); tdCirc(x, bx, by, br); x.fillStyle = chatColor(owner.n || ''); x.fill(); x.clip();
+      if(im) x.drawImage(im, bx - br, by - br, br * 2, br * 2);
+      else { x.fillStyle = '#111'; x.font = `800 ${Math.round(br * 1.25)}px Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText((owner.n || '?').slice(0, 1).toUpperCase(), bx, by + br * .08); }
+      x.restore(); tdCirc(x, bx, by, br); x.lineWidth = Math.max(1, u * .035); x.strokeStyle = mine ? '#ffd76a' : '#fff'; x.stroke();
+    }
+  }
+  // a monster, walking (legs, bob), facing where it goes; flashes when hit, frosty when slowed
+  function tdDrawFoe(x, cx, cy, u, f, t, dir, scale){
+    const F = TD_FOES[f.k], s = u * F.r * 2.2 * (scale || 1), ph = t * (F.sp * 7) + f.id * 1.7, step = Math.sin(ph), bob = Math.abs(Math.cos(ph)) * s * .06;
+    const hitA = f.hitAt != null ? Math.max(0, 1 - (t - f.hitAt) / 0.12) : 0, cold = f.slowT > 0 && f.hp > 0;
+    x.save(); x.translate(cx, cy - bob); if(dir < 0) x.scale(-1, 1);
+    // shadow
+    x.fillStyle = 'rgba(0,0,0,.3)'; x.beginPath(); x.ellipse(0, s * .45 + bob, s * .36, s * .1, 0, 0, 7); x.fill();
+    const C = (c) => cold ? '#bfe9f5' : c;
+    if(f.k === 'grunt'){
+      x.fillStyle = C('#3d6b2a'); tdRR(x, -s * .2 + step * s * .08, s * .2, s * .14, s * .24, s * .05); x.fill(); tdRR(x, s * .06 - step * s * .08, s * .2, s * .14, s * .24, s * .05); x.fill();       // legs
+      x.fillStyle = C('#6fbf4a'); x.beginPath(); x.ellipse(0, s * .08, s * .27, s * .24, 0, 0, 7); x.fill();         // body
+      x.fillStyle = C('#8b5a2b'); tdRR(x, -s * .26, s * .05, s * .52, s * .1, s * .03); x.fill();                      // belt
+      x.fillStyle = C('#7fd157'); tdCirc(x, s * .04, -s * .2, s * .2); x.fill();                                         // head
+      x.beginPath(); x.moveTo(-s * .12, -s * .26); x.lineTo(-s * .36, -s * .36); x.lineTo(-s * .1, -s * .14); x.fill();     // ear
+      x.beginPath(); x.moveTo(s * .18, -s * .28); x.lineTo(s * .4, -s * .4); x.lineTo(s * .2, -s * .14); x.fill();
+      x.fillStyle = '#ffe14d'; tdCirc(x, s * .1, -s * .22, s * .045); x.fill(); tdCirc(x, -s * .01, -s * .22, s * .04); x.fill();
+      x.save(); x.translate(s * .24, s * .02); x.rotate(-.6 + Math.sin(ph) * .5); x.fillStyle = '#7a4a22'; tdRR(x, -s * .03, -s * .32, s * .07, s * .34, s * .03); x.fill(); x.restore();   // club
+    } else if(f.k === 'runner'){
+      x.fillStyle = C('#5d5a52');
+      for(let i = 0; i < 4; i++){ const lx = -s * .26 + i * s * .17, sw = (i % 2 ? 1 : -1) * step * s * .07; tdRR(x, lx + sw, s * .12, s * .08, s * .22, s * .03); x.fill(); }
+      x.fillStyle = C('#8e8a80'); x.beginPath(); x.ellipse(-s * .02, s * .04, s * .36, s * .17, 0, 0, 7); x.fill();       // body
+      x.beginPath(); x.moveTo(-s * .34, -s * .02); x.quadraticCurveTo(-s * .55, -s * .22 + step * s * .05, -s * .5, s * .02); x.fill();   // tail
+      x.fillStyle = C('#a39f94'); tdCirc(x, s * .3, -s * .08, s * .15); x.fill();                                       // head
+      x.beginPath(); x.moveTo(s * .38, -s * .1); x.lineTo(s * .58, -s * .02); x.lineTo(s * .38, s * .03); x.fill();       // snout
+      x.beginPath(); x.moveTo(s * .22, -s * .18); x.lineTo(s * .26, -s * .36); x.lineTo(s * .34, -s * .2); x.fill();     // ear
+      x.fillStyle = '#ff5e5e'; tdCirc(x, s * .34, -s * .1, s * .035); x.fill();
+    } else if(f.k === 'tank'){
+      x.fillStyle = C('#8a5a3a'); tdRR(x, -s * .24 + step * s * .06, s * .22, s * .18, s * .22, s * .06); x.fill(); tdRR(x, s * .06 - step * s * .06, s * .22, s * .18, s * .22, s * .06); x.fill();
+      x.fillStyle = C('#c48a5a'); x.beginPath(); x.ellipse(0, s * .02, s * .38, s * .32, 0, 0, 7); x.fill();             // big body
+      x.fillStyle = C('#dcae86'); x.beginPath(); x.ellipse(s * .04, s * .1, s * .22, s * .18, 0, 0, 7); x.fill();          // belly
+      x.fillStyle = C('#c48a5a'); tdCirc(x, s * .06, -s * .3, s * .16); x.fill();                                          // head
+      x.fillStyle = '#fff'; x.beginPath(); x.moveTo(s * .02, -s * .22); x.lineTo(s * .04, -s * .32); x.lineTo(s * .07, -s * .22); x.fill(); x.beginPath(); x.moveTo(s * .12, -s * .22); x.lineTo(s * .14, -s * .32); x.lineTo(s * .17, -s * .22); x.fill();  // tusks
+      x.fillStyle = '#2a1600'; tdCirc(x, s * .02, -s * .34, s * .03); x.fill(); tdCirc(x, s * .13, -s * .34, s * .03); x.fill();
+      x.save(); x.translate(s * .36, -s * .02); x.rotate(-.4 + Math.sin(ph) * .35); x.fillStyle = '#5c3d22'; tdRR(x, -s * .05, -s * .42, s * .11, s * .46, s * .05); x.fill(); x.restore();
+    } else {
+      // the skull king: a robe, a skull, a crown and a flapping cape
+      x.fillStyle = C('#3a1f5c'); x.beginPath(); x.moveTo(-s * .34, s * .44); x.quadraticCurveTo(-s * .5 + step * s * .06, 0, -s * .14, -s * .18); x.lineTo(s * .18, -s * .18); x.quadraticCurveTo(s * .38, 0, s * .3, s * .44); x.closePath(); x.fill();
+      x.fillStyle = C('#6b3fc0'); x.beginPath(); x.moveTo(-s * .2, s * .44); x.lineTo(-s * .1, -s * .14); x.lineTo(s * .14, -s * .14); x.lineTo(s * .22, s * .44); x.closePath(); x.fill();
+      x.fillStyle = C('#f2efe6'); tdCirc(x, s * .02, -s * .3, s * .19); x.fill(); tdRR(x, -s * .08, -s * .2, s * .2, s * .12, s * .03); x.fill();
+      x.fillStyle = '#1a0f22'; tdCirc(x, -s * .05, -s * .32, s * .05); x.fill(); tdCirc(x, s * .09, -s * .32, s * .05); x.fill();
+      x.fillStyle = `rgba(255,80,80,${.6 + .4 * Math.sin(t * 6)})`; tdCirc(x, -s * .05, -s * .32, s * .02); x.fill(); tdCirc(x, s * .09, -s * .32, s * .02); x.fill();
+      x.fillStyle = '#ffd76a'; x.beginPath(); x.moveTo(-s * .16, -s * .44); x.lineTo(-s * .16, -s * .58); x.lineTo(-s * .08, -s * .5); x.lineTo(s * .02, -s * .62); x.lineTo(s * .12, -s * .5); x.lineTo(s * .2, -s * .58); x.lineTo(s * .2, -s * .44); x.closePath(); x.fill();
+    }
+    if(hitA > 0){ x.fillStyle = `rgba(255,255,255,${hitA * .6})`; x.beginPath(); x.ellipse(0, -s * .05, s * .36, s * .42, 0, 0, 7); x.fill(); }
+    x.restore();
+    if(cold){ x.fillStyle = 'rgba(220,250,255,.9)'; for(let i = 0; i < 3; i++){ const a = t * 2 + i * 2.1 + f.id; tdCirc(x, cx + Math.cos(a) * s * .38, cy - bob + Math.sin(a) * s * .25 - s * .1, u * .03); x.fill(); } }
+  }
+  // the shots, flying from troop to target
+  const TD_FLY = { archer: .16, cannon: .32, frost: .2, ballista: .1 };
+  function tdDrawShots(x, B, u){
+    for(const s of B.shots){
+      const fly = TD_FLY[s.k] || .15, a = (B.t - s.t) / fly; if(a < 0 || a > 1) continue;
+      const X1 = (s.x1 + .5) * u, Y1 = (s.y1 + .5) * u, X2 = (s.x2 + .5) * u, Y2 = (s.y2 + .5) * u, X = X1 + (X2 - X1) * a, ang = Math.atan2(Y2 - Y1, X2 - X1);
+      let Y = Y1 + (Y2 - Y1) * a;
+      if(s.k === 'cannon'){ Y -= Math.sin(a * Math.PI) * u * .9; x.fillStyle = 'rgba(0,0,0,.25)'; x.beginPath(); x.ellipse(X, Y1 + (Y2 - Y1) * a + u * .1, u * .08, u * .04, 0, 0, 7); x.fill(); x.fillStyle = '#1a1a1e'; tdCirc(x, X, Y, u * .09); x.fill(); x.fillStyle = 'rgba(255,255,255,.35)'; tdCirc(x, X - u * .03, Y - u * .03, u * .03); x.fill(); }
+      else if(s.k === 'archer'){ x.save(); x.translate(X, Y); x.rotate(ang); x.strokeStyle = '#d9c7a3'; x.lineWidth = Math.max(1.2, u * .03); x.beginPath(); x.moveTo(-u * .22, 0); x.lineTo(u * .06, 0); x.stroke(); x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(u * .12, 0); x.lineTo(u * .04, -u * .04); x.lineTo(u * .04, u * .04); x.fill(); x.fillStyle = '#e9e4d8'; x.fillRect(-u * .24, -u * .03, u * .06, u * .06); x.restore(); }
+      else if(s.k === 'frost'){ for(let i = 0; i < 3; i++){ const b = Math.max(0, a - i * .12); const XX = X1 + (X2 - X1) * b, YY = Y1 + (Y2 - Y1) * b; x.globalAlpha = 1 - i * .3; x.fillStyle = i ? '#bff4ff' : '#ffffff'; tdCirc(x, XX, YY, u * (.08 - i * .02)); x.fill(); } x.globalAlpha = 1; }
+      else { x.save(); x.translate(X, Y); x.rotate(ang); x.strokeStyle = 'rgba(255,122,182,.5)'; x.lineWidth = u * .08; x.beginPath(); x.moveTo(-u * .5, 0); x.lineTo(0, 0); x.stroke(); x.strokeStyle = '#7a5230'; x.lineWidth = u * .04; x.beginPath(); x.moveTo(-u * .3, 0); x.lineTo(u * .1, 0); x.stroke(); x.fillStyle = '#c0c0c8'; x.beginPath(); x.moveTo(u * .2, 0); x.lineTo(u * .08, -u * .06); x.lineTo(u * .08, u * .06); x.fill(); x.restore(); }
+    }
+    // cannon blasts (when the ball lands) and frost bursts
+    for(const bm of B.booms){
+      const a = (B.t - bm.t - TD_FLY.cannon) / 0.45; if(a < 0 || a >= 1) continue;
+      const X = (bm.x + .5) * u, Y = (bm.y + .5) * u;
+      x.globalAlpha = 1 - a; x.fillStyle = '#ffdd7a'; tdCirc(x, X, Y, u * (.25 + a * .9)); x.fill();
+      x.fillStyle = '#ff7a2e'; tdCirc(x, X, Y, u * (.18 + a * .6)); x.fill();
+      x.fillStyle = 'rgba(80,70,60,.8)'; for(let i = 0; i < 6; i++){ const ang = i * 1.05 + bm.t; tdCirc(x, X + Math.cos(ang) * u * a * 1.1, Y + Math.sin(ang) * u * a * 1.1 - a * u * .3, u * .05 * (1 - a)); x.fill(); }
+      x.globalAlpha = 1;
+    }
+  }
+  // a monster that's just died: a puff and a few bits flying off
+  function tdDrawPoof(x, cx, cy, u, a, col, id){
+    x.globalAlpha = 1 - a; x.fillStyle = 'rgba(240,235,225,.85)';
+    for(let i = 0; i < 5; i++){ const ang = i * 1.26 + id; tdCirc(x, cx + Math.cos(ang) * u * a * .5, cy + Math.sin(ang) * u * a * .4 - a * u * .2, u * (.14 + a * .12)); x.fill(); }
+    x.fillStyle = col; for(let i = 0; i < 4; i++){ const ang = i * 1.57 + id * .7; tdCirc(x, cx + Math.cos(ang) * u * a * .9, cy + Math.sin(ang) * u * a * .9, u * .05); x.fill(); }
+    x.globalAlpha = 1;
+  }
+  // the castle getting hit: it shakes, flashes red, rubble flies, and "-1 ❤️" floats up
+  function tdCastleHits(B, now){ let shake = 0, flash = 0; if(B) for(const l of B.leaks){ const a = (now - l.t) / 0.6; if(a >= 0 && a < 1){ shake = Math.max(shake, 1 - a); flash = Math.max(flash, 1 - a); } } return { shake, flash }; }
+  function tdDrawCastleHits(x, B, u){
+    const cx = (TD_CASTLE[0] + .3) * u, cy = (TD_CASTLE[1] + .5) * u;
+    for(const l of B.leaks){
+      const a = (B.t - l.t) / 1.2; if(a < 0 || a >= 1) continue;
+      x.fillStyle = `rgba(150,140,125,${1 - a})`;
+      for(let i = 0; i < 6; i++){ const ang = -Math.PI * (.15 + i * .14), d = u * (.3 + a * 1.4); tdCirc(x, cx - u * .4 + Math.cos(ang) * d, cy + Math.sin(ang) * d + a * a * u * 1.5, u * .06 * (1 - a * .5)); x.fill(); }
+      x.globalAlpha = 1 - a; x.font = `900 ${Math.round(u * .45)}px Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.lineWidth = u * .08; x.strokeStyle = 'rgba(40,0,0,.8)'; x.strokeText(`-${l.n} ❤️`, cx, cy - u * 1.3 - a * u * .9); x.fillStyle = '#ff6b6b'; x.fillText(`-${l.n} ❤️`, cx, cy - u * 1.3 - a * u * .9);
       x.globalAlpha = 1;
     }
   }
