@@ -3271,6 +3271,45 @@
   .lyr-ctx-pick input{opacity:0;width:100%;height:100%;cursor:pointer;}
   .lyr-ctx-foot{display:flex;justify-content:flex-end;gap:6px;margin-top:2px;}
   .lyr-ctx .lyr-ctx-cut, .lyr-cut-menu .rec-small-btn{width:100%;justify-content:center;}
+  /* The Great Deflation announcement */
+  .infl{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%, rgba(40,10,10,.82), rgba(0,0,0,.94));animation:inflIn .35s ease-out both;}
+  .infl.out{animation:inflOut .45s ease-in both;}
+  @keyframes inflIn{from{opacity:0}to{opacity:1}} @keyframes inflOut{to{opacity:0;transform:scale(1.04)}}
+  .infl-rain{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .infl-rain span{position:absolute;top:-60px;animation:inflFall linear both;}
+  @keyframes inflFall{to{transform:translateY(calc(100vh + 120px)) rotate(540deg);}}
+  .infl-card{position:relative;width:min(640px, 94vw);max-height:90vh;display:flex;flex-direction:column;border-radius:18px;background:linear-gradient(180deg,#1d1418,#120c10);border:2px solid #c9a24a;box-shadow:0 0 0 6px rgba(201,162,74,.15), 0 30px 80px rgba(0,0,0,.7);overflow:hidden;animation:inflPop .5s cubic-bezier(.2,1.4,.4,1) both;}
+  @keyframes inflPop{from{transform:scale(.6) rotate(-3deg);opacity:0}to{transform:none;opacity:1}}
+  .infl-card.shake{animation:inflShake .45s;} @keyframes inflShake{20%{transform:translate(-8px,4px) rotate(-1deg)}40%{transform:translate(7px,-5px) rotate(1deg)}60%{transform:translate(-5px,3px)}80%{transform:translate(3px,-2px)}}
+  .infl-ticker{background:#d8232a;color:#fff;font:900 13px 'Inter',sans-serif;letter-spacing:.06em;white-space:nowrap;overflow:hidden;padding:7px 0;}
+  .infl-ticker span{display:inline-block;padding-left:100%;animation:inflTick 14s linear infinite;} @keyframes inflTick{to{transform:translateX(-100%)}}
+  .infl-body{flex:1;overflow:auto;padding:18px 22px 10px;display:flex;flex-direction:column;gap:9px;}
+  .infl-ln{animation:inflLn .35s ease-out both;color:#f3e6cc;} @keyframes inflLn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .infl-small{font:600 13.5px 'Inter',sans-serif;line-height:1.45;} .infl-small.dim{color:#b6a58a;font-style:italic;}
+  .infl-mid{font:800 17px 'Manrope','Inter',sans-serif;color:#ffe9b8;line-height:1.35;}
+  .infl-stamp{align-self:center;margin:8px 0;padding:10px 22px;border:5px solid #e0333a;border-radius:10px;color:#ff4a50;font:900 34px 'Manrope','Inter',sans-serif;letter-spacing:.04em;text-align:center;transform:rotate(-6deg);animation:inflStamp .45s cubic-bezier(.3,1.6,.5,1) both;text-shadow:0 0 18px rgba(255,60,60,.4);}
+  .infl-stamp em{font-style:normal;color:#ffd76a;}
+  @keyframes inflStamp{from{transform:rotate(-6deg) scale(3);opacity:0}60%{opacity:1}to{transform:rotate(-6deg) scale(1)}}
+  .infl-law{font:600 14px 'Inter',sans-serif;padding:7px 10px;border-radius:9px;background:rgba(255,215,106,.07);border-left:3px solid #c9a24a;} .infl-law b{color:#ffd76a;}
+  .infl-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+  .infl-list li{position:relative;display:grid;grid-template-columns:minmax(80px,1.2fr) auto auto auto auto;align-items:center;gap:8px;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.04);font:600 12.5px 'Inter',sans-serif;animation:inflLn .3s ease-out both;}
+  .infl-list li.me{background:rgba(255,215,106,.12);outline:1px solid rgba(255,215,106,.4);}
+  .infl-list b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;}
+  .infl-list .was{color:#a08d77;text-decoration:line-through;font-family:'JetBrains Mono',monospace;font-size:11.5px;} .infl-list .arr{color:#c9a24a;} .infl-list .now{color:#7dffb2;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .infl-list .took{color:#ff6a70;font-family:'JetBrains Mono',monospace;font-size:11.5px;} .infl-list .ok{color:#9fd6ff;font-size:11.5px;}
+  .infl-list .seized{position:absolute;left:38%;top:50%;transform:translateY(-50%) rotate(-10deg);border:2px solid #e0333a;color:#ff4a50;font:900 10px 'Inter',sans-serif;padding:1px 5px;border-radius:4px;opacity:.85;animation:inflStamp .35s cubic-bezier(.3,1.6,.5,1) both;}
+  .infl-tot{color:#ff6a70;font-family:'JetBrains Mono',monospace;}
+  .infl-chips{display:flex;flex-wrap:wrap;gap:5px;} .infl-chip{padding:3px 9px;border-radius:99px;background:rgba(255,215,106,.15);color:#ffe9b8;font:700 12px 'Inter',sans-serif;}
+  .infl-pick-h{font:800 14px 'Inter',sans-serif;color:#ffe9b8;margin-bottom:6px;}
+  .infl-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+  .infl-pick button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 6px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,215,106,.25);text-align:center;transition:transform .12s, background .12s;}
+  .infl-pick button:hover:not(:disabled){transform:translateY(-2px);background:rgba(255,215,106,.12);} .infl-pick button:disabled{opacity:.45;cursor:default;} .infl-pick button.got{opacity:1;border-color:#7dffb2;background:rgba(53,208,126,.18);}
+  .infl-pi{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:28px;} .infl-pi svg{width:100%;height:100%;}
+  .infl-pick b{font:800 11.5px 'Inter',sans-serif;color:#fff;} .infl-pick i{font-style:normal;font-size:10px;color:#c9a24a;}
+  .infl-end{display:flex;justify-content:center;padding:6px 0 4px;}
+  .infl-ok{all:unset;cursor:pointer;padding:11px 22px;border-radius:12px;background:linear-gradient(135deg,#ffd76a,#c8891a);color:#2a1a00;font:900 15px 'Inter',sans-serif;box-shadow:0 6px 18px rgba(200,137,26,.4);animation:inflPop .4s cubic-bezier(.2,1.4,.4,1) both;} .infl-ok:hover{filter:brightness(1.08);}
+  .infl-foot{display:flex;justify-content:flex-end;padding:8px 14px;border-top:1px solid rgba(255,255,255,.06);} .infl-skip{all:unset;cursor:pointer;color:#b6a58a;font:700 12px 'Inter',sans-serif;} .infl-skip:hover{color:#fff;}
+  @media (max-width:560px){ .infl-pick{grid-template-columns:repeat(2,1fr);} .infl-list li{grid-template-columns:1fr auto auto;} .infl-list .was,.infl-list .arr{display:none;} }
   .lyr-look{width:330px;max-height:calc(100vh - 16px);overflow:auto;}
   .lyr-look-note, .lyr-look-hint{font-size:11px;line-height:1.4;color:var(--text-faint);} .lyr-look-note b{color:var(--text-dim);}
   .lyr-look-seg{display:flex;flex-wrap:wrap;gap:3px;} .lyr-look-seg button{all:unset;cursor:pointer;padding:4px 7px;border-radius:7px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:600 11px 'Inter',sans-serif;}
@@ -22579,7 +22618,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 135;                 // ← goes up by one with every published version
+  const SD_BUILD = 136;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23960,6 +23999,7 @@
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
       if(!SC.loaded && chatName()) scLoad();      // (your points, bubble and bullets, ready before you send anything)
+      if(chatName()) setTimeout(() => inflCheck(), 600);      // (the Great Deflation: your cut, and the announcement once)
       if(chatName() && !CAS.on) chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(!CAS.on){ CAS.seats = d || {}; casBarRender(); } }).catch(() => {});
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
@@ -25032,12 +25072,12 @@
   const CAS_SYMS = ['🍒', '🍋', '🍊', '🔔', '💎', '7️⃣'];
   const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: 50, pot: null };
   const casReels = (T) => [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
-  // A spin costs 2% of your points (at least 10, at most 2,000) — the database works out the same.
+  // A spin costs 1% of your points (at least 10, no top limit) — the database works out the same.
   // What a result pays is in tenths of your bet, and the lower you are on the leaderboard the better
   // it pays (pity luck): tier 2 = the bottom third, tier 1 = the middle third (config/pity holds the lines).
   // 7️⃣7️⃣7️⃣ always takes the whole jackpot. Whatever you lose goes into the jackpot.
-  const CAS_MIN = 10, CAS_MAX = Infinity, CAS_POT0 = 1000;     // (a spin is 2% of your points, at least 10 — no top limit)
-  const casFee = (bal) => { const f = Math.floor(Math.max(0, Math.floor(Number(bal) || 0)) / 50); return f < CAS_MIN ? CAS_MIN : f > CAS_MAX ? CAS_MAX : f; };
+  const CAS_MIN = 10, CAS_MAX = Infinity, CAS_POT0 = 1000000;     // (a spin is 1% of your points, at least 10 — no top limit; the jackpot starts at 1,000,000)
+  const casFee = (bal) => { const f = Math.floor(Math.max(0, Math.floor(Number(bal) || 0)) / 100); return f < CAS_MIN ? CAS_MIN : f > CAS_MAX ? CAS_MAX : f; };
   //            💎💎💎  any three  two 💎/7️⃣  any two  one 7️⃣  nothing
   const CAS_PAY = [[120, 60, 25, 10, 4, 0], [120, 60, 25, 11, 4, 0], [120, 60, 27, 11, 5, 0]];
   const CAS_TIER_NAME = ['', 'Lucky break', 'Pity luck'];
@@ -25237,9 +25277,9 @@
         const potNow = pg.ok ? await pg.json() : null, pot = typeof potNow === 'number' ? potNow : CAS_POT0;
         const jack = casIsJack(sp.t);
         if(jack) sp.jp = pot;
-        const win = casWin(sp), loss = !jack ? Math.max(0, sp.b - win) : 0;
+        const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;      // (only a tenth of what's lost goes into the jackpot)
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
-        if(jack) body['casino/pot'] = CAS_POT0; else if(loss) body['casino/pot'] = pot + loss;
+        if(jack) body['casino/pot'] = CAS_POT0; else if(sp.b - win > 0) body['casino/pot'] = pot + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
         if(r.ok){ SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown && win > 0){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; casHeldSum(); } CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
         await scLoad();
@@ -25299,7 +25339,7 @@
     const sb = el.querySelector('.cas-spin:not(.cas-spin10)'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !!CAS.multi || !CAS.on || scBal() < fee; sb.textContent = CAS.busy || CAS.multi ? '…' : `SPIN · ${fee.toLocaleString()}`;
     { const b10 = el.querySelector('.cas-spin10'); if(b10){ b10.disabled = !CAS.multi && (CAS.busy || !CAS.on || scBal() < fee); b10.textContent = CAS.multi ? (CAS.multi.stop ? 'stopping…' : `■ ${CAS.multi.n}/10`) : '10×'; b10.classList.toggle('on', !!CAS.multi); } }
     { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
-      const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 2% of your points (at least ${CAS_MIN}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
+      const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 1% of your points (at least ${CAS_MIN}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
       if(pe.dataset.h !== h){ pe.dataset.h = h; pe.innerHTML = h; } } }
     casPotShow();
   }
@@ -25368,7 +25408,8 @@
     if(m.classList.contains('me') && CAS.heldBy){ for(const k of Object.keys(CAS.heldBy)) if(Number(k) < sp.t) delete CAS.heldBy[k]; casHeldSum(); }
     const R = casReels(sp.t), jackpot = casIsJack(sp.t), win = casWin(sp), res = m.querySelector('.cas-res');
     const strips = [...m.querySelectorAll('.cas-strip')];
-    const still = !roll || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const mine = m.classList.contains('me');
+    const still = !roll || !mine || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);      // (other people's spins don't roll — lighter when lots of people spin at once)
     if(!still) m.classList.add('rolling');
     const done = () => {
       m.classList.remove('rolling');
@@ -25376,9 +25417,9 @@
       m.classList.toggle('won', win > 0); m.classList.toggle('big', win >= 300);
       sp.shown = true;
       if(roll){
-        sfxSlotResult(casMult(sp.t), m.classList.contains('me') ? 1 : 0.35);
+        if(mine) sfxSlotResult(casMult(sp.t), 1);
         if(m.classList.contains('me')){ if(CAS.heldBy) delete CAS.heldBy[sp.t]; casHeldSum(); casCtl(); }      // (the win shows in your points only now)
-        if(win > 0) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
+        if(win > 0 && (mine || win >= 300 || jackpot)) m.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 18px rgba(245,208,74,0)' }], { duration: 900 });
         const nm = w ? (chatBadName(w.n) ? 'someone' : w.n) : 'Someone';
         casFeed(`${nm} → ${R.map(casSym).join('')} ${jackpot ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || jackpot);
         if(m.classList.contains('me') && (win >= 300 || jackpot)) toast(`🎰 ${R.map(casSym).join(' ')} — you won ${win.toLocaleString()} points!`, 3600);
@@ -27684,9 +27725,9 @@
         const tok = await chatAuth();
         const pg = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
         const v = pg.ok ? await pg.json() : null, pot = typeof v === 'number' ? v : CAS_POT0;
-        const body = { 'casino/pot': pot + lost }; body[`casino/bjl/${me}`] = R;
+        const add = Math.max(1, Math.floor(lost / 10)), body = { 'casino/pot': pot + add }; body[`casino/bjl/${me}`] = R;      // (a tenth of what's lost)
         const w = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(w.ok){ chatLS('bjpot', String(R)); CAS.pot = pot + lost; try{ casPotShow(); chatTickerSync && chatTickerSync(); }catch(e){} return; }
+        if(w.ok){ chatLS('bjpot', String(R)); CAS.pot = pot + add; try{ casPotShow(); chatTickerSync && chatTickerSync(); }catch(e){} return; }
       }catch(e){}
     }
   }
@@ -29324,6 +29365,136 @@
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
     el.prepend(d); while(el.children.length > 12) el.lastChild.remove();
     d.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
+  }
+  // ----- The Great Deflation: the inflation fix (config/infl = { i, at, bm, pm }) -----
+  // Anything up to 1,000,000 stays 1:1; above that, the cut grows with how much you have, so the biggest wallet
+  // (bm, frozen when the fix was declared) lands on 50,000,000 and the biggest all-time total (pm) on 500,000,000.
+  // The first person to open this SaiDeck declares it; after that the admin page's switch declares it again.
+  // Each app cuts its own points once per fix (the rules only let them go down), then shows the announcement.
+  const INFL = { busy: false };
+  const INFL_B = 50000000, INFL_P = 500000000, INFL_T = 1000000, INFL_GIFT = 100000000;
+  function inflF(x, M, C){
+    x = Math.max(0, Math.floor(Number(x) || 0));
+    if(!(M > C) || x <= INFL_T) return x;
+    const a = Math.log(C / INFL_T) / Math.log(M / INFL_T);
+    return Math.min(x, Math.round(INFL_T * Math.pow(x / INFL_T, a)));
+  }
+  async function inflCheck(force){
+    if(INFL.busy || !chatName()) return; INFL.busy = true;
+    try{
+      const tok = await chatAuth(), me = chatUid(), q = (p) => `${CHAT_DB}/${p}.json?auth=${encodeURIComponent(tok)}`;
+      const get = async (p) => { const r = await fetch(q(p), { cache: 'no-store' }); return r.ok ? r.json() : null; };
+      let cfg = await get('config/infl');
+      if(!cfg){
+        // nobody's declared it yet: this app does (with the biggest wallet and all-time total right now), and the jackpot starts again at 1,000,000
+        const all = (await get('scores')) || {}; let bm = 0, pm = 0;
+        for(const v of Object.values(all)){ if(!v || v.mg) continue; const p = Math.floor(+v.p || 0), b = p - Math.floor(+v.s || 0); bm = Math.max(bm, b); pm = Math.max(pm, p); }
+        await fetch(q(''), { method: 'PATCH', body: JSON.stringify({ 'config/infl': { i: 1, at: { '.sv': 'timestamp' }, bm, pm }, 'casino/pot': CAS_POT0 }) }).catch(() => {});
+        cfg = await get('config/infl');
+        if(!cfg) return;
+      }
+      INFL.cfg = cfg;
+      // your own cut (once per fix)
+      const mine = await get(`scores/${me}`);
+      if(mine && (!mine.inf || mine.inf.i !== cfg.i)){
+        const p0 = Math.floor(+mine.p || 0), b0 = Math.max(0, p0 - Math.floor(+mine.s || 0));
+        const b1 = inflF(b0, cfg.bm, INFL_B); let p1 = inflF(p0, cfg.pm, INFL_P); if(p1 < b1) p1 = b1;
+        const r = await fetch(q(''), { method: 'PATCH', body: JSON.stringify({ [`scores/${me}/p`]: p1, [`scores/${me}/s`]: p1 - b1, [`scores/${me}/inf`]: { i: cfg.i, b0, p0, b1, p1 }, [`scores/${me}/t`]: { '.sv': 'timestamp' } }) });
+        if(r.ok){ SC.p = p1; SC.s = p1 - b1; try{ chatRenderArcade(); dockRender(); }catch(e){} }
+      }
+      if(force || (+chatLS('inflSeen') || 0) < cfg.i){ if(!SC.loaded) await scLoad(); inflShow(cfg); }
+    }catch(e){ console.warn('inflation', e); }
+    finally{ INFL.busy = false; }
+  }
+  // the announcement: a broadcast from the Higher Ups, the new laws, the confiscation list, then a free premium item for the big earners
+  async function inflShow(cfg){
+    if(document.querySelector('.infl')) return;
+    const me = chatUid(), tok = await chatAuth();
+    let all = {}; try{ const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); all = (r.ok ? await r.json() : null) || {}; }catch(e){}
+    const rows = Object.entries(all).filter(([u, v]) => v && v.n && !v.mg).map(([u, v]) => {
+      const p = Math.floor(+v.p || 0), b = Math.max(0, p - Math.floor(+v.s || 0)), done = v.inf && v.inf.i === cfg.i;
+      return done ? { u, n: v.n, b0: v.inf.b0, b1: v.inf.b1, p0: v.inf.p0 } : { u, n: v.n, b0: b, b1: inflF(b, cfg.bm, INFL_B), p0: p };
+    }).sort((a, b) => b.b0 - a.b0);
+    const total = rows.reduce((a, r) => a + Math.max(0, r.b0 - r.b1), 0), myRow = rows.find(r => r.u === me);
+    const fmt = (v) => Math.round(v).toLocaleString();
+    const el = document.createElement('div'); el.className = 'infl';
+    el.innerHTML = `<div class="infl-rain" aria-hidden="true"></div><div class="infl-card"><div class="infl-ticker"><span>🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨</span></div><div class="infl-body"></div><div class="infl-foot"><button type="button" class="infl-skip">Skip ⏭</button></div></div>`;
+    document.body.appendChild(el);
+    const body = el.querySelector('.infl-body'), skipB = el.querySelector('.infl-skip');
+    let skip = false, closed = false;
+    skipB.addEventListener('click', () => { skip = true; });
+    const wait = (ms) => new Promise(res => { if(skip) return res(); const t0 = Date.now(), iv = setInterval(() => { if(skip || Date.now() - t0 >= ms){ clearInterval(iv); res(); } }, 40); });
+    const add = (html, cls) => { const d = document.createElement('div'); d.className = 'infl-ln ' + (cls || ''); d.innerHTML = html; body.appendChild(d); body.scrollTop = body.scrollHeight; return d; };
+    const type = async (d, txt, speed) => { if(skip){ d.textContent = txt; return; } d.textContent = ''; for(const ch of txt){ d.textContent += ch; body.scrollTop = body.scrollHeight; if(skip){ d.textContent = txt; break; } await wait(speed || 28); } };
+    const snd = (fn) => { try{ if(sfxOn()){ const ac = sfxCtx(); if(ac) fn(ac, ac.currentTime); } }catch(e){} };
+    const gavel = () => snd((ac, t) => { sfxNoiseHit(ac, t, 'lowpass', 900, 120, .8, .5, .25); sfxTone(ac, t, 'sine', 160, 50, .3, .35); });
+    const siren = () => snd((ac, t) => { for(let i = 0; i < 4; i++){ sfxTone(ac, t + i * .5, 'sawtooth', 600, 900, .25, .04); sfxTone(ac, t + i * .5 + .25, 'sawtooth', 900, 600, .25, .04); } });
+    const rain = (n, ems) => { const R = el.querySelector('.infl-rain'); for(let i = 0; i < n; i++){ const s = document.createElement('span'); s.textContent = ems[i % ems.length]; s.style.left = (Math.random() * 100) + '%'; s.style.animationDelay = (Math.random() * 1.6) + 's'; s.style.fontSize = (18 + Math.random() * 22) + 'px'; s.style.animationDuration = (2.2 + Math.random() * 1.8) + 's'; R.appendChild(s); setTimeout(() => s.remove(), 5000); } };
+    const finish = () => { if(closed) return; closed = true; chatLS('inflSeen', cfg.i); el.classList.add('out'); setTimeout(() => el.remove(), 450); try{ scLoad(); scAllLoad(); }catch(e){} };
+    // 1 · the broadcast
+    siren(); await wait(400);
+    await type(add('', 'infl-small'), '📜 An official message from the Higher Ups™', 32); await wait(500);
+    await type(add('', 'infl-small dim'), 'After a long and extremely serious meeting (it was 4 minutes)…', 26); await wait(600);
+    await type(add('', 'infl-mid'), 'The Higher Ups have agreed on…', 45); await wait(500);
+    const st = add(cfg.i > 1 ? `THE GREAT DEFLATION <em>${['', '', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][cfg.i] || '#' + cfg.i}</em>` : 'THE GREAT DEFLATION', 'infl-stamp'); gavel(); el.querySelector('.infl-card').classList.add('shake'); setTimeout(() => el.querySelector('.infl-card').classList.remove('shake'), 500);
+    await wait(1400);
+    // 2 · why
+    rain(36, ['💸', '💵', '🪙', '💰']);
+    await type(add('', 'infl-mid'), '🎰 Someone discovered the slot machine money printer.', 30); await wait(400);
+    await type(add('', 'infl-small'), `There are ${fmt(rows.reduce((a, r) => a + r.b0, 0))} points out there. A bubble tea costs 4 billion now. The economy is cooked. 🍳`, 22); await wait(900);
+    // 3 · the new laws
+    add('📋 <b>THE NEW LAWS</b>', 'infl-mid');
+    const laws = [`👑 The biggest wallet gets cut down to <b>${fmt(INFL_B)}</b>`, `🏆 The #1 all-time total gets cut down to <b>${fmt(INFL_P)}</b>`, '🤏 The less you have, the less we take (under 1,000,000: untouched)', '🎰 A slot spin now costs <b>1%</b> of your points', `💰 The jackpot starts at <b>${fmt(CAS_POT0)}</b> and only <b>10%</b> of what's lost goes in it`];
+    for(const l of laws){ add(l, 'infl-law'); snd((ac, t) => sfxTone(ac, t, 'square', 700, 900, .06, .04)); await wait(420); }
+    await wait(700);
+    // 4 · the confiscation list
+    add('🧾 <b>THE CONFISCATION LIST</b>', 'infl-mid');
+    const list = add('<ul class="infl-list"></ul>', ''), ul = list.querySelector('ul');
+    const tot = add(`Seized so far: <b class="infl-tot">0</b> points`, 'infl-small'), totEl = tot.querySelector('.infl-tot');
+    let seized = 0;
+    for(const r of rows){
+      const cut = Math.max(0, r.b0 - r.b1), li = document.createElement('li');
+      li.className = (r.u === me ? 'me ' : '') + (cut > 0 ? 'cut' : 'safe');
+      li.innerHTML = `<b>${escapeHtml(r.n)}</b><span class="was">${fmt(r.b0)}</span><span class="arr">→</span><span class="now">${fmt(r.b1)}</span>${cut > 0 ? `<span class="took">−${fmt(cut)}</span>${cut >= 1e6 ? '<i class="seized">SEIZED</i>' : ''}` : '<span class="ok">untouched 😇</span>'}`;
+      ul.appendChild(li); body.scrollTop = body.scrollHeight;
+      if(cut > 0){ snd((ac, t) => sfxTone(ac, t, 'triangle', 300 + Math.min(500, Math.log10(cut + 1) * 50), 200, .08, .05)); }
+      seized += cut; totEl.textContent = fmt(seized);
+      await wait(cut >= 1e6 ? 380 : 160);
+    }
+    totEl.textContent = fmt(total); gavel(); await wait(700);
+    add(`💀 <b>${fmt(total)}</b> points have been fed to the Treasury Crocodile 🐊`, 'infl-mid'); rain(24, ['🐊', '💸']);
+    if(myRow){ const cut = Math.max(0, myRow.b0 - myRow.b1); add(cut > 0 ? `You: ${fmt(myRow.b0)} → <b>${fmt(myRow.b1)}</b>. Thank you for your cooperation. 🫡` : `You: untouched. The Higher Ups smile upon you. 😇`, 'infl-small'); }
+    await wait(800);
+    // 5 · a free premium item for everyone whose all-time total was over 100,000,000
+    const lucky = rows.filter(r => r.p0 > INFL_GIFT);
+    if(lucky.length){
+      add(`🎁 <b>BUT WAIT.</b> Everyone who earned over ${fmt(INFL_GIFT)} all-time gets to pick <b>one free item</b> from the premium shop:`, 'infl-mid');
+      add(lucky.map(r => `<span class="infl-chip">${escapeHtml(r.n)}</span>`).join(''), 'infl-chips');
+      await wait(600);
+      if(myRow && myRow.p0 > INFL_GIFT){
+        const prem = BUBBLES.filter(b => b.prem);
+        if(prem.some(b => bubOwned(b.k))) add(`Oh — you already have one from the premium shop 😎 Skipping you.`, 'infl-small');
+        else {
+          skip = false; skipB.hidden = true;
+          const pick = add(`<div class="infl-pick-h">Pick yours:</div><div class="infl-pick">${prem.map(b => `<button type="button" data-k="${b.k}" title="${escapeHtml(b.desc)}"><span class="infl-pi">${bubIcon(b)}</span><b>${escapeHtml(b.name)}</b><i>worth ${b.price.toLocaleString()}</i></button>`).join('')}</div>`, '');
+          await new Promise(res => {
+            pick.querySelectorAll('[data-k]').forEach(btn => btn.addEventListener('click', async () => {
+              pick.querySelectorAll('[data-k]').forEach(x => x.disabled = true);
+              const k = btn.dataset.k, b = BUBBLES.find(x => x.k === k);
+              try{
+                const t2 = await chatAuth(), r = await fetch(`${CHAT_DB}/inv/${encodeURIComponent(me)}/bub/${k}.json?auth=${encodeURIComponent(t2)}`, { method: 'PUT', body: 'true' });
+                if(r.ok){ SC.bub = SC.bub || {}; SC.bub[k] = true; chatLS('bubble', k); btn.classList.add('got'); add(`✨ <b>${escapeHtml(b.name)}</b> is yours — your messages use it now.`, 'infl-mid'); gavel(); rain(20, ['✨', '🎉']); try{ chatRenderArcade(); }catch(e){} res(); }
+                else { add("Couldn't hand it over — try again.", 'infl-small'); pick.querySelectorAll('[data-k]').forEach(x => x.disabled = false); }
+              }catch(e){ add("Couldn't hand it over — try again.", 'infl-small'); pick.querySelectorAll('[data-k]').forEach(x => x.disabled = false); }
+            }));
+          });
+        }
+      }
+    }
+    // the end
+    skipB.hidden = true;
+    const fin = add(`<button type="button" class="infl-ok">🫡 I accept my fate</button>`, 'infl-end');
+    fin.querySelector('.infl-ok').addEventListener('click', finish);
   }
   async function scLoad(){
     if(!chatName()) return;
