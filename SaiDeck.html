@@ -939,6 +939,7 @@
   .td-act{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
   .td-pickinfo{display:flex;flex-direction:column;} .td-pickinfo b{font-size:12.5px;} .td-pickinfo i{font-style:normal;font-size:11px;color:var(--text-faint);}
   .arc-cas-join.td{background:linear-gradient(135deg,#7dffb2,#35d0b8);}
+  .arc-cas-join.trd{background:linear-gradient(135deg,#ffe066,#2bd47f);}
   @media (max-width: 760px){ .td-lobby{grid-template-columns:1fr;} .td-tb b{display:none;} }
   /* the little menu on someone's picture: emojis to send, and what else you can do to them */
   .chat-poke{position:absolute;z-index:6;width:228px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:6px 6px 5px;border-radius:14px;background:#1f2029;border:1px solid rgba(180,140,255,.35);box-shadow:0 10px 26px rgba(0,0,0,.5);}
@@ -22652,7 +22653,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 139;                 // ← goes up by one with every published version
+  const SD_BUILD = 140;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23378,6 +23379,7 @@
         if(e.target.closest('[data-cas-join]')){ casJoin(); return; }
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
         if(e.target.closest('[data-td-join]')){ tdOpen(); return; }
+        if(e.target.closest('[data-trd-join]')){ trdOpen(); return; }
         { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
         const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); dockRender(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
@@ -29950,7 +29952,7 @@
       h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
         <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
         <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
-        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button></div>
+        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button><button type="button" class="arc-cas-join trd" data-trd-join>📈 Trading</button></div>
         <p class="chat-side-p">Blackjack: one table for everyone, with a bot dealer — or take the dealer's seat yourself. Blackjack pays 3 to 2, a win 2 to 1.</p></div>`;
       if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {

@@ -1,6 +1,6 @@
 {
-  "build": 139,
+  "build": 140,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🎰 Fix: slots stuck for people who had an unfinished spin from before The Great Deflation — that old spin is void now, spin away. (Plus 138: 📈 Trading!)"
+  "notes": "📈 Trading now has its own button in the 🎰 Casino tab, next to Slots, Blackjack and Tower Defense."
 }
