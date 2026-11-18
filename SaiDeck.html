@@ -22706,7 +22706,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 145;                 // ← goes up by one with every published version
+  const SD_BUILD = 146;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26530,7 +26530,7 @@
     W.querySelectorAll('[data-s]').forEach(b => { b.disabled = !(mp.sh > 0); });
     // everyone: lines and ranking
     const people = [];
-    for(const [u, p] of Object.entries(TRD.p || {})){ if(!p || p.r !== TRD_ID) continue; people.push({ u, n: trdName(u, p), p, pn: trdPnl(p, P) }); }
+    for(const [u, p] of Object.entries(TRD.p || {})){ if(!p || p.r !== TRD_ID || MERGED.has(u)) continue; people.push({ u, n: trdName(u, p), p, pn: trdPnl(p, P) }); }
     people.sort((a, b) => b.pn - a.pn);
     W.querySelector('.trd-rank').innerHTML = people.length ? people.slice(0, 12).map((x, i) => `<li data-u="${escapeHtml(x.u)}" class="${x.u === me ? 'me' : ''}${TRD.focus === x.u ? ' focus' : ''}"><i class="rk">${i === 0 ? '🏆' : i === people.length - 1 && people.length > 2 ? '💀' : i + 1}</i>${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><em>${x.p.sh ? '🎒 ' + trdK(x.p.sh) : ''}</em><span class="${x.pn >= 0 ? 'up' : 'down'}">${trdSg(x.pn)}</span></li>`).join('') : '<li class="td-dim">Nobody has traded yet. Be the first 👀</li>';
     // the ticker tape: the latest trades
@@ -27175,7 +27175,8 @@
     const ol = TDG.win && TDG.win.querySelector('.td-lb'); if(!ol) return;
     let d = null; try{ d = await tdGet(`td/lb/${TDG.lbTab}`); }catch(e){}
     if(!TDG.win) return;
-    const rows = Object.entries(d || {}).map(([k, v]) => ({ k, n: v && v.n || '?', w: (v && v.w) | 0, sc: v && v.sc })).filter(x => x.w > 0).sort((a, b) => b.w - a.w).slice(0, 10);
+    if(Date.now() - SCALL.at > 60000) try{ await scAllLoad(); }catch(e){}
+    const rows = Object.entries(d || {}).map(([k, v]) => ({ k, n: v && v.n || '?', w: (v && v.w) | 0, sc: v && v.sc })).filter(x => x.w > 0 && !MERGED.has(x.k)).sort((a, b) => b.w - a.w).slice(0, 10);
     ol.innerHTML = rows.length ? rows.map((x, i) => `<li class="${x.k === tdMe() ? 'me ' : ''}${i < 3 ? 'top' + (i + 1) : ''}"><span class="td-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b>${escapeHtml(x.n)}</b><i>🌊 ${x.w}</i></li>`).join('') : `<li class="td-dim tdl-empty">Nobody yet — be the first!</li>`;
   }
   async function tdLobbyOpen(){
@@ -29659,7 +29660,7 @@
       const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
       await inflCfg();
-      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg){ const x = inflView(v); m[u] = { b: x.b, p: x.p, n: v.n }; } SCALL.m = m; SCALL.at = Date.now(); }
+      if(d){ const m = {}; MERGED.clear(); for(const [u, v] of Object.entries(d)){ if(v && typeof v.mg === 'string' && !chatIsMe(u)) MERGED.add(u); if(v && !v.mg){ const x = inflView(v); m[u] = { b: x.b, p: x.p, n: v.n }; } } SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
     try{ if(!CAS.pity && !CAS.pityRead){ CAS.pityRead = true; casPityLoad().then(casPityUpdate); } else casPityUpdate(); }catch(e){}
@@ -31069,12 +31070,14 @@
     if(!PRES.away && Date.now() - PRES.act > 30000){ PRES.away = true; presBeat(); }
     chatRingsUpdate();
   }, 5000);
+  // accounts merged into another one (scores/<uid>/mg): hidden from the online list, Everyone and the leaderboards
+  var MERGED = new Set();      // (var: the score loader may fill it before this line has run)
   function presOnline(){
     const now = Date.now() + PRES.offset, out = [];
     for(const [uid, p] of Object.entries(PRES.list || {})){
       if(!p || typeof p.n !== 'string' || typeof p.t !== 'number' || now - p.t > 150000) continue;
       if(chatIsMe(uid) && !chatVisible()) continue;
-      if(chatBanned(uid)) continue;
+      if(chatBanned(uid) || MERGED.has(uid)) continue;
       out.push({ uid, n: chatBadName(p.n) ? 'someone' : p.n, me: chatIsMe(uid) });
     }
     out.sort((a, b) => (b.me - a.me) || a.n.localeCompare(b.n));
@@ -31112,7 +31115,7 @@
       for(const p of on) row1(p.uid, p.n, p.me, '', true);
       // everyone else who has a chat name, most recently seen first
       const onIds = new Set(on.map(p => p.uid));
-      const rest = Object.entries(CHAT.people || {}).filter(([uid, p]) => p && typeof p.n === 'string' && p.n && !onIds.has(uid) && !chatBanned(uid) && !chatBadName(p.n))
+      const rest = Object.entries(CHAT.people || {}).filter(([uid, p]) => p && typeof p.n === 'string' && p.n && !onIds.has(uid) && !chatBanned(uid) && !MERGED.has(uid) && !chatBadName(p.n))
         .map(([uid, p]) => ({ uid, n: p.n, t: p.t || 0, me: chatIsMe(uid) })).sort((a, b) => b.t - a.t).slice(0, 150);
       if(rest.length){
         const h2 = document.createElement('div'); h2.className = 'chat-who-h'; h2.style.marginTop = '6px'; h2.textContent = `Everyone else · ${rest.length}`; w.appendChild(h2);

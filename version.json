@@ -1,6 +1,6 @@
 {
-  "build": 145,
+  "build": 146,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🔗 Merging fix: when the main account's old device is gone, the newer device keeps its sign-in and becomes the main account — name, points and items."
+  "notes": "🔗 Merged accounts are hidden from the online list, Everyone, and every leaderboard."
 }
