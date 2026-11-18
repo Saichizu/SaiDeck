@@ -1,6 +1,6 @@
 {
-  "build": 143,
+  "build": 144,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🔗 Merged accounts now really merge: every device of a merged account signs in as the main one. 📱 One device at a time — opening your account somewhere else asks to use it there, and pauses the other device until it's refreshed."
+  "notes": "📲 Your account on two devices: the one you left open freezes, and touching it asks to move the session back there — no refresh needed."
 }

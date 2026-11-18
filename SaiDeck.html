@@ -891,9 +891,9 @@
   .chat-gm.td{background:rgba(255,190,80,.08);border-color:rgba(255,190,80,.3);} .chat-gm.trd{background:rgba(53,208,126,.08);border-color:rgba(53,208,126,.3);}
   .chat-gm .gm-i{font-size:18px;} .chat-gm .gm-t{display:flex;flex-direction:column;gap:1px;} .chat-gm .gm-t i{font-style:normal;font-size:10px;color:var(--text-faint);}
   .chat-gm.in{animation:chatPopIn .3s ease-out both;}
-  .sess-dead{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgba(6,6,12,.88);backdrop-filter:blur(6px);}
+  .sess-dead{position:fixed;inset:0;z-index:199000;display:flex;align-items:center;justify-content:center;background:rgba(6,6,12,.88);backdrop-filter:blur(6px);}
   .sess-box{width:min(420px, calc(100% - 32px));padding:26px 24px;border-radius:18px;background:#17171f;border:1px solid var(--border);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.6);}
-  .sess-ic{font-size:44px;} .sess-box b{font:800 17px 'Manrope',sans-serif;} .sess-box p{margin:0;font:500 13px/1.5 'Inter',sans-serif;color:var(--text-dim);}
+  .sess-ic{font-size:44px;} .sess-box b{font:800 17px 'Manrope',sans-serif;} .sess-hint{font:500 11px 'Inter',sans-serif;color:var(--text-faint);} .sess-dead{cursor:pointer;} .sess-box p{margin:0;font:500 13px/1.5 'Inter',sans-serif;color:var(--text-dim);}
   .td-win{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;}
   .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
   .td-box{position:relative;width:min(1000px, calc(100% - 16px));max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
@@ -22706,7 +22706,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 143;                 // ← goes up by one with every published version
+  const SD_BUILD = 144;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -29164,21 +29164,37 @@
       // another device has the account
       if(SESS.own){ sessKill(); return; }
       if(SESS.asked) return; SESS.asked = true;
-      if(await lyrConfirm('📱 Open on another device', `Your account (${chatName()}) is being used on another device right now.\n\nUse it on this device instead? The other device pauses until it's refreshed.`, 'Use this device')){ await sessClaim(); }
-      else sessKill(true);
+      if(await lyrConfirm('📲 Move the session here?', `${chatName()} is still open on another device.\n\nUse it on this device instead? The other device freezes until you move it back.`, 'Move it here')){ await sessClaim(); }
+      else sessKill();
     }catch(e){} finally{ sessBusy = false; }
   }
-  // paused: nothing more goes out from this device until it's refreshed
-  function sessKill(here){
-    if(SESS.dead) return; SESS.dead = true;
+  // frozen: nothing goes out from this device. Touch it again and it asks to move the session back here.
+  function sessKill(){
+    if(SESS.dead) return; SESS.dead = true; SESS.own = false; SESS.wasOpen = !!CHAT.open;
     try{ chatToggle(false); }catch(e){} try{ chatDisconnect(); }catch(e){}
     for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
-    const w = document.createElement('div'); w.className = 'sess-dead'; w.setAttribute('role', 'alertdialog');
-    w.innerHTML = `<div class="sess-box"><div class="sess-ic">📴</div><b>${here ? 'Using your account on the other device' : 'Your account is open on another device'}</b><p>${here ? "You chose to keep using it on the other device, so the chat and games are paused here." : "Someone (probably you 👀) opened your account on another device and chose to use it there. The chat and games are paused here."}<br>Refresh to use it on this device again.</p><button type="button" class="arc-buy sess-r">🔄 Refresh</button></div>`;
-    w.querySelector('.sess-r').addEventListener('click', () => location.reload());
-    document.body.appendChild(w); w.querySelector('.sess-r').focus();
+    document.querySelector('.sess-dead')?.remove();
+    const w = document.createElement('div'); w.className = 'sess-dead'; w.setAttribute('role', 'alertdialog'); w.tabIndex = -1;
+    w.innerHTML = `<div class="sess-box"><div class="sess-ic">📴</div><b>${escapeHtml(chatName() || 'Your account')} is being used on another device</b><p>SaiDeck is frozen here so you don't play on two devices at once.</p><button type="button" class="arc-buy sess-r">📲 Move the session here</button><span class="sess-hint">or just click anywhere</span></div>`;
+    let asking = false;
+    const ask = async (e) => {
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+      if(asking) return; asking = true;
+      const ok = await lyrConfirm('📲 Move the session here?', `${chatName() || 'Your account'} is open on another device.\n\nUse it on this device instead? The other device freezes until you move it back.`, 'Move it here');
+      asking = false;
+      if(ok) sessResume();
+    };
+    w.addEventListener('pointerdown', ask, true); w.addEventListener('keydown', ask, true);
+    document.body.appendChild(w); w.focus();
   }
-  setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching) sessCheck(); }, 15000);
+  async function sessResume(){
+    SESS.dead = false; SESS.asked = true;
+    try{ await sessClaim(); }catch(e){}
+    document.querySelector('.sess-dead')?.remove();
+    try{ chatConnect(); }catch(e){} try{ if(SESS.wasOpen) chatToggle(true); }catch(e){}
+    toast('📲 The session is on this device now.', 2200);
+  }
+  setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching) sessCheck(); }, 6000);
   let vaultBusy = false;
   async function mgCheck(){
     if(vaultBusy || !chatName()) return; vaultBusy = true;
