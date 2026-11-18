@@ -22706,7 +22706,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 144;                 // ← goes up by one with every published version
+  const SD_BUILD = 145;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -29200,7 +29200,14 @@
     if(vaultBusy || !chatName()) return; vaultBusy = true;
     try{
       await vaultSync();
-      const me = chatUid(), go = await vaultGet(`vault/${encodeURIComponent(me)}/go`);
+      const me = chatUid(), vt = await vaultGet(`vault/${encodeURIComponent(me)}`) || {}, go = vt.go;
+      // the admin gave this account a new name (merging: this device keeps its sign-in but becomes the old account)
+      if(typeof vt.nm === 'string' && vt.nm){
+        chatLS('name', vt.nm.slice(0, CHAT_NAME_MAX));
+        try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/vault/${encodeURIComponent(me)}/nm.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
+        SC.loaded = false; try{ await scLoad(); chatRender(); chatRenderArcade(); }catch(e){}
+        toast(`🔗 Your accounts were merged — you're ${vt.nm} again, with everything back.`, 4000);
+      }
       if(!go || typeof go.u !== 'string' || go.u === me) return;
       const k = await vaultGet(`vault/${encodeURIComponent(go.u)}/k`);
       if(typeof k !== 'string' || k.length < 20) return;          // (the main account hasn't opened this version yet — next time)

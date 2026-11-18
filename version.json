@@ -1,6 +1,6 @@
 {
-  "build": 144,
+  "build": 145,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "📲 Your account on two devices: the one you left open freezes, and touching it asks to move the session back there — no refresh needed."
+  "notes": "🔗 Merging fix: when the main account's old device is gone, the newer device keeps its sign-in and becomes the main account — name, points and items."
 }
