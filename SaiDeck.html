@@ -891,6 +891,9 @@
   .chat-gm.td{background:rgba(255,190,80,.08);border-color:rgba(255,190,80,.3);} .chat-gm.trd{background:rgba(53,208,126,.08);border-color:rgba(53,208,126,.3);}
   .chat-gm .gm-i{font-size:18px;} .chat-gm .gm-t{display:flex;flex-direction:column;gap:1px;} .chat-gm .gm-t i{font-style:normal;font-size:10px;color:var(--text-faint);}
   .chat-gm.in{animation:chatPopIn .3s ease-out both;}
+  .sess-dead{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:rgba(6,6,12,.88);backdrop-filter:blur(6px);}
+  .sess-box{width:min(420px, calc(100% - 32px));padding:26px 24px;border-radius:18px;background:#17171f;border:1px solid var(--border);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+  .sess-ic{font-size:44px;} .sess-box b{font:800 17px 'Manrope',sans-serif;} .sess-box p{margin:0;font:500 13px/1.5 'Inter',sans-serif;color:var(--text-dim);}
   .td-win{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;}
   .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
   .td-box{position:relative;width:min(1000px, calc(100% - 16px));max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
@@ -22703,7 +22706,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 142;                 // ← goes up by one with every published version
+  const SD_BUILD = 143;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23199,6 +23202,7 @@
   // one is needed (only for sending: reading is open).
   const CHAT_AUTH = { tok: '', exp: 0, uid: chatLS('auid') || '', p: null };
   async function chatAuth(){
+    if(SESS && SESS.dead) throw new Error('this account is in use on another device');
     if(CHAT_AUTH.tok && Date.now() < CHAT_AUTH.exp - 60000) return CHAT_AUTH.tok;
     if(CHAT_AUTH.p) return CHAT_AUTH.p;
     CHAT_AUTH.p = (async () => {
@@ -24104,7 +24108,7 @@
       CHAT._scrollDown = true; chatRender();
       if(!SC.loaded && chatName()) scLoad();      // (your points, bubble and bullets, ready before you send anything)
       if(chatName()) setTimeout(() => inflCheck(), 600);
-      if(chatName()) setTimeout(() => mgCheck(), 2500);      // (merged into another account by the admin?)      // (the Great Deflation: your cut, and the announcement once)
+      if(chatName()) setTimeout(() => mgCheck(), 2500);      // (merged into another account by the admin? then this device becomes the main one)      // (the Great Deflation: your cut, and the announcement once)
       if(chatName() && !CAS.on) chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(!CAS.on){ CAS.seats = d || {}; casBarRender(); } }).catch(() => {});
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
@@ -24220,6 +24224,7 @@
   }
   function chatStartWatching(){
     if(CHAT.watching) return; CHAT.watching = true;
+    if(chatName()) setTimeout(() => mgCheck().then(() => setTimeout(sessCheck, 800)), 3000);      // (as soon as SaiDeck opens: keep the sign-in key safe, switch if the admin merged this account, and one device at a time)
     CHAT.pollCfg = chatPoll('config', (cfg) => {
       const prevPin = CHAT.cfg.pinned && CHAT.cfg.pinned.t, prevRooms = CHAT.cfg.rooms;
       CHAT.cfg = cfg || {};
@@ -29130,16 +29135,68 @@
     });
   }
   // this device's account goes into another one: send what it can spend, mark it merged, switch to the other account
-  // the admin merged this account into another one: say so (once), and offer to link this device to it
-  async function mgCheck(){
+  // ----- merged by the admin: this device switches to the main account by itself -----
+  // Each device keeps its sign-in key in vault/<uid>/k (only it and the admin can read it). When the admin merges accounts,
+  // vault/<other>/go = {u: main, n} is set: the other device reads the main account's key, becomes it, and reloads.
+  async function vaultSync(){
+    const tok = await chatAuth(), rt = chatLS('rt'), me = chatUid(); if(!rt || !me || chatLS('vaultK') === me + rt) return;
+    const r = await fetch(`${CHAT_DB}/vault/${encodeURIComponent(me)}/k.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify(rt) });
+    if(r.ok) chatLS('vaultK', me + rt);
+  }
+  async function vaultGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); return r.ok ? r.json() : null; }
+  // ----- one device at a time: vault/<uid>/s = {id, t} says which device is using the account. Opening it on a second
+  // device asks "use this device instead?"; the first one is paused (everything stops) until it's refreshed. -----
+  var SESS = { id: '', dead: false, own: false, at: 0, asked: false };      // (var: chatAuth may look before this line has run)
+  try{ SESS.id = sessionStorage.getItem('sdSess') || ''; if(!SESS.id){ SESS.id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); sessionStorage.setItem('sdSess', SESS.id); } }catch(e){ SESS.id = 'd' + Math.random().toString(36).slice(2, 10); }
+  async function sessClaim(){
+    const tok = await chatAuth(), me = chatUid();
+    const r = await fetch(`${CHAT_DB}/vault/${encodeURIComponent(me)}/s.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ id: SESS.id, t: { '.sv': 'timestamp' } }) });
+    if(r.ok){ SESS.own = true; SESS.at = Date.now(); }
+  }
+  let sessBusy = false;
+  async function sessCheck(){
+    if(SESS.dead || sessBusy || !chatName() || vaultBusy) return; sessBusy = true;
     try{
-      const me = chatUid(); if(!me) return;
-      const r = await fetch(`${CHAT_DB}/scores/${encodeURIComponent(me)}.json`, { cache: 'no-store' }); const v = r.ok ? await r.json() : null;
-      if(!v || typeof v.mg !== 'string' || chatLS('mgSeen') === v.mg) return;
-      chatLS('mgSeen', v.mg);
-      const m = await fetch(`${CHAT_DB}/scores/${encodeURIComponent(v.mg)}/n.json`, { cache: 'no-store' }); const mn = (m.ok ? await m.json() : '') || 'your main account';
-      if(await lyrConfirm('🔗 Your accounts were merged', `An admin moved this account's points and items into ${mn}.\n\nLink this device to ${mn} to keep playing as them — on ${mn}'s device open ⚙️ › Link devices to get a code, then type it in here (keep ${mn}).`, 'Link this device')) lkOpen();
-    }catch(e){}
+      await chatAuth();
+      const s = await vaultGet(`vault/${encodeURIComponent(chatUid())}/s`), now = Date.now() + (PRES.offset || 0);
+      const mine = s && s.id === SESS.id, live = s && typeof s.t === 'number' && now - s.t < 75000;
+      if(!s || mine || !live){ if(!mine || Date.now() - SESS.at > 25000) await sessClaim(); return; }
+      // another device has the account
+      if(SESS.own){ sessKill(); return; }
+      if(SESS.asked) return; SESS.asked = true;
+      if(await lyrConfirm('📱 Open on another device', `Your account (${chatName()}) is being used on another device right now.\n\nUse it on this device instead? The other device pauses until it's refreshed.`, 'Use this device')){ await sessClaim(); }
+      else sessKill(true);
+    }catch(e){} finally{ sessBusy = false; }
+  }
+  // paused: nothing more goes out from this device until it's refreshed
+  function sessKill(here){
+    if(SESS.dead) return; SESS.dead = true;
+    try{ chatToggle(false); }catch(e){} try{ chatDisconnect(); }catch(e){}
+    for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
+    const w = document.createElement('div'); w.className = 'sess-dead'; w.setAttribute('role', 'alertdialog');
+    w.innerHTML = `<div class="sess-box"><div class="sess-ic">📴</div><b>${here ? 'Using your account on the other device' : 'Your account is open on another device'}</b><p>${here ? "You chose to keep using it on the other device, so the chat and games are paused here." : "Someone (probably you 👀) opened your account on another device and chose to use it there. The chat and games are paused here."}<br>Refresh to use it on this device again.</p><button type="button" class="arc-buy sess-r">🔄 Refresh</button></div>`;
+    w.querySelector('.sess-r').addEventListener('click', () => location.reload());
+    document.body.appendChild(w); w.querySelector('.sess-r').focus();
+  }
+  setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching) sessCheck(); }, 15000);
+  let vaultBusy = false;
+  async function mgCheck(){
+    if(vaultBusy || !chatName()) return; vaultBusy = true;
+    try{
+      await vaultSync();
+      const me = chatUid(), go = await vaultGet(`vault/${encodeURIComponent(me)}/go`);
+      if(!go || typeof go.u !== 'string' || go.u === me) return;
+      const k = await vaultGet(`vault/${encodeURIComponent(go.u)}/k`);
+      if(typeof k !== 'string' || k.length < 20) return;          // (the main account hasn't opened this version yet — next time)
+      // become the main account
+      chatLS('rt', k); chatLS('auid', go.u); chatLS('name', String(go.n || chatName()).slice(0, CHAT_NAME_MAX)); chatLS('vaultK', null);
+      Object.assign(CHAT_AUTH, { tok: '', exp: 0, uid: go.u, p: null });
+      SC.loaded = false;
+      try{ chatToggle(false); }catch(e){}
+      const work = (typeof tracks !== 'undefined' && tracks.length) || (typeof projVideo !== 'undefined' && projVideo);
+      if(!work){ toast(`🔗 This device is now ${go.n || 'your main account'} — reloading…`, 2500); setTimeout(() => location.reload(), 1800); }
+      else if(await lyrConfirm('🔗 Accounts merged', `The admin merged your accounts — this device is now ${go.n || 'your main account'}.\n\nSaiDeck reloads to finish switching. Save your project first if you need to.`, 'Reload now')) location.reload();
+    }catch(e){} finally{ vaultBusy = false; }
   }
   async function lkMergeInto(mainUid, mainRt, mainName, dropCode){
     if(!mainUid || !mainRt) throw new Error('no main account');
