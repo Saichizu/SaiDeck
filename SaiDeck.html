@@ -3292,12 +3292,13 @@
   @keyframes inflStamp{from{transform:rotate(-6deg) scale(3);opacity:0}60%{opacity:1}to{transform:rotate(-6deg) scale(1)}}
   .infl-law{font:600 14px 'Inter',sans-serif;padding:7px 10px;border-radius:9px;background:rgba(255,215,106,.07);border-left:3px solid #c9a24a;} .infl-law b{color:#ffd76a;}
   .infl-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
-  .infl-list li{position:relative;display:grid;grid-template-columns:minmax(80px,1.2fr) auto auto auto auto;align-items:center;gap:8px;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.04);font:600 12.5px 'Inter',sans-serif;animation:inflLn .3s ease-out both;}
+  .infl-list li{position:relative;display:grid;grid-template-columns:minmax(80px,1fr) auto;align-items:center;gap:8px;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.04);font:600 12.5px 'Inter',sans-serif;animation:inflLn .3s ease-out both;}
   .infl-list li.me{background:rgba(255,215,106,.12);outline:1px solid rgba(255,215,106,.4);}
   .infl-list b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;}
   .infl-list .was{color:#a08d77;text-decoration:line-through;font-family:'JetBrains Mono',monospace;font-size:11.5px;} .infl-list .arr{color:#c9a24a;} .infl-list .now{color:#7dffb2;font-family:'JetBrains Mono',monospace;font-size:12px;}
   .infl-list .took{color:#ff6a70;font-family:'JetBrains Mono',monospace;font-size:11.5px;} .infl-list .ok{color:#9fd6ff;font-size:11.5px;}
-  .infl-list .seized{position:absolute;left:38%;top:50%;transform:translateY(-50%) rotate(-10deg);border:2px solid #e0333a;color:#ff4a50;font:900 10px 'Inter',sans-serif;padding:1px 5px;border-radius:4px;opacity:.85;animation:inflStamp .35s cubic-bezier(.3,1.6,.5,1) both;}
+  .infl-2{display:grid;grid-template-columns:auto auto auto auto auto;align-items:center;column-gap:7px;row-gap:2px;justify-items:end;} .infl-2 .ic{font-size:12px;} .infl-key{font:600 11px 'Inter',sans-serif;color:#b6a58a;margin-left:6px;}
+  .infl-nm{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;} .infl-list .seized{position:static;display:inline-block;transform:rotate(-8deg);border:2px solid #e0333a;color:#ff4a50;font:900 10px 'Inter',sans-serif;padding:1px 5px;border-radius:4px;opacity:.85;animation:inflStamp .35s cubic-bezier(.3,1.6,.5,1) both;}
   .infl-tot{color:#ff6a70;font-family:'JetBrains Mono',monospace;}
   .infl-chips{display:flex;flex-wrap:wrap;gap:5px;} .infl-chip{padding:3px 9px;border-radius:99px;background:rgba(255,215,106,.15);color:#ffe9b8;font:700 12px 'Inter',sans-serif;}
   .infl-pick-h{font:800 14px 'Inter',sans-serif;color:#ffe9b8;margin-bottom:6px;}
@@ -3309,7 +3310,7 @@
   .infl-end{display:flex;justify-content:center;padding:6px 0 4px;}
   .infl-ok{all:unset;cursor:pointer;padding:11px 22px;border-radius:12px;background:linear-gradient(135deg,#ffd76a,#c8891a);color:#2a1a00;font:900 15px 'Inter',sans-serif;box-shadow:0 6px 18px rgba(200,137,26,.4);animation:inflPop .4s cubic-bezier(.2,1.4,.4,1) both;} .infl-ok:hover{filter:brightness(1.08);}
   .infl-foot{display:flex;justify-content:flex-end;padding:8px 14px;border-top:1px solid rgba(255,255,255,.06);} .infl-skip{all:unset;cursor:pointer;color:#b6a58a;font:700 12px 'Inter',sans-serif;} .infl-skip:hover{color:#fff;}
-  @media (max-width:560px){ .infl-pick{grid-template-columns:repeat(2,1fr);} .infl-list li{grid-template-columns:1fr auto auto;} .infl-list .was,.infl-list .arr{display:none;} }
+  @media (max-width:560px){ .infl-pick{grid-template-columns:repeat(2,1fr);} .infl-list li{grid-template-columns:1fr;} .infl-2{justify-items:start;} .infl-list .was,.infl-list .arr{display:none;} }
   .lyr-look{width:330px;max-height:calc(100vh - 16px);overflow:auto;}
   .lyr-look-note, .lyr-look-hint{font-size:11px;line-height:1.4;color:var(--text-faint);} .lyr-look-note b{color:var(--text-dim);}
   .lyr-look-seg{display:flex;flex-wrap:wrap;gap:3px;} .lyr-look-seg button{all:unset;cursor:pointer;padding:4px 7px;border-radius:7px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:600 11px 'Inter',sans-serif;}
@@ -22618,7 +22619,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 136;                 // ← goes up by one with every published version
+  const SD_BUILD = 137;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -28676,7 +28677,8 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=8&auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null; if(!d) return;
-      const list = Object.entries(d).map(([u, v]) => ({ u, p: Math.floor(+(v && v.p) || 0) })).filter(x => x.p > 0 && !chatBanned(x.u)).sort((a, b) => b.p - a.p).slice(0, 3);
+      await inflCfg();
+      const list = Object.entries(d).map(([u, v]) => ({ u, p: inflView(v).p })).filter(x => x.p > 0 && !chatBanned(x.u)).sort((a, b) => b.p - a.p).slice(0, 3);
       const nr = {}; list.forEach((x, i) => { nr[x.u] = i + 1; });
       const changed = JSON.stringify(nr) !== JSON.stringify(TOP.r);
       TOP.r = nr; TOP.at = Date.now(); TOP.init = true;
@@ -28979,7 +28981,8 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg) m[u] = { b: Math.max(0, Math.floor(+(v.p) || 0) - Math.floor(+(v.s) || 0)), p: Math.floor(+(v.p) || 0), n: v.n }; SCALL.m = m; SCALL.at = Date.now(); }
+      await inflCfg();
+      if(d){ const m = {}; for(const [u, v] of Object.entries(d)) if(v && !v.mg){ const x = inflView(v); m[u] = { b: x.b, p: x.p, n: v.n }; } SCALL.m = m; SCALL.at = Date.now(); }
     }catch(e){}
     SCALL.at = Date.now(); SCALL.busy = false;
     try{ if(!CAS.pity && !CAS.pityRead){ CAS.pityRead = true; casPityLoad().then(casPityUpdate); } else casPityUpdate(); }catch(e){}
@@ -29379,6 +29382,18 @@
     const a = Math.log(C / INFL_T) / Math.log(M / INFL_T);
     return Math.min(x, Math.round(INFL_T * Math.pow(x / INFL_T, a)));
   }
+  const INFL_SHOW = 2;      // (bump to play the announcement once more for everyone)
+  async function inflCfg(){
+    if(INFL.cfg !== undefined && Date.now() - (INFL.cfgAt || 0) < 60000) return INFL.cfg;
+    try{ const r = await fetch(`${CHAT_DB}/config/infl.json`, { cache: 'no-store' }); if(r.ok){ INFL.cfg = (await r.json()) || null; INFL.cfgAt = Date.now(); } }catch(e){}
+    return INFL.cfg || null;
+  }
+  // someone's points as they are once the declared fix has cut them (it happens on their own app the next time they open the chat)
+  function inflView(v){
+    const p = Math.floor(+(v && v.p) || 0), b = Math.max(0, p - Math.floor(+(v && v.s) || 0)), c = INFL.cfg;
+    if(!c || !v || (v.inf && v.inf.i === c.i)) return { p, b };
+    const b1 = inflF(b, c.bm, INFL_B); return { b: b1, p: Math.max(b1, inflF(p, c.pm, INFL_P)) };
+  }
   async function inflCheck(force){
     if(INFL.busy || !chatName()) return; INFL.busy = true;
     try{
@@ -29393,7 +29408,7 @@
         cfg = await get('config/infl');
         if(!cfg) return;
       }
-      INFL.cfg = cfg;
+      INFL.cfg = cfg; INFL.cfgAt = Date.now();
       // your own cut (once per fix)
       const mine = await get(`scores/${me}`);
       if(mine && (!mine.inf || mine.inf.i !== cfg.i)){
@@ -29402,7 +29417,7 @@
         const r = await fetch(q(''), { method: 'PATCH', body: JSON.stringify({ [`scores/${me}/p`]: p1, [`scores/${me}/s`]: p1 - b1, [`scores/${me}/inf`]: { i: cfg.i, b0, p0, b1, p1 }, [`scores/${me}/t`]: { '.sv': 'timestamp' } }) });
         if(r.ok){ SC.p = p1; SC.s = p1 - b1; try{ chatRenderArcade(); dockRender(); }catch(e){} }
       }
-      if(force || (+chatLS('inflSeen') || 0) < cfg.i){ if(!SC.loaded) await scLoad(); inflShow(cfg); }
+      if(force || chatLS('inflSeen') !== cfg.i + '.' + INFL_SHOW){ if(!SC.loaded) await scLoad(); inflShow(cfg); }
     }catch(e){ console.warn('inflation', e); }
     finally{ INFL.busy = false; }
   }
@@ -29413,9 +29428,10 @@
     let all = {}; try{ const r = await fetch(`${CHAT_DB}/scores.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); all = (r.ok ? await r.json() : null) || {}; }catch(e){}
     const rows = Object.entries(all).filter(([u, v]) => v && v.n && !v.mg).map(([u, v]) => {
       const p = Math.floor(+v.p || 0), b = Math.max(0, p - Math.floor(+v.s || 0)), done = v.inf && v.inf.i === cfg.i;
-      return done ? { u, n: v.n, b0: v.inf.b0, b1: v.inf.b1, p0: v.inf.p0 } : { u, n: v.n, b0: b, b1: inflF(b, cfg.bm, INFL_B), p0: p };
-    }).sort((a, b) => b.b0 - a.b0);
-    const total = rows.reduce((a, r) => a + Math.max(0, r.b0 - r.b1), 0), myRow = rows.find(r => r.u === me);
+      if(done) return { u, n: v.n, b0: v.inf.b0, b1: v.inf.b1, p0: v.inf.p0, p1: v.inf.p1 };
+      const b1 = inflF(b, cfg.bm, INFL_B); return { u, n: v.n, b0: b, b1, p0: p, p1: Math.max(b1, inflF(p, cfg.pm, INFL_P)) };
+    }).sort((a, b) => b.p0 - a.p0 || b.b0 - a.b0);
+    const total = rows.reduce((a, r) => a + Math.max(0, r.b0 - r.b1), 0), totalP = rows.reduce((a, r) => a + Math.max(0, r.p0 - r.p1), 0), myRow = rows.find(r => r.u === me);
     const fmt = (v) => Math.round(v).toLocaleString();
     const el = document.createElement('div'); el.className = 'infl';
     el.innerHTML = `<div class="infl-rain" aria-hidden="true"></div><div class="infl-card"><div class="infl-ticker"><span>🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨 BREAKING NEWS 🚨 THE ECONOMY IS COOKED 🚨</span></div><div class="infl-body"></div><div class="infl-foot"><button type="button" class="infl-skip">Skip ⏭</button></div></div>`;
@@ -29430,7 +29446,7 @@
     const gavel = () => snd((ac, t) => { sfxNoiseHit(ac, t, 'lowpass', 900, 120, .8, .5, .25); sfxTone(ac, t, 'sine', 160, 50, .3, .35); });
     const siren = () => snd((ac, t) => { for(let i = 0; i < 4; i++){ sfxTone(ac, t + i * .5, 'sawtooth', 600, 900, .25, .04); sfxTone(ac, t + i * .5 + .25, 'sawtooth', 900, 600, .25, .04); } });
     const rain = (n, ems) => { const R = el.querySelector('.infl-rain'); for(let i = 0; i < n; i++){ const s = document.createElement('span'); s.textContent = ems[i % ems.length]; s.style.left = (Math.random() * 100) + '%'; s.style.animationDelay = (Math.random() * 1.6) + 's'; s.style.fontSize = (18 + Math.random() * 22) + 'px'; s.style.animationDuration = (2.2 + Math.random() * 1.8) + 's'; R.appendChild(s); setTimeout(() => s.remove(), 5000); } };
-    const finish = () => { if(closed) return; closed = true; chatLS('inflSeen', cfg.i); el.classList.add('out'); setTimeout(() => el.remove(), 450); try{ scLoad(); scAllLoad(); }catch(e){} };
+    const finish = () => { if(closed) return; closed = true; chatLS('inflSeen', cfg.i + '.' + INFL_SHOW); el.classList.add('out'); setTimeout(() => el.remove(), 450); try{ scLoad(); scAllLoad(); }catch(e){} };
     // 1 · the broadcast
     siren(); await wait(400);
     await type(add('', 'infl-small'), '📜 An official message from the Higher Ups™', 32); await wait(500);
@@ -29444,26 +29460,27 @@
     await type(add('', 'infl-small'), `There are ${fmt(rows.reduce((a, r) => a + r.b0, 0))} points out there. A bubble tea costs 4 billion now. The economy is cooked. 🍳`, 22); await wait(900);
     // 3 · the new laws
     add('📋 <b>THE NEW LAWS</b>', 'infl-mid');
-    const laws = [`👑 The biggest wallet gets cut down to <b>${fmt(INFL_B)}</b>`, `🏆 The #1 all-time total gets cut down to <b>${fmt(INFL_P)}</b>`, '🤏 The less you have, the less we take (under 1,000,000: untouched)', '🎰 A slot spin now costs <b>1%</b> of your points', `💰 The jackpot starts at <b>${fmt(CAS_POT0)}</b> and only <b>10%</b> of what's lost goes in it`];
+    const laws = [`👑 The biggest wallet gets cut down to <b>${fmt(INFL_B)}</b>`, `🏆 The leaderboard's #1 (all-time points) gets cut down to <b>${fmt(INFL_P)}</b> — everyone's all-time points get cut the same way`, '🤏 The less you have, the less we take (under 1,000,000: untouched)', '🎰 A slot spin now costs <b>1%</b> of your points', `💰 The jackpot starts at <b>${fmt(CAS_POT0)}</b> and only <b>10%</b> of what's lost goes in it`];
     for(const l of laws){ add(l, 'infl-law'); snd((ac, t) => sfxTone(ac, t, 'square', 700, 900, .06, .04)); await wait(420); }
     await wait(700);
     // 4 · the confiscation list
-    add('🧾 <b>THE CONFISCATION LIST</b>', 'infl-mid');
+    add('🧾 <b>THE CONFISCATION LIST</b> <span class="infl-key">💰 money · 🏆 all-time (leaderboard)</span>', 'infl-mid');
     const list = add('<ul class="infl-list"></ul>', ''), ul = list.querySelector('ul');
     const tot = add(`Seized so far: <b class="infl-tot">0</b> points`, 'infl-small'), totEl = tot.querySelector('.infl-tot');
     let seized = 0;
     for(const r of rows){
-      const cut = Math.max(0, r.b0 - r.b1), li = document.createElement('li');
-      li.className = (r.u === me ? 'me ' : '') + (cut > 0 ? 'cut' : 'safe');
-      li.innerHTML = `<b>${escapeHtml(r.n)}</b><span class="was">${fmt(r.b0)}</span><span class="arr">→</span><span class="now">${fmt(r.b1)}</span>${cut > 0 ? `<span class="took">−${fmt(cut)}</span>${cut >= 1e6 ? '<i class="seized">SEIZED</i>' : ''}` : '<span class="ok">untouched 😇</span>'}`;
+      const cut = Math.max(0, r.b0 - r.b1), cutP = Math.max(0, r.p0 - r.p1), li = document.createElement('li');
+      li.className = (r.u === me ? 'me ' : '') + (cut > 0 || cutP > 0 ? 'cut' : 'safe');
+      const line = (ic, a, b, c) => `<span class="ic">${ic}</span><span class="was">${fmt(a)}</span><span class="arr">→</span><span class="now">${fmt(b)}</span>${c > 0 ? `<span class="took">−${fmt(c)}</span>` : '<span class="ok">untouched 😇</span>'}`;
+      li.innerHTML = `<div class="infl-nm"><b>${escapeHtml(r.n)}</b>${cut >= 1e6 || cutP >= 1e7 ? '<i class="seized">SEIZED</i>' : ''}</div><div class="infl-2">${line('💰', r.b0, r.b1, cut)}${line('🏆', r.p0, r.p1, cutP)}</div>`;
       ul.appendChild(li); body.scrollTop = body.scrollHeight;
       if(cut > 0){ snd((ac, t) => sfxTone(ac, t, 'triangle', 300 + Math.min(500, Math.log10(cut + 1) * 50), 200, .08, .05)); }
       seized += cut; totEl.textContent = fmt(seized);
       await wait(cut >= 1e6 ? 380 : 160);
     }
     totEl.textContent = fmt(total); gavel(); await wait(700);
-    add(`💀 <b>${fmt(total)}</b> points have been fed to the Treasury Crocodile 🐊`, 'infl-mid'); rain(24, ['🐊', '💸']);
-    if(myRow){ const cut = Math.max(0, myRow.b0 - myRow.b1); add(cut > 0 ? `You: ${fmt(myRow.b0)} → <b>${fmt(myRow.b1)}</b>. Thank you for your cooperation. 🫡` : `You: untouched. The Higher Ups smile upon you. 😇`, 'infl-small'); }
+    add(`💀 <b>${fmt(total)}</b> points have been fed to the Treasury Crocodile 🐊 (and <b>${fmt(totalP)}</b> leaderboard points wiped)`, 'infl-mid'); rain(24, ['🐊', '💸']);
+    if(myRow){ const cut = Math.max(0, myRow.b0 - myRow.b1) + Math.max(0, myRow.p0 - myRow.p1); add(cut > 0 ? `You: 💰 ${fmt(myRow.b0)} → <b>${fmt(myRow.b1)}</b> · 🏆 ${fmt(myRow.p0)} → <b>${fmt(myRow.p1)}</b>. Thank you for your cooperation. 🫡` : `You: untouched. The Higher Ups smile upon you. 😇`, 'infl-small'); }
     await wait(800);
     // 5 · a free premium item for everyone whose all-time total was over 100,000,000
     const lucky = rows.filter(r => r.p0 > INFL_GIFT);
@@ -29558,7 +29575,8 @@
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/scores.json?orderBy=${encodeURIComponent('"p"')}&limitToLast=25&auth=${encodeURIComponent(tok)}`);
       const d = r.ok ? await r.json() : null;
-      SC.board = Object.entries(d || {}).filter(([u, v]) => !(v && v.mg)).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: Math.floor(+(v && v.p) || 0) })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
+      await inflCfg();
+      SC.board = Object.entries(d || {}).filter(([u, v]) => !(v && v.mg)).map(([u, v]) => ({ u, n: (v && v.n) || 'Someone', p: inflView(v).p })).filter(x => x.p > 0).sort((a, b) => b.p - a.p);
       SC.boardAt = Date.now();
     }catch(e){ SC.board = SC.board || []; }
     chatRenderArcade();
