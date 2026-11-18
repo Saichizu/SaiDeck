@@ -810,7 +810,7 @@
   .chat-av.poke:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
   /* Tower Defense */
   /* ----- Trading ----- */
-  .trd-box{width:min(1000px, calc(100% - 16px));background:radial-gradient(120% 60% at 50% 0%,rgba(53,208,126,.08),transparent 60%),linear-gradient(180deg,#0f1219,#0a0c12);}
+  .td-box.trd-box{width:min(1000px, calc(100% - 16px));background:radial-gradient(120% 60% at 50% 0%,rgba(53,208,126,.08),transparent 60%),linear-gradient(180deg,#0f1219,#0a0c12);}
   .trd-head{gap:10px;} .trd-live{display:flex;align-items:center;gap:6px;font:900 11px 'Inter',sans-serif;letter-spacing:.12em;color:#35d07e;padding:3px 9px;border-radius:999px;background:rgba(53,208,126,.12);}
   .trd-live i{width:7px;height:7px;border-radius:50%;background:#35d07e;box-shadow:0 0 8px #35d07e;animation:trdPulse 1.2s ease-in-out infinite;} .trd-live.off{color:#f5c04a;background:rgba(245,192,74,.12);} .trd-live.off i{background:#f5c04a;box-shadow:none;animation:none;}
   @keyframes trdPulse{50%{opacity:.25;}}
@@ -840,11 +840,52 @@
   .trd-b{all:unset;cursor:pointer;padding:9px 14px;border-radius:10px;font:800 12.5px 'Inter',sans-serif;transition:transform .08s, filter .15s;} .trd-b:hover{filter:brightness(1.2);} .trd-b:active{transform:scale(.93);} .trd-b:disabled{opacity:.3;cursor:default;filter:none;}
   .trd-b.buy{background:rgba(53,208,126,.14);color:#6ff5a9;border:1px solid rgba(53,208,126,.4);} .trd-b.sell{background:rgba(255,77,106,.12);color:#ff8095;border:1px solid rgba(255,77,106,.4);}
   .trd-b.buy.all{background:linear-gradient(180deg,#2bd47f,#14935a);color:#04210f;box-shadow:0 4px 14px rgba(53,208,126,.3);} .trd-b.sell.all{background:linear-gradient(180deg,#ff6b84,#c22b47);color:#2a0710;box-shadow:0 4px 14px rgba(255,77,106,.25);}
-  .trd-low{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;} .trd-pl{display:flex;flex-direction:column;height:200px;} .trd-pl canvas{flex:1;min-height:0;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);}
+  .trd-low{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;} .trd-pl{display:flex;flex-direction:column;height:200px;} .trd-plw{position:relative;flex:1;min-height:0;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);overflow:hidden;} .trd-plw canvas{width:100%;height:100%;display:block;}
+  .trd-ov,.trd-ov2{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;} .trd-chart,.trd-plw{cursor:crosshair;}
+  .trd-tip{position:absolute;z-index:2;pointer-events:none;min-width:150px;max-width:260px;padding:8px 10px;border-radius:10px;background:rgba(12,14,20,.94);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 24px rgba(0,0,0,.5);font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);display:flex;flex-direction:column;gap:3px;} .trd-tip[hidden]{display:none;} .trd-tip .tg{font-size:10.5px;color:var(--text-faint);} .trd-tip b{color:#fff;}
+  .trd-tip .up{color:#35d07e;} .trd-tip .down{color:#ff4d6a;}
+  .trd-prev{margin-left:8px;font:600 12px 'Inter',sans-serif;color:var(--text-dim);} .trd-prev b{color:#fff;}
+  .trd-rank li{cursor:default;transition:background .12s;} .trd-rank li:hover,.trd-rank li.focus{background:rgba(245,192,74,.1);}
   .trd-ph{font:800 10.5px 'Inter',sans-serif;letter-spacing:.1em;color:var(--text-faint);margin:2px 0 6px;} .trd-ph i{font-style:normal;font-weight:600;letter-spacing:0;opacity:.7;}
   .trd-side{display:flex;flex-direction:column;min-width:0;} .trd-rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;max-height:190px;overflow:auto;}
   .trd-rank li{display:flex;align-items:center;gap:7px;font:600 12px 'Inter',sans-serif;padding:4px 7px;border-radius:8px;} .trd-rank li.me{background:rgba(255,255,255,.06);} .trd-rank .rk{font-style:normal;width:18px;text-align:center;} .trd-rank li b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .trd-rank li em{font-style:normal;font-size:10.5px;color:var(--text-faint);} .trd-rank .td-face{width:20px;height:20px;}
   @media (max-width:640px){ .trd-low{grid-template-columns:1fr;} .trd-chart{height:210px;} .trd-bag{margin-left:0;} }
+  /* ----- Coin Flip ----- */
+  .td-box.cf-box{width:min(900px, calc(100% - 16px));background:radial-gradient(90% 70% at 50% 35%,#16402e,#0b1712 70%);}
+  .cf-round{margin-left:auto;font:700 11.5px 'Inter',sans-serif;color:var(--text-faint);}
+  .cf-table{display:grid;grid-template-columns:1fr 260px 1fr;gap:10px;padding:14px;min-height:300px;}
+  .cf-zone{border-radius:16px;border:2px dashed rgba(255,255,255,.12);padding:10px;cursor:pointer;transition:border-color .15s, background .15s, transform .15s;display:flex;flex-direction:column;gap:6px;}
+  .cf-zone.h{background:rgba(245,192,74,.05);} .cf-zone.t{background:rgba(120,170,255,.05);}
+  .cf-zone.pick.h{border-color:rgba(245,192,74,.7);} .cf-zone.pick.t{border-color:rgba(120,170,255,.7);}
+  .cf-zone.won{border-style:solid;border-color:#35d07e;background:rgba(53,208,126,.14);box-shadow:0 0 30px rgba(53,208,126,.25);} .cf-zone.lost{opacity:.45;}
+  .cf-zh{font:900 15px 'Manrope',sans-serif;letter-spacing:.06em;} .cf-zone.h .cf-zh{color:#f5c04a;} .cf-zone.t .cf-zh{color:#8fb8ff;} .cf-zh b{font-size:12px;color:var(--text-dim);}
+  .cf-bets{display:flex;flex-direction:column;gap:4px;overflow:auto;max-height:240px;} .cf-empty{font:600 11.5px 'Inter',sans-serif;color:var(--text-faint);padding:8px 2px;}
+  .cf-bet{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:9px;background:rgba(0,0,0,.25);font:600 12px 'Inter',sans-serif;animation:chatPopIn .25s ease-out both;} .cf-bet b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .cf-bet.me{outline:1px solid rgba(255,255,255,.35);} .cf-bet .td-face{width:20px;height:20px;}
+  .cf-mid{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .cf-bot{display:flex;align-items:center;gap:8px;min-height:44px;} .cf-robo{font-size:34px;animation:trdBob 2.4s ease-in-out infinite;}
+  .cf-say{max-width:180px;padding:6px 10px;border-radius:12px 12px 12px 3px;background:#fff;color:#111;font:700 12px 'Inter',sans-serif;} .cf-say.pop{animation:cfPop .3s cubic-bezier(.2,1.6,.4,1);} .cf-say:empty{display:none;}
+  @keyframes cfPop{from{transform:scale(.5);opacity:0;}}
+  .cf-stage{position:relative;width:120px;height:150px;perspective:600px;display:flex;align-items:flex-end;justify-content:center;}
+  .cf-coin{position:relative;width:96px;height:96px;margin-bottom:22px;transform-style:preserve-3d;}
+  .cf-face{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;backface-visibility:hidden;border:5px solid #b8862a;box-shadow:inset 0 0 0 4px rgba(255,255,255,.25), inset 0 -8px 16px rgba(0,0,0,.25);}
+  .cf-face.h{background:radial-gradient(circle at 35% 30%,#ffe9a6,#f5c04a 45%,#c48b1d);} .cf-face.t{background:radial-gradient(circle at 35% 30%,#fff3c4,#e6b23c 45%,#a87412);transform:rotateX(180deg);}
+  .cf-shadow{position:absolute;bottom:8px;width:80px;height:12px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(3px);opacity:.5;}
+  .cf-res{min-height:28px;font:900 24px 'Manrope',sans-serif;letter-spacing:.04em;} .cf-res.h{color:#f5c04a;text-shadow:0 0 16px rgba(245,192,74,.6);} .cf-res.t{color:#8fb8ff;text-shadow:0 0 16px rgba(120,170,255,.6);} .cf-res.e{color:#ff4d6a;}
+  .cf-timer{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;} .cf-timer i{display:block;height:100%;background:#35d07e;transform-origin:left;} .cf-timer.hurry i{background:#ff4d6a;}
+  .cf-hist{display:flex;align-items:center;gap:4px;padding:0 14px 10px;flex-wrap:wrap;} .cf-hl{font:800 10px 'Inter',sans-serif;letter-spacing:.12em;color:var(--text-faint);margin-right:6px;}
+  .cf-hist i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:900 10px 'Inter',sans-serif;font-style:normal;color:#111;} .cf-hist i.h{background:#f5c04a;} .cf-hist i.t{background:#8fb8ff;} .cf-hist i.e{background:#ff4d6a;color:#fff;}
+  .cf-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2);}
+  .cf-sides{display:flex;gap:4px;} .cf-side{all:unset;cursor:pointer;padding:9px 14px;border-radius:10px;font:900 12.5px 'Manrope',sans-serif;border:1px solid rgba(255,255,255,.15);color:var(--text-dim);}
+  .cf-side.h.on{background:#f5c04a;color:#2a1c00;border-color:#f5c04a;} .cf-side.t.on{background:#8fb8ff;color:#0b1a33;border-color:#8fb8ff;}
+  .cf-chips{display:flex;gap:4px;flex-wrap:wrap;} .cf-chip{all:unset;cursor:pointer;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:900 11px 'Inter',sans-serif;color:#fff;background:repeating-conic-gradient(#c22b47 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #c22b47, 0 3px 0 rgba(0,0,0,.4);transition:transform .1s;text-shadow:0 1px 2px #000;}
+  .cf-chip:nth-child(2){background:repeating-conic-gradient(#2b6fd4 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #2b6fd4, 0 3px 0 rgba(0,0,0,.4);} .cf-chip:nth-child(3){background:repeating-conic-gradient(#14935a 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #14935a, 0 3px 0 rgba(0,0,0,.4);}
+  .cf-chip:nth-child(4){background:repeating-conic-gradient(#222 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #222, 0 3px 0 rgba(0,0,0,.4);} .cf-chip:nth-child(5){background:repeating-conic-gradient(#8a3fd1 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #8a3fd1, 0 3px 0 rgba(0,0,0,.4);}
+  .cf-chip.all{font-size:9.5px;background:repeating-conic-gradient(#f5c04a 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #c48b1d, 0 3px 0 rgba(0,0,0,.4);}
+  .cf-chip span{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(10,12,16,.82);} .cf-chip.on{transform:translateY(-5px) scale(1.08);outline:2px solid #fff;outline-offset:2px;} .cf-chip:active{transform:scale(.92);}
+  .cf-go{all:unset;cursor:pointer;margin-left:auto;padding:12px 18px;border-radius:12px;font:900 13.5px 'Manrope',sans-serif;background:linear-gradient(180deg,#ffd76a,#e0a326);color:#2a1c00;box-shadow:0 4px 16px rgba(245,192,74,.35);} .cf-go.t{background:linear-gradient(180deg,#aecbff,#5f8fe0);color:#0b1a33;box-shadow:0 4px 16px rgba(120,170,255,.35);}
+  .cf-go:disabled{opacity:.4;cursor:default;box-shadow:none;} .cf-go span{opacity:.7;margin-left:4px;}
+  .cf-me{width:100%;font:600 12px 'Inter',sans-serif;color:var(--text-dim);} .cf-me b{color:#fff;}
+  @media (max-width:700px){ .cf-table{grid-template-columns:1fr 1fr;} .cf-mid{grid-column:1 / -1;order:-1;} }
   /* game notices in the chat (Tower Defense, Trading) */
   .chat-gm{align-self:center;max-width:94%;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:12px;font-size:11.5px;color:var(--text-dim);border:1px solid;}
   .chat-gm.td{background:rgba(255,190,80,.08);border-color:rgba(255,190,80,.3);} .chat-gm.trd{background:rgba(53,208,126,.08);border-color:rgba(53,208,126,.3);}
@@ -948,6 +989,7 @@
   .td-pickinfo{display:flex;flex-direction:column;} .td-pickinfo b{font-size:12.5px;} .td-pickinfo i{font-style:normal;font-size:11px;color:var(--text-faint);}
   .arc-cas-join.td{background:linear-gradient(135deg,#7dffb2,#35d0b8);}
   .arc-cas-join.trd{background:linear-gradient(135deg,#ffe066,#2bd47f);}
+  .arc-cas-join.cf{background:linear-gradient(135deg,#ffe9a6,#f5c04a);}
   @media (max-width: 760px){ .td-lobby{grid-template-columns:1fr;} .td-tb b{display:none;} }
   /* the little menu on someone's picture: emojis to send, and what else you can do to them */
   .chat-poke{position:absolute;z-index:6;width:228px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:6px 6px 5px;border-radius:14px;background:#1f2029;border:1px solid rgba(180,140,255,.35);box-shadow:0 10px 26px rgba(0,0,0,.5);}
@@ -22661,7 +22703,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 141;                 // ← goes up by one with every published version
+  const SD_BUILD = 142;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23388,6 +23430,7 @@
         if(e.target.closest('[data-bj-join]')){ bjJoin(); return; }
         if(e.target.closest('[data-td-join]')){ tdOpen(); return; }
         if(e.target.closest('[data-trd-join]')){ trdOpen(); return; }
+        if(e.target.closest('[data-cf-join]')){ cfOpen(); return; }
         { const tb = e.target.closest('[data-tot]'); if(tb){ tb.blur(); totBuy(); return; } }
         const t = e.target.closest('[data-tab]'); if(t){ if(SC.tab !== t.dataset.tab){ const sc = chatPanel.querySelector('.chat-arcade'); if(sc) sc.scrollTop = 0; } SC.tab = t.dataset.tab; if(SC.tab === 'board') SC.boardAt = 0; chatRenderArcade(); dockRender(); return; }
         const f = e.target.closest('[data-fx]'); if(f){ f.blur(); if(ammoOwned(f.dataset.fx)){ chatLS('ammo', f.dataset.fx); chatRenderArcade(); infHud(); } else scBuy('fx', f.dataset.fx); return; }
@@ -23626,7 +23669,7 @@
   // the Alerts window: infiltrations, swats and game invites, once they're more than a minute old (newest first)
   const CHAT_EV_LIVE = 60 * 1000;
   // notices that only stay in the chat for a minute (the rest stay for good)
-  const chatEvTemp = (m) => m.e === 'swat' || m.e === 'inf' || ((m.e === 'td' || m.e === 'trd') && /^(open|go):/.test(String(m.v || '')));
+  const chatEvTemp = (m) => m.e === 'swat' || m.e === 'inf' || ((m.e === 'td' || m.e === 'trd' || m.e === 'cf') && /^(open|go):/.test(String(m.v || '')));
   function chatRenderAlerts(){
     const el = chatPanel.querySelector('.chat-alerts'); if(!el) return;
     const bell = chatPanel.querySelector('.chat-bell'); if(bell) bell.setAttribute('aria-expanded', String(CHAT.side === 'alerts'));
@@ -23641,7 +23684,7 @@
     const box = el.querySelector('.alert-list');
     for(const m of list.slice(0, 200)){
       const r = document.createElement('div'); r.className = 'alert-r';
-      r.innerHTML = `<span class="alert-em">${m.e === 'inf' ? '🕵️' : m.e === 'td' ? '🏰' : m.e === 'trd' ? '📈' : '💥'}</span><div><b></b> <span class="alert-t"></span><i></i></div>`;
+      r.innerHTML = `<span class="alert-em">${m.e === 'inf' ? '🕵️' : m.e === 'td' ? '🏰' : m.e === 'trd' ? '📈' : m.e === 'cf' ? '🪙' : '💥'}</span><div><b></b> <span class="alert-t"></span><i></i></div>`;
       r.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; r.querySelector('b').style.color = chatColor(m.n);
       r.querySelector('.alert-t').textContent = chatMask(m.m);
       r.querySelector('i').textContent = chatFmtDay(m.t) + ' · ' + chatFmtTime(m.t);
@@ -23875,17 +23918,17 @@
       }
       const day = chatFmtDay(m.t), off = m.a === true;
       if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
-      if(m.e === 'td' || m.e === 'trd'){
-        const v = String(m.v || ''), td = m.e === 'td', inv = /^(open|go):/.test(v);
-        const ev = document.createElement('div'); ev.className = 'chat-gm ' + m.e;
-        ev.innerHTML = `<span class="gm-i" aria-hidden="true">${td ? '🏰' : '📈'}</span><div class="gm-t"><span><b></b> <span class="ev-t"></span></span><i></i></div>`;
+      if(m.e === 'td' || m.e === 'trd' || m.e === 'cf'){
+        const v = String(m.v || ''), td = m.e === 'td', cf = m.e === 'cf', inv = /^(open|go):/.test(v);
+        const ev = document.createElement('div'); ev.className = 'chat-gm ' + (cf ? 'trd cf' : m.e);
+        ev.innerHTML = `<span class="gm-i" aria-hidden="true">${td ? '🏰' : cf ? '🪙' : '📈'}</span><div class="gm-t"><span><b></b> <span class="ev-t"></span></span><i></i></div>`;
         ev.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('b').style.color = chatColor(m.n);
         if(!td && !inv) ev.querySelector('b').remove();      // (market results: whoever posted them doesn't matter)
-        ev.querySelector('.ev-t').textContent = chatMask(m.m) + (v.startsWith('end:') ? ' · ' + chatMask(v.slice(4)) : ''); ev.querySelector('i').textContent = (td ? 'Tower Defense' : 'Trading') + ' · ' + chatFmtTime(m.t);
+        ev.querySelector('.ev-t').textContent = chatMask(m.m) + (v.startsWith('end:') ? ' · ' + chatMask(v.slice(4)) : ''); ev.querySelector('i').textContent = (td ? 'Tower Defense' : cf ? 'Coin Flip' : 'Trading') + ' · ' + chatFmtTime(m.t);
         if(fresh(m._k)) ev.classList.add('in');
         if(inv && !chatIsMe(m.u) && Date.now() + PRES.offset - (m.t || 0) < CHAT_EV_LIVE){
-          const jb = document.createElement('button'); jb.type = 'button'; jb.className = 'chat-join'; jb.textContent = td ? 'Join' : 'Trade';
-          jb.addEventListener('click', () => { jb.blur(); if(td) tdJoinFromChat(v.slice(5)); else trdOpen(); });
+          const jb = document.createElement('button'); jb.type = 'button'; jb.className = 'chat-join'; jb.textContent = td ? 'Join' : cf ? 'Flip' : 'Trade';
+          jb.addEventListener('click', () => { jb.blur(); if(td) tdJoinFromChat(v.slice(5)); else if(cf) cfOpen(); else trdOpen(); });
           ev.appendChild(jb);
         }
         body.appendChild(ev); continue;
@@ -24060,7 +24103,8 @@
       chatPops.querySelectorAll('.chat-pop').forEach(p => p.remove());
       CHAT._scrollDown = true; chatRender();
       if(!SC.loaded && chatName()) scLoad();      // (your points, bubble and bullets, ready before you send anything)
-      if(chatName()) setTimeout(() => inflCheck(), 600);      // (the Great Deflation: your cut, and the announcement once)
+      if(chatName()) setTimeout(() => inflCheck(), 600);
+      if(chatName()) setTimeout(() => mgCheck(), 2500);      // (merged into another account by the admin?)      // (the Great Deflation: your cut, and the announcement once)
       if(chatName() && !CAS.on) chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(!CAS.on){ CAS.seats = d || {}; casBarRender(); } }).catch(() => {});
       const f = chatPanel.querySelector('textarea:not(:disabled)') || chatPanel.querySelector('input[type=text]'); if(f) setTimeout(() => f.focus(), 0);
     } else { chatBtn.focus(); }
@@ -26282,6 +26326,7 @@
     m.innerHTML = `<button type="button" role="menuitem" data-g="slots"><span>🎰</span><b>Slots</b><i>${nS ? nS + ' playing' : ''}</i></button>
       <button type="button" role="menuitem" data-g="bj"><span>🃏</span><b>Blackjack</b><i>${nB ? nB + ' at the table' : ''}</i></button>
       <button type="button" role="menuitem" data-g="td"><span>🏰</span><b>Tower Defense</b><i>solo or team</i></button>
+      <button type="button" role="menuitem" data-g="cf"><span>🪙</span><b>Coin Flip</b><i>heads or tails?</i></button>
       <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r ? TRD_SYM + ' ' + TRD.r.P.toLocaleString() : 'the $SAI market'}</i></button>
       <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
     btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
@@ -26295,6 +26340,7 @@
       else if(b.dataset.g === 'bj'){ if(!BJ.on) bjJoin(); }
       else if(b.dataset.g === 'td') tdOpen();
       else if(b.dataset.g === 'trade') trdOpen();
+      else if(b.dataset.g === 'cf') cfOpen();
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
@@ -26374,8 +26420,8 @@
     const amt = Math.floor(scBal() * frac), q = Math.floor(amt / r.P);
     if(q < 1){ toast(`One share costs ${r.P.toLocaleString()} — you need more points.`, 1800); return; }
     const old = TRD.p[me] && TRD.p[me].r === TRD_ID ? TRD.p[me] : null, cost = q * r.P, n = Date.now().toString(36);
-    const body = old ? { [`trade/p/${me}/sh`]: old.sh + q, [`trade/p/${me}/c`]: (old.c || 0) + cost, [`trade/p/${me}/x/${n}`]: { k: r.k, q } }
-      : { [`trade/p/${me}`]: { r: TRD_ID, sh: q, c: cost, g: 0, x: { [n]: { k: r.k, q } } } };
+    const body = old ? { [`trade/p/${me}/sh`]: old.sh + q, [`trade/p/${me}/c`]: (old.c || 0) + cost, [`trade/p/${me}/x/${n}`]: { k: r.k, q, p: r.P } }
+      : { [`trade/p/${me}`]: { r: TRD_ID, sh: q, c: cost, g: 0, x: { [n]: { k: r.k, q, p: r.P } } } };
     // (only the latest 60 trades are kept)
     if(old && old.x){ const ks = Object.keys(old.x).sort(); for(const k of ks.slice(0, Math.max(0, ks.length - 59))) body[`trade/p/${me}/x/${k}`] = null; }
     body[`scores/${me}/s`] = SC.s + cost; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
@@ -26391,7 +26437,7 @@
     // (the first part of a sale just pays back what the shares cost — that comes off s; only profit adds to your all-time points)
     const rem = Math.min((mp.c || 0) - (mp.g || 0), SC.s), back = rem <= 0 ? 0 : Math.min(rem, got);
     const body = { [`trade/p/${me}/sh`]: mp.sh - q, [`trade/p/${me}/g`]: (mp.g || 0) + got, [`scores/${me}/p`]: SC.p + got - back, [`scores/${me}/s`]: SC.s - back, [`scores/${me}/t`]: { '.sv': 'timestamp' } };
-    if(cur) body[`trade/p/${me}/x/${n}`] = { k: r.k, q: -q };
+    if(cur) body[`trade/p/${me}/x/${n}`] = { k: r.k, q: -q, p: P };
     if(await trdPatch(body)){
       SC.p += got - back; SC.s -= back;
       if(auto) toast(`💸 Your old ${q.toLocaleString()} shares paid out ${got.toLocaleString()} points.`, 3000);
@@ -26413,10 +26459,10 @@
       <div class="trd-tape"><div class="trd-tape-in"></div></div>
       <div class="trd-main">
         <div class="trd-top"><div class="trd-tk"><span class="trd-logo">S</span><div><b class="trd-sym">${TRD_SYM}</b><small>SaiDeck Inc. · ticks every 4 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
-        <div class="trd-chart"><canvas class="trd-cv"></canvas><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
+        <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
         <div class="trd-acts"><span class="trd-l">BUY</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
-          <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button></div>
-        <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT <i>(recent)</i></div><canvas class="trd-cv2"></canvas></div>
+          <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button><span class="trd-prev"></span></div>
+        <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT <i>(recent)</i></div><div class="trd-plw"><canvas class="trd-cv2"></canvas><canvas class="trd-ov2"></canvas><div class="trd-tip" hidden></div></div></div>
           <div class="trd-side"><div class="trd-ph">🏆 BEST TRADERS <i>(all-time)</i></div><ol class="trd-rank"></ol></div></div>
       </div></div>`;
     document.body.appendChild(w); TRD.win = w;
@@ -26427,6 +26473,23 @@
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); trdClose(); } });
     w.querySelectorAll('[data-b]').forEach(b => b.addEventListener('click', () => { b.blur(); trdBuy(+b.dataset.b); }));
     w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { b.blur(); trdSell(+b.dataset.s); }));
+    // what a button would do, before you press it
+    const prev = w.querySelector('.trd-prev');
+    w.querySelectorAll('[data-b],[data-s]').forEach(b => {
+      b.addEventListener('pointerenter', () => {
+        const r = TRD.r; if(!r) return; const mp = trdPos();
+        if(b.dataset.b){ const q = Math.floor(Math.floor((SC.loaded ? scBal() : 0) * +b.dataset.b) / r.P); prev.innerHTML = q ? `≈ <b class="up">${trdK(q)}</b> shares for <b>${trdK(q * r.P)}</b>` : `<span class="down">not enough points</span>`; }
+        else { const q = +b.dataset.s >= 1 ? mp.sh : Math.max(1, Math.floor(mp.sh * +b.dataset.s)); prev.innerHTML = mp.sh ? `sells <b class="down">${trdK(q)}</b> shares for <b>${trdK(q * r.P)}</b>` : ''; }
+      });
+      b.addEventListener('pointerleave', () => { prev.textContent = ''; });
+    });
+    // hovering the charts: a crosshair and what happened there
+    trdHover(w.querySelector('.trd-chart'), w.querySelector('.trd-ov'), 'px');
+    trdHover(w.querySelector('.trd-plw'), w.querySelector('.trd-ov2'), 'pl');
+    // hovering someone in the ranking: their line, dots and buys stand out
+    const rk = w.querySelector('.trd-rank');
+    rk.addEventListener('pointerover', (e) => { const li = e.target.closest('li[data-u]'); const u = li ? li.dataset.u : ''; if(u !== TRD.focus){ TRD.focus = u; TRD.drawKey = ''; trdRender(); } });
+    rk.addEventListener('pointerleave', () => { if(TRD.focus){ TRD.focus = ''; TRD.drawKey = ''; trdRender(); } });
     w.tabIndex = -1; w.focus();
     if(!SC.loaded) scLoad().catch(() => {});
     trdStep(); TRD.poll = setInterval(trdStep, 1000);
@@ -26464,10 +26527,10 @@
     const people = [];
     for(const [u, p] of Object.entries(TRD.p || {})){ if(!p || p.r !== TRD_ID) continue; people.push({ u, n: trdName(u, p), p, pn: trdPnl(p, P) }); }
     people.sort((a, b) => b.pn - a.pn);
-    W.querySelector('.trd-rank').innerHTML = people.length ? people.slice(0, 12).map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><i class="rk">${i === 0 ? '🏆' : i === people.length - 1 && people.length > 2 ? '💀' : i + 1}</i>${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><em>${x.p.sh ? '🎒 ' + trdK(x.p.sh) : ''}</em><span class="${x.pn >= 0 ? 'up' : 'down'}">${trdSg(x.pn)}</span></li>`).join('') : '<li class="td-dim">Nobody has traded yet. Be the first 👀</li>';
+    W.querySelector('.trd-rank').innerHTML = people.length ? people.slice(0, 12).map((x, i) => `<li data-u="${escapeHtml(x.u)}" class="${x.u === me ? 'me' : ''}${TRD.focus === x.u ? ' focus' : ''}"><i class="rk">${i === 0 ? '🏆' : i === people.length - 1 && people.length > 2 ? '💀' : i + 1}</i>${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><em>${x.p.sh ? '🎒 ' + trdK(x.p.sh) : ''}</em><span class="${x.pn >= 0 ? 'up' : 'down'}">${trdSg(x.pn)}</span></li>`).join('') : '<li class="td-dim">Nobody has traded yet. Be the first 👀</li>';
     // the ticker tape: the latest trades
     const byK = {}; for(const h of H) byK[h.k] = h.P;
-    const trades = []; for(const x of people) for(const t of Object.values(x.p.x || {})) if(t && isFinite(t.k)) trades.push({ n: x.n, u: x.u, k: t.k, q: t.q, P: byK[t.k] });
+    const trades = []; for(const x of people) for(const t of Object.values(x.p.x || {})) if(t && isFinite(t.k)) trades.push({ n: x.n, u: x.u, k: t.k, q: t.q, P: t.p || byK[t.k] });
     trades.sort((a, b) => b.k - a.k);
     const tapeKey = trades.slice(0, 14).map(t => t.k + t.n + t.q).join();
     if(TRD.tapeKey !== tapeKey){
@@ -26476,12 +26539,42 @@
       W.querySelector('.trd-tape-in').innerHTML = items + items;
     }
     // the charts: only redrawn when something changed
-    const key = r.k + '|' + tapeKey + '|' + people.map(x => x.u + x.p.sh).join();
-    if(key !== TRD.drawKey){ TRD.drawKey = key; trdDraw(W.querySelector('.trd-cv'), H, trades); trdDrawPL(W.querySelector('.trd-cv2'), H, people, byK); }
+    const key = r.k + '|' + tapeKey + '|' + people.map(x => x.u + x.p.sh).join() + '|' + (TRD.focus || '');
+    if(key !== TRD.drawKey){ TRD.drawKey = key; trdDraw(W.querySelector('.trd-cv'), H, trades, trdEntries(TRD.focus || me, byK)); trdDrawPL(W.querySelector('.trd-cv2'), H, people, byK); }
+  }
+  // where someone's shares were bought: each buy still in the bag, and the average (worked out oldest trade first)
+  function trdEntries(u, byK){
+    const p = TRD.p[u]; if(!p || p.r !== TRD_ID || !(p.sh > 0)) return { u, buys: [], avg: 0 };
+    const xs = Object.values(p.x || {}).filter(t => t && isFinite(t.k) && (t.p || byK[t.k])).sort((a, b) => a.k - b.k);
+    let sh = 0, cost = 0; const lots = [];
+    for(const t of xs){ const P = t.p || byK[t.k]; if(t.q > 0){ sh += t.q; cost += t.q * P; lots.push({ k: t.k, q: t.q, P }); } else { const sold = Math.min(sh, -t.q); if(sh > 0) cost *= (sh - sold) / sh; sh -= sold; let left = sold; while(left > 0 && lots.length){ const l = lots[0]; const d = Math.min(l.q, left); l.q -= d; left -= d; if(!l.q) lots.shift(); } } }
+    // (logs only keep the latest trades: if they don't add up to the bag, only the lines we know about are shown)
+    const avg = sh > 0 && Math.abs(sh - p.sh) <= p.sh * 0.02 ? cost / sh : 0;
+    return { u, buys: lots.slice(-6), avg, name: trdName(u) };
+  }
+  // a crosshair over a chart; the chart's drawing leaves its layout in TRD.lay[kind]
+  function trdHover(box, ov, kind){
+    const tip = box.querySelector('.trd-tip');
+    const clear = () => { const c = ov.getContext('2d'); c.clearRect(0, 0, ov.width, ov.height); tip.hidden = true; };
+    box.addEventListener('pointerleave', clear);
+    box.addEventListener('pointermove', (e) => {
+      const L = TRD.lay && TRD.lay[kind]; if(!L) return;
+      const b = ov.getBoundingClientRect(), dpr = L.dpr; if(ov.width !== L.W || ov.height !== L.H){ ov.width = L.W; ov.height = L.H; }
+      const mx = (e.clientX - b.left) * dpr, my = (e.clientY - b.top) * dpr, x = ov.getContext('2d'); x.clearRect(0, 0, ov.width, ov.height);
+      if(mx < L.left || mx > L.right){ tip.hidden = true; return; }
+      const hit = L.at(mx); if(!hit){ tip.hidden = true; return; }
+      x.strokeStyle = 'rgba(255,255,255,.35)'; x.lineWidth = dpr; x.setLineDash([3 * dpr, 3 * dpr]);
+      x.beginPath(); x.moveTo(hit.x, 0); x.lineTo(hit.x, L.H); x.stroke();
+      if(kind === 'px'){ x.beginPath(); x.moveTo(L.left, my); x.lineTo(L.right, my); x.stroke(); x.setLineDash([]); const v = L.val(my); x.fillStyle = 'rgba(255,255,255,.9)'; x.fillRect(L.right + 2 * dpr, my - 9 * dpr, L.W - L.right - 4 * dpr, 18 * dpr); x.fillStyle = '#111'; x.font = `800 ${Math.round(11 * dpr)}px Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(Math.round(v).toLocaleString(), (L.right + L.W) / 2, my); }
+      else { x.setLineDash([]); for(const d of hit.dots){ x.fillStyle = d.c; x.beginPath(); x.arc(hit.x, d.y, 4.5 * dpr, 0, 7); x.fill(); } }
+      tip.innerHTML = hit.html; tip.hidden = false;
+      const tx = e.clientX - box.getBoundingClientRect().left, bw = box.clientWidth;
+      tip.style.left = Math.min(bw - tip.offsetWidth - 6, Math.max(6, tx + 14)) + 'px'; tip.style.top = '8px';
+    });
   }
   function trdCanvas(cv){ const b = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1); const W = Math.max(200, Math.round(b.width * dpr)), H = Math.max(80, Math.round(b.height * dpr)); if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; } const x = cv.getContext('2d'); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, W, H); return { x, W, H, dpr }; }
   // candles (5 ticks = 20 s each), volume, everyone's trades, the naps
-  function trdDraw(cv, H, trades){
+  function trdDraw(cv, H, trades, ent){
     const { x, W, H: Hh, dpr } = trdCanvas(cv); if(!H.length) return;
     const pad = 8 * dpr, right = 58 * dpr, volH = 34 * dpr, top = 10 * dpr, bot = Hh - volH - 6 * dpr;
     // (the chart fits what there is: at least 60 ticks wide, at most the last 240)
@@ -26506,8 +26599,33 @@
       x.fillRect(cx - bw / 2, y1, bw, Math.max(1.5 * dpr, y2 - y1)); x.shadowBlur = 0;
       if(c.v){ x.globalAlpha = .35; x.fillRect(cx - bw / 2, Hh - (volH - 4 * dpr) * c.v / vmax, bw, (volH - 4 * dpr) * c.v / vmax); x.globalAlpha = 1; }
     });
+    // striped lines where the shares in the bag were bought (yours, or whoever you're hovering in the ranking), and their average
+    if(ent && ent.buys.length){
+      const mine = ent.u === chatUid(), col = mine ? '#35d07e' : chatColor(ent.name);
+      x.save(); x.lineWidth = 1.2 * dpr; x.font = `700 ${Math.round(10 * dpr)}px Inter, sans-serif`; x.textBaseline = 'bottom'; x.textAlign = 'left';
+      for(const l of ent.buys){ if(l.P < lo || l.P > hi) continue; const y = Y(l.P); x.strokeStyle = col; x.globalAlpha = .55; x.setLineDash([7 * dpr, 5 * dpr]); x.beginPath(); x.moveTo(pad, y); x.lineTo(W - right, y); x.stroke(); x.globalAlpha = .85; x.fillStyle = col; x.fillText(`▲ ${trdK(l.q)} @ ${l.P.toLocaleString()}`, pad + 4 * dpr, y - 2 * dpr); }
+      if(ent.avg && ent.avg >= lo && ent.avg <= hi){
+        const y = Y(ent.avg), now = H[H.length - 1].P, d = (now / ent.avg - 1) * 100;
+        // (a striped band, so your break-even price is easy to see)
+        x.globalAlpha = .14; x.fillStyle = '#f5c04a'; for(let sx = pad; sx < W - right; sx += 14 * dpr){ x.beginPath(); x.moveTo(sx, y - 4 * dpr); x.lineTo(sx + 7 * dpr, y - 4 * dpr); x.lineTo(sx + 3 * dpr, y + 4 * dpr); x.lineTo(sx - 4 * dpr, y + 4 * dpr); x.closePath(); x.fill(); }
+        x.globalAlpha = 1; x.strokeStyle = '#f5c04a'; x.lineWidth = 1.6 * dpr; x.setLineDash([10 * dpr, 6 * dpr]); x.beginPath(); x.moveTo(pad, y); x.lineTo(W - right, y); x.stroke();
+        x.setLineDash([]); x.fillStyle = '#f5c04a'; x.font = `800 ${Math.round(10.5 * dpr)}px Inter, sans-serif`; x.textAlign = 'right';
+        x.fillText(`${mine ? 'YOUR' : (ent.name || '').toUpperCase().slice(0, 10) + "'S"} AVG ${Math.round(ent.avg).toLocaleString()} · ${d >= 0 ? '+' : ''}${d.toFixed(1)}%`, W - right - 6 * dpr, y - 5 * dpr);
+      }
+      x.restore();
+    }
     // everyone's trades: a dot in their colour (▲ under for buys, ▼ over for sells)
-    for(const t of trades){ const i = Math.floor((t.k - kStart) / C); if(!cs[i] || !t.P) continue; const cx = X(i), cy = Y(t.P) + (t.q > 0 ? 9 : -9) * dpr; x.fillStyle = chatColor(t.n); x.beginPath(); x.arc(cx, cy, 4.5 * dpr, 0, 7); x.fill(); x.strokeStyle = 'rgba(0,0,0,.6)'; x.lineWidth = dpr; x.stroke(); }
+    for(const t of trades){ const i = Math.floor((t.k - kStart) / C); if(!cs[i] || !t.P) continue; const cx = X(i), cy = Y(t.P) + (t.q > 0 ? 9 : -9) * dpr; x.globalAlpha = TRD.focus && TRD.focus !== t.u ? .2 : 1; x.fillStyle = chatColor(t.n); x.beginPath(); x.arc(cx, cy, (TRD.focus === t.u ? 6 : 4.5) * dpr, 0, 7); x.fill(); x.strokeStyle = 'rgba(0,0,0,.6)'; x.lineWidth = dpr; x.stroke(); }
+    x.globalAlpha = 1;
+    // (for hovering)
+    const kOf = (i) => kStart + i * C;
+    TRD.lay = TRD.lay || {};
+    TRD.lay.px = { W, H: Hh, dpr, left: pad, right: W - right, val: (y) => hi - (y - top) / (bot - top) * (hi - lo), at: (mx) => {
+      const i = Math.max(0, Math.min(nC - 1, Math.floor((mx - pad) / cw))), c = cs[i]; if(!c) return null;
+      const tr = trades.filter(t => Math.floor((t.k - kStart) / C) === i);
+      const ch = (c.c / c.o - 1) * 100, ago = Math.max(0, Math.round((kEnd - kOf(i)) * 4 / 60));
+      return { x: X(i), html: `<b>${ago ? ago + ' min ago' : 'now'}</b><div class="tg">O ${c.o.toLocaleString()} · H ${c.hi.toLocaleString()} · L ${c.lo.toLocaleString()} · C <b class="${ch >= 0 ? 'up' : 'down'}">${c.c.toLocaleString()} (${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%)</b></div>` + (tr.length ? tr.slice(0, 6).map(t => `<div><b style="color:${chatColor(t.n)}">${escapeHtml(t.n)}</b> ${t.q > 0 ? '<span class="up">bought</span>' : '<span class="down">sold</span>'} ${trdK(Math.abs(t.q))}${t.P ? ' @ ' + t.P.toLocaleString() : ''}</div>`).join('') : '') + (c.gap ? '<div class="tg">💤 the market napped here</div>' : '') };
+    } };
     // the price now
     const P = H[H.length - 1].P, ly = Y(P), lc = P >= H[0].P ? '#35d07e' : '#ff4d6a';
     x.setLineDash([2 * dpr, 3 * dpr]); x.strokeStyle = lc; x.beginPath(); x.moveTo(pad, ly); x.lineTo(W - right, ly); x.stroke(); x.setLineDash([]);
@@ -26532,12 +26650,167 @@
     x.strokeStyle = 'rgba(255,255,255,.22)'; x.setLineDash([4 * dpr, 4 * dpr]); x.beginPath(); x.moveTo(pad, Y(0)); x.lineTo(W - right, Y(0)); x.stroke(); x.setLineDash([]);
     const used = [];
     for(const l of lines){
-      const c = chatColor(l.n); x.strokeStyle = c; x.lineWidth = (l.u === chatUid() ? 3 : 1.8) * dpr; x.beginPath();
+      const c = chatColor(l.n); x.strokeStyle = c; x.lineWidth = (l.u === chatUid() || l.u === TRD.focus ? 3 : 1.8) * dpr; x.globalAlpha = TRD.focus && TRD.focus !== l.u ? .2 : 1; x.beginPath();
       H.forEach((h, j) => { const px = X(h.k), py = Y(l.line[j]); j ? x.lineTo(px, py) : x.moveTo(px, py); }); x.stroke();
-      let ly = Y(l.line[l.line.length - 1]); for(let t = 0; t < 20 && used.some(u => Math.abs(u - ly) < 13 * dpr); t++) ly += 13 * dpr; used.push(ly);
+      let ly = Math.min(Hh - 8 * dpr, Math.max(8 * dpr, Y(l.line[l.line.length - 1]))); const dir = ly > Hh / 2 ? -1 : 1; for(let t = 0; t < 20 && used.some(u => Math.abs(u - ly) < 13 * dpr); t++) ly += dir * 13 * dpr; used.push(ly);
       x.fillStyle = c; x.font = `800 ${Math.round(11 * dpr)}px Inter, sans-serif`; x.textAlign = 'left'; x.textBaseline = 'middle';
       x.fillText(`${l.n.slice(0, 9)} ${trdSg(l.line[l.line.length - 1])}`, W - right + 6 * dpr, ly);
     }
+    x.globalAlpha = 1;
+    TRD.lay = TRD.lay || {};
+    TRD.lay.pl = { W, H: Hh, dpr, left: pad, right: W - right, at: (mx) => {
+      const k = Math.round(kStart + (mx - pad) / (W - pad - right) * (span - 1)); let j = H.findIndex(h => h.k >= k); if(j < 0) j = H.length - 1;
+      const rows = lines.map(l => ({ n: l.n, v: l.line[j], c: chatColor(l.n) })).sort((a, b) => b.v - a.v);
+      return { x: X(H[j].k), dots: rows.map(r => ({ c: r.c, y: Y(r.v) })), html: `<b>${H[j].P.toLocaleString()}</b> <span class="tg">price then</span>` + rows.slice(0, 8).map(r => `<div><b style="color:${r.c}">${escapeHtml(r.n)}</b> <span class="${r.v >= 0 ? 'up' : 'down'}">${trdSg(r.v)}</span></div>`).join('') };
+    } };
+  }
+  // ----- Coin Flip: one table for everyone, a bot flips. 12 s to bet heads or tails, the flip, 5 s to see it, next round.
+  // The coin is the server's time at the flip (nobody can pick it): heads if (f - f % 7) / 7 is even, tails if odd, and 1 in
+  // 61 lands on its EDGE (the bot wins). A win pays 1 to 1. Rounds only move while someone has the table open. -----
+  const CF = { on: false, win: null, r: null, b: {}, busy: false, poll: 0, shownF: 0, hist: [], side: 'h', frac: .05, said: '' };
+  const CF_BET = 12000, CF_SHOW = 5000;
+  const cfRes = (f) => { const q = (f - f % 7) / 7; return q % 61 === 0 ? 'e' : q % 2 === 0 ? 'h' : 't'; };
+  const CF_NAME = { h: 'HEADS', t: 'TAILS', e: 'EDGE' };
+  const CF_BOT = { open: ['Place your bets! 🪙', 'Heads or tails, bestie?', 'Feeling lucky? 👀', 'Bet it all, coward 😤', 'The coin is hungry'],
+    shut: ['No more bets! 🛑', 'Bets are locked 🔒', 'Here we go…'], win: ['ok fine, take it 😒', 'lucky… for now', 'FAHHH you got me'], lose: ['cooked 💀', 'bruh 😂', 'thanks for the points lmao', 'flat broke speedrun'],
+    edge: ['IT LANDED ON ITS EDGE 😱 house wins!', 'EDGE?! sksksk everyone lost'], none: ['Nobody bet… boring 😴'] };
+  const cfPick = (a) => a[Math.floor(Math.random() * a.length)];
+  async function cfGet(){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/coin.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('get ' + r.status); return (await r.json()) || {}; }
+  async function cfStep(){
+    if(CF.busy || !chatName()) return; CF.busy = true;
+    try{
+      const d = await cfGet(); CF.r = d.r || null; CF.b = d.b || {};
+      const r = CF.r, now = trdNow(), me = chatUid();
+      if(!r){ await trdPatch({ 'coin/r': { n: 1, t0: { '.sv': 'timestamp' } } }); }
+      else if(!r.f && now >= r.t0 + CF_BET){ if(await trdPatch({ 'coin/r/f': { '.sv': 'timestamp' } })){ const d2 = await cfGet(); CF.r = d2.r || CF.r; CF.b = d2.b || CF.b; } }
+      else if(r.f && now >= r.f + CF_SHOW){ await trdPatch({ 'coin/r': { n: r.n + 1, t0: { '.sv': 'timestamp' }, pn: r.n, pf: r.f } }); }
+      // your bet: settle it once its coin has landed (after the flip has been shown)
+      const mb = CF.b[me], R = CF.r;
+      if(mb && mb.c === false && R){
+        const F = mb.n === R.n ? R.f : mb.n === R.pn ? R.pf : null;
+        if(F && now >= F + 1900){
+          if(!SC.loaded) await scLoad();
+          const won = cfRes(F) === mb.s;
+          const body = won ? { [`coin/b/${me}/c`]: true, [`scores/${me}/p`]: SC.p + mb.a, [`scores/${me}/s`]: SC.s - mb.a, [`scores/${me}/t`]: { '.sv': 'timestamp' } } : { [`coin/b/${me}/c`]: true };
+          if(await trdPatch(body)){ mb.c = true; if(won){ SC.p += mb.a; SC.s -= mb.a; if(mb.a >= 100000) trdNote2(`won ${trdK(mb.a)} on ${CF_NAME[mb.s]} 🪙`); } }
+          else if(mb.n !== R.n && mb.n !== R.pn){ /* too old to check now */ }
+        }
+      }
+    }catch(e){}
+    CF.busy = false;
+    if(CF.on) cfRender();
+  }
+  function trdNote2(txt){ const n = Date.now(); if(n - (CF.noteAt || 0) < 60000) return; CF.noteAt = n; chatNotice('cf', 'go:cf', txt); }
+  async function cfBet(){
+    const r = CF.r, me = chatUid(), now = trdNow();
+    if(!r || r.f || now >= r.t0 + CF_BET){ toast('Betting is closed — next round in a moment.', 1600); return; }
+    const mb = CF.b[me]; if(mb && mb.n === r.n){ toast('You already bet this round.', 1500); return; }
+    if(!SC.loaded) await scLoad();
+    const a = Math.floor(scBal() * CF.frac); if(a < 1){ toast("You're out of points 😭", 1600); return; }
+    const body = { [`coin/b/${me}`]: { n: r.n, s: CF.side, a, c: false }, [`scores/${me}/s`]: SC.s + a, [`scores/${me}/t`]: { '.sv': 'timestamp' }, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone' };
+    if(await trdPatch(body)){ SC.s += a; CF.b[me] = { n: r.n, s: CF.side, a, c: false }; try{ sfxChip(); }catch(e){} cfRender(); }
+    else { toast("Couldn't bet — try again.", 1600); await scLoad(); }
+  }
+  function cfOpen(){
+    if(!chatName()){ toast('Set your chat name first.', 2000); return; }
+    if(CF.on) return; CF.on = true; CF.shownF = 0; CF.said = '';
+    const w = document.createElement('div'); w.className = 'td-win cf-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Coin Flip');
+    w.innerHTML = `<div class="td-back"></div><div class="td-box cf-box">
+      <div class="td-head"><b>🪙 Coin Flip</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="cf-round"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
+      <div class="cf-table">
+        <div class="cf-zone h" data-side="h"><div class="cf-zh">👑 HEADS<b class="cf-tot"></b></div><div class="cf-bets"></div></div>
+        <div class="cf-mid">
+          <div class="cf-bot"><span class="cf-robo">🤖</span><div class="cf-say"></div></div>
+          <div class="cf-stage"><div class="cf-coin"><div class="cf-face h">👑</div><div class="cf-face t">🦅</div></div><div class="cf-shadow"></div></div>
+          <div class="cf-res"></div>
+          <div class="cf-timer"><i></i></div>
+        </div>
+        <div class="cf-zone t" data-side="t"><div class="cf-zh">🦅 TAILS<b class="cf-tot"></b></div><div class="cf-bets"></div></div>
+      </div>
+      <div class="cf-hist"></div>
+      <div class="cf-ctl">
+        <div class="cf-sides"><button type="button" class="cf-side h" data-s="h">👑 HEADS</button><button type="button" class="cf-side t" data-s="t">🦅 TAILS</button></div>
+        <div class="cf-chips">${[[.01, '1%'], [.05, '5%'], [.1, '10%'], [.25, '25%'], [.5, '50%'], [1, 'ALL IN']].map(([f, l]) => `<button type="button" class="cf-chip${f === 1 ? ' all' : ''}" data-f="${f}"><span>${l}</span></button>`).join('')}</div>
+        <button type="button" class="cf-go">BET <span></span></button>
+        <div class="cf-me"></div>
+      </div></div>`;
+    document.body.appendChild(w); CF.win = w;
+    const fit = () => { if(!CF.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v) w.style.right = v; };
+    fit(); CF.fit = setInterval(fit, 400); window.addEventListener('resize', fit); CF.fitOff = () => { clearInterval(CF.fit); window.removeEventListener('resize', fit); };
+    w.querySelector('.td-x').addEventListener('click', cfClose); w.querySelector('.td-back').addEventListener('click', cfClose);
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); cfClose(); } });
+    w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { CF.side = b.dataset.s; cfRender(); }));
+    w.querySelectorAll('.cf-zone').forEach(z => z.addEventListener('click', () => { CF.side = z.dataset.side; cfRender(); }));
+    w.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { CF.frac = +b.dataset.f; cfRender(); }));
+    w.querySelector('.cf-go').addEventListener('click', (e) => { e.currentTarget.blur(); cfBet(); });
+    w.tabIndex = -1; w.focus();
+    if(!SC.loaded) scLoad().catch(() => {});
+    cfStep(); CF.poll = setInterval(cfStep, 700);
+    const tick = () => { if(!CF.on) return; cfTimer(); CF.raf = requestAnimationFrame(tick); }; tick();
+  }
+  function cfClose(){ if(!CF.on) return; CF.on = false; clearInterval(CF.poll); cancelAnimationFrame(CF.raf); if(CF.fitOff) CF.fitOff(); if(CF.win){ CF.win.remove(); CF.win = null; } }
+  // the betting clock (a bar that runs down)
+  function cfTimer(){
+    const W = CF.win, r = CF.r; if(!W || !r) return;
+    const left = r.f ? 0 : Math.max(0, r.t0 + CF_BET - trdNow()), bar = W.querySelector('.cf-timer i');
+    bar.style.transform = `scaleX(${left / CF_BET})`; bar.parentElement.classList.toggle('hurry', left > 0 && left < 3500);
+    const go = W.querySelector('.cf-go span'); const t = left > 0 ? Math.ceil(left / 1000) + 's' : ''; if(go.textContent !== t) go.textContent = t;
+  }
+  function cfSay(t){ const W = CF.win; if(!W || CF.said === t) return; CF.said = t; const el = W.querySelector('.cf-say'); el.textContent = t; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  function cfRender(){
+    const W = CF.win, r = CF.r; if(!W || !r) return;
+    const me = chatUid(), now = trdNow();
+    W.querySelector('.cf-round').textContent = `Round ${r.n.toLocaleString()}`;
+    const paused = !r.f && now > r.t0 + CF_BET + 8000; W.querySelector('.trd-live').classList.toggle('off', paused); W.querySelector('.trd-live span').textContent = paused ? 'WAKING UP' : 'LIVE';
+    // this round's bets, on their side of the table
+    const bets = Object.entries(CF.b || {}).filter(([u, x]) => x && x.n === r.n).map(([u, x]) => ({ u, n: trdName(u), s: x.s, a: x.a }));
+    for(const sd of ['h', 't']){
+      const z = W.querySelector(`.cf-zone.${sd}`), L = bets.filter(x => x.s === sd).sort((a, b) => b.a - a.a), tot = L.reduce((t, x) => t + x.a, 0);
+      z.querySelector('.cf-tot').textContent = tot ? ' · ' + trdK(tot) : '';
+      const key = L.map(x => x.u + x.a).join();
+      if(z.dataset.k !== key){ z.dataset.k = key; z.querySelector('.cf-bets').innerHTML = L.map(x => `<div class="cf-bet${x.u === me ? ' me' : ''}">${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><span>🪙 ${trdK(x.a)}</span></div>`).join('') || '<div class="cf-empty">no bets yet</div>'; }
+      z.classList.toggle('pick', CF.side === sd);
+      const res = r.f ? cfRes(r.f) : ''; z.classList.toggle('won', !!r.f && now >= r.f + 1700 && res === sd); z.classList.toggle('lost', !!r.f && now >= r.f + 1700 && res !== sd);
+    }
+    // the flip
+    const coin = W.querySelector('.cf-coin'), resEl = W.querySelector('.cf-res');
+    if(r.f && CF.shownF !== r.f){
+      CF.shownF = r.f; const res = cfRes(r.f), fresh = now - r.f < 2500;
+      const end = res === 'h' ? 0 : res === 't' ? 180 : 90;
+      coin.getAnimations().forEach(a => a.cancel());
+      if(fresh){
+        try{ sfxReels([700, 900, 1100], .5); }catch(e){}
+        coin.animate([{ transform: 'translateY(0) rotateX(0deg)' }, { transform: `translateY(-90px) rotateX(${1800 + end / 2}deg)`, offset: .5 }, { transform: `translateY(0) rotateX(${3600 + end}deg)` }], { duration: 1700, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'forwards' });
+        W.querySelector('.cf-shadow').animate([{ transform: 'scale(1)', opacity: .5 }, { transform: 'scale(.5)', opacity: .2, offset: .5 }, { transform: 'scale(1)', opacity: .5 }], { duration: 1700 });
+        resEl.textContent = ''; cfSay(cfPick(CF_BOT.shut));
+        setTimeout(() => cfReveal(res, r), 1750);
+      } else { coin.style.transform = `rotateX(${end}deg)`; cfReveal(res, r, true); }
+    } else if(!r.f){
+      if(CF.shownF){ CF.shownF = 0; coin.getAnimations().forEach(a => a.cancel()); coin.style.transform = ''; resEl.textContent = ''; resEl.className = 'cf-res'; }
+      if(CF.openN !== r.n){ CF.openN = r.n; cfSay(cfPick(CF_BOT.open)); }
+    }
+    // history
+    const hEl = W.querySelector('.cf-hist'), hk = CF.hist.map(x => x.n + x.r).join();
+    if(hEl.dataset.k !== hk){ hEl.dataset.k = hk; hEl.innerHTML = '<span class="cf-hl">LAST FLIPS</span>' + CF.hist.slice(-24).map(x => `<i class="${x.r}" title="Round ${x.n}: ${CF_NAME[x.r]}">${x.r === 'h' ? 'H' : x.r === 't' ? 'T' : 'E'}</i>`).join(''); }
+    // controls
+    W.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === CF.side));
+    W.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', +b.dataset.f === CF.frac));
+    const mb = CF.b[me], betNow = mb && mb.n === r.n, open = !r.f && now < r.t0 + CF_BET, amt = SC.loaded ? Math.floor(scBal() * CF.frac) : 0;
+    const go = W.querySelector('.cf-go'); go.disabled = !open || betNow || amt < 1; go.classList.toggle('t', CF.side === 't');
+    go.firstChild.textContent = betNow ? 'BET PLACED ' : `BET ${trdK(amt)} ON ${CF_NAME[CF.side]} `;
+    W.querySelector('.cf-me').innerHTML = `🪙 <b>${SC.loaded ? trdK(scBal()) : '…'}</b> points` + (betNow ? ` · your bet: <b>${trdK(mb.a)}</b> on <b>${CF_NAME[mb.s]}</b>` : '');
+  }
+  function cfReveal(res, r, quiet){
+    const W = CF.win; if(!W) return;
+    if(!CF.hist.length || CF.hist[CF.hist.length - 1].n !== r.n){ CF.hist.push({ n: r.n, r: res }); if(CF.hist.length > 40) CF.hist.shift(); }
+    const el = W.querySelector('.cf-res'); el.className = 'cf-res ' + res; el.textContent = res === 'e' ? '😱 ON ITS EDGE!' : CF_NAME[res] + '!';
+    const me = chatUid(), mb = CF.b[me], mine = mb && mb.n === r.n;
+    const bets = Object.values(CF.b || {}).filter(x => x && x.n === r.n);
+    if(!quiet){
+      if(res === 'e') cfSay(cfPick(CF_BOT.edge)); else if(!bets.length) cfSay(cfPick(CF_BOT.none)); else cfSay(bets.some(x => x.s === res) ? cfPick(CF_BOT.win) : cfPick(CF_BOT.lose));
+      if(mine){ if(mb.s === res){ toast(`🪙 ${CF_NAME[res]}! You won ${mb.a.toLocaleString()} points!`, 2600); try{ sfxTdWin(); }catch(e){} el.animate([{ transform: 'scale(.4)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 500 }); } else { try{ sfxTdTwist(); }catch(e){} } }
+    }
+    cfRender();
   }
   // ----- Tower Defense: the battle (the same on every computer) -----
   // A wave is worked out step by step (30 steps a second) from the wave number, the troops on the map and the
@@ -28857,6 +29130,17 @@
     });
   }
   // this device's account goes into another one: send what it can spend, mark it merged, switch to the other account
+  // the admin merged this account into another one: say so (once), and offer to link this device to it
+  async function mgCheck(){
+    try{
+      const me = chatUid(); if(!me) return;
+      const r = await fetch(`${CHAT_DB}/scores/${encodeURIComponent(me)}.json`, { cache: 'no-store' }); const v = r.ok ? await r.json() : null;
+      if(!v || typeof v.mg !== 'string' || chatLS('mgSeen') === v.mg) return;
+      chatLS('mgSeen', v.mg);
+      const m = await fetch(`${CHAT_DB}/scores/${encodeURIComponent(v.mg)}/n.json`, { cache: 'no-store' }); const mn = (m.ok ? await m.json() : '') || 'your main account';
+      if(await lyrConfirm('🔗 Your accounts were merged', `An admin moved this account's points and items into ${mn}.\n\nLink this device to ${mn} to keep playing as them — on ${mn}'s device open ⚙️ › Link devices to get a code, then type it in here (keep ${mn}).`, 'Link this device')) lkOpen();
+    }catch(e){}
+  }
   async function lkMergeInto(mainUid, mainRt, mainName, dropCode){
     if(!mainUid || !mainRt) throw new Error('no main account');
     await scLoad();
@@ -29961,7 +30245,7 @@
       h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
         <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
         <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
-        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button><button type="button" class="arc-cas-join trd" data-trd-join>📈 Trading</button></div>
+        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button><button type="button" class="arc-cas-join trd" data-trd-join>📈 Trading</button><button type="button" class="arc-cas-join cf" data-cf-join>🪙 Coin Flip</button></div>
         <p class="chat-side-p">Blackjack: one table for everyone, with a bot dealer — or take the dealer's seat yourself. Blackjack pays 3 to 2, a win 2 to 1.</p></div>`;
       if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {
