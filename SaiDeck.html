@@ -252,6 +252,25 @@
   .gp-row{display:flex;gap:6px;align-items:center;} .gp-row > *{flex:none !important;}
   .gp-row input{width:80px;padding:7px 6px;border-radius:8px;border:1px solid rgba(125,255,178,.45);background:#14151c;color:#7dffb2;font:800 14px 'Inter',sans-serif;text-align:center;}
   .arc-cas-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  /* the casino map */
+  .cas-title{font:900 16px 'Manrope',sans-serif;}
+  .cas-map{position:relative;width:100%;height:400px;margin:8px 0 4px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
+    background:radial-gradient(circle at 50% 58%,rgba(255,215,106,.10),transparent 35%),repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 14px),repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 14px),radial-gradient(circle at 50% 40%,#3a1430,#1a0b1a 75%);}
+  .cas-paths{position:absolute;inset:0;width:100%;height:100%;} .cas-paths line{stroke:rgba(255,215,106,.28);stroke-width:.8;stroke-dasharray:2 2;vector-effect:non-scaling-stroke;}
+  .cas-lobby{position:absolute;left:50%;top:67%;z-index:1;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#2b5d7a,#173246);border:2px solid rgba(140,220,255,.4);box-shadow:0 0 22px rgba(90,200,255,.25);}
+  .cas-lobby span{font-size:22px;line-height:1;} .cas-lobby i{font:800 8px 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-style:normal;color:#bfe6ff;}
+  .cas-room{all:unset;box-sizing:border-box;position:absolute;z-index:2;cursor:pointer;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto 1fr;column-gap:7px;padding:8px 9px;border-radius:14px;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--c) 22%,#15121c),#120f18);border:1.5px solid color-mix(in srgb,var(--c) 45%,transparent);box-shadow:0 6px 16px rgba(0,0,0,.4);transition:transform .15s, box-shadow .2s;}
+  .cas-room:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.5),0 0 18px color-mix(in srgb,var(--c) 40%,transparent);} .cas-room:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  .cas-room.busy{animation:casGlow 2.4s ease-in-out infinite;} @keyframes casGlow{50%{box-shadow:0 6px 16px rgba(0,0,0,.4),0 0 22px color-mix(in srgb,var(--c) 55%,transparent);}}
+  .cas-room.mine{border-color:#fff;}
+  .cr-em{grid-row:1 / 3;font-size:26px;line-height:1;align-self:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+  .cr-t{display:flex;flex-direction:column;min-width:0;} .cr-t b{font:900 13px 'Manrope',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;} .cr-t i{font:600 9.5px 'Inter',sans-serif;font-style:normal;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cr-n{grid-column:2;font:800 9.5px 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 80%,#fff);} .cas-room:not(.busy) .cr-n{color:var(--text-faint);}
+  .cr-faces{grid-column:1 / -1;display:flex;align-items:flex-end;padding-left:4px;margin-top:4px;}
+  .cr-f{margin-left:-5px;border-radius:50%;box-shadow:0 0 0 2px #120f18;animation:chatPopIn .3s ease-out both;} .cr-f .td-face{width:24px;height:24px;font-size:10px;}
+  .cr-more{margin-left:3px;font:800 10px 'Inter',sans-serif;color:var(--text-dim);}
+  .cas-fine{font-size:10.5px !important;opacity:.75;}
   .arc-cas-join.bj{background:linear-gradient(135deg,#7dffb2,#2fb37a);color:#06200f;box-shadow:0 6px 18px rgba(60,200,120,.3);}
   .cas-sw{all:unset;flex:none;cursor:pointer;margin-left:auto;padding:7px 12px;border-radius:999px;font:700 12px 'Inter',sans-serif;color:#ffe08a;border:1px solid rgba(245,208,74,.5);background:rgba(245,208,74,.08);}
   .cas-sw:hover{background:rgba(245,208,74,.18);} .cas-sw:focus-visible{outline:2px solid #fff;}
@@ -834,6 +853,7 @@
   .trd-ev.up{background:rgba(53,208,126,.2);color:#6ff5a9;text-shadow:0 0 18px #35d07e;} .trd-ev.down{background:rgba(255,77,106,.2);color:#ff8095;text-shadow:0 0 18px #ff4d6a;} .trd-ev[hidden],.trd-paused[hidden]{display:none;}
   .trd-paused{position:absolute;left:50%;top:12px;transform:translateX(-50%);font:700 12px 'Inter',sans-serif;color:#f5c04a;background:rgba(245,192,74,.12);padding:5px 12px;border-radius:999px;}
   @keyframes trdEv{from{transform:translate(-50%,-50%) scale(.3);opacity:0;}}
+  .trd-chart.shake{animation:trdShake .45s ease-out;} @keyframes trdShake{20%{transform:translateX(-6px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(2px);}}
   .trd-pop{position:absolute;right:70px;top:30%;font:900 24px 'Manrope',sans-serif;animation:trdPop 1.2s ease-out both;pointer-events:none;} .trd-pop.buy{color:#35d07e;} .trd-pop.sell{color:#ff4d6a;}
   @keyframes trdPop{to{transform:translateY(-60px);opacity:0;}}
   .trd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;} .trd-l{font:800 10.5px 'Inter',sans-serif;color:var(--text-faint);letter-spacing:.12em;margin:0 2px 0 6px;}
@@ -872,6 +892,8 @@
   .cf-shadow{position:absolute;bottom:8px;width:80px;height:12px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(3px);opacity:.5;}
   .cf-res{min-height:28px;font:900 24px 'Manrope',sans-serif;letter-spacing:.04em;} .cf-res.h{color:#f5c04a;text-shadow:0 0 16px rgba(245,192,74,.6);} .cf-res.t{color:#8fb8ff;text-shadow:0 0 16px rgba(120,170,255,.6);} .cf-res.e{color:#ff4d6a;}
   .cf-timer{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;} .cf-timer i{display:block;height:100%;background:#35d07e;transform-origin:left;} .cf-timer.hurry i{background:#ff4d6a;}
+  .cf-start{all:unset;cursor:pointer;margin-top:2px;padding:7px 16px;border-radius:999px;font:900 11.5px 'Manrope',sans-serif;letter-spacing:.06em;color:#04210f;background:linear-gradient(180deg,#7dffb2,#2fb37a);box-shadow:0 4px 14px rgba(53,208,126,.35);transition:transform .1s, filter .15s;}
+  .cf-start:hover{filter:brightness(1.1);} .cf-start:active{transform:scale(.94);} .cf-start:disabled{opacity:.35;cursor:default;box-shadow:none;filter:none;} .cf-start[hidden]{display:none;}
   .cf-hist{display:flex;align-items:center;gap:4px;padding:0 14px 10px;flex-wrap:wrap;} .cf-hl{font:800 10px 'Inter',sans-serif;letter-spacing:.12em;color:var(--text-faint);margin-right:6px;}
   .cf-hist i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:900 10px 'Inter',sans-serif;font-style:normal;color:#111;} .cf-hist i.h{background:#f5c04a;} .cf-hist i.t{background:#8fb8ff;} .cf-hist i.e{background:#ff4d6a;color:#fff;}
   .cf-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2);}
@@ -22706,7 +22728,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 147;                 // ← goes up by one with every published version
+  const SD_BUILD = 148;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26332,7 +26354,7 @@
       <button type="button" role="menuitem" data-g="bj"><span>🃏</span><b>Blackjack</b><i>${nB ? nB + ' at the table' : ''}</i></button>
       <button type="button" role="menuitem" data-g="td"><span>🏰</span><b>Tower Defense</b><i>solo or team</i></button>
       <button type="button" role="menuitem" data-g="cf"><span>🪙</span><b>Coin Flip</b><i>heads or tails?</i></button>
-      <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r ? TRD_SYM + ' ' + TRD.r.P.toLocaleString() : 'the $SAI market'}</i></button>
+      <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r ? TRD_SYM + ' ' + TRD.r.P.toLocaleString() : 'Cardiastra Inc.'}</i></button>
       <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
     btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
     m.animate([{ opacity: 0, transform: 'translateY(6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 160, easing: 'ease-out' });
@@ -26354,7 +26376,7 @@
   // it left off when someone comes back. trade/r = the market, trade/h = recent prices, trade/on = who's in,
   // trade/p/<uid> = positions (c = what all your shares cost, g = what you got back — all-time). -----
   const TRD = { on: false, win: null, r: null, h: {}, p: {}, f: {}, live: {}, poll: 0, busy: false, hbAt: 0, drawKey: '', lastP: 0, noteAt: 0, woke: false };
-  const TRD_ID = 'M1', TRD_SYM = '$SAI', TRD_WIN = 240;
+  const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 240;
   const trdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
   const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
   const trdSg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
@@ -26362,10 +26384,10 @@
   function trdNext(r){
     const k = r.k + 1, P = r.P, km = k % 997;
     const H = ((r.lt % 10007) * 2654 + (k % 10007) * 40503 + km * km * 97) % 10007;
-    const trend = (((k - k % 150) / 150 * 7919 + r.S) % 9) - 4;
-    const rev = P < 300 ? 20 : P < 700 ? 6 : P > 3000 ? -12 : P > 1800 ? -5 : 0;
-    const E = H % 97 === 0 ? 250 : (H % 89 === 0 && P > 600) ? -250 : 0;
-    const X = P * (1000 + (H % 121) - 60 + trend + rev + E), Q = (X - X % 1000) / 1000;
+    const trend = (((k - k % 40) / 40 * 7919 + r.S) % 31) - 15;      // (a mood every 40 ticks)
+    const rev = P < 300 ? 40 : P < 600 ? 15 : P > 3500 ? -30 : P > 2000 ? -12 : 0;
+    const E = H % 53 === 0 ? 350 : (H % 47 === 0 && P > 500) ? -300 : 0;
+    const X = P * (1000 + (H % 241) - 120 + trend + rev + E), Q = (X - X % 1000) / 1000;
     return { k, P: Q >= 100 ? Q : 100 };
   }
   async function trdGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('get ' + r.status); return r.json(); }
@@ -26463,7 +26485,7 @@
       <div class="td-head trd-head"><b>📈 SaiDeck Exchange</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="trd-who"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
       <div class="trd-tape"><div class="trd-tape-in"></div></div>
       <div class="trd-main">
-        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">S</span><div><b class="trd-sym">${TRD_SYM}</b><small>SaiDeck Inc. · ticks every 4 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
+        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 4 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
         <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
         <div class="trd-acts"><span class="trd-l">BUY</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
           <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button><span class="trd-prev"></span></div>
@@ -26514,7 +26536,7 @@
       px.textContent = P.toLocaleString();
       if(TRD.lastP){ px.classList.remove('fu', 'fd'); void px.offsetWidth; px.classList.add(P > TRD.lastP ? 'fu' : 'fd'); }
       // a big jump: the whale / crash banner
-      if(TRD.lastP && Math.abs(P / TRD.lastP - 1) > 0.15){ const up = P > TRD.lastP, ev = W.querySelector('.trd-ev'); ev.hidden = false; ev.className = 'trd-ev ' + (up ? 'up' : 'down'); ev.textContent = up ? '🐋 WHALE PUMP!' : '💥 MARKET CRASH!'; try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { ev.hidden = true; }, 2400); }
+      if(TRD.lastP && Math.abs(P / TRD.lastP - 1) > 0.2){ const up = P > TRD.lastP, ev = W.querySelector('.trd-ev'); ev.hidden = false; ev.className = 'trd-ev ' + (up ? 'up' : 'down'); ev.textContent = up ? '🐋 WHALE PUMP!' : '💥 MARKET CRASH!'; W.querySelector('.trd-chart').classList.remove('shake'); void W.offsetWidth; W.querySelector('.trd-chart').classList.add('shake'); try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { ev.hidden = true; }, 2400); }
       TRD.lastP = P;
     }
     const chEl = W.querySelector('.trd-ch'); chEl.textContent = `${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch).toFixed(1)}%`; chEl.className = 'trd-ch ' + (ch >= 0 ? 'up' : 'down');
@@ -26716,6 +26738,14 @@
     if(await trdPatch(body)){ SC.s += a; CF.b[me] = { n: r.n, s: CF.side, a, c: false }; try{ sfxChip(); }catch(e){} cfRender(); }
     else { toast("Couldn't bet — try again.", 1600); await scLoad(); }
   }
+  // start the flip now (only someone who has bet this round can — then nobody has to wait out the clock)
+  async function cfStart(){
+    const r = CF.r, me = chatUid(); if(!r || r.f) return;
+    const mb = CF.b[me]; if(!mb || mb.n !== r.n){ toast('Place a bet first, then you can start the flip.', 1800); return; }
+    if(trdNow() < r.t0 + 1500){ toast('One second — give everyone a moment to bet.', 1500); return; }
+    if(await trdPatch({ 'coin/r/f': { '.sv': 'timestamp' } })){ cfSay('Ooh, impatient! Flipping… 🪙'); await cfStep(); }
+    else { toast("Couldn't start it — try again.", 1500); await cfStep(); }
+  }
   function cfOpen(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(CF.on) return; CF.on = true; CF.shownF = 0; CF.said = '';
@@ -26729,6 +26759,7 @@
           <div class="cf-stage"><div class="cf-coin"><div class="cf-face h">👑</div><div class="cf-face t">🦅</div></div><div class="cf-shadow"></div></div>
           <div class="cf-res"></div>
           <div class="cf-timer"><i></i></div>
+          <button type="button" class="cf-start" hidden>▶ START THE FLIP</button>
         </div>
         <div class="cf-zone t" data-side="t"><div class="cf-zh">🦅 TAILS<b class="cf-tot"></b></div><div class="cf-bets"></div></div>
       </div>
@@ -26748,6 +26779,7 @@
     w.querySelectorAll('.cf-zone').forEach(z => z.addEventListener('click', () => { CF.side = z.dataset.side; cfRender(); }));
     w.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { CF.frac = +b.dataset.f; cfRender(); }));
     w.querySelector('.cf-go').addEventListener('click', (e) => { e.currentTarget.blur(); cfBet(); });
+    w.querySelector('.cf-start').addEventListener('click', (e) => { e.currentTarget.blur(); cfStart(); });
     w.tabIndex = -1; w.focus();
     if(!SC.loaded) scLoad().catch(() => {});
     cfStep(); CF.poll = setInterval(cfStep, 700);
@@ -26802,6 +26834,7 @@
     W.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', +b.dataset.f === CF.frac));
     const mb = CF.b[me], betNow = mb && mb.n === r.n, open = !r.f && now < r.t0 + CF_BET, amt = SC.loaded ? Math.floor(scBal() * CF.frac) : 0;
     const go = W.querySelector('.cf-go'); go.disabled = !open || betNow || amt < 1; go.classList.toggle('t', CF.side === 't');
+    const st = W.querySelector('.cf-start'); st.hidden = !open; st.disabled = !betNow; st.title = betNow ? 'Flip right now instead of waiting' : 'Bet first, then you can start the flip';
     go.firstChild.textContent = betNow ? 'BET PLACED ' : `BET ${trdK(amt)} ON ${CF_NAME[CF.side]} `;
     W.querySelector('.cf-me').innerHTML = `🪙 <b>${SC.loaded ? trdK(scBal()) : '…'}</b> points` + (betNow ? ` · your bet: <b>${trdK(mb.a)}</b> on <b>${CF_NAME[mb.s]}</b>` : '');
   }
@@ -30324,11 +30357,10 @@
       h += questHtml();
     } else if(SC.tab === 'casino'){
       const here = Object.values(CAS.seats).filter(casSeatLive);
-      h += `<div class="arc-cas"><div class="arc-cas-art">🎰</div><b>The Casino</b><p class="chat-side-p">Take a seat at a slot machine and bet your points (1 to 500 a spin) to win more. Everyone sitting in the casino sees each other's spins, bets and wins.</p>
-        <p class="chat-side-p">7️⃣7️⃣7️⃣ pays ×25 · 💎💎💎 ×12 · any three ×6 · two 💎 or 7️⃣ ×2 · any two gives your bet back.</p>
-        <p class="chat-side-p">${here.length ? `${here.length} sitting now: ${here.map(x => escapeHtml(chatBadName(x.n) ? 'someone' : x.n)).slice(0, 8).join(', ')}` : 'Nobody is sitting right now.'}</p>
-        <div class="arc-cas-row"><button type="button" class="arc-cas-join" data-cas-join>🎰 Slots</button><button type="button" class="arc-cas-join bj" data-bj-join>🃏 Blackjack</button><button type="button" class="arc-cas-join td" data-td-join>🏰 Tower Defense</button><button type="button" class="arc-cas-join trd" data-trd-join>📈 Trading</button><button type="button" class="arc-cas-join cf" data-cf-join>🪙 Coin Flip</button></div>
-        <p class="chat-side-p">Blackjack: one table for everyone, with a bot dealer — or take the dealer's seat yourself. Blackjack pays 3 to 2, a win 2 to 1.</p></div>`;
+      h += `<div class="arc-cas"><b class="cas-title">🎰 The Casino</b><p class="chat-side-p">Pick a game on the map — the faces show who's playing where right now.</p>
+        <div class="cas-map" role="list"></div>
+        <p class="chat-side-p cas-fine">Slots: 7️⃣7️⃣7️⃣ ×25 · 💎💎💎 ×12 · any three ×6. Blackjack pays 3 to 2, a win 2 to 1. Coin Flip pays 1 to 1.</p></div>`;
+      setTimeout(casMapRender, 0);
       if(!CAS.peekAt || Date.now() - CAS.peekAt > 20000){ CAS.peekAt = Date.now(); chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`)).then(r => r.ok ? r.json() : null).then(d => { if(d && !CAS.on){ CAS.seats = d; chatRenderArcade(); } }).catch(() => {}); }
     } else {
       const B = SC.board;
@@ -31030,13 +31062,52 @@
   const PRES = { es: null, list: {}, offset: 0, timer: 0, started: false };
   const chatVisible = () => chatLS('visible') !== '0';
   function presUrl(uid, tok){ return (uid ? `${CHAT_DB}/presence/${encodeURIComponent(uid)}.json` : `${CHAT_DB}/presence.json`) + (tok ? '?auth=' + encodeURIComponent(tok) : ''); }
+  // ----- the casino map: every game is a room on the floor, with the faces of whoever is in it right now -----
+  const CAS_ROOMS = [
+    { g: 'slots', em: '🎰', n: 'Slots', sub: 'spin to win', c: '#ff9a3c', x: 3, y: 3, open: () => casJoin() },
+    { g: 'bj', em: '🃏', n: 'Blackjack', sub: 'beat the dealer', c: '#35d07e', x: 53, y: 3, open: () => bjJoin() },
+    { g: 'cf', em: '🪙', n: 'Coin Flip', sub: 'heads or tails', c: '#f5c04a', x: 3, y: 33, open: () => cfOpen() },
+    { g: 'trd', em: '📈', n: 'Trading', sub: 'Cardiastra Inc.', c: '#5aa9ff', x: 53, y: 33, open: () => trdOpen() },
+    { g: 'td', em: '🏰', n: 'Tower Defense', sub: 'solo or team', c: '#b48cff', x: 3, y: 73, w: 94, h: 24, open: () => tdOpen() },
+  ];
+  function casWho(){
+    const by = { slots: [], bj: [], cf: [], trd: [], td: [] }, seen = new Set(), now = Date.now() + (PRES.offset || 0);
+    const add = (g, uid, n) => { if(!by[g] || seen.has(g + uid) || MERGED.has(uid) || chatBanned(uid)) return; seen.add(g + uid); by[g].push({ uid, n: chatBadName(n) ? 'someone' : n }); };
+    const mine = presGame(); if(mine && chatName()) add(mine, chatUid(), chatName());
+    for(const [uid, p] of Object.entries(PRES.list || {})) if(p && typeof p.g === 'string' && typeof p.t === 'number' && now - p.t < 150000 && !chatIsMe(uid)) add(p.g, uid, p.n || 'someone');
+    for(const [uid, st] of Object.entries(CAS.seats || {})) if(casSeatLive(st) && !chatIsMe(uid)) add('slots', uid, st.n || 'someone');
+    return by;
+  }
+  function casMapRender(){
+    const box = document.querySelector('.cas-map'); if(!box) return;
+    const by = casWho();
+    if(!box.dataset.built){
+      box.dataset.built = '1';
+      box.innerHTML = `<svg class="cas-paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${CAS_ROOMS.map(r => `<line x1="50" y1="67" x2="${r.x + (r.w || 44) / 2}" y2="${r.y + (r.h || 28) / 2}" />`).join('')}</svg>
+        <div class="cas-lobby" aria-hidden="true"><span>⛲</span><i>lobby</i></div>` +
+        CAS_ROOMS.map(r => `<button type="button" class="cas-room" role="listitem" data-room="${r.g}" style="--c:${r.c};left:${r.x}%;top:${r.y}%;width:${r.w || 44}%;height:${r.h || 28}%"><span class="cr-em">${r.em}</span><span class="cr-t"><b>${r.n}</b><i>${r.sub}</i></span><span class="cr-n"></span><span class="cr-faces"></span></button>`).join('');
+      box.addEventListener('click', (e) => { const b = e.target.closest('.cas-room'); if(!b) return; b.blur(); const r = CAS_ROOMS.find(x => x.g === b.dataset.room); if(r) r.open(); });
+    }
+    for(const r of CAS_ROOMS){
+      const el = box.querySelector(`[data-room="${r.g}"]`), L = by[r.g], key = L.map(x => x.uid).join();
+      el.classList.toggle('busy', L.length > 0); el.classList.toggle('mine', presGame() === r.g);
+      el.querySelector('.cr-n').textContent = L.length ? `${L.length} playing` : 'empty';
+      el.setAttribute('aria-label', `${r.n}: ${L.length ? L.length + ' playing — ' + L.map(x => x.n).join(', ') : 'nobody playing'}`);
+      if(el.dataset.k !== key){ el.dataset.k = key; el.querySelector('.cr-faces').innerHTML = L.slice(0, 6).map(x => `<span class="cr-f" title="${escapeHtml(x.n)}">${tdFaceHtml(x.uid, x.n)}</span>`).join('') + (L.length > 6 ? `<span class="cr-more">+${L.length - 6}</span>` : ''); }
+    }
+  }
+  setInterval(() => { if(document.querySelector('.cas-map')) casMapRender(); }, 3000);
+  // the game you're in right now (shown on the casino map)
+  function presGame(){ try{ return TDG.on ? 'td' : TRD.on ? 'trd' : CF.on ? 'cf' : BJ.on ? 'bj' : CAS.on ? 'slots' : ''; }catch(e){ return ''; } }
+  let presGameWas = '';
+  setInterval(() => { const g = presGame(); if(g !== presGameWas){ presGameWas = g; if(chatName()) presBeat(); } }, 1500);
   async function presBeat(){
     const name = chatName();
     if(!name) return;
     try{
       const tok = await chatAuth(), uid = chatUid();
-      if(!chatVisible() || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
-      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true; if(document.visibilityState !== 'visible' || !document.hasFocus()) body.h = true;
+      if((!chatVisible() && !presGame()) || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
+      const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; const g = presGame(); if(g) body.g = g; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true; if(document.visibilityState !== 'visible' || !document.hasFocus()) body.h = true;
       const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
@@ -31124,6 +31195,7 @@
       }
     }
     const others = on.filter(p => !p.me).length;
+    try{ casMapRender(); }catch(e){}
     chatBtn.dataset.online = others;
     chatBtn.classList.toggle('has-online', others > 0);
     if(!CHAT.unread) chatBtn.title = others ? `${others} other${others === 1 ? '' : 's'} using SaiDeck now — open the chat` : 'Chat with everyone who uses SaiDeck';
