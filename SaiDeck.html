@@ -22735,7 +22735,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 150;                 // ← goes up by one with every published version
+  const SD_BUILD = 151;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25787,7 +25787,7 @@
     //  landing on top of a card that's already there — that showed 10 + 8 as "20")
     const body = Object.assign({ [`${path}/pe`]: true, [`${path}/lt`]: bjSv, [`${path}/c/${hand.k | 0}`]: bjSv, [`${path}/k`]: hand.k | 0 }, extra || {});
     const d = await bjPatch(body); if(!d) return false;
-    let T = d[`${path}/lt`];
+    let T = d[`${path}/lt`]; if(typeof T !== 'number'){ let v = d; for(const k of `${path}/lt`.split('/')) v = v && typeof v === 'object' ? v[k] : undefined; T = v; }      // (Firebase answers nested)
     if(typeof T !== 'number'){ const tok = await chatAuth(); const g = await casFetch(`${CHAT_DB}/${path}/lt.json?auth=${encodeURIComponent(tok)}`, {}, 6000); T = g.ok ? await g.json() : null; }
     if(typeof T !== 'number') return false;
     sfxCard();
@@ -26442,10 +26442,17 @@
     const m = (opt.method || 'GET').toUpperCase(), now = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
     const sv = (v) => v && typeof v === 'object' ? (v['.sv'] === 'timestamp' ? now : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sv(x)]))) : v;
     let body = null; try{ body = opt.body ? JSON.parse(opt.body) : null; }catch(e){ return; }
-    if(m !== 'DELETE'){ if(answer === undefined) return; body = answer; }
+    if(m !== 'DELETE' && answer === undefined) return;
+    // The paths come from what we SENT; the values from the server's answer. (Firebase answers a multi-path update NESTED —
+    // {"bj":{"p":{"me":{"r":…}}}} — not with the "bj/p/me/r" keys we sent: taking the answer as-is replaced the whole table
+    // with just our own few fields, which emptied blackjack — "Setting up the table…" and sitting you out.)
+    const pick = (keyParts) => { let v = answer; for(const k of keyParts){ if(v == null || typeof v !== 'object') return undefined; v = v[k]; } return v === undefined ? null : v; };
     const hasSv = (v) => v && typeof v === 'object' && (v['.sv'] !== undefined || Object.values(v).some(hasSv));
-    if(hasSv(body)) return;      // (no real answer for a server time: wait for the stream)
-    const writes = m === 'PATCH' ? Object.entries(body || {}).map(([k, v]) => [base.concat(k.split('/').filter(Boolean)), sv(v)]) : [[base, m === 'DELETE' ? null : sv(body)]];
+    const writes = m === 'DELETE' ? [[base, null]] : m === 'PATCH'
+      ? Object.keys(body || {}).map(k => { const kp = k.split('/').filter(Boolean); const flat = answer && typeof answer === 'object' && Object.prototype.hasOwnProperty.call(answer, k) ? answer[k] : pick(kp); return [base.concat(kp), flat]; })
+      : [[base, answer]];
+    if(writes.some(([, v]) => v === undefined || hasSv(v))) return;      // (no real answer for a server time: wait for the stream)
+    void sv;
     for(const [path, L] of LIVE){
       if(!L.ready) continue;
       const lp = path.split('/').filter(Boolean);
