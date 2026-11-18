@@ -810,33 +810,41 @@
   .chat-av.poke:focus-visible{outline:2px solid #b48cff;outline-offset:2px;}
   /* Tower Defense */
   /* ----- Trading ----- */
-  .trd-box{width:min(980px, calc(100% - 16px));background:linear-gradient(180deg,#10131c,#0b0d14);}
-  .trd-clock{margin-left:auto;font:900 15px 'Manrope',monospace;color:#35d07e;letter-spacing:.04em;font-variant-numeric:tabular-nums;} .trd-clock.closing{color:#ff4d6a;animation:trdBlink .5s steps(2) infinite;}
-  @keyframes trdBlink{50%{opacity:.35;}}
+  .trd-box{width:min(1000px, calc(100% - 16px));background:radial-gradient(120% 60% at 50% 0%,rgba(53,208,126,.08),transparent 60%),linear-gradient(180deg,#0f1219,#0a0c12);}
+  .trd-head{gap:10px;} .trd-live{display:flex;align-items:center;gap:6px;font:900 11px 'Inter',sans-serif;letter-spacing:.12em;color:#35d07e;padding:3px 9px;border-radius:999px;background:rgba(53,208,126,.12);}
+  .trd-live i{width:7px;height:7px;border-radius:50%;background:#35d07e;box-shadow:0 0 8px #35d07e;animation:trdPulse 1.2s ease-in-out infinite;} .trd-live.off{color:#f5c04a;background:rgba(245,192,74,.12);} .trd-live.off i{background:#f5c04a;box-shadow:none;animation:none;}
+  @keyframes trdPulse{50%{opacity:.25;}}
+  .trd-who{margin-left:auto;display:flex;align-items:center;font:600 11px 'Inter',sans-serif;color:var(--text-faint);} .trd-who .td-face{width:22px;height:22px;margin-right:-6px;border:2px solid #0f1219;} .trd-who span{margin-left:12px;}
+  .trd-tape{overflow:hidden;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.25);font:600 11.5px 'Inter',sans-serif;}
+  .trd-tape-in{display:inline-flex;gap:28px;padding:6px 0;animation:trdTape 40s linear infinite;} .trd-tape-in span{color:var(--text-dim);} .trd-tape-in .up{color:#6ff5a9;} .trd-tape-in .down{color:#ff8095;}
+  @keyframes trdTape{from{transform:translateX(0);}to{transform:translateX(-50%);}}
   .trd-main{padding:12px 14px 14px;overflow:auto;display:flex;flex-direction:column;gap:10px;}
-  .trd-start{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 10px;text-align:center;} .trd-logo{font-size:54px;animation:trdBob 2s ease-in-out infinite;} @keyframes trdBob{50%{transform:translateY(-6px) rotate(-4deg);}}
-  .trd-st-h{font:900 22px 'Manrope',sans-serif;} .trd-durs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(520px,100%);margin:6px 0;}
-  .trd-durs .tdl-big{background:linear-gradient(180deg,#2bd47f,#14935a);color:#04210f;padding:12px 6px 10px;} .trd-durs .tdl-big b{font-size:17px;} .trd-durs .tdl-big:hover{filter:brightness(1.1);transform:translateY(-2px);}
-  .trd-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;} .trd-tk{display:flex;align-items:baseline;gap:10px;}
-  .trd-sym{font:900 26px 'Manrope',sans-serif;letter-spacing:.02em;} .trd-px{font:900 26px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;} .trd-ch{font:800 14px 'Inter',sans-serif;padding:2px 8px;border-radius:6px;}
+  .trd-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;} .trd-tk{display:flex;align-items:center;gap:10px;}
+  .trd-logo{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:900 20px 'Manrope',sans-serif;color:#04210f;background:linear-gradient(135deg,#7dffb2,#14935a);box-shadow:0 4px 16px rgba(53,208,126,.35);}
+  .trd-tk > div{display:flex;flex-direction:column;} .trd-sym{font:900 20px 'Manrope',sans-serif;line-height:1;} .trd-tk small{font:600 10.5px 'Inter',sans-serif;color:var(--text-faint);margin-top:3px;}
+  .trd-px{font:900 32px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;margin-left:8px;padding:0 6px;border-radius:8px;}
+  .trd-px.fu{animation:trdFu .7s ease-out;} .trd-px.fd{animation:trdFd .7s ease-out;}
+  @keyframes trdFu{from{background:rgba(53,208,126,.45);color:#b6ffd4;}} @keyframes trdFd{from{background:rgba(255,77,106,.45);color:#ffd0d8;}}
+  .trd-ch{font:800 13px 'Inter',sans-serif;padding:3px 8px;border-radius:6px;}
   .trd-main .up{color:#35d07e;} .trd-main .down{color:#ff4d6a;} .trd-ch.up{background:rgba(53,208,126,.14);} .trd-ch.down{background:rgba(255,77,106,.14);}
-  .trd-bag{margin-left:auto;display:flex;gap:12px;font:600 12.5px 'Inter',sans-serif;color:var(--text-dim);} .trd-bag b{color:#fff;}
-  .trd-chart{position:relative;height:250px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);overflow:hidden;} .trd-cv,.trd-cv2{width:100%;height:100%;display:block;}
-  .trd-ev{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font:900 30px 'Manrope',sans-serif;padding:8px 18px;border-radius:12px;animation:trdEv .5s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none;white-space:nowrap;}
-  .trd-ev.up{background:rgba(53,208,126,.2);color:#6ff5a9;text-shadow:0 0 18px #35d07e;} .trd-ev.down{background:rgba(255,77,106,.2);color:#ff8095;text-shadow:0 0 18px #ff4d6a;} .trd-ev[hidden]{display:none;}
+  .trd-bag{margin-left:auto;display:flex;gap:6px;} .trd-bag > div{display:flex;flex-direction:column;gap:2px;white-space:nowrap;padding:6px 11px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font:600 12px 'Inter',sans-serif;color:var(--text-dim);}
+  .trd-bag small{font:800 9px 'Inter',sans-serif;letter-spacing:.12em;color:var(--text-faint);} .trd-bag b{color:#fff;}
+  .trd-chart{position:relative;height:280px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);overflow:hidden;} .trd-cv,.trd-cv2{width:100%;height:100%;display:block;}
+  .trd-ev{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font:900 32px 'Manrope',sans-serif;padding:8px 20px;border-radius:14px;animation:trdEv .5s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none;white-space:nowrap;}
+  .trd-ev.up{background:rgba(53,208,126,.2);color:#6ff5a9;text-shadow:0 0 18px #35d07e;} .trd-ev.down{background:rgba(255,77,106,.2);color:#ff8095;text-shadow:0 0 18px #ff4d6a;} .trd-ev[hidden],.trd-paused[hidden]{display:none;}
+  .trd-paused{position:absolute;left:50%;top:12px;transform:translateX(-50%);font:700 12px 'Inter',sans-serif;color:#f5c04a;background:rgba(245,192,74,.12);padding:5px 12px;border-radius:999px;}
   @keyframes trdEv{from{transform:translate(-50%,-50%) scale(.3);opacity:0;}}
-  .trd-pop{position:absolute;right:60px;top:30%;font:900 22px 'Manrope',sans-serif;animation:trdPop 1.2s ease-out both;pointer-events:none;} .trd-pop.buy{color:#35d07e;} .trd-pop.sell{color:#ff4d6a;}
+  .trd-pop{position:absolute;right:70px;top:30%;font:900 24px 'Manrope',sans-serif;animation:trdPop 1.2s ease-out both;pointer-events:none;} .trd-pop.buy{color:#35d07e;} .trd-pop.sell{color:#ff4d6a;}
   @keyframes trdPop{to{transform:translateY(-60px);opacity:0;}}
-  .trd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;} .trd-l{font:800 10.5px 'Inter',sans-serif;color:var(--text-faint);letter-spacing:.08em;margin:0 2px 0 6px;}
-  .trd-b{all:unset;cursor:pointer;padding:8px 13px;border-radius:9px;font:800 12.5px 'Inter',sans-serif;transition:transform .08s, filter .15s;} .trd-b:active{transform:scale(.94);} .trd-b:disabled{opacity:.35;cursor:default;}
-  .trd-b.buy{background:rgba(53,208,126,.16);color:#6ff5a9;border:1px solid rgba(53,208,126,.4);} .trd-b.sell{background:rgba(255,77,106,.14);color:#ff8095;border:1px solid rgba(255,77,106,.4);}
-  .trd-b.buy.all{background:linear-gradient(180deg,#2bd47f,#14935a);color:#04210f;} .trd-b.sell.all{background:linear-gradient(180deg,#ff6b84,#c22b47);color:#2a0710;}
-  .trd-low{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;} .trd-pl{display:flex;flex-direction:column;height:200px;} .trd-pl canvas{flex:1;min-height:0;border-radius:10px;background:rgba(255,255,255,.025);}
-  .trd-ph{font:800 10.5px 'Inter',sans-serif;letter-spacing:.1em;color:var(--text-faint);margin:2px 0 5px;}
-  .trd-side{display:flex;flex-direction:column;min-width:0;} .trd-rank{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:3px;max-height:110px;overflow:auto;}
-  .trd-rank li{display:flex;align-items:center;gap:6px;font:600 12px 'Inter',sans-serif;padding:3px 6px;border-radius:7px;} .trd-rank li.me{background:rgba(255,255,255,.06);} .trd-rank li i{font-style:normal;width:18px;text-align:center;} .trd-rank li b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .trd-rank .td-face{width:18px;height:18px;}
-  .trd-feed{display:flex;flex-direction:column;gap:2px;font:500 11px 'Inter',sans-serif;max-height:70px;overflow:auto;color:var(--text-dim);}
-  @media (max-width:640px){ .trd-low{grid-template-columns:1fr;} .trd-chart{height:200px;} .trd-durs{grid-template-columns:repeat(2,1fr);} }
+  .trd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;} .trd-l{font:800 10.5px 'Inter',sans-serif;color:var(--text-faint);letter-spacing:.12em;margin:0 2px 0 6px;}
+  .trd-b{all:unset;cursor:pointer;padding:9px 14px;border-radius:10px;font:800 12.5px 'Inter',sans-serif;transition:transform .08s, filter .15s;} .trd-b:hover{filter:brightness(1.2);} .trd-b:active{transform:scale(.93);} .trd-b:disabled{opacity:.3;cursor:default;filter:none;}
+  .trd-b.buy{background:rgba(53,208,126,.14);color:#6ff5a9;border:1px solid rgba(53,208,126,.4);} .trd-b.sell{background:rgba(255,77,106,.12);color:#ff8095;border:1px solid rgba(255,77,106,.4);}
+  .trd-b.buy.all{background:linear-gradient(180deg,#2bd47f,#14935a);color:#04210f;box-shadow:0 4px 14px rgba(53,208,126,.3);} .trd-b.sell.all{background:linear-gradient(180deg,#ff6b84,#c22b47);color:#2a0710;box-shadow:0 4px 14px rgba(255,77,106,.25);}
+  .trd-low{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;} .trd-pl{display:flex;flex-direction:column;height:200px;} .trd-pl canvas{flex:1;min-height:0;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);}
+  .trd-ph{font:800 10.5px 'Inter',sans-serif;letter-spacing:.1em;color:var(--text-faint);margin:2px 0 6px;} .trd-ph i{font-style:normal;font-weight:600;letter-spacing:0;opacity:.7;}
+  .trd-side{display:flex;flex-direction:column;min-width:0;} .trd-rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;max-height:190px;overflow:auto;}
+  .trd-rank li{display:flex;align-items:center;gap:7px;font:600 12px 'Inter',sans-serif;padding:4px 7px;border-radius:8px;} .trd-rank li.me{background:rgba(255,255,255,.06);} .trd-rank .rk{font-style:normal;width:18px;text-align:center;} .trd-rank li b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .trd-rank li em{font-style:normal;font-size:10.5px;color:var(--text-faint);} .trd-rank .td-face{width:20px;height:20px;}
+  @media (max-width:640px){ .trd-low{grid-template-columns:1fr;} .trd-chart{height:210px;} .trd-bag{margin-left:0;} }
   /* game notices in the chat (Tower Defense, Trading) */
   .chat-gm{align-self:center;max-width:94%;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:12px;font-size:11.5px;color:var(--text-dim);border:1px solid;}
   .chat-gm.td{background:rgba(255,190,80,.08);border-color:rgba(255,190,80,.3);} .chat-gm.trd{background:rgba(53,208,126,.08);border-color:rgba(53,208,126,.3);}
@@ -22653,7 +22661,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 140;                 // ← goes up by one with every published version
+  const SD_BUILD = 141;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26274,7 +26282,7 @@
     m.innerHTML = `<button type="button" role="menuitem" data-g="slots"><span>🎰</span><b>Slots</b><i>${nS ? nS + ' playing' : ''}</i></button>
       <button type="button" role="menuitem" data-g="bj"><span>🃏</span><b>Blackjack</b><i>${nB ? nB + ' at the table' : ''}</i></button>
       <button type="button" role="menuitem" data-g="td"><span>🏰</span><b>Tower Defense</b><i>solo or team</i></button>
-      <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r && trdNow() < TRD.r.e ? trdName(TRD.r) + ' is open!' : 'meme stocks'}</i></button>
+      <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r ? TRD_SYM + ' ' + TRD.r.P.toLocaleString() : 'the $SAI market'}</i></button>
       <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
     btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
     m.animate([{ opacity: 0, transform: 'translateY(6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 160, easing: 'ease-out' });
@@ -26290,24 +26298,24 @@
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
-  // ----- Trading: one market round at a time. Anyone opens a round (1–10 min); the price ticks every 4 s by a formula
-  // the database checks (so nobody can fake it), everyone buys and sells at the price in the database, and everyone's
-  // profit line shows on the chart. trade/r = the round, trade/p/<uid> = positions, trade/f/<id> = final prices. -----
-  const TRD = { on: false, win: null, r: null, p: {}, f: {}, poll: 0, bg: 0, busy: false, posted: {}, sold: {}, seenGo: '' };
-  const TRD_TICK = 4000, TRD_NAMES = ['$SAI', '$BRUH', '$COOK', '$FAHH', '$SKSK', '$OKDO', '$MOON', '$COPE', '$BONK', '$YOLO', '$GYAT', '$RIZZ'];
-  const trdName = (r) => TRD_NAMES[(r ? r.S : 0) % TRD_NAMES.length];
-  const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
+  // ----- Trading: one market ($SAI) that never ends. The price ticks every 4 s by a formula the database checks — the
+  // ticks are done by the apps of whoever has the market open, so it pauses when nobody's playing and picks up where
+  // it left off when someone comes back. trade/r = the market, trade/h = recent prices, trade/on = who's in,
+  // trade/p/<uid> = positions (c = what all your shares cost, g = what you got back — all-time). -----
+  const TRD = { on: false, win: null, r: null, h: {}, p: {}, f: {}, live: {}, poll: 0, busy: false, hbAt: 0, drawKey: '', lastP: 0, noteAt: 0, woke: false };
+  const TRD_ID = 'M1', TRD_SYM = '$SAI', TRD_WIN = 240;
   const trdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
-  const trdMaxK = (r) => Math.floor(r.d / 4);
-  // the price at every tick up to k (the same sums as the rules — whole numbers only)
-  function trdSeries(S, k){
-    const out = [1000], ev = {}; let P = 1000;
-    for(let i = 1; i <= k; i++){
-      const H = (S * 2654 + i * 40503 + i * i * 97) % 10007, D = (H % 121) - 60 + (S % 7) - 3, E = H % 97 === 0 ? 250 : H % 89 === 0 ? -300 : 0;
-      const X = P * (1000 + D + E), Q = (X - X % 1000) / 1000; P = Q >= 10 ? Q : 10; out.push(P);
-      if(E) ev[i] = E;
-    }
-    return { px: out, ev };
+  const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
+  const trdSg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
+  // the next price (the same sums as the rules — whole numbers only)
+  function trdNext(r){
+    const k = r.k + 1, P = r.P, km = k % 997;
+    const H = ((r.lt % 10007) * 2654 + (k % 10007) * 40503 + km * km * 97) % 10007;
+    const trend = (((k - k % 150) / 150 * 7919 + r.S) % 9) - 4;
+    const rev = P < 300 ? 20 : P < 700 ? 6 : P > 3000 ? -12 : P > 1800 ? -5 : 0;
+    const E = H % 97 === 0 ? 250 : (H % 89 === 0 && P > 600) ? -250 : 0;
+    const X = P * (1000 + (H % 121) - 60 + trend + rev + E), Q = (X - X % 1000) / 1000;
+    return { k, P: Q >= 100 ? Q : 100 };
   }
   async function trdGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('get ' + r.status); return r.json(); }
   async function trdPatch(body){ try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }); return r.ok; }catch(e){ return false; } }
@@ -26316,95 +26324,62 @@
     if(!chatName() || chatBlock()) return;
     try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(chatRoom())}/messages.json?auth=${encodeURIComponent(tok)}`, { method: 'POST', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), m: String(txt).slice(0, chatMaxLen()), t: bjSv, u: chatUid(), e, v: String(v).slice(0, 40) }) }); }catch(err){}
   }
-  // everyone's profit at each tick (from their trades) — for the lines on the chart
-  function trdLines(r, px){
-    const out = [];
-    for(const [u, p] of Object.entries(TRD.p || {})){
-      if(!p || p.r !== r.id || !p.x) continue;
-      const xs = Object.values(p.x).filter(t => t && isFinite(t.k) && isFinite(t.q)).sort((a, b) => a.k - b.k);
-      if(!xs.length) continue;
-      let sh = 0, cash = 0, j = 0; const line = [];
-      for(let k = 0; k < px.length; k++){
-        while(j < xs.length && xs[j].k <= k){ sh += xs[j].q; cash -= xs[j].q * px[xs[j].k]; j++; }
-        line.push(j ? cash + sh * px[k] : null);
-      }
-      const n = (SCALL.m && SCALL.m[u] && SCALL.m[u].n) || (PRES.list && PRES.list[u] && PRES.list[u].n) || p.n || 'Someone';
-      out.push({ u, n, line, last: line[line.length - 1] || 0, xs });
-    }
-    return out.sort((a, b) => b.last - a.last);
+  function trdNote(txt){ const n = Date.now(); if(n - TRD.noteAt < 60000) return; TRD.noteAt = n; chatNotice('trd', 'go:' + TRD_ID, txt); }
+  const trdName = (u, p) => (SCALL.m && SCALL.m[u] && SCALL.m[u].n) || (PRES.list && PRES.list[u] && PRES.list[u].n) || (u === chatUid() ? chatName() : '') || 'Someone';
+  const trdPnl = (p, P) => p ? (p.g || 0) + (p.sh || 0) * P - (p.c || 0) : 0;
+  // the recent prices, oldest first
+  function trdHist(){
+    const r = TRD.r; if(!r) return [];
+    const out = Object.values(TRD.h || {}).filter(x => x && isFinite(x.k) && x.k > r.k - TRD_WIN && x.k <= r.k).sort((a, b) => a.k - b.k);
+    if(!out.length || out[out.length - 1].k !== r.k) out.push({ k: r.k, P: r.P, t: r.lt });
+    return out;
   }
   async function trdLoad(){
     const d = (await trdGet('trade')) || {};
-    TRD.r = d.r && isFinite(d.r.t0) ? d.r : null; TRD.p = d.p || {}; TRD.f = d.f || {};
-    if(TRD.r){ TRD.r.S = TRD.r.t0 % 999983; TRD.r.e = TRD.r.t0 + TRD.r.d * 1000; }
-    return d;
+    TRD.r = d.r && d.r.lt ? d.r : null; TRD.h = d.h || {}; TRD.p = d.p || {}; TRD.f = d.f || {}; TRD.live = d.on || {};
   }
-  // keep the market moving: tick when it's due, post the results when it closes, cash yourself out
+  // keep the market moving while you're in it
   async function trdStep(){
     if(TRD.busy || !chatName()) return; TRD.busy = true;
     try{
       await trdLoad();
-      const r = TRD.r, me = chatUid(), now = trdNow();
-      if(r){
-        // ticks that are due (catching up a few at a time)
-        for(let n = 0; n < 12 && r.k < trdMaxK(r) && now >= r.t0 + (r.k + 1) * TRD_TICK; n++){
-          const k = r.k + 1, P = trdSeries(r.S, k).px[k];
-          if(!(await trdPatch({ 'trade/r/k': k, 'trade/r/P': P }))){ await trdLoad(); break; }
-          r.k = k; r.P = P;
-        }
-        // closed: keep the final price, post the results (whoever gets there first)
-        if(r.k >= trdMaxK(r) && !r.post && !TRD.posted[r.id]){
-          TRD.posted[r.id] = true;
-          if(await trdPatch({ 'trade/r/post': true, [`trade/f/${r.id}`]: { P: r.P } })){ r.post = true; trdPostResults(r); }
+      const me = chatUid(), now = trdNow();
+      if(!TRD.r){
+        await trdPatch({ 'trade/r': { id: TRD_ID, S: Math.floor(Math.random() * 999983), k: 0, P: 1000, lt: { '.sv': 'timestamp' } } });
+        await trdLoad();
+      } else if(now >= TRD.r.lt + 4000){
+        const r = TRD.r, slept = now - r.lt > 300000, n = trdNext(r);
+        if(await trdPatch({ 'trade/r/k': n.k, 'trade/r/P': n.P, 'trade/r/lt': { '.sv': 'timestamp' }, [`trade/h/${n.k % TRD_WIN}`]: { k: n.k, P: n.P, t: { '.sv': 'timestamp' } } })){
+          r.k = n.k; r.P = n.P; r.lt = now; TRD.h[n.k % TRD_WIN] = { k: n.k, P: n.P, t: now };
+          if(slept && !TRD.woke){ TRD.woke = true; trdNote(`woke up the market — ${TRD_SYM} is moving again 📈`); }
         }
       }
-      // your own bag: sell what's left once its round is over (at that round's final price)
+      if(now - TRD.hbAt > 8000){ TRD.hbAt = now; trdPatch({ [`trade/on/${me}`]: { '.sv': 'timestamp' } }); TRD.live[me] = now; }
+      // a bag from the old timed rounds: cash it out (at that round's final price) or start fresh
       const mp = TRD.p[me];
-      if(mp && mp.sh > 0 && !TRD.sold[mp.r]){
-        const cur = r && mp.r === r.id, P = cur ? (r.k >= trdMaxK(r) ? r.P : null) : (TRD.f[mp.r] && TRD.f[mp.r].P);
-        if(P){ TRD.sold[mp.r] = true; await trdSell(1, true); }
+      if(mp && mp.r !== TRD_ID){
+        const P = TRD.f[mp.r] && TRD.f[mp.r].P;
+        if(mp.sh > 0 && P) await trdSell(1, true);
+        else await trdPatch({ [`trade/p/${me}`]: { r: TRD_ID, sh: 0, c: 0, g: 0 } });
+        await trdLoad();
       }
     }catch(e){}
     TRD.busy = false;
     if(TRD.on) trdRender();
   }
-  function trdPostResults(r){
-    const { px } = trdSeries(r.S, trdMaxK(r)), L = trdLines(r, px), ch = Math.round((r.P / 1000 - 1) * 1000) / 10;
-    // (chat messages are short: the winner goes in the text, the biggest loser in v)
-    const sg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
-    let txt = `${trdName(r)} closed ${ch >= 0 ? '+' : ''}${ch}%`, v = 'end';
-    if(L.length){ const b = L[0], w = L[L.length - 1]; txt += ` · 🏆 ${b.n.slice(0, 12)} ${sg(b.last)}`; if(L.length > 1) v = `end:💀 ${w.n.slice(0, 12)} ${sg(w.last)}`; }
-    else txt += ' · nobody traded 🦗';
-    chatNotice('trd', v, txt);
-  }
-  // open a round
-  async function trdStart(d){
-    if(!SC.loaded) await scLoad();
-    const id = 'R' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    let ok = false;
-    try{
-      const tok = await chatAuth();
-      const r = await fetch(`${CHAT_DB}/trade/r.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ id, t0: { '.sv': 'timestamp' }, d, k: 0, P: 1000, by: chatUid(), n: chatName().slice(0, 20) }) });
-      ok = r.ok;
-    }catch(e){}
-    if(!ok){ toast('Someone else just opened a round — jump in!', 1800); await trdStep(); return; }
-    await trdLoad(); if(TRD.r && TRD.r.id === id) chatNotice('trd', 'go:' + id, `opened ${trdName(TRD.r)} — ${d / 60} min to get rich 🚀`);
-    toast('Opening the market…', 1200);
-    await trdStep();
-  }
-  // buy with a share of your points / sell a share of your bag
+  function trdPos(){ const me = chatUid(), p = TRD.p[me]; return p && p.r === TRD_ID ? p : { r: TRD_ID, sh: 0, c: 0, g: 0 }; }
   async function trdBuy(frac){
-    const r = TRD.r, me = chatUid(); if(!r || trdNow() >= r.e){ toast('The market is closed.', 1500); return; }
+    const r = TRD.r, me = chatUid(); if(!r){ return; }
     if(!SC.loaded) await scLoad();
     const amt = Math.floor(scBal() * frac), q = Math.floor(amt / r.P);
     if(q < 1){ toast(`One share costs ${r.P.toLocaleString()} — you need more points.`, 1800); return; }
-    const old = TRD.p[me], same = old && old.r === r.id, sh0 = same ? old.sh : 0, cost = q * r.P, n = Date.now().toString(36);
-    if(old && !same && old.sh > 0){ toast('Cashing out your last round first…', 1500); await trdStep(); return; }
-    const pos = same ? { 'trade/p/<u>/sh': sh0 + q, 'trade/p/<u>/c': (old.c || 0) + cost, [`trade/p/<u>/x/${n}`]: { k: r.k, q }, 'trade/p/<u>/r': r.id, 'trade/p/<u>/g': old.g || 0 }
-      : { 'trade/p/<u>': { r: r.id, sh: q, c: cost, g: 0, x: { [n]: { k: r.k, q } } } };
-    const body = {}; for(const [k, v] of Object.entries(pos)) body[k.replace('<u>', me)] = v;
+    const old = TRD.p[me] && TRD.p[me].r === TRD_ID ? TRD.p[me] : null, cost = q * r.P, n = Date.now().toString(36);
+    const body = old ? { [`trade/p/${me}/sh`]: old.sh + q, [`trade/p/${me}/c`]: (old.c || 0) + cost, [`trade/p/${me}/x/${n}`]: { k: r.k, q } }
+      : { [`trade/p/${me}`]: { r: TRD_ID, sh: q, c: cost, g: 0, x: { [n]: { k: r.k, q } } } };
+    // (only the latest 60 trades are kept)
+    if(old && old.x){ const ks = Object.keys(old.x).sort(); for(const k of ks.slice(0, Math.max(0, ks.length - 59))) body[`trade/p/${me}/x/${k}`] = null; }
     body[`scores/${me}/s`] = SC.s + cost; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
-    if(await trdPatch(body)){ SC.s += cost; trdFx('buy', q); toast(`📈 Bought ${q.toLocaleString()} ${trdName(r)} for ${cost.toLocaleString()}`, 1500); try{ sfxChip(); }catch(e){} }
+    if(await trdPatch(body)){ SC.s += cost; trdFx('buy', q); try{ sfxChip(); }catch(e){} if(frac >= 1 && cost >= 100000) trdNote(`went ALL IN on ${TRD_SYM} — ${trdK(cost)} 🚀`); }
     else { toast('The price just moved — try again.', 1500); await scLoad(); }
     await trdStep();
   }
@@ -26414,11 +26389,14 @@
     const cur = r && mp.r === r.id, P = cur ? r.P : (TRD.f[mp.r] && TRD.f[mp.r].P); if(!P) return;
     const q = frac >= 1 ? mp.sh : Math.max(1, Math.floor(mp.sh * frac)), got = q * P, n = Date.now().toString(36);
     // (the first part of a sale just pays back what the shares cost — that comes off s; only profit adds to your all-time points)
-    const rem = (mp.c || 0) - (mp.g || 0), back = rem <= 0 ? 0 : Math.min(rem, got);
+    const rem = Math.min((mp.c || 0) - (mp.g || 0), SC.s), back = rem <= 0 ? 0 : Math.min(rem, got);
     const body = { [`trade/p/${me}/sh`]: mp.sh - q, [`trade/p/${me}/g`]: (mp.g || 0) + got, [`scores/${me}/p`]: SC.p + got - back, [`scores/${me}/s`]: SC.s - back, [`scores/${me}/t`]: { '.sv': 'timestamp' } };
     if(cur) body[`trade/p/${me}/x/${n}`] = { k: r.k, q: -q };
-    if(await trdPatch(body)){ SC.p += got - back; SC.s -= back; if(!auto){ trdFx('sell', q); toast(`💸 Sold ${q.toLocaleString()} for ${got.toLocaleString()}`, 1500); try{ sfxChip(); }catch(e){} } else toast(`📉 Market closed — your ${q.toLocaleString()} ${cur ? trdName(r) : 'shares'} paid out ${got.toLocaleString()} points.`, 3000); }
-    else if(!auto){ toast('The price just moved — try again.', 1500); await scLoad(); }
+    if(await trdPatch(body)){
+      SC.p += got - back; SC.s -= back;
+      if(auto) toast(`💸 Your old ${q.toLocaleString()} shares paid out ${got.toLocaleString()} points.`, 3000);
+      else { trdFx('sell', q); try{ sfxChip(); }catch(e){} const pn = trdPnl({ c: mp.c, g: (mp.g || 0) + got, sh: mp.sh - q }, P); if(got >= 100000 && frac >= 1) trdNote(`cashed out ${trdK(got)} of ${TRD_SYM} · all-time ${trdSg(pn)} ${pn >= 0 ? '🤑' : '💀'}`); }
+    } else if(!auto){ toast('The price just moved — try again.', 1500); await scLoad(); }
     if(!auto) await trdStep();
   }
   function trdFx(kind, q){
@@ -26428,108 +26406,139 @@
   // ----- the window -----
   function trdOpen(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
-    if(TRD.on) return; TRD.on = true;
+    if(TRD.on) return; TRD.on = true; TRD.drawKey = ''; TRD.tapeKey = null; TRD.lastP = 0; TRD.woke = false;
     const w = document.createElement('div'); w.className = 'td-win trd-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Trading');
-    w.innerHTML = `<div class="td-back"></div><div class="td-box trd-box"><div class="td-head"><b>📈 SaiDeck Exchange</b><span class="trd-clock"></span><button type="button" class="td-x" aria-label="Close">✕</button></div><div class="trd-main"><p class="td-dim">Loading the market…</p></div></div>`;
+    w.innerHTML = `<div class="td-back"></div><div class="td-box trd-box">
+      <div class="td-head trd-head"><b>📈 SaiDeck Exchange</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="trd-who"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
+      <div class="trd-tape"><div class="trd-tape-in"></div></div>
+      <div class="trd-main">
+        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">S</span><div><b class="trd-sym">${TRD_SYM}</b><small>SaiDeck Inc. · ticks every 4 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
+        <div class="trd-chart"><canvas class="trd-cv"></canvas><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
+        <div class="trd-acts"><span class="trd-l">BUY</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
+          <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button></div>
+        <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT <i>(recent)</i></div><canvas class="trd-cv2"></canvas></div>
+          <div class="trd-side"><div class="trd-ph">🏆 BEST TRADERS <i>(all-time)</i></div><ol class="trd-rank"></ol></div></div>
+      </div></div>`;
     document.body.appendChild(w); TRD.win = w;
-    const fit = () => { if(!TRD.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v) w.style.right = v; };
+    const fit = () => { if(!TRD.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v){ w.style.right = v; TRD.drawKey = ''; } };
     fit(); TRD.fit = setInterval(fit, 400); window.addEventListener('resize', fit);
     TRD.fitOff = () => { clearInterval(TRD.fit); window.removeEventListener('resize', fit); };
     w.querySelector('.td-x').addEventListener('click', trdClose); w.querySelector('.td-back').addEventListener('click', trdClose);
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); trdClose(); } });
+    w.querySelectorAll('[data-b]').forEach(b => b.addEventListener('click', () => { b.blur(); trdBuy(+b.dataset.b); }));
+    w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { b.blur(); trdSell(+b.dataset.s); }));
     w.tabIndex = -1; w.focus();
-    TRD.built = ''; trdStep(); TRD.poll = setInterval(trdStep, 1500);
-    const loop = () => { if(!TRD.on) return; trdClock(); TRD.raf = requestAnimationFrame(loop); }; loop();
+    if(!SC.loaded) scLoad().catch(() => {});
+    trdStep(); TRD.poll = setInterval(trdStep, 1000);
   }
-  function trdClose(){ if(!TRD.on) return; TRD.on = false; clearInterval(TRD.poll); cancelAnimationFrame(TRD.raf); if(TRD.fitOff) TRD.fitOff(); if(TRD.win){ TRD.win.remove(); TRD.win = null; } }
-  function trdClock(){
-    const c = TRD.win && TRD.win.querySelector('.trd-clock'), r = TRD.r; if(!c) return;
-    const left = r ? r.e - trdNow() : 0;
-    const t = r && left > 0 ? `⏱ ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}` : r ? 'CLOSED' : '';
-    if(c.textContent !== t){ c.textContent = t; c.classList.toggle('closing', left > 0 && left < 15000); }
+  function trdClose(){
+    if(!TRD.on) return; TRD.on = false; clearInterval(TRD.poll); if(TRD.fitOff) TRD.fitOff();
+    trdPatch({ [`trade/on/${chatUid()}`]: null });
+    if(TRD.win){ TRD.win.remove(); TRD.win = null; }
   }
   function trdRender(){
-    const main = TRD.win && TRD.win.querySelector('.trd-main'); if(!main) return;
-    const r = TRD.r, me = chatUid(), now = trdNow(), open = r && now < r.e, live = r && (open || now < r.e + 30000);
-    if(!live){
-      // no market: open one
-      if(TRD.built !== 'start'){
-        TRD.built = 'start';
-        main.innerHTML = `<div class="trd-start"><div class="trd-logo">📈</div><b class="trd-st-h">The market is closed</b><span class="td-dim">Open a round — a brand-new meme stock. Everyone buys and sells at the same price, and the best trader wins bragging rights (and points).</span>
-          <div class="trd-durs">${[[60, '1 min'], [180, '3 min'], [300, '5 min'], [600, '10 min']].map(([d, l]) => `<button type="button" class="tdl-big" data-d="${d}"><b>${l}</b><i>round</i></button>`).join('')}</div>
-          ${r ? `<span class="td-dim">Last round: ${trdName(r)} closed at ${r.P.toLocaleString()} (${r.P >= 1000 ? '+' : ''}${Math.round((r.P / 1000 - 1) * 1000) / 10}%)</span>` : ''}</div>`;
-        main.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', async () => { main.querySelectorAll('[data-d]').forEach(x => x.disabled = true); await trdStart(+b.dataset.d); TRD.built = ''; trdRender(); }));
-      }
-      return;
+    const W = TRD.win, r = TRD.r; if(!W || !r) return;
+    const me = chatUid(), now = trdNow(), H = trdHist(), mp = trdPos(), P = r.P;
+    const p0 = H.length ? H[0].P : 1000, ch = (P / p0 - 1) * 100;
+    // the price: flashes green / red when it moves
+    const px = W.querySelector('.trd-px');
+    if(TRD.lastP !== P){
+      px.textContent = P.toLocaleString();
+      if(TRD.lastP){ px.classList.remove('fu', 'fd'); void px.offsetWidth; px.classList.add(P > TRD.lastP ? 'fu' : 'fd'); }
+      // a big jump: the whale / crash banner
+      if(TRD.lastP && Math.abs(P / TRD.lastP - 1) > 0.15){ const up = P > TRD.lastP, ev = W.querySelector('.trd-ev'); ev.hidden = false; ev.className = 'trd-ev ' + (up ? 'up' : 'down'); ev.textContent = up ? '🐋 WHALE PUMP!' : '💥 MARKET CRASH!'; try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { ev.hidden = true; }, 2400); }
+      TRD.lastP = P;
     }
-    if(TRD.built !== r.id){
-      TRD.built = r.id;
-      main.innerHTML = `<div class="trd-top"><div class="trd-tk"><b class="trd-sym"></b><span class="trd-px"></span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
-        <div class="trd-chart"><canvas class="trd-cv"></canvas><div class="trd-ev" hidden></div></div>
-        <div class="trd-mid"><div class="trd-acts"><span class="trd-l">BUY with</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
-          <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button></div></div>
-        <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT</div><canvas class="trd-cv2"></canvas></div><div class="trd-side"><div class="trd-ph">🏆 THIS ROUND</div><ol class="trd-rank"></ol><div class="trd-ph">🧾 TRADES</div><div class="trd-feed"></div></div></div>`;
-      main.querySelectorAll('[data-b]').forEach(b => b.addEventListener('click', () => trdBuy(+b.dataset.b)));
-      main.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => trdSell(+b.dataset.s)));
+    const chEl = W.querySelector('.trd-ch'); chEl.textContent = `${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch).toFixed(1)}%`; chEl.className = 'trd-ch ' + (ch >= 0 ? 'up' : 'down');
+    const paused = now - r.lt > 9000;
+    W.querySelector('.trd-live').classList.toggle('off', paused); W.querySelector('.trd-live span').textContent = paused ? 'PAUSED' : 'LIVE';
+    W.querySelector('.trd-paused').hidden = !paused;
+    // who's here
+    const live = Object.entries(TRD.live || {}).filter(([u, t]) => typeof t === 'number' && now - t < 25000).map(([u]) => u);
+    W.querySelector('.trd-who').innerHTML = live.slice(0, 6).map(u => tdFaceHtml(u, trdName(u))).join('') + `<span>${live.length} trading</span>`;
+    // your bag
+    const val = mp.sh * P, pn = trdPnl(mp, P);
+    W.querySelector('.trd-bag').innerHTML = `<div><small>YOUR BAG</small><span><b>${trdK(mp.sh)}</b> sh · <b>${trdK(val)}</b></span></div><div><small>ALL-TIME</small><b class="${pn >= 0 ? 'up' : 'down'}">${trdSg(pn)} ${pn >= 0 ? '📈' : '📉'}</b></div><div><small>POINTS</small><b>🪙 ${SC.loaded ? trdK(scBal()) : '…'}</b></div>`;
+    W.querySelectorAll('[data-s]').forEach(b => { b.disabled = !(mp.sh > 0); });
+    // everyone: lines and ranking
+    const people = [];
+    for(const [u, p] of Object.entries(TRD.p || {})){ if(!p || p.r !== TRD_ID) continue; people.push({ u, n: trdName(u, p), p, pn: trdPnl(p, P) }); }
+    people.sort((a, b) => b.pn - a.pn);
+    W.querySelector('.trd-rank').innerHTML = people.length ? people.slice(0, 12).map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><i class="rk">${i === 0 ? '🏆' : i === people.length - 1 && people.length > 2 ? '💀' : i + 1}</i>${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><em>${x.p.sh ? '🎒 ' + trdK(x.p.sh) : ''}</em><span class="${x.pn >= 0 ? 'up' : 'down'}">${trdSg(x.pn)}</span></li>`).join('') : '<li class="td-dim">Nobody has traded yet. Be the first 👀</li>';
+    // the ticker tape: the latest trades
+    const byK = {}; for(const h of H) byK[h.k] = h.P;
+    const trades = []; for(const x of people) for(const t of Object.values(x.p.x || {})) if(t && isFinite(t.k)) trades.push({ n: x.n, u: x.u, k: t.k, q: t.q, P: byK[t.k] });
+    trades.sort((a, b) => b.k - a.k);
+    const tapeKey = trades.slice(0, 14).map(t => t.k + t.n + t.q).join();
+    if(TRD.tapeKey !== tapeKey){
+      TRD.tapeKey = tapeKey;
+      const items = trades.slice(0, 14).map(t => `<span class="${t.q > 0 ? 'up' : 'down'}"><b style="color:${chatColor(t.n)}">${escapeHtml(t.n)}</b> ${t.q > 0 ? 'bought' : 'sold'} ${trdK(Math.abs(t.q))}${t.P ? ' @ ' + t.P.toLocaleString() : ''} ${t.q > 0 ? '▲' : '▼'}</span>`).join('') || `<span>${TRD_SYM} is open for business — buy low, sell high, don't get cooked</span>`;
+      W.querySelector('.trd-tape-in').innerHTML = items + items;
     }
-    const { px, ev } = trdSeries(r.S, r.k), L = trdLines(r, px), mp = TRD.p[me] && TRD.p[me].r === r.id ? TRD.p[me] : null;
-    const ch = (r.P / 1000 - 1) * 100, sym = main.querySelector('.trd-sym');
-    sym.textContent = trdName(r); main.querySelector('.trd-px').textContent = r.P.toLocaleString();
-    const chEl = main.querySelector('.trd-ch'); chEl.textContent = `${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch).toFixed(1)}%`; chEl.className = 'trd-ch ' + (ch >= 0 ? 'up' : 'down');
-    const val = mp ? mp.sh * r.P : 0, pnl = mp ? (mp.g || 0) + val - (mp.c || 0) : 0;
-    main.querySelector('.trd-bag').innerHTML = mp && (mp.sh > 0 || mp.c) ? `<span>🎒 <b>${mp.sh.toLocaleString()}</b> shares · worth <b>${val.toLocaleString()}</b></span><span class="${pnl >= 0 ? 'up' : 'down'}">${pnl >= 0 ? '+' : '−'}${Math.abs(pnl).toLocaleString()} ${pnl >= 0 ? '📈' : '📉'}</span>` : `<span class="td-dim">🪙 ${SC.loaded ? scBal().toLocaleString() : '…'} points to trade with</span>`;
-    main.querySelectorAll('[data-b]').forEach(b => { b.disabled = !open; }); main.querySelectorAll('[data-s]').forEach(b => { b.disabled = !(mp && mp.sh > 0); });
-    // a big event just happened?
-    const evEl = main.querySelector('.trd-ev'), lastEv = Object.keys(ev).map(Number).filter(k => k > r.k - 2).pop();
-    if(lastEv && TRD.evShown !== r.id + ':' + lastEv){ TRD.evShown = r.id + ':' + lastEv; const up = ev[lastEv] > 0; evEl.hidden = false; evEl.className = 'trd-ev ' + (up ? 'up' : 'down'); evEl.textContent = up ? '🐋 WHALE PUMP +25%' : '💥 MARKET CRASH −30%'; try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { evEl.hidden = true; }, 2600); }
-    trdDraw(main.querySelector('.trd-cv'), r, px, ev, L);
-    trdDrawPL(main.querySelector('.trd-cv2'), r, L);
-    main.querySelector('.trd-rank').innerHTML = L.length ? L.map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><i>${i === 0 ? '🏆' : i === L.length - 1 && L.length > 1 ? '💀' : i + 1}</i>${tdFaceHtml(x.u, x.n)}<b style="color:${chatColor(x.n)}">${escapeHtml(x.n)}</b><span class="${x.last >= 0 ? 'up' : 'down'}">${x.last >= 0 ? '+' : '−'}${Math.abs(Math.round(x.last)).toLocaleString()}</span></li>`).join('') : '<li class="td-dim">Nobody has traded yet. Be the first 👀</li>';
-    const feed = []; for(const x of L) for(const t of x.xs) feed.push({ n: x.n, k: t.k, q: t.q });
-    feed.sort((a, b) => b.k - a.k);
-    main.querySelector('.trd-feed').innerHTML = feed.slice(0, 12).map(f => `<div class="${f.q > 0 ? 'up' : 'down'}"><b style="color:${chatColor(f.n)}">${escapeHtml(f.n)}</b> ${f.q > 0 ? 'bought' : (f.q < -1000 ? 'panic sold' : 'sold')} ${Math.abs(f.q).toLocaleString()} @ ${(px[f.k] || 0).toLocaleString()}</div>`).join('') || '<div class="td-dim">…</div>';
+    // the charts: only redrawn when something changed
+    const key = r.k + '|' + tapeKey + '|' + people.map(x => x.u + x.p.sh).join();
+    if(key !== TRD.drawKey){ TRD.drawKey = key; trdDraw(W.querySelector('.trd-cv'), H, trades); trdDrawPL(W.querySelector('.trd-cv2'), H, people, byK); }
   }
   function trdCanvas(cv){ const b = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1); const W = Math.max(200, Math.round(b.width * dpr)), H = Math.max(80, Math.round(b.height * dpr)); if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; } const x = cv.getContext('2d'); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, W, H); return { x, W, H, dpr }; }
-  // the price: a glowing line, everyone's buys ▲ and sells ▼, the big events
-  function trdDraw(cv, r, px, ev, L){
-    const { x, W, H, dpr } = trdCanvas(cv), mk = trdMaxK(r), pad = 10 * dpr;
-    let lo = Math.min(...px), hi = Math.max(...px); if(hi - lo < 60){ hi += 30; lo = Math.max(0, lo - 30); }
-    const X = (k) => pad + (W - 2 * pad - 50 * dpr) * k / Math.max(1, mk), Y = (v) => H - pad - (H - 2 * pad) * (v - lo) / (hi - lo);
-    x.strokeStyle = 'rgba(255,255,255,.06)'; x.lineWidth = 1; for(let i = 0; i <= 4; i++){ const y = pad + (H - 2 * pad) * i / 4; x.beginPath(); x.moveTo(pad, y); x.lineTo(W - pad, y); x.stroke(); }
-    const y0 = Y(1000); x.setLineDash([4 * dpr, 4 * dpr]); x.strokeStyle = 'rgba(255,255,255,.25)'; x.beginPath(); x.moveTo(pad, y0); x.lineTo(W - pad, y0); x.stroke(); x.setLineDash([]);
-    const up = px[px.length - 1] >= 1000, col = up ? '#35d07e' : '#ff4d6a';
-    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, up ? 'rgba(53,208,126,.35)' : 'rgba(255,77,106,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-    x.beginPath(); px.forEach((v, k) => k ? x.lineTo(X(k), Y(v)) : x.moveTo(X(k), Y(v))); x.lineTo(X(px.length - 1), H); x.lineTo(X(0), H); x.closePath(); x.fillStyle = g; x.fill();
-    x.beginPath(); px.forEach((v, k) => k ? x.lineTo(X(k), Y(v)) : x.moveTo(X(k), Y(v))); x.strokeStyle = col; x.lineWidth = 2.5 * dpr; x.shadowColor = col; x.shadowBlur = 10 * dpr; x.stroke(); x.shadowBlur = 0;
-    // the big moments
-    x.font = `${Math.round(14 * dpr)}px sans-serif`; x.textAlign = 'center'; x.textBaseline = 'bottom';
-    for(const [k, e] of Object.entries(ev)) x.fillText(e > 0 ? '🐋' : '💥', X(+k), Y(px[+k]) - 6 * dpr);
-    // everyone's trades
-    for(const l of L) for(const t of l.xs){ if(t.k >= px.length) continue; const cx = X(t.k), cy = Y(px[t.k]), s = 6 * dpr; x.fillStyle = chatColor(l.n); x.beginPath(); if(t.q > 0){ x.moveTo(cx, cy + 3 * dpr); x.lineTo(cx - s, cy + 3 * dpr + s * 1.5); x.lineTo(cx + s, cy + 3 * dpr + s * 1.5); } else { x.moveTo(cx, cy - 3 * dpr); x.lineTo(cx - s, cy - 3 * dpr - s * 1.5); x.lineTo(cx + s, cy - 3 * dpr - s * 1.5); } x.closePath(); x.fill(); }
-    // the price tag at the end
-    const lx = X(px.length - 1), ly = Y(px[px.length - 1]);
-    x.fillStyle = col; x.beginPath(); x.arc(lx, ly, 4 * dpr * (1 + .3 * Math.sin(Date.now() / 200)), 0, 7); x.fill();
-    x.font = `800 ${Math.round(12 * dpr)}px Inter, sans-serif`; x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText(px[px.length - 1].toLocaleString(), lx + 8 * dpr, ly);
+  // candles (5 ticks = 20 s each), volume, everyone's trades, the naps
+  function trdDraw(cv, H, trades){
+    const { x, W, H: Hh, dpr } = trdCanvas(cv); if(!H.length) return;
+    const pad = 8 * dpr, right = 58 * dpr, volH = 34 * dpr, top = 10 * dpr, bot = Hh - volH - 6 * dpr;
+    // (the chart fits what there is: at least 60 ticks wide, at most the last 240)
+    const C = 5, span = Math.max(60, Math.ceil(H.length / C) * C), kEnd = H[H.length - 1].k, kStart = kEnd - span + 1, nC = span / C;
+    const cs = []; let prev = null;
+    for(const h of H){ const i = Math.floor((h.k - kStart) / C); if(i < 0) continue; let c = cs[i]; if(!c){ c = cs[i] = { o: prev != null ? prev : h.P, c: h.P, hi: h.P, lo: h.P, v: 0, gap: false }; if(prev != null) { c.hi = Math.max(c.hi, prev); c.lo = Math.min(c.lo, prev); } } c.c = h.P; c.hi = Math.max(c.hi, h.P); c.lo = Math.min(c.lo, h.P); prev = h.P; }
+    // naps: a long wait between two ticks
+    for(let j = 1; j < H.length; j++) if(H[j].t && H[j - 1].t && H[j].t - H[j - 1].t > 15000){ const i = Math.floor((H[j].k - kStart) / C); if(cs[i]) cs[i].gap = true; }
+    for(const t of trades){ const i = Math.floor((t.k - kStart) / C); if(cs[i]) cs[i].v += Math.abs(t.q); }
+    let lo = Infinity, hi = -Infinity, vmax = 1; for(const c of cs) if(c){ lo = Math.min(lo, c.lo); hi = Math.max(hi, c.hi); vmax = Math.max(vmax, c.v); }
+    if(hi - lo < 40){ hi += 20; lo -= 20; } const m = (hi - lo) * .08; hi += m; lo -= m;
+    const cw = (W - pad - right) / nC, X = (i) => pad + cw * (i + .5), Y = (v) => top + (bot - top) * (hi - v) / (hi - lo);
+    x.strokeStyle = 'rgba(255,255,255,.05)'; x.lineWidth = 1; x.fillStyle = 'rgba(255,255,255,.3)'; x.font = `${Math.round(10 * dpr)}px Inter, sans-serif`; x.textAlign = 'left'; x.textBaseline = 'middle';
+    for(let g = 0; g <= 4; g++){ const v = lo + (hi - lo) * g / 4, y = Y(v); x.beginPath(); x.moveTo(pad, y); x.lineTo(W - right, y); x.stroke(); x.fillText(Math.round(v).toLocaleString(), W - right + 6 * dpr, y); }
+    cs.forEach((c, i) => {
+      if(!c) return; const up = c.c >= c.o, col = up ? '#35d07e' : '#ff4d6a', cx = X(i);
+      if(c.gap){ x.save(); x.setLineDash([3 * dpr, 4 * dpr]); x.strokeStyle = 'rgba(255,255,255,.22)'; x.beginPath(); x.moveTo(cx - cw / 2, top); x.lineTo(cx - cw / 2, Hh); x.stroke(); x.restore(); x.fillStyle = 'rgba(255,255,255,.4)'; x.textAlign = 'center'; x.fillText('💤', cx - cw / 2, top + 6 * dpr); x.textAlign = 'left'; }
+      x.strokeStyle = col; x.fillStyle = col; x.lineWidth = Math.max(1, dpr);
+      x.beginPath(); x.moveTo(cx, Y(c.hi)); x.lineTo(cx, Y(c.lo)); x.stroke();
+      const y1 = Y(Math.max(c.o, c.c)), y2 = Y(Math.min(c.o, c.c)), bw = Math.max(2 * dpr, cw * .62);
+      if(i === cs.length - 1){ x.shadowColor = col; x.shadowBlur = 12 * dpr; }
+      x.fillRect(cx - bw / 2, y1, bw, Math.max(1.5 * dpr, y2 - y1)); x.shadowBlur = 0;
+      if(c.v){ x.globalAlpha = .35; x.fillRect(cx - bw / 2, Hh - (volH - 4 * dpr) * c.v / vmax, bw, (volH - 4 * dpr) * c.v / vmax); x.globalAlpha = 1; }
+    });
+    // everyone's trades: a dot in their colour (▲ under for buys, ▼ over for sells)
+    for(const t of trades){ const i = Math.floor((t.k - kStart) / C); if(!cs[i] || !t.P) continue; const cx = X(i), cy = Y(t.P) + (t.q > 0 ? 9 : -9) * dpr; x.fillStyle = chatColor(t.n); x.beginPath(); x.arc(cx, cy, 4.5 * dpr, 0, 7); x.fill(); x.strokeStyle = 'rgba(0,0,0,.6)'; x.lineWidth = dpr; x.stroke(); }
+    // the price now
+    const P = H[H.length - 1].P, ly = Y(P), lc = P >= H[0].P ? '#35d07e' : '#ff4d6a';
+    x.setLineDash([2 * dpr, 3 * dpr]); x.strokeStyle = lc; x.beginPath(); x.moveTo(pad, ly); x.lineTo(W - right, ly); x.stroke(); x.setLineDash([]);
+    x.fillStyle = lc; const tw = right - 4 * dpr; x.beginPath(); x.roundRect ? x.roundRect(W - right + 2 * dpr, ly - 9 * dpr, tw, 18 * dpr, 4 * dpr) : x.rect(W - right + 2 * dpr, ly - 9 * dpr, tw, 18 * dpr); x.fill();
+    x.fillStyle = '#071a10'; x.font = `800 ${Math.round(11 * dpr)}px Inter, sans-serif`; x.textAlign = 'center'; x.fillText(P.toLocaleString(), W - right + 2 * dpr + tw / 2, ly);
   }
-  // everyone's profit, one line each in their colour, name at the end
-  function trdDrawPL(cv, r, L){
-    const { x, W, H, dpr } = trdCanvas(cv), mk = trdMaxK(r), pad = 8 * dpr;
-    if(!L.length){ x.fillStyle = 'rgba(255,255,255,.35)'; x.font = `${Math.round(12 * dpr)}px Inter, sans-serif`; x.textAlign = 'center'; x.fillText('Profit lines show up here once people trade', W / 2, H / 2); return; }
-    let lo = 0, hi = 0; for(const l of L) for(const v of l.line) if(v != null){ lo = Math.min(lo, v); hi = Math.max(hi, v); } if(hi - lo < 10){ hi += 5; lo -= 5; }
-    const X = (k) => pad + (W - 2 * pad - 105 * dpr) * k / Math.max(1, mk), Y = (v) => H - pad - (H - 2 * pad) * (v - lo) / (hi - lo);
-    x.strokeStyle = 'rgba(255,255,255,.25)'; x.setLineDash([4 * dpr, 4 * dpr]); x.beginPath(); x.moveTo(pad, Y(0)); x.lineTo(W - pad, Y(0)); x.stroke(); x.setLineDash([]);
+  // everyone's profit over the chart's time — worked back from where they are now and their trades
+  function trdDrawPL(cv, H, people, byK){
+    const { x, W, H: Hh, dpr } = trdCanvas(cv), pad = 8 * dpr, right = 96 * dpr;
+    if(!H.length) return;
+    const ks = H.map(h => h.k), span = Math.max(60, Math.ceil(H.length / 5) * 5), kStart = ks[ks.length - 1] - span + 1;
+    const lines = [];
+    for(const pp of people){
+      const tr = Object.values(pp.p.x || {}).filter(t => t && t.k >= ks[0]);
+      if(!tr.length && !pp.p.sh) continue;
+      const line = H.map(h => { let cash = (pp.p.g || 0) - (pp.p.c || 0), sh = pp.p.sh || 0; for(const t of tr) if(t.k > h.k){ cash += t.q * (byK[t.k] || h.P); sh -= t.q; } return cash + sh * h.P; });
+      lines.push({ ...pp, line });
+    }
+    if(!lines.length){ x.fillStyle = 'rgba(255,255,255,.35)'; x.font = `${Math.round(12 * dpr)}px Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Everyone\'s profit lines show up here once people trade', W / 2, Hh / 2); return; }
+    let lo = 0, hi = 0; for(const l of lines) for(const v of l.line){ lo = Math.min(lo, v); hi = Math.max(hi, v); } if(hi - lo < 10){ hi += 5; lo -= 5; }
+    const X = (k) => pad + (W - pad - right) * (k - kStart) / (span - 1), Y = (v) => pad + (Hh - 2 * pad) * (hi - v) / (hi - lo);
+    x.strokeStyle = 'rgba(255,255,255,.22)'; x.setLineDash([4 * dpr, 4 * dpr]); x.beginPath(); x.moveTo(pad, Y(0)); x.lineTo(W - right, Y(0)); x.stroke(); x.setLineDash([]);
     const used = [];
-    for(const l of L){
-      const c = chatColor(l.n); x.strokeStyle = c; x.lineWidth = (l.u === chatUid() ? 3 : 2) * dpr; x.beginPath(); let on = false, lk = 0;
-      l.line.forEach((v, k) => { if(v == null) return; if(!on){ x.moveTo(X(k), Y(v)); on = true; } else x.lineTo(X(k), Y(v)); lk = k; });
-      x.stroke();
+    for(const l of lines){
+      const c = chatColor(l.n); x.strokeStyle = c; x.lineWidth = (l.u === chatUid() ? 3 : 1.8) * dpr; x.beginPath();
+      H.forEach((h, j) => { const px = X(h.k), py = Y(l.line[j]); j ? x.lineTo(px, py) : x.moveTo(px, py); }); x.stroke();
+      let ly = Y(l.line[l.line.length - 1]); for(let t = 0; t < 20 && used.some(u => Math.abs(u - ly) < 13 * dpr); t++) ly += 13 * dpr; used.push(ly);
       x.fillStyle = c; x.font = `800 ${Math.round(11 * dpr)}px Inter, sans-serif`; x.textAlign = 'left'; x.textBaseline = 'middle';
-      let ly = Y(l.line[lk]); for(let t = 0; t < 20 && used.some(u => Math.abs(u - ly) < 13 * dpr); t++) ly += 13 * dpr; used.push(ly);      // (names don't sit on top of each other)
-      x.fillText(`${l.n.slice(0, 10)} ${l.last >= 0 ? '+' : '−'}${trdK(Math.abs(l.last))}`, X(lk) + 6 * dpr, ly);
+      x.fillText(`${l.n.slice(0, 9)} ${trdSg(l.line[l.line.length - 1])}`, W - right + 6 * dpr, ly);
     }
   }
-  // in the background (chat open): the market keeps ticking and closing even when nobody has the window open
-  setInterval(() => { if(!TRD.on && chatName() && document.visibilityState === 'visible' && (CHAT.open || (TRD.p[chatUid()] && TRD.p[chatUid()].sh > 0))) trdStep(); }, 8000);
   // ----- Tower Defense: the battle (the same on every computer) -----
   // A wave is worked out step by step (30 steps a second) from the wave number, the troops on the map and the
   // difficulty — nothing random except a seeded shuffle — so everyone in a team sees exactly the same fight, and
