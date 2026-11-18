@@ -22728,7 +22728,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 148;                 // ← goes up by one with every published version
+  const SD_BUILD = 149;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23285,15 +23285,21 @@
   function chatFmtTime(t){ const d = new Date(t); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
   function chatFmtDay(t){ const d = new Date(t), now = new Date(); const same = (a, b) => a.toDateString() === b.toDateString(); const y = new Date(now); y.setDate(now.getDate() - 1); return same(d, now) ? 'Today' : same(d, y) ? 'Yesterday' : d.toLocaleDateString([], { day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' }); }
   // ----- profile pictures (profiles/<chat id> = a small square JPEG) -----
+  // (pictures are kept for 6 hours and remembered between visits — re-downloading everyone's every 5 minutes added up)
+  const PROF_TTL = 6 * 3600000;
+  let profSaveT = 0;
+  function profRemember(){ clearTimeout(profSaveT); profSaveT = setTimeout(() => { try{ const o = {}; for(const [u, c] of CHAT.prof) if(c && !c.loading && c.at) o[u] = { p: c.p || null, at: c.at }; localStorage.setItem('sdProfCache', JSON.stringify(o)); }catch(e){} }, 2000); }
+  function profRestore(){ try{ const o = JSON.parse(localStorage.getItem('sdProfCache') || '{}'); for(const [u, c] of Object.entries(o)) if(c && c.at && !CHAT.prof.has(u)) CHAT.prof.set(u, { p: c.p, at: c.at }); }catch(e){} }
   function chatProfile(uid){
     if(!uid) return null;
+    if(!CHAT.profRestored){ CHAT.profRestored = true; profRestore(); }
     const c = CHAT.prof.get(uid);
-    if(c && (c.loading || Date.now() - c.at < 300000)) return c.p || null;
+    if(c && (c.loading || Date.now() - c.at < (chatIsMe(uid) ? 300000 : PROF_TTL))) return c.p || null;
     CHAT.prof.set(uid, { loading: true, p: c && c.p, at: 0 });
     fetch(`${CHAT_DB}/profiles/${encodeURIComponent(uid)}/p.json`).then(r => r.ok ? r.json() : null).catch(() => undefined).then(p => {
       const old = CHAT.prof.get(uid);
       const val = p === undefined ? (old && old.p) : (typeof p === 'string' && /^data:image\//.test(p) ? p : null);
-      CHAT.prof.set(uid, { p: val, at: Date.now() });
+      CHAT.prof.set(uid, { p: val, at: Date.now() }); profRemember();
       if(val !== (old && old.p)) chatRerenderSoon();
     });
     return c && c.p || null;
@@ -25282,7 +25288,7 @@
     CAS.on = false; clearInterval(CAS.hb); CAS.hb = 0; CAS.held = 0; CAS.heldBy = {};
     const S = CAS.sess; CAS.sess = null;
     if(S && S.spins > 0) casSessionPost(S);
-    clearInterval(CAS.poll); CAS.poll = 0;
+    clearInterval(CAS.poll); CAS.poll = 0; liveClose('casino');
     chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
   }
   window.addEventListener('pagehide', () => { if(CAS.on) casLeave(); });
@@ -25295,7 +25301,7 @@
       if(CAS.polling) return; CAS.polling = true;
       try{
         const tok = await chatAuth();
-        const r = await casFetch(`${CHAT_DB}/casino.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+        void tok; const r = await liveResp('casino');
         const d = r.ok ? await r.json() : null;
         if(CAS.on){
           CAS.seats = (d && d.seats) || {};
@@ -25442,9 +25448,9 @@
   setInterval(async () => {
     if(!CHAT.open || CAS.on || !chatName() || document.visibilityState !== 'visible') return;
     try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/seats.json?auth=${encodeURIComponent(tok)}`); if(r.ok && !CAS.on){ CAS.seats = (await r.json()) || {}; }
-      if(!BJ.on){ const b = await fetch(`${CHAT_DB}/bj/p.json?auth=${encodeURIComponent(tok)}`); if(b.ok) BJ.peek = (await b.json()) || {}; }
+      if(!BJ.on){ const pk = {}, now = Date.now() + (PRES.offset || 0); for(const [u, p] of Object.entries(PRES.list || {})) if(p && p.g === 'bj' && typeof p.t === 'number' && now - p.t < 150000) pk[u] = { n: p.n, t: bjNow() }; BJ.peek = pk; }      // (from who's online — no download)
       casBarRender(); }catch(e){}
-  }, 10000);
+  }, 30000);
   // the Casino window
   function casRender(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el) return;
@@ -25680,7 +25686,7 @@
   function bjLeave(){
     if(!BJ.on) return;
     const me = chatUid(), D = BJ.d;
-    BJ.on = false; BJ.watch = false; clearInterval(BJ.hb); BJ.hb = 0; clearInterval(BJ.poll); BJ.poll = 0;
+    BJ.on = false; BJ.watch = false; clearInterval(BJ.hb); BJ.hb = 0; clearInterval(BJ.poll); BJ.poll = 0; liveClose('bj');
     const Ss = BJ.sess; BJ.sess = null;
     if(Ss && Ss.hands > 0) bjSessionPost(Ss);
     const body = { [`bj/p/${me}/o`]: true, [`bj/p/${me}/t`]: bjSv };
@@ -25697,7 +25703,7 @@
       if(BJ.polling) return; BJ.polling = true;
       try{
         const tok = await chatAuth();
-        const r = await casFetch(`${CHAT_DB}/bj.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+        void tok; const r = await liveResp('bj');
         const d = r.ok ? await r.json() : null;
         if(BJ.on && d){ BJ.d = d.d || null; BJ.x = d.x || null; BJ.p = d.p || {}; BJ.kick = d.kick || {}; BJ.st = d.st || {}; bjBaitSeen(d.rb); bjSync(); bjDrive(); }
       }catch(e){}
@@ -26371,12 +26377,76 @@
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
+  // ----- live data: a stream that only sends what changed, instead of downloading a whole table again and again -----
+  // The games used to re-download their whole table up to twice a second (Tower Defense alone ~70 MB an hour). Now each
+  // open game holds one live stream (Firebase sends the table once, then only the changes) and reads its own copy.
+  const LIVE = new Map();      // path → { es, data, ready, waiters, want }
+  function liveSet(obj, parts, v){
+    if(!parts.length) return v;
+    obj = obj && typeof obj === 'object' ? obj : {};
+    const k = parts[0], nv = liveSet(obj[k], parts.slice(1), v);
+    if(nv === null || nv === undefined) delete obj[k]; else obj[k] = nv;
+    return Object.keys(obj).length ? obj : null;
+  }
+  async function liveOpen(path){
+    let L = LIVE.get(path);
+    if(!L){ L = { data: null, ready: false, waiters: [], want: true }; LIVE.set(path, L); }
+    L.want = true;
+    if(L.es || L.opening) return L;
+    L.opening = true;
+    try{
+      const tok = await chatAuth();
+      if(!L.want) return L;
+      const es = new EventSource(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`); L.es = es;
+      const apply = (e, patch) => {
+        let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+        const parts = String((d && d.path) || '/').split('/').filter(Boolean);
+        if(patch){ for(const [k, v] of Object.entries((d && d.data) || {})) L.data = liveSet(L.data, parts.concat(k.split('/').filter(Boolean)), v); }
+        else L.data = liveSet(L.data, parts, d ? d.data : null);
+        L.ready = true; L.at = Date.now(); L.waiters.splice(0).forEach(f => f());
+      };
+      es.addEventListener('put', (e) => apply(e, false)); es.addEventListener('patch', (e) => apply(e, true));
+      // (the sign-in runs out every hour, or the line drops: open it again)
+      const again = () => { try{ es.close(); }catch(_){} if(L.es !== es) return; L.es = null; L.ready = false; if(L.want) setTimeout(() => { if(L.want && !L.es) liveOpen(path); }, 1500); };
+      es.addEventListener('auth_revoked', again); es.addEventListener('cancel', again);
+      es.addEventListener('error', () => { if(es.readyState === 2) again(); });
+    }finally{ L.opening = false; }
+    return L;
+  }
+  // a copy of the live data (waits for the first snapshot)
+  async function liveGet(path){
+    const L = await liveOpen(path);
+    if(!L.ready) await new Promise(r => { L.waiters.push(r); setTimeout(r, 7000); });
+    if(!L.ready) throw new Error('no live data yet');
+    return L.data == null ? null : structuredClone(L.data);
+  }
+  const liveResp = async (path) => { try{ const d = await liveGet(path); return { ok: true, json: async () => d }; }catch(e){ return { ok: false, status: 0, json: async () => null }; } };
+  // our own writes show in our live copy straight away (the stream confirms them a moment later) — so a game doesn't
+  // act on a stale copy and try the same move twice
+  function liveLocal(url, opt){
+    const u = String(url); if(!u.startsWith(CHAT_DB + '/')) return;
+    const base = u.slice(CHAT_DB.length + 1).split('?')[0].replace(/\.json$/, '').split('/').filter(Boolean).map(decodeURIComponent);
+    const m = (opt.method || 'GET').toUpperCase(), now = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
+    const sv = (v) => v && typeof v === 'object' ? (v['.sv'] === 'timestamp' ? now : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sv(x)]))) : v;
+    let body = null; try{ body = opt.body ? JSON.parse(opt.body) : null; }catch(e){ return; }
+    const writes = m === 'PATCH' ? Object.entries(body || {}).map(([k, v]) => [base.concat(k.split('/').filter(Boolean)), sv(v)]) : [[base, m === 'DELETE' ? null : sv(body)]];
+    for(const [path, L] of LIVE){
+      if(!L.ready) continue;
+      const lp = path.split('/').filter(Boolean);
+      for(const [wp, v] of writes){
+        if(wp.length >= lp.length && lp.every((x, i) => wp[i] === x)) L.data = liveSet(L.data, wp.slice(lp.length), v == null ? null : structuredClone(v));
+        else if(lp.length > wp.length && wp.every((x, i) => lp[i] === x)){ let sub = v; for(const k of lp.slice(wp.length)) sub = sub && typeof sub === 'object' ? sub[k] : null; L.data = sub == null ? null : structuredClone(sub); }
+      }
+    }
+  }
+  { const _f = window.fetch.bind(window); window.fetch = async (url, opt) => { const r = await _f(url, opt); try{ if(r.ok && opt && opt.method && opt.method !== 'GET' && LIVE.size) liveLocal(url, opt); }catch(e){} return r; }; }
+  function liveClose(path){ const L = LIVE.get(path); if(!L) return; L.want = false; try{ L.es && L.es.close(); }catch(e){} LIVE.delete(path); }
   // ----- Trading: one market ($SAI) that never ends. The price ticks every 4 s by a formula the database checks — the
   // ticks are done by the apps of whoever has the market open, so it pauses when nobody's playing and picks up where
   // it left off when someone comes back. trade/r = the market, trade/h = recent prices, trade/on = who's in,
   // trade/p/<uid> = positions (c = what all your shares cost, g = what you got back — all-time). -----
   const TRD = { on: false, win: null, r: null, h: {}, p: {}, f: {}, live: {}, poll: 0, busy: false, hbAt: 0, drawKey: '', lastP: 0, noteAt: 0, woke: false };
-  const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 240;
+  const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 480, TRD_TICK = 2000;      // (a tick every 2 s; the chart keeps the last 16 min)
   const trdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
   const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
   const trdSg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
@@ -26408,7 +26478,7 @@
     return out;
   }
   async function trdLoad(){
-    const d = (await trdGet('trade')) || {};
+    const d = (await liveGet('trade')) || {};
     TRD.r = d.r && d.r.lt ? d.r : null; TRD.h = d.h || {}; TRD.p = d.p || {}; TRD.f = d.f || {}; TRD.live = d.on || {};
   }
   // keep the market moving while you're in it
@@ -26420,7 +26490,7 @@
       if(!TRD.r){
         await trdPatch({ 'trade/r': { id: TRD_ID, S: Math.floor(Math.random() * 999983), k: 0, P: 1000, lt: { '.sv': 'timestamp' } } });
         await trdLoad();
-      } else if(now >= TRD.r.lt + 4000){
+      } else if(now >= TRD.r.lt + TRD_TICK){
         const r = TRD.r, slept = now - r.lt > 300000, n = trdNext(r);
         if(await trdPatch({ 'trade/r/k': n.k, 'trade/r/P': n.P, 'trade/r/lt': { '.sv': 'timestamp' }, [`trade/h/${n.k % TRD_WIN}`]: { k: n.k, P: n.P, t: { '.sv': 'timestamp' } } })){
           r.k = n.k; r.P = n.P; r.lt = now; TRD.h[n.k % TRD_WIN] = { k: n.k, P: n.P, t: now };
@@ -26485,7 +26555,7 @@
       <div class="td-head trd-head"><b>📈 SaiDeck Exchange</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="trd-who"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
       <div class="trd-tape"><div class="trd-tape-in"></div></div>
       <div class="trd-main">
-        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 4 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
+        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
         <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
         <div class="trd-acts"><span class="trd-l">BUY</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
           <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button><span class="trd-prev"></span></div>
@@ -26523,7 +26593,7 @@
   }
   function trdClose(){
     if(!TRD.on) return; TRD.on = false; clearInterval(TRD.poll); if(TRD.fitOff) TRD.fitOff();
-    trdPatch({ [`trade/on/${chatUid()}`]: null });
+    trdPatch({ [`trade/on/${chatUid()}`]: null }); liveClose('trade');
     if(TRD.win){ TRD.win.remove(); TRD.win = null; }
   }
   function trdRender(){
@@ -26605,7 +26675,7 @@
     const { x, W, H: Hh, dpr } = trdCanvas(cv); if(!H.length) return;
     const pad = 8 * dpr, right = 58 * dpr, volH = 34 * dpr, top = 10 * dpr, bot = Hh - volH - 6 * dpr;
     // (the chart fits what there is: at least 60 ticks wide, at most the last 240)
-    const C = 5, span = Math.max(60, Math.ceil(H.length / C) * C), kEnd = H[H.length - 1].k, kStart = kEnd - span + 1, nC = span / C;
+    const C = 10, span = Math.max(120, Math.ceil(H.length / C) * C), kEnd = H[H.length - 1].k, kStart = kEnd - span + 1, nC = span / C;
     const cs = []; let prev = null;
     for(const h of H){ const i = Math.floor((h.k - kStart) / C); if(i < 0) continue; let c = cs[i]; if(!c){ c = cs[i] = { o: prev != null ? prev : h.P, c: h.P, hi: h.P, lo: h.P, v: 0, gap: false }; if(prev != null) { c.hi = Math.max(c.hi, prev); c.lo = Math.min(c.lo, prev); } } c.c = h.P; c.hi = Math.max(c.hi, h.P); c.lo = Math.min(c.lo, h.P); prev = h.P; }
     // naps: a long wait between two ticks
@@ -26650,7 +26720,7 @@
     TRD.lay.px = { W, H: Hh, dpr, left: pad, right: W - right, val: (y) => hi - (y - top) / (bot - top) * (hi - lo), at: (mx) => {
       const i = Math.max(0, Math.min(nC - 1, Math.floor((mx - pad) / cw))), c = cs[i]; if(!c) return null;
       const tr = trades.filter(t => Math.floor((t.k - kStart) / C) === i);
-      const ch = (c.c / c.o - 1) * 100, ago = Math.max(0, Math.round((kEnd - kOf(i)) * 4 / 60));
+      const ch = (c.c / c.o - 1) * 100, ago = Math.max(0, Math.round((kEnd - kOf(i)) * (TRD_TICK / 1000) / 60));
       return { x: X(i), html: `<b>${ago ? ago + ' min ago' : 'now'}</b><div class="tg">O ${c.o.toLocaleString()} · H ${c.hi.toLocaleString()} · L ${c.lo.toLocaleString()} · C <b class="${ch >= 0 ? 'up' : 'down'}">${c.c.toLocaleString()} (${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%)</b></div>` + (tr.length ? tr.slice(0, 6).map(t => `<div><b style="color:${chatColor(t.n)}">${escapeHtml(t.n)}</b> ${t.q > 0 ? '<span class="up">bought</span>' : '<span class="down">sold</span>'} ${trdK(Math.abs(t.q))}${t.P ? ' @ ' + t.P.toLocaleString() : ''}</div>`).join('') : '') + (c.gap ? '<div class="tg">💤 the market napped here</div>' : '') };
     } };
     // the price now
@@ -26663,7 +26733,7 @@
   function trdDrawPL(cv, H, people, byK){
     const { x, W, H: Hh, dpr } = trdCanvas(cv), pad = 8 * dpr, right = 96 * dpr;
     if(!H.length) return;
-    const ks = H.map(h => h.k), span = Math.max(60, Math.ceil(H.length / 5) * 5), kStart = ks[ks.length - 1] - span + 1;
+    const ks = H.map(h => h.k), span = Math.max(120, Math.ceil(H.length / 10) * 10), kStart = ks[ks.length - 1] - span + 1;
     const lines = [];
     for(const pp of people){
       const tr = Object.values(pp.p.x || {}).filter(t => t && t.k >= ks[0]);
@@ -26702,15 +26772,16 @@
     shut: ['No more bets! 🛑', 'Bets are locked 🔒', 'Here we go…'], win: ['ok fine, take it 😒', 'lucky… for now', 'FAHHH you got me'], lose: ['cooked 💀', 'bruh 😂', 'thanks for the points lmao', 'flat broke speedrun'],
     edge: ['IT LANDED ON ITS EDGE 😱 house wins!', 'EDGE?! sksksk everyone lost'], none: ['Nobody bet… boring 😴'] };
   const cfPick = (a) => a[Math.floor(Math.random() * a.length)];
-  async function cfGet(){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/coin.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('get ' + r.status); return (await r.json()) || {}; }
+  async function cfGet(){ return (await liveGet('coin')) || {}; }
   async function cfStep(){
     if(CF.busy || !chatName()) return; CF.busy = true;
     try{
       const d = await cfGet(); CF.r = d.r || null; CF.b = d.b || {};
       const r = CF.r, now = trdNow(), me = chatUid();
       if(!r){ await trdPatch({ 'coin/r': { n: 1, t0: { '.sv': 'timestamp' } } }); }
-      else if(!r.f && now >= r.t0 + CF_BET){ if(await trdPatch({ 'coin/r/f': { '.sv': 'timestamp' } })){ const d2 = await cfGet(); CF.r = d2.r || CF.r; CF.b = d2.b || CF.b; } }
-      else if(r.f && now >= r.f + CF_SHOW){ await trdPatch({ 'coin/r': { n: r.n + 1, t0: { '.sv': 'timestamp' }, pn: r.n, pf: r.f } }); }
+      // (each app waits a slightly different moment, so two don't try the same flip at once)
+      else if(!r.f && now >= r.t0 + CF_BET + (CF.jit || 0)){ if(await trdPatch({ 'coin/r/f': { '.sv': 'timestamp' } })){ const d2 = await cfGet(); CF.r = d2.r || CF.r; CF.b = d2.b || CF.b; } }
+      else if(r.f && now >= r.f + CF_SHOW + (CF.jit || 0)){ await trdPatch({ 'coin/r': { n: r.n + 1, t0: { '.sv': 'timestamp' }, pn: r.n, pf: r.f } }); }
       // your bet: settle it once its coin has landed (after the flip has been shown)
       const mb = CF.b[me], R = CF.r;
       if(mb && mb.c === false && R){
@@ -26748,7 +26819,7 @@
   }
   function cfOpen(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
-    if(CF.on) return; CF.on = true; CF.shownF = 0; CF.said = '';
+    if(CF.on) return; CF.on = true; CF.shownF = 0; CF.said = ''; CF.jit = Math.floor(Math.random() * 900);
     const w = document.createElement('div'); w.className = 'td-win cf-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Coin Flip');
     w.innerHTML = `<div class="td-back"></div><div class="td-box cf-box">
       <div class="td-head"><b>🪙 Coin Flip</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="cf-round"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
@@ -26785,7 +26856,7 @@
     cfStep(); CF.poll = setInterval(cfStep, 700);
     const tick = () => { if(!CF.on) return; cfTimer(); CF.raf = requestAnimationFrame(tick); }; tick();
   }
-  function cfClose(){ if(!CF.on) return; CF.on = false; clearInterval(CF.poll); cancelAnimationFrame(CF.raf); if(CF.fitOff) CF.fitOff(); if(CF.win){ CF.win.remove(); CF.win = null; } }
+  function cfClose(){ if(!CF.on) return; CF.on = false; liveClose('coin'); clearInterval(CF.poll); cancelAnimationFrame(CF.raf); if(CF.fitOff) CF.fitOff(); if(CF.win){ CF.win.remove(); CF.win = null; } }
   // the betting clock (a bar that runs down)
   function cfTimer(){
     const W = CF.win, r = CF.r; if(!W || !r) return;
@@ -27155,7 +27226,7 @@
   function tdClose(){
     if(!TDG.on) return;
     if(TDG.rid && TDG.room && TDG.room.st !== 'over' && TDG.room.m === 'team'){ toast('You left the window — you\'re still in the team. Open Tower Defense again to get back in.', 3500); }
-    TDG.on = false; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); TDG.poll = TDG.hb = TDG.raf = 0; if(TDG.fitOff){ TDG.fitOff(); TDG.fitOff = null; }
+    TDG.on = false; clearInterval(TDG.poll); clearInterval(TDG.hb); cancelAnimationFrame(TDG.raf); if(TDG.livePath){ liveClose(TDG.livePath); TDG.livePath = ''; } TDG.poll = TDG.hb = TDG.raf = 0; if(TDG.fitOff){ TDG.fitOff(); TDG.fitOff = null; }
     if(TDG.win){ TDG.win.remove(); TDG.win = null; }
   }
   // ----- the lobby: play solo, start or join a team, the leaderboards -----
@@ -27303,7 +27374,8 @@
     if(!TDG.rid || (TDG.polling && Date.now() - TDG.polling < 8000)) return; TDG.polling = Date.now();
     const rid0 = TDG.rid;
     try{
-      const r = await tdGet(`td/r/${TDG.rid}`);
+      const lp = `td/r/${TDG.rid}`; if(TDG.livePath && TDG.livePath !== lp) liveClose(TDG.livePath); TDG.livePath = lp;
+      const r = await liveGet(lp);
       if(!TDG.rid) return;
       if(!r){ toast('That game has ended.', 2000); TDG.rid = ''; tdLobby(); return; }
       const was = TDG.room; TDG.room = r;
@@ -29229,7 +29301,7 @@
     try{ chatConnect(); }catch(e){} try{ if(SESS.wasOpen) chatToggle(true); }catch(e){}
     toast('📲 The session is on this device now.', 2200);
   }
-  setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching) sessCheck(); }, 6000);
+  setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching && document.visibilityState === 'visible') sessCheck(); }, 12000);
   let vaultBusy = false;
   async function mgCheck(){
     if(vaultBusy || !chatName()) return; vaultBusy = true;

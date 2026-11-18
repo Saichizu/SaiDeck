@@ -1,6 +1,6 @@
 {
-  "build": 148,
+  "build": 149,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🗺️ The Casino is now a map — see who's playing where. 🪙 Coin Flip: START button to flip right away. 📈 Trading is now Cardiastra Inc. ($CRDA) and moves a lot wilder."
+  "notes": "⚡ Way less data: the games now get live updates instead of re-downloading everything every second. 📈 Cardiastra ticks every 2 seconds."
 }
