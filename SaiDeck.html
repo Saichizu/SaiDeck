@@ -856,7 +856,11 @@
   .trd-chart.shake{animation:trdShake .45s ease-out;} @keyframes trdShake{20%{transform:translateX(-6px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(2px);}}
   .trd-pop{position:absolute;right:70px;top:30%;font:900 24px 'Manrope',sans-serif;animation:trdPop 1.2s ease-out both;pointer-events:none;} .trd-pop.buy{color:#35d07e;} .trd-pop.sell{color:#ff4d6a;}
   @keyframes trdPop{to{transform:translateY(-60px);opacity:0;}}
-  .trd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px;} .trd-l{font:800 10.5px 'Inter',sans-serif;color:var(--text-faint);letter-spacing:.12em;margin:0 2px 0 6px;}
+  .trd-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;}
+  .trd-grp{display:flex;align-items:center;gap:5px;padding:5px 6px 5px 8px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);}
+  .trd-in{width:96px;padding:8px 9px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.35);color:#fff;font:800 13px 'Inter',sans-serif;font-variant-numeric:tabular-nums;}
+  .trd-grp.buy .trd-in:focus{outline:2px solid #35d07e;} .trd-grp.sell .trd-in:focus{outline:2px solid #ff4d6a;}
+  .trd-qk{display:flex;gap:3px;} .trd-c{all:unset;cursor:pointer;padding:6px 7px;border-radius:7px;font:800 10.5px 'Inter',sans-serif;color:var(--text-dim);background:rgba(255,255,255,.06);} .trd-c:hover{background:rgba(255,255,255,.13);color:#fff;} .trd-c:disabled{opacity:.35;cursor:default;} .trd-l{font:800 10.5px 'Inter',sans-serif;color:var(--text-faint);letter-spacing:.12em;margin:0 2px 0 6px;}
   .trd-b{all:unset;cursor:pointer;padding:9px 14px;border-radius:10px;font:800 12.5px 'Inter',sans-serif;transition:transform .08s, filter .15s;} .trd-b:hover{filter:brightness(1.2);} .trd-b:active{transform:scale(.93);} .trd-b:disabled{opacity:.3;cursor:default;filter:none;}
   .trd-b.buy{background:rgba(53,208,126,.14);color:#6ff5a9;border:1px solid rgba(53,208,126,.4);} .trd-b.sell{background:rgba(255,77,106,.12);color:#ff8095;border:1px solid rgba(255,77,106,.4);}
   .trd-b.buy.all{background:linear-gradient(180deg,#2bd47f,#14935a);color:#04210f;box-shadow:0 4px 14px rgba(53,208,126,.3);} .trd-b.sell.all{background:linear-gradient(180deg,#ff6b84,#c22b47);color:#2a0710;box-shadow:0 4px 14px rgba(255,77,106,.25);}
@@ -903,7 +907,10 @@
   .cf-chip:nth-child(2){background:repeating-conic-gradient(#2b6fd4 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #2b6fd4, 0 3px 0 rgba(0,0,0,.4);} .cf-chip:nth-child(3){background:repeating-conic-gradient(#14935a 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #14935a, 0 3px 0 rgba(0,0,0,.4);}
   .cf-chip:nth-child(4){background:repeating-conic-gradient(#222 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #222, 0 3px 0 rgba(0,0,0,.4);} .cf-chip:nth-child(5){background:repeating-conic-gradient(#8a3fd1 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #8a3fd1, 0 3px 0 rgba(0,0,0,.4);}
   .cf-chip.all{font-size:9.5px;background:repeating-conic-gradient(#f5c04a 0 15deg,#fff 15deg 30deg);box-shadow:inset 0 0 0 6px #c48b1d, 0 3px 0 rgba(0,0,0,.4);}
-  .cf-chip span{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(10,12,16,.82);} .cf-chip.on{transform:translateY(-5px) scale(1.08);outline:2px solid #fff;outline-offset:2px;} .cf-chip:active{transform:scale(.92);}
+  .cf-chip span{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(10,12,16,.82);}
+  .cf-amtbox{display:flex;align-items:center;gap:4px;} .cf-amt{width:110px;padding:10px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);color:#fff;font:900 14px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;} .cf-amt:focus{outline:2px solid #f5c04a;}
+  .cf-clr{all:unset;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-faint);background:rgba(255,255,255,.06);font-size:11px;} .cf-clr:hover{color:#fff;}
+  .cf-chip.on{transform:translateY(-5px) scale(1.08);outline:2px solid #fff;outline-offset:2px;} .cf-chip:active{transform:scale(.92);}
   .cf-go{all:unset;cursor:pointer;margin-left:auto;padding:12px 18px;border-radius:12px;font:900 13.5px 'Manrope',sans-serif;background:linear-gradient(180deg,#ffd76a,#e0a326);color:#2a1c00;box-shadow:0 4px 16px rgba(245,192,74,.35);} .cf-go.t{background:linear-gradient(180deg,#aecbff,#5f8fe0);color:#0b1a33;box-shadow:0 4px 16px rgba(120,170,255,.35);}
   .cf-go:disabled{opacity:.4;cursor:default;box-shadow:none;} .cf-go span{opacity:.7;margin-left:4px;}
   .cf-me{width:100%;font:600 12px 'Inter',sans-serif;color:var(--text-dim);} .cf-me b{color:#fff;}
@@ -22728,7 +22735,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 149;                 // ← goes up by one with every published version
+  const SD_BUILD = 150;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25776,7 +25783,9 @@
   }
   // draw a card into a hand (yours, or the dealer's): the server stamps the card, then the totals are counted from it
   async function bjDraw(path, hand, extra){
-    const body = Object.assign({ [`${path}/pe`]: true, [`${path}/lt`]: bjSv, [`${path}/c/${hand.k | 0}`]: bjSv }, extra || {});
+    // (k goes with it, unchanged: if our copy of the hand is out of date the database refuses the card, instead of it
+    //  landing on top of a card that's already there — that showed 10 + 8 as "20")
+    const body = Object.assign({ [`${path}/pe`]: true, [`${path}/lt`]: bjSv, [`${path}/c/${hand.k | 0}`]: bjSv, [`${path}/k`]: hand.k | 0 }, extra || {});
     const d = await bjPatch(body); if(!d) return false;
     let T = d[`${path}/lt`];
     if(typeof T !== 'number'){ const tok = await chatAuth(); const g = await casFetch(`${CHAT_DB}/${path}/lt.json?auth=${encodeURIComponent(tok)}`, {}, 6000); T = g.ok ? await g.json() : null; }
@@ -26134,9 +26143,11 @@
     const cards = bjCards(hand), key = (hand.r || 0) + '';
     if(box.dataset.r !== key){ box.innerHTML = ''; box.dataset.r = key; }
     while(box.children.length > cards.length) box.lastChild.remove();
+    // (a card that isn't what the table says any more is drawn again)
+    for(let i = 0; i < box.children.length; i++) if(box.children[i].dataset.t !== String(cards[i])){ while(box.children.length > i) box.lastChild.remove(); break; }
     for(let i = box.children.length; i < cards.length; i++){
       const T = cards[i], r = T % 13, s = Math.floor(T / 13) % 4, red = s === 1 || s === 2;
-      const c = document.createElement('div'); c.className = 'bj-card' + (red ? ' red' : '');
+      const c = document.createElement('div'); c.className = 'bj-card' + (red ? ' red' : ''); c.dataset.t = String(T);
       c.innerHTML = `<b>${BJ_RANKS[r]}</b><i>${BJ_SUITS[s]}</i><b class="bj-c2">${BJ_RANKS[r]}</b>`;
       box.appendChild(c);
       const seen = BJ.shown[box.dataset.k + ':' + key + ':' + i]; BJ.shown[box.dataset.k + ':' + key + ':' + i] = 1;
@@ -26423,12 +26434,17 @@
   const liveResp = async (path) => { try{ const d = await liveGet(path); return { ok: true, json: async () => d }; }catch(e){ return { ok: false, status: 0, json: async () => null }; } };
   // our own writes show in our live copy straight away (the stream confirms them a moment later) — so a game doesn't
   // act on a stale copy and try the same move twice
-  function liveLocal(url, opt){
+  // (it uses the server's ANSWER, which has the real server times filled in — guessing them from the local clock showed the
+  //  wrong blackjack cards and the wrong round, so bets were refused)
+  function liveLocal(url, opt, answer){
     const u = String(url); if(!u.startsWith(CHAT_DB + '/')) return;
     const base = u.slice(CHAT_DB.length + 1).split('?')[0].replace(/\.json$/, '').split('/').filter(Boolean).map(decodeURIComponent);
     const m = (opt.method || 'GET').toUpperCase(), now = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
     const sv = (v) => v && typeof v === 'object' ? (v['.sv'] === 'timestamp' ? now : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sv(x)]))) : v;
     let body = null; try{ body = opt.body ? JSON.parse(opt.body) : null; }catch(e){ return; }
+    if(m !== 'DELETE'){ if(answer === undefined) return; body = answer; }
+    const hasSv = (v) => v && typeof v === 'object' && (v['.sv'] !== undefined || Object.values(v).some(hasSv));
+    if(hasSv(body)) return;      // (no real answer for a server time: wait for the stream)
     const writes = m === 'PATCH' ? Object.entries(body || {}).map(([k, v]) => [base.concat(k.split('/').filter(Boolean)), sv(v)]) : [[base, m === 'DELETE' ? null : sv(body)]];
     for(const [path, L] of LIVE){
       if(!L.ready) continue;
@@ -26439,8 +26455,14 @@
       }
     }
   }
-  { const _f = window.fetch.bind(window); window.fetch = async (url, opt) => { const r = await _f(url, opt); try{ if(r.ok && opt && opt.method && opt.method !== 'GET' && LIVE.size) liveLocal(url, opt); }catch(e){} return r; }; }
+  { const _f = window.fetch.bind(window); window.fetch = async (url, opt) => {
+      const r = await _f(url, opt);
+      try{ if(r.ok && opt && opt.method && opt.method !== 'GET' && LIVE.size){ const m = opt.method.toUpperCase(); if(m === 'DELETE') liveLocal(url, opt); else if(m === 'PATCH' || m === 'PUT') r.clone().json().then(a => liveLocal(url, opt, a)).catch(() => {}); } }catch(e){}
+      return r;
+    }; }
   function liveClose(path){ const L = LIVE.get(path); if(!L) return; L.want = false; try{ L.es && L.es.close(); }catch(e){} LIVE.delete(path); }
+  // an amount typed by a player: "1500", "1,500", "15k", "2.5m", "1b"
+  function amtParse(v){ const m = String(v || '').trim().toLowerCase().replace(/[, _]/g, '').match(/^(\d+(?:\.\d+)?)([kmbt]?)$/); if(!m) return NaN; return Math.floor(+m[1] * ({ '': 1, k: 1e3, m: 1e6, b: 1e9, t: 1e12 })[m[2]]); }
   // ----- Trading: one market ($SAI) that never ends. The price ticks every 4 s by a formula the database checks — the
   // ticks are done by the apps of whoever has the market open, so it pauses when nobody's playing and picks up where
   // it left off when someone comes back. trade/r = the market, trade/h = recent prices, trade/on = who's in,
@@ -26511,10 +26533,10 @@
     if(TRD.on) trdRender();
   }
   function trdPos(){ const me = chatUid(), p = TRD.p[me]; return p && p.r === TRD_ID ? p : { r: TRD_ID, sh: 0, c: 0, g: 0 }; }
-  async function trdBuy(frac){
+  async function trdBuy(frac, pts){
     const r = TRD.r, me = chatUid(); if(!r){ return; }
     if(!SC.loaded) await scLoad();
-    const amt = Math.floor(scBal() * frac), q = Math.floor(amt / r.P);
+    const amt = pts != null ? Math.min(Math.floor(pts), scBal()) : Math.floor(scBal() * frac), q = Math.floor(amt / r.P);
     if(q < 1){ toast(`One share costs ${r.P.toLocaleString()} — you need more points.`, 1800); return; }
     const old = TRD.p[me] && TRD.p[me].r === TRD_ID ? TRD.p[me] : null, cost = q * r.P, n = Date.now().toString(36);
     const body = old ? { [`trade/p/${me}/sh`]: old.sh + q, [`trade/p/${me}/c`]: (old.c || 0) + cost, [`trade/p/${me}/x/${n}`]: { k: r.k, q, p: r.P } }
@@ -26522,15 +26544,15 @@
     // (only the latest 60 trades are kept)
     if(old && old.x){ const ks = Object.keys(old.x).sort(); for(const k of ks.slice(0, Math.max(0, ks.length - 59))) body[`trade/p/${me}/x/${k}`] = null; }
     body[`scores/${me}/s`] = SC.s + cost; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
-    if(await trdPatch(body)){ SC.s += cost; trdFx('buy', q); try{ sfxChip(); }catch(e){} if(frac >= 1 && cost >= 100000) trdNote(`went ALL IN on ${TRD_SYM} — ${trdK(cost)} 🚀`); }
+    if(await trdPatch(body)){ SC.s += cost; trdFx('buy', q); try{ sfxChip(); }catch(e){} if(cost >= 100000 && scBal() < r.P) trdNote(`went ALL IN on ${TRD_SYM} — ${trdK(cost)} 🚀`); }
     else { toast('The price just moved — try again.', 1500); await scLoad(); }
     await trdStep();
   }
-  async function trdSell(frac, auto){
+  async function trdSell(frac, auto, qty){
     const r = TRD.r, me = chatUid(), mp = TRD.p[me]; if(!mp || !(mp.sh > 0)) return;
     if(!SC.loaded) await scLoad();
     const cur = r && mp.r === r.id, P = cur ? r.P : (TRD.f[mp.r] && TRD.f[mp.r].P); if(!P) return;
-    const q = frac >= 1 ? mp.sh : Math.max(1, Math.floor(mp.sh * frac)), got = q * P, n = Date.now().toString(36);
+    const q = qty != null ? Math.max(1, Math.min(mp.sh, Math.floor(qty))) : frac >= 1 ? mp.sh : Math.max(1, Math.floor(mp.sh * frac)), got = q * P, n = Date.now().toString(36);
     // (the first part of a sale just pays back what the shares cost — that comes off s; only profit adds to your all-time points)
     const rem = Math.min((mp.c || 0) - (mp.g || 0), SC.s), back = rem <= 0 ? 0 : Math.min(rem, got);
     const body = { [`trade/p/${me}/sh`]: mp.sh - q, [`trade/p/${me}/g`]: (mp.g || 0) + got, [`scores/${me}/p`]: SC.p + got - back, [`scores/${me}/s`]: SC.s - back, [`scores/${me}/t`]: { '.sv': 'timestamp' } };
@@ -26538,7 +26560,7 @@
     if(await trdPatch(body)){
       SC.p += got - back; SC.s -= back;
       if(auto) toast(`💸 Your old ${q.toLocaleString()} shares paid out ${got.toLocaleString()} points.`, 3000);
-      else { trdFx('sell', q); try{ sfxChip(); }catch(e){} const pn = trdPnl({ c: mp.c, g: (mp.g || 0) + got, sh: mp.sh - q }, P); if(got >= 100000 && frac >= 1) trdNote(`cashed out ${trdK(got)} of ${TRD_SYM} · all-time ${trdSg(pn)} ${pn >= 0 ? '🤑' : '💀'}`); }
+      else { trdFx('sell', q); try{ sfxChip(); }catch(e){} const pn = trdPnl({ c: mp.c, g: (mp.g || 0) + got, sh: mp.sh - q }, P); if(got >= 100000 && mp.sh - q === 0) trdNote(`cashed out ${trdK(got)} of ${TRD_SYM} · all-time ${trdSg(pn)} ${pn >= 0 ? '🤑' : '💀'}`); }
     } else if(!auto){ toast('The price just moved — try again.', 1500); await scLoad(); }
     if(!auto) await trdStep();
   }
@@ -26557,8 +26579,10 @@
       <div class="trd-main">
         <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
         <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
-        <div class="trd-acts"><span class="trd-l">BUY</span><button type="button" class="trd-b buy" data-b=".1">10%</button><button type="button" class="trd-b buy" data-b=".25">25%</button><button type="button" class="trd-b buy" data-b=".5">50%</button><button type="button" class="trd-b buy all" data-b="1">ALL IN 🚀</button>
-          <span class="trd-l">SELL</span><button type="button" class="trd-b sell" data-s=".25">25%</button><button type="button" class="trd-b sell" data-s=".5">50%</button><button type="button" class="trd-b sell all" data-s="1">ALL 🧻</button><span class="trd-prev"></span></div>
+        <div class="trd-acts">
+          <div class="trd-grp buy"><span class="trd-l">BUY</span><input class="trd-in" data-in="b" inputmode="decimal" placeholder="points" aria-label="Points to spend"><span class="trd-qk">${['1k', '10k', '100k', '1m'].map(a => `<button type="button" class="trd-c" data-ab="${a}">+${a.toUpperCase()}</button>`).join('')}<button type="button" class="trd-c" data-ab="max">MAX</button></span><button type="button" class="trd-b buy all" data-buy>BUY 🚀</button></div>
+          <div class="trd-grp sell"><span class="trd-l">SELL</span><input class="trd-in" data-in="s" inputmode="decimal" placeholder="shares" aria-label="Shares to sell"><span class="trd-qk"><button type="button" class="trd-c" data-as="half">HALF</button><button type="button" class="trd-c" data-as="all">ALL</button></span><button type="button" class="trd-b sell all" data-sell>SELL 🧻</button></div>
+          <span class="trd-prev"></span></div>
         <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT <i>(recent)</i></div><div class="trd-plw"><canvas class="trd-cv2"></canvas><canvas class="trd-ov2"></canvas><div class="trd-tip" hidden></div></div></div>
           <div class="trd-side"><div class="trd-ph">🏆 BEST TRADERS <i>(all-time)</i></div><ol class="trd-rank"></ol></div></div>
       </div></div>`;
@@ -26568,18 +26592,25 @@
     TRD.fitOff = () => { clearInterval(TRD.fit); window.removeEventListener('resize', fit); };
     w.querySelector('.td-x').addEventListener('click', trdClose); w.querySelector('.td-back').addEventListener('click', trdClose);
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); trdClose(); } });
-    w.querySelectorAll('[data-b]').forEach(b => b.addEventListener('click', () => { b.blur(); trdBuy(+b.dataset.b); }));
-    w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { b.blur(); trdSell(+b.dataset.s); }));
-    // what a button would do, before you press it
-    const prev = w.querySelector('.trd-prev');
-    w.querySelectorAll('[data-b],[data-s]').forEach(b => {
-      b.addEventListener('pointerenter', () => {
-        const r = TRD.r; if(!r) return; const mp = trdPos();
-        if(b.dataset.b){ const q = Math.floor(Math.floor((SC.loaded ? scBal() : 0) * +b.dataset.b) / r.P); prev.innerHTML = q ? `≈ <b class="up">${trdK(q)}</b> shares for <b>${trdK(q * r.P)}</b>` : `<span class="down">not enough points</span>`; }
-        else { const q = +b.dataset.s >= 1 ? mp.sh : Math.max(1, Math.floor(mp.sh * +b.dataset.s)); prev.innerHTML = mp.sh ? `sells <b class="down">${trdK(q)}</b> shares for <b>${trdK(q * r.P)}</b>` : ''; }
-      });
-      b.addEventListener('pointerleave', () => { prev.textContent = ''; });
-    });
+    // amounts: type them, or add with the quick buttons
+    const inB = w.querySelector('[data-in="b"]'), inS = w.querySelector('[data-in="s"]'), prev = w.querySelector('.trd-prev');
+    const showPrev = () => {
+      const r = TRD.r; if(!r){ prev.textContent = ''; return; } const mp = trdPos();
+      const pts = amtParse(inB.value), sh = amtParse(inS.value);
+      const bits = [];
+      if(pts > 0){ const q = Math.floor(Math.min(pts, SC.loaded ? scBal() : pts) / r.P); bits.push(q ? `buys ≈ <b class="up">${trdK(q)}</b> shares for <b>${trdK(q * r.P)}</b>` : `<span class="down">not enough for 1 share (${r.P.toLocaleString()})</span>`); }
+      if(sh > 0 && mp.sh){ const q = Math.min(sh, mp.sh); bits.push(`sells <b class="down">${trdK(q)}</b> for <b>${trdK(q * r.P)}</b>`); }
+      prev.innerHTML = bits.join(' · ');
+    };
+    w.querySelectorAll('[data-ab]').forEach(b => b.addEventListener('click', () => { b.blur(); const v = b.dataset.ab; if(v === 'max') inB.value = String(SC.loaded ? scBal() : ''); else inB.value = String((amtParse(inB.value) || 0) + amtParse(v)); showPrev(); }));
+    w.querySelectorAll('[data-as]').forEach(b => b.addEventListener('click', () => { b.blur(); const mp = trdPos(); inS.value = String(b.dataset.as === 'all' ? mp.sh : Math.floor(mp.sh / 2)); showPrev(); }));
+    inB.addEventListener('input', showPrev); inS.addEventListener('input', showPrev);
+    const doBuy = () => { const v = amtParse(inB.value); if(!(v >= 1)){ toast('Type how many points to spend (like 5000 or 25k).', 2000); inB.focus(); return; } trdBuy(0, v); };
+    const doSell = () => { const v = amtParse(inS.value); if(!(v >= 1)){ toast('Type how many shares to sell — or press ALL.', 2000); inS.focus(); return; } trdSell(0, false, v); };
+    w.querySelector('[data-buy]').addEventListener('click', (e) => { e.currentTarget.blur(); doBuy(); });
+    w.querySelector('[data-sell]').addEventListener('click', (e) => { e.currentTarget.blur(); doSell(); });
+    inB.addEventListener('keydown', (e) => { if(e.key === 'Enter') doBuy(); }); inS.addEventListener('keydown', (e) => { if(e.key === 'Enter') doSell(); });
+    TRD.showPrev = showPrev;
     // hovering the charts: a crosshair and what happened there
     trdHover(w.querySelector('.trd-chart'), w.querySelector('.trd-ov'), 'px');
     trdHover(w.querySelector('.trd-plw'), w.querySelector('.trd-ov2'), 'pl');
@@ -26619,7 +26650,7 @@
     // your bag
     const val = mp.sh * P, pn = trdPnl(mp, P);
     W.querySelector('.trd-bag').innerHTML = `<div><small>YOUR BAG</small><span><b>${trdK(mp.sh)}</b> sh · <b>${trdK(val)}</b></span></div><div><small>ALL-TIME</small><b class="${pn >= 0 ? 'up' : 'down'}">${trdSg(pn)} ${pn >= 0 ? '📈' : '📉'}</b></div><div><small>POINTS</small><b>🪙 ${SC.loaded ? trdK(scBal()) : '…'}</b></div>`;
-    W.querySelectorAll('[data-s]').forEach(b => { b.disabled = !(mp.sh > 0); });
+    W.querySelectorAll('[data-sell],[data-as]').forEach(b => { b.disabled = !(mp.sh > 0); }); if(TRD.showPrev && document.activeElement && !document.activeElement.classList.contains('trd-in')) TRD.showPrev();
     // everyone: lines and ranking
     const people = [];
     for(const [u, p] of Object.entries(TRD.p || {})){ if(!p || p.r !== TRD_ID || MERGED.has(u)) continue; people.push({ u, n: trdName(u, p), p, pn: trdPnl(p, P) }); }
@@ -26764,7 +26795,7 @@
   // ----- Coin Flip: one table for everyone, a bot flips. 12 s to bet heads or tails, the flip, 5 s to see it, next round.
   // The coin is the server's time at the flip (nobody can pick it): heads if (f - f % 7) / 7 is even, tails if odd, and 1 in
   // 61 lands on its EDGE (the bot wins). A win pays 1 to 1. Rounds only move while someone has the table open. -----
-  const CF = { on: false, win: null, r: null, b: {}, busy: false, poll: 0, shownF: 0, hist: [], side: 'h', frac: .05, said: '' };
+  const CF = { on: false, win: null, r: null, b: {}, busy: false, poll: 0, shownF: 0, hist: [], side: 'h', amt: Math.max(0, Number(localStorage.getItem('sdCfAmt')) || 1000), said: '' };
   const CF_BET = 12000, CF_SHOW = 5000;
   const cfRes = (f) => { const q = (f - f % 7) / 7; return q % 61 === 0 ? 'e' : q % 2 === 0 ? 'h' : 't'; };
   const CF_NAME = { h: 'HEADS', t: 'TAILS', e: 'EDGE' };
@@ -26804,7 +26835,9 @@
     if(!r || r.f || now >= r.t0 + CF_BET){ toast('Betting is closed — next round in a moment.', 1600); return; }
     const mb = CF.b[me]; if(mb && mb.n === r.n){ toast('You already bet this round.', 1500); return; }
     if(!SC.loaded) await scLoad();
-    const a = Math.floor(scBal() * CF.frac); if(a < 1){ toast("You're out of points 😭", 1600); return; }
+    if(!(CF.amt >= 1)){ toast('Pick or type how much to bet first.', 1800); return; }
+    const a = Math.min(Math.floor(CF.amt), scBal()); if(a < 1){ toast("You're out of points 😭", 1600); return; }
+    try{ localStorage.setItem('sdCfAmt', String(CF.amt)); }catch(e){}
     const body = { [`coin/b/${me}`]: { n: r.n, s: CF.side, a, c: false }, [`scores/${me}/s`]: SC.s + a, [`scores/${me}/t`]: { '.sv': 'timestamp' }, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone' };
     if(await trdPatch(body)){ SC.s += a; CF.b[me] = { n: r.n, s: CF.side, a, c: false }; try{ sfxChip(); }catch(e){} cfRender(); }
     else { toast("Couldn't bet — try again.", 1600); await scLoad(); }
@@ -26837,7 +26870,8 @@
       <div class="cf-hist"></div>
       <div class="cf-ctl">
         <div class="cf-sides"><button type="button" class="cf-side h" data-s="h">👑 HEADS</button><button type="button" class="cf-side t" data-s="t">🦅 TAILS</button></div>
-        <div class="cf-chips">${[[.01, '1%'], [.05, '5%'], [.1, '10%'], [.25, '25%'], [.5, '50%'], [1, 'ALL IN']].map(([f, l]) => `<button type="button" class="cf-chip${f === 1 ? ' all' : ''}" data-f="${f}"><span>${l}</span></button>`).join('')}</div>
+        <div class="cf-chips">${['1k', '10k', '100k', '1m', '10m'].map(a => `<button type="button" class="cf-chip" data-a="${a}" title="Add ${a.toUpperCase()}"><span>${a.toUpperCase()}</span></button>`).join('')}<button type="button" class="cf-chip all" data-a="all"><span>ALL IN</span></button></div>
+        <div class="cf-amtbox"><input class="cf-amt" inputmode="decimal" aria-label="Bet amount" placeholder="amount"><button type="button" class="cf-clr" title="Clear">✕</button></div>
         <button type="button" class="cf-go">BET <span></span></button>
         <div class="cf-me"></div>
       </div></div>`;
@@ -26848,7 +26882,11 @@
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); cfClose(); } });
     w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { CF.side = b.dataset.s; cfRender(); }));
     w.querySelectorAll('.cf-zone').forEach(z => z.addEventListener('click', () => { CF.side = z.dataset.side; cfRender(); }));
-    w.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { CF.frac = +b.dataset.f; cfRender(); }));
+    const amtIn = w.querySelector('.cf-amt'); amtIn.value = CF.amt ? String(CF.amt) : '';
+    w.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { b.blur(); const v = b.dataset.a; CF.amt = v === 'all' ? (SC.loaded ? scBal() : 0) : (CF.amt || 0) + amtParse(v); amtIn.value = String(CF.amt); b.animate([{ transform: 'translateY(-8px) scale(1.1)' }, { transform: 'none' }], { duration: 220 }); try{ sfxChip(); }catch(e){} cfRender(); }));
+    amtIn.addEventListener('input', () => { const v = amtParse(amtIn.value); CF.amt = v > 0 ? v : 0; cfRender(); });
+    amtIn.addEventListener('keydown', (e) => { if(e.key === 'Enter') cfBet(); });
+    w.querySelector('.cf-clr').addEventListener('click', () => { CF.amt = 0; amtIn.value = ''; cfRender(); });
     w.querySelector('.cf-go').addEventListener('click', (e) => { e.currentTarget.blur(); cfBet(); });
     w.querySelector('.cf-start').addEventListener('click', (e) => { e.currentTarget.blur(); cfStart(); });
     w.tabIndex = -1; w.focus();
@@ -26902,8 +26940,8 @@
     if(hEl.dataset.k !== hk){ hEl.dataset.k = hk; hEl.innerHTML = '<span class="cf-hl">LAST FLIPS</span>' + CF.hist.slice(-24).map(x => `<i class="${x.r}" title="Round ${x.n}: ${CF_NAME[x.r]}">${x.r === 'h' ? 'H' : x.r === 't' ? 'T' : 'E'}</i>`).join(''); }
     // controls
     W.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === CF.side));
-    W.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', +b.dataset.f === CF.frac));
-    const mb = CF.b[me], betNow = mb && mb.n === r.n, open = !r.f && now < r.t0 + CF_BET, amt = SC.loaded ? Math.floor(scBal() * CF.frac) : 0;
+
+    const mb = CF.b[me], betNow = mb && mb.n === r.n, open = !r.f && now < r.t0 + CF_BET, amt = SC.loaded ? Math.min(Math.floor(CF.amt || 0), scBal()) : 0;
     const go = W.querySelector('.cf-go'); go.disabled = !open || betNow || amt < 1; go.classList.toggle('t', CF.side === 't');
     const st = W.querySelector('.cf-start'); st.hidden = !open; st.disabled = !betNow; st.title = betNow ? 'Flip right now instead of waiting' : 'Bet first, then you can start the flip';
     go.firstChild.textContent = betNow ? 'BET PLACED ' : `BET ${trdK(amt)} ON ${CF_NAME[CF.side]} `;

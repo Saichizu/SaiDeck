@@ -1,6 +1,6 @@
 {
-  "build": 149,
+  "build": 150,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "⚡ Way less data: the games now get live updates instead of re-downloading everything every second. 📈 Cardiastra ticks every 2 seconds."
+  "notes": "🃏 Blackjack fixes (wrong totals, bets refused). 📈 Trading no longer says the market is asleep while you play. 💰 Type or pick your bet amount in Trading and Coin Flip."
 }
