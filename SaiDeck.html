@@ -923,6 +923,9 @@
   .sess-dead{position:fixed;inset:0;z-index:199000;display:flex;align-items:center;justify-content:center;background:rgba(6,6,12,.88);backdrop-filter:blur(6px);}
   .sess-box{width:min(420px, calc(100% - 32px));padding:26px 24px;border-radius:18px;background:#17171f;border:1px solid var(--border);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.6);}
   .sess-ic{font-size:44px;} .sess-box b{font:800 17px 'Manrope',sans-serif;} .sess-hint{font:500 11px 'Inter',sans-serif;color:var(--text-faint);} .sess-dead{cursor:pointer;} .sess-box p{margin:0;font:500 13px/1.5 'Inter',sans-serif;color:var(--text-dim);}
+  .crate-thief{position:fixed;z-index:100000;font-size:64px;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+  .crate-thief-tag{position:fixed;z-index:100001;pointer-events:none;font:900 26px 'Manrope',sans-serif;color:#ff4d6a;-webkit-text-stroke:1px #3a0010;text-shadow:0 3px 0 #3a0010;white-space:nowrap;}
+  .crate-thief-coin{position:fixed;z-index:99999;font-size:24px;pointer-events:none;}
   .td-win{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;}
   .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
   .td-box{position:relative;width:min(1000px, calc(100% - 16px));max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
@@ -22735,7 +22738,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 151;                 // ← goes up by one with every published version
+  const SD_BUILD = 152;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23878,14 +23881,14 @@
         const day = chatFmtDay(m.t); if(day !== lastDay){ const d = document.createElement('div'); d.className = 'chat-day'; d.textContent = day; body.appendChild(d); lastDay = day; }
         const c = CRATES.get(m._k), mine = !!(c && c.w && chatIsMe(c.w)), old = Date.now() + PRES.offset - (m.t || 0) > 86400000;
         const ev = document.createElement('div'); ev.className = 'chat-crate' + (c && c.w ? ' opened' : old ? ' opened' : '') + (mine ? ' mine' : '');
-        ev.innerHTML = `<div class="cc-shine"></div><span class="ccr-i" aria-hidden="true">${c && c.w ? (c.x ? '🎃' : '🎉') : '🎁'}</span><div class="ccr-t"><b class="ccr-h"></b><span class="ccr-m"></span><span class="ccr-s"></span></div>`;
-        ev.querySelector('.ccr-h').textContent = c && c.w ? (c.x ? 'A trick! 🎃' : c.a != null ? `${c.a.toLocaleString()} points` : 'Opened') : 'Mystery crate';
+        ev.innerHTML = `<div class="cc-shine"></div><span class="ccr-i" aria-hidden="true">${c && c.w ? (c.l ? '🦹' : c.x ? '🎃' : '🎉') : '🎁'}</span><div class="ccr-t"><b class="ccr-h"></b><span class="ccr-m"></span><span class="ccr-s"></span></div>`;
+        ev.querySelector('.ccr-h').textContent = c && c.w ? (c.l ? `A THIEF! 💸${c.ls != null ? ' −' + c.ls.toLocaleString() : ''}` : c.x ? 'A trick! 🎃' : c.a != null ? `${c.a.toLocaleString()} points` : 'Opened') : 'Mystery crate';
         ev.querySelector('.ccr-m').textContent = chatMask(String(m.m || ''));
         const st = ev.querySelector('.ccr-s');
-        if(c && c.w){ st.innerHTML = c.x ? (mine ? '<b>You</b> got jumpscared! 😱' : '<b></b> got jumpscared! 😱') : (mine ? '<b>You</b> grabbed it!' : '<b></b> grabbed it!'); if(!mine){ st.querySelector('b').textContent = chatBadName(c.wn) ? 'someone' : c.wn; st.querySelector('b').style.color = chatColor(c.wn || ''); } }
+        if(c && c.w){ st.innerHTML = c.l ? (mine ? `<b>You</b> got robbed of ${c.l}% 😭` : `<b></b> got robbed of ${c.l}% 😭`) : c.x ? (mine ? '<b>You</b> got jumpscared! 😱' : '<b></b> got jumpscared! 😱') : (mine ? '<b>You</b> grabbed it!' : '<b></b> grabbed it!'); if(!mine){ st.querySelector('b').textContent = chatBadName(c.wn) ? 'someone' : c.wn; st.querySelector('b').style.color = chatColor(c.wn || ''); } }
         else if(old) st.textContent = 'Nobody opened it in time.';
         else {
-          st.textContent = 'Points… or a nasty surprise? First to open it finds out!';
+          st.textContent = 'Points… or a nasty surprise (even a thief)? First to open it finds out!';
           const b = document.createElement('button'); b.type = 'button'; b.className = 'ccr-open'; b.textContent = 'Open!';
           b.addEventListener('click', (e) => { e.stopPropagation(); crateOpen(m._k, b); });
           ev.appendChild(b);
@@ -30103,11 +30106,13 @@
     try{
       const tok = chatName() ? await chatAuth().catch(() => null) : null, q = tok ? `?auth=${encodeURIComponent(tok)}` : '';
       const get = async (k) => { const r = await fetch(`${CHAT_DB}/crates/${encodeURIComponent(id)}/${k}.json${q}`, { cache: 'no-store' }); return r.ok ? r.json() : null; };
-      const [t, w, wn, pd, a] = await Promise.all([get('t'), get('w'), get('wn'), get('pd'), get('a')]);
+      const [t, w, wn, pd, a, ls] = await Promise.all([get('t'), get('w'), get('wn'), get('pd'), get('a'), get('ls')]);
       if(t == null) return null;
-      const d = { t, w: w || null, wn: wn || null, pd: pd === true, legacy: typeof a === 'number', a: typeof a === 'number' ? a : null, x: false, _at: Date.now() };
-      if(w && !d.legacy){ const sc = await get('s'); if(sc){ d.a = Math.floor(+(sc.a) || 0); d.x = sc.x === true; } }
+      const d = { t, w: w || null, wn: wn || null, pd: pd === true, legacy: typeof a === 'number', a: typeof a === 'number' ? a : null, x: false, l: 0, ls: typeof ls === 'number' ? ls : null, _at: Date.now() };
+      if(w && !d.legacy){ const sc = await get('s'); if(sc){ d.a = Math.floor(+(sc.a) || 0); d.x = sc.x === true; d.l = Math.floor(+(sc.l) || 0); } }
       CRATES.set(id, d);
+      // (you opened a thief crate and haven't paid up yet: that happens now)
+      if(w && chatIsMe(w) && !d.legacy && !d.pd && d.l > 0) crateSteal(id, d, null);
       // (you opened it but the points didn't reach you yet: collect them now)
       if(w && chatIsMe(w) && !d.legacy && !d.pd && !d.x && d.a > 0) crateCollect(id, d, null);
       return d;
@@ -30154,7 +30159,8 @@
       } else if(ok){
         // it's yours — now see what's inside
         const d = await crateFetch(id) || c;
-        if(d.x){
+        if(d.l > 0) await crateSteal(id, d, btn);
+        else if(d.x){
           const r = btn && btn.isConnected ? btn.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
           try{ totScare(r.left + r.width / 2, r.top + r.height / 2, 'the crate'); }catch(e){}
           setTimeout(() => toast('🎃 TRICK! That crate was a trap 😈', 3600), 1600);
@@ -30166,6 +30172,36 @@
       }
       chatRenderMessages();
     } finally { crateBusy = false; }
+  }
+  // a THIEF crate: a robber jumps out and takes l % of your money (the same sum the database checks)
+  let stealBusy = false;
+  async function crateSteal(id, d, btn){
+    if(stealBusy || d.pd) return; stealBusy = true;
+    try{
+      await scLoad();
+      const me = chatUid(), X = Math.max(0, scBal()) * d.l, loss = (X - X % 100) / 100;
+      const ok = await bjPatch({ [`crates/${id}/pd`]: true, [`crates/${id}/ls`]: loss, [`scores/${me}/s`]: SC.s + loss, [`scores/${me}/t`]: bjSv }).catch(() => null);
+      if(!ok){ const f = await crateFetch(id); if(f && f.pd) return; toast("The thief tripped — try opening it again.", 2400); return; }
+      SC.s += loss; d.pd = true; d.ls = loss; CRATES.set(id, d);
+      crateThiefFx(btn, loss, d.l);
+      setTimeout(() => toast(loss > 0 ? `💸 THIEF CRATE! A robber took ${loss.toLocaleString()} points (${d.l}% of your money) 😭` : '💸 A THIEF crate! …but you had nothing to steal 😂', 4200), 900);
+      chatRenderArcade(); chatRenderMessages();
+    } finally { stealBusy = false; }
+  }
+  function crateThiefFx(anchor, loss, pct){
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const r = anchor && anchor.isConnected ? anchor.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const rob = document.createElement('div'); rob.className = 'crate-thief'; rob.textContent = '🦹'; rob.style.left = cx + 'px'; rob.style.top = cy + 'px'; document.body.appendChild(rob);
+    rob.animate([{ transform: 'translate(-50%,-50%) scale(.2)', opacity: 0 }, { transform: 'translate(-50%,-80%) scale(1.6)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-80%) scale(1.5) rotate(-8deg)', offset: .55 }, { transform: `translate(${innerWidth}px,-120%) scale(1.2)`, opacity: 1 }], { duration: 2200, easing: 'cubic-bezier(.5,0,.7,1)' }).onfinish = () => rob.remove();
+    const tag = document.createElement('div'); tag.className = 'crate-thief-tag'; tag.textContent = loss > 0 ? `−${loss.toLocaleString()} (${pct}%)` : 'nothing to steal 😂'; tag.style.left = cx + 'px'; tag.style.top = (cy - 70) + 'px'; document.body.appendChild(tag);
+    tag.animate([{ transform: 'translate(-50%,0) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-10px) scale(1.15)', opacity: 1, offset: .2 }, { transform: 'translate(-50%,-40px) scale(1)', opacity: 0 }], { duration: 2600 }).onfinish = () => tag.remove();
+    for(let i = 0; i < 14; i++){
+      const c = document.createElement('div'); c.className = 'crate-thief-coin'; c.textContent = i % 3 ? '🪙' : '💸'; c.style.left = cx + 'px'; c.style.top = cy + 'px'; document.body.appendChild(c);
+      const dx = innerWidth - cx + 60 + Math.random() * 80, dy = -60 - Math.random() * 120;
+      c.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(${dx * .3 - 50}%, ${dy}px) rotate(${Math.random() * 360}deg)`, offset: .4 }, { transform: `translate(${dx}px, ${dy - 40}px) rotate(720deg)`, opacity: 0 }], { duration: 1500 + Math.random() * 800, delay: 400 + i * 60, easing: 'ease-in' }).onfinish = () => c.remove();
+    }
+    try{ sfxTdTwist(); }catch(e){}
   }
   // the crate bursts open: coins and sparkles fly out of it
   function crateBurst(anchor, amt){

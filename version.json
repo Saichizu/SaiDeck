@@ -1,6 +1,6 @@
 {
-  "build": 151,
+  "build": 152,
   "version": "V18",
   "file": "SaiDeck.html",
-  "notes": "🃏 Fixes blackjack getting stuck on \"Setting up the table\" and sitting you out after a bet."
+  "notes": "🦹 Thief crates! Some mystery crates now hide a thief who steals a chunk of your money."
 }
