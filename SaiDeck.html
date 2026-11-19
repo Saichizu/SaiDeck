@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 156;                 // ← goes up by one with every published version
+  const SD_BUILD = 157;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25040,6 +25040,7 @@
   priced(AMMO, 'fx'); priced(ARTY, 'art'); priced(PWR, 'pw');
   const SWAT_PTS = 10;                       // (the database only accepts exactly this many per swat)
   const ARTY_SHOTS = 10, ARTY_COOL = 5 * 60 * 1000;      // (each artillery swats up to 10 infiltrators, then 5 minutes' cooldown)
+  const SCW = { n: 0, seq: 0 };
   const SC = { p: 0, s: 0, fx: {}, art: {}, bub: {}, loaded: false, busy: false, board: null, boardAt: 0, tab: 'shop' };
   const scBal = () => Math.max(0, SC.p - SC.s);
   const ammoOwned = (k) => k === 'slime' || !!SC.fx[k];
@@ -26588,8 +26589,16 @@
       }
     }
   }
+  // Points writes in flight (SCW): scLoad waits for them and re-reads if one started meanwhile, because a read that
+  // lands between a write and the app's own "SC.s += cost" counted that cost twice — the next write then sent that
+  // too-high s and the database (which lets s only go up) took the difference out of the player's money.
   { const _f = window.fetch.bind(window); window.fetch = async (url, opt) => {
-      const r = await _f(url, opt);
+      const m0 = opt && opt.method ? String(opt.method).toUpperCase() : 'GET';
+      const pts = m0 !== 'GET' && String(url).startsWith(CHAT_DB) && (String(url).includes('/scores') || String((opt && opt.body) || '').includes('scores/'));
+      if(pts){ SCW.n++; SCW.seq++; }
+      let r;
+      try{ r = await _f(url, opt); }
+      finally{ if(pts) setTimeout(() => { SCW.n = Math.max(0, SCW.n - 1); SCW.seq++; }, 700); }
       try{ if(r.ok && opt && opt.method && opt.method !== 'GET' && LIVE.size){ const m = opt.method.toUpperCase(); if(m === 'DELETE') liveLocal(url, opt); else if(m === 'PATCH' || m === 'PUT') r.clone().json().then(a => liveLocal(url, opt, a)).catch(() => {}); } }catch(e){}
       return r;
     }; }
@@ -29521,7 +29530,7 @@
   // points from your own linked devices are accepted straight away
   async function lkAutoAccept(id, g){
     await scLoad();
-    const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: (chatName() || 'Someone').slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+    const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, ...scKeepS(me), [`scores/${me}/n`]: (chatName() || 'Someone').slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
     if(await bjPatch(body).catch(() => null)){ SC.p += g.a; sfxChip(); toast(`🔗 ${g.a.toLocaleString()} points came over from your linked device.`, 4000); chatRenderArcade(); bjCtl(); return true; }
     return false;
   }
@@ -29604,7 +29613,7 @@
     yes.addEventListener('click', async () => {
       yes.disabled = no.disabled = true; yes.textContent = '…';
       await scLoad();
-      const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
+      const me = chatUid(), body = { [`gifts/${me}/${id}`]: null, [`scores/${me}/g`]: id, [`scores/${me}/p`]: SC.p + g.a, ...scKeepS(me), [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX), [`scores/${me}/t`]: bjSv };
       if(await bjPatch(body).catch(() => null)){ SC.p += g.a; sfxChip(); done(`+${g.a} points`); chatRenderArcade(); bjCtl(); }
       else { yes.disabled = no.disabled = false; yes.textContent = 'Accept'; toast("Couldn't accept — try again in a moment.", 2200); }
     });
@@ -29779,7 +29788,7 @@
       const ub = g.ok ? await g.json() : null;
       if(typeof ub === 'number' && ub >= SD_BUILD){ rwdLS('ub', ub); return; }
       await scLoad();
-      const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + 100, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`scores/${me}/t`]: bjSv, [`rewards/${me}/ub`]: SD_BUILD });
+      const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + 100, ...scKeepS(me), [`scores/${me}/n`]: chatName().slice(0, CHAT_NAME_MAX) || 'Someone', [`scores/${me}/t`]: bjSv, [`rewards/${me}/ub`]: SD_BUILD });
       if(ok){ SC.p += 100; rwdLS('ub', SD_BUILD); rwdCelebrate('🚀 Thanks for updating! +100 points', `You're on build ${SD_BUILD}`); try{ sfxChip(); }catch(e){} chatRenderArcade(); }
     }catch(e){}
     RWD.updBusy = false;
@@ -29802,7 +29811,7 @@
       if(k < 1){ wait = Math.max(3000, rt0 + 11500 - rwdNow()); }
       else {
         const nm = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
-        const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + k * RWD_PTS, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/r`]: r0 + k, [`rewards/${me}/rt`]: bjSv });
+        const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + k * RWD_PTS, ...scKeepS(me), [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/r`]: r0 + k, [`rewards/${me}/rt`]: bjSv });
         if(!ok) throw new Error('no');
         SC.p += k * RWD_PTS; pend -= k; rwdLS('pend', pend);
         const pts = k * RWD_PTS;
@@ -29899,7 +29908,7 @@
       if(S.done[s]) continue;
       if(s === 'x' && !Q_SLOTS.every(z => S.done[z])) continue;
       await scLoad();
-      const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + QUEST_PTS, [`scores/${me}/s`]: SC.s, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/q/${s}`]: true }).catch(() => null);
+      const ok = await bjPatch({ [`scores/${me}/p`]: SC.p + QUEST_PTS, ...scKeepS(me), [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv, [`rewards/${me}/q/${s}`]: true }).catch(() => null);
       if(!ok) break;
       SC.p += QUEST_PTS; S.done[s] = true; questSave(S);
       try{ sfxChip(); }catch(e){}
@@ -30247,7 +30256,7 @@
       await scLoad();
       const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
       const body = { [`crates/${id}/pd`]: true, [`scores/${me}/k`]: id, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv };
-      if(c.a > 0){ body[`scores/${me}/p`] = SC.p + c.a; body[`scores/${me}/s`] = SC.s; }
+      if(c.a > 0){ body[`scores/${me}/p`] = SC.p + c.a; Object.assign(body, scKeepS(me)); }
       const ok = await bjPatch(body).catch(() => null);
       if(ok){ c.pd = true; if(c.a > 0){ SC.p += c.a; crateBurst(btn, c.a); toast(`🎁 It was full of points — +${c.a.toLocaleString()}!`, 3200); } chatRenderArcade(); }
     } finally { c._collecting = false; }
@@ -30273,7 +30282,7 @@
       await scLoad();
       const me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX);
       let ok;
-      if(c.legacy) ok = await bjPatch({ [`crates/${id}/w`]: me, [`crates/${id}/wn`]: nm, [`scores/${me}/p`]: SC.p + c.a, [`scores/${me}/s`]: SC.s, [`scores/${me}/k`]: id, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv }).catch(() => null);
+      if(c.legacy) ok = await bjPatch({ [`crates/${id}/w`]: me, [`crates/${id}/wn`]: nm, [`scores/${me}/p`]: SC.p + c.a, ...scKeepS(me), [`scores/${me}/k`]: id, [`scores/${me}/n`]: nm, [`scores/${me}/t`]: bjSv }).catch(() => null);
       else ok = await bjPatch({ [`crates/${id}/w`]: me, [`crates/${id}/wn`]: nm }).catch(() => null);
       if(ok && c.legacy){
         SC.p += c.a; c.w = me; c.wn = nm; CRATES.set(id, c);
@@ -30501,14 +30510,22 @@
     const fin = add(`<button type="button" class="infl-ok">🫡 I accept my fate</button>`, 'infl-end');
     fin.querySelector('.infl-ok').addEventListener('click', finish);
   }
+  // (for writes that only ADD points: leave s alone, so a wrong local copy can never be written back)
+  const scKeepS = (me) => SC.rec ? {} : { [`scores/${me}/s`]: SC.s };
   async function scLoad(){
     if(!chatName()) return;
     try{
       const tok = await chatAuth(), uid = chatUid();
-      const [a, b] = await Promise.all([
-        fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null),
-        fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`).then(r => r.ok ? r.json() : null)]);
-      SC.p = Math.floor(+(a && a.p) || 0); SC.s = Math.floor(+(a && a.s) || 0);
+      let a = null, b = null;
+      for(let tries = 0; tries < 10; tries++){
+        const t0 = Date.now(); while(SCW.n > 0 && Date.now() - t0 < 8000) await new Promise(res => setTimeout(res, 120));
+        const seq = SCW.seq;
+        [a, b] = await Promise.all([
+          fetch(`${CHAT_DB}/scores/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null),
+          fetch(`${CHAT_DB}/inv/${encodeURIComponent(uid)}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null)]);
+        if(SCW.n === 0 && SCW.seq === seq) break;     // (a points write overlapped this read: read again)
+      }
+      SC.p = Math.floor(+(a && a.p) || 0); SC.s = Math.floor(+(a && a.s) || 0); SC.rec = !!(a && typeof a.s === 'number');
       SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.pw = (b && b.pw) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.snd = (b && b.snd) || {};
       SC.loaded = true;
     }catch(e){}
@@ -30522,7 +30539,7 @@
       const tok = await chatAuth();
       if(!SC.loaded) await scLoad();
       const body = {}; body[`pokes/${victim}/zs`] = { u: me, n: nm, t: sv };
-      body[`scores/${me}`] = { n: nm, p: SC.p + SWAT_PTS, s: SC.s, v: victim, t: sv };
+      Object.assign(body, { [`scores/${me}/n`]: nm, [`scores/${me}/p`]: SC.p + SWAT_PTS, [`scores/${me}/v`]: victim, [`scores/${me}/t`]: sv }, scKeepS(me));
       const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       if(r.ok){ ok = true; SC.p += SWAT_PTS; try{ questEv('swat'); }catch(e){} }
       else { SC.loaded = false; setTimeout(scLoad, 1200); await fetch(`${CHAT_DB}/pokes/${encodeURIComponent(victim)}/zs.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ u: me, n: nm, t: sv }) }); }

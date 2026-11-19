@@ -1,1 +1,1 @@
-{"build":156,"version":"V18","file":"SaiDeck.html","notes":"Merged tracks can be unmerged: click a merged track and press Unmerge in the bar to get the original tracks back (works after reopening the session too)."}
+{"build":157,"version":"V18","file":"SaiDeck.html","notes":"Fixed a bug that could quietly take points: when the app re-read your points while a payment was still finishing, it counted that payment twice, and the next thing you did charged you the extra. Rewards, quests and bonuses also no longer re-send your spent total."}
