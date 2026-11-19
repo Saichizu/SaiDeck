@@ -1,6 +1,1 @@
-{
-  "build": 152,
-  "version": "V18",
-  "file": "SaiDeck.html",
-  "notes": "🦹 Thief crates! Some mystery crates now hide a thief who steals a chunk of your money."
-}
+{"build":156,"version":"V18","file":"SaiDeck.html","notes":"Merged tracks can be unmerged: click a merged track and press Unmerge in the bar to get the original tracks back (works after reopening the session too)."}

@@ -2837,7 +2837,8 @@
   .key-paste .kp-go{background:var(--accent) !important;border-color:var(--accent) !important;color:#fff !important;}
   .key-paste .kp-go:disabled{opacity:.45;cursor:default;}
   .track-bar{border-color:rgba(255,181,71,.35);}
-  .track-bar button[data-t="merge"]{color:#ffd27a;}
+  .track-bar button[data-t="merge"], .track-bar button[data-t="unmerge"]{color:#ffd27a;}
+  .track-bar button[data-t="unmerge"]:hover{background:rgba(255,181,71,.14);color:#ffe2a8;}
   .track-bar button[data-t="merge"]:hover{background:rgba(255,181,71,.14);color:#ffe2a8;}
   .merge-name{display:flex;flex-direction:column;gap:6px;font:600 12px 'Inter',sans-serif;color:var(--text-dim);margin:-4px 0 6px;}
   .merge-name input{box-sizing:border-box;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #3a3b48;background:#121319;color:var(--text);font:14px 'Inter',sans-serif;outline:none;}
@@ -4739,6 +4740,7 @@
         <div class="rec-row rs" data-rec-row="panelOpacity" data-hl="column" title="How see-through the left panel (the track icon strip) is"><span>Left panel opacity</span><input type="range" min="0" max="100" step="5" data-rec="panelOpacity"><span class="rec-val" data-rec-val="panelOpacity"></span></div>
         <div class="rec-row rs" data-rec-row="iconSize" data-hl="icons"><span>Icon size</span><input type="range" min="12" max="140" step="2" data-rec="iconSize"><span class="rec-val" data-rec-val="iconSize"></span></div>
         <div class="rec-row rs" data-rec-row="headerScale" data-hl="header"><span>Header size</span><input type="range" min="50" max="220" step="5" data-rec="headerScale"><span class="rec-val" data-rec-val="headerScale"></span></div>
+        <div class="rec-row rs" data-rec-row="nameSize" data-hl="names" title="How big the track names are in the top-left corner of each track"><span>Track name size</span><input type="range" min="50" max="300" step="5" data-rec="nameSize"><span class="rec-val" data-rec-val="nameSize"></span></div>
         <div class="rec-row bg-pick" data-rec-row="bgGrad" data-hl="bg" title="A quiet gradient behind everything — dark enough that the tracks, panel and waveforms keep their colours"><span>Background</span><div class="seg bg-grid" data-rec="bgGrad"><button type="button" data-value="" title="Plain colour (below)" style="--g:var(--plain-bg,#08080a)"><i></i><span>Plain</span></button><button type="button" data-value="midnight" title="Midnight" style="--g:linear-gradient(155deg,#070a14,#0e1428,#18203a)"><i></i><span>Midnight</span></button><button type="button" data-value="dusk" title="Dusk" style="--g:linear-gradient(160deg,#0a0912,#171126,#2a1426)"><i></i><span>Dusk</span></button><button type="button" data-value="plum" title="Plum" style="--g:linear-gradient(135deg,#0b070f,#1a0f22,#2a1233)"><i></i><span>Plum</span></button><button type="button" data-value="ocean" title="Ocean" style="--g:linear-gradient(170deg,#050c12,#0a1b26,#0e2a36)"><i></i><span>Ocean</span></button><button type="button" data-value="aurora" title="Aurora" style="--g:linear-gradient(120deg,#06110f,#0b1a22,#141430,#1d1029)"><i></i><span>Aurora</span></button><button type="button" data-value="forest" title="Forest" style="--g:linear-gradient(165deg,#060b08,#0c1a12,#14281c)"><i></i><span>Forest</span></button><button type="button" data-value="ember" title="Ember" style="--g:linear-gradient(150deg,#0b0706,#1a0f0c,#2e1510)"><i></i><span>Ember</span></button><button type="button" data-value="rose" title="Rose" style="--g:linear-gradient(145deg,#0c070a,#1b0e17,#2e1423)"><i></i><span>Rose</span></button><button type="button" data-value="graphite" title="Graphite" style="--g:linear-gradient(170deg,#08080b,#121318,#1d1f27)"><i></i><span>Graphite</span></button></div></div>
         <div class="rec-row" data-rec-row="bgColor" data-hl="bg"><span>Background colour</span><input type="color" data-rec="bg"></div>
         <label class="rec-row rec-toggle" data-hl="lanes" title="In the video only (the timeline never changes): singing tracks move up past quiet ones. Pick below which mic tracks are Main, Backup or Fixed; instruments never move."><span>Singing tracks move up</span><span class="switch"><input type="checkbox" data-rec="vocalReorder"><span class="track"></span><span class="knob"></span></span></label>
@@ -4884,6 +4886,14 @@
         <div class="rec-row rec-ratio-custom" data-rec-row="videoRatioCustom" data-hl="video" title="The box's shape: width : height (any numbers — 16 : 9, 1080 : 700…). Or drag the box's edges in the preview."><span>Custom ratio</span><span class="rec-ratio-in"><input type="number" min="1" max="10000" step="1" data-rec="videoRW"><b>:</b><input type="number" min="1" max="10000" step="1" data-rec="videoRH"></span></div>
         <div class="rec-row" data-rec-row="videoSlot" data-hl="video"><span>Position</span><select class="rec-select" data-rec="videoSlot"></select></div>
         <div class="rec-row rs" data-rec-row="videoSize" data-hl="video"><span>Size</span><input type="range" min="20" max="100" step="1" data-rec="videoSize"><span class="rec-val" data-rec-val="videoSize"></span></div>
+        <div class="rec-row rs" data-rec-row="videoFeather" data-hl="video" title="Soften the edges of the video so it fades into whatever is behind it (no background band) instead of ending in a hard line. 0 = sharp edges."><span>Soft edges</span><input type="range" min="0" max="50" step="1" data-rec="videoFeather"><span class="rec-val" data-rec-val="videoFeather"></span></div>
+        <div class="rec-chips" data-rec-row="videoFeatherSides" data-hl="video" title="Which edges fade out">
+          <label class="rec-row rec-toggle rec-chip" style="--chip:#5aa9ff"><span>Top</span><span class="switch"><input type="checkbox" data-rec="videoFeatherT"><span class="track"></span><span class="knob"></span></span></label>
+          <label class="rec-row rec-toggle rec-chip" style="--chip:#5aa9ff"><span>Bottom</span><span class="switch"><input type="checkbox" data-rec="videoFeatherB"><span class="track"></span><span class="knob"></span></span></label>
+          <label class="rec-row rec-toggle rec-chip" style="--chip:#5aa9ff"><span>Left</span><span class="switch"><input type="checkbox" data-rec="videoFeatherL"><span class="track"></span><span class="knob"></span></span></label>
+          <label class="rec-row rec-toggle rec-chip" style="--chip:#5aa9ff"><span>Right</span><span class="switch"><input type="checkbox" data-rec="videoFeatherR"><span class="track"></span><span class="knob"></span></span></label>
+          <button type="button" class="rec-small-btn" id="recFeatherAll" title="Fade all four edges">All sides</button>
+        </div>
         <div class="rec-sub-lbl" data-rec-row="videoFrame" data-hl="video">Framing <span>— or scroll on the video in the preview to zoom, drag it to move</span></div>
         <div class="rec-row rs" data-rec-row="videoZoom" data-hl="video"><span>Zoom</span><input type="range" min="25" max="400" step="1" data-rec="videoZoom"><span class="rec-val" data-rec-val="videoZoom"></span></div>
         <div class="rec-row rs" data-rec-row="videoPanX" data-hl="video"><span>Move across</span><input type="range" min="-100" max="100" step="1" data-rec="videoPanX"><span class="rec-val" data-rec-val="videoPanX"></span></div>
@@ -8657,36 +8667,7 @@
                  : (recSettings.audioFileName ? { name: recSettings.audioFileName, offset: recSettings.audioFileOffset || 0, use: recSettings.audioSource === 'file' } : undefined),
       video: projVideo ? { name: projVideo.name, fileName: projVideo.fileName || null, start: videoStartSec, delay: videoDelaySec || undefined, fade: videoDelaySec > 0 ? videoFadeSec : undefined, len: videoLenSec || undefined, fadeOut: videoLenSec > 0 ? videoFadeOutSec : undefined }
            : (pendingVideoInfo ? Object.assign({}, pendingVideoInfo) : undefined),
-      tracks: tracks.map(t => {
-        const entry = {
-          // Saved as the track's base (no-key) look, not whatever a key
-          // happened to be overriding it to at the moment of saving —
-          // otherwise reloading would "freeze" that override as the new
-          // default and the keys array below would double up on it.
-          name: t.name, color: t.baseColor, icon: t.icon,
-          volume: t.volume, muted: t.muted, solo: t.solo,
-          trailEffect: t.baseTrailEffect,
-          avatarDataUrl: t.avatarDataUrl, avatarShape: t.avatarShape,
-          audioFileName: t.audioFileName || null,
-          offset: t.offset || 0,
-          segs: (isSplit(t) || segPartial(t)) ? t.segs.map(g => ({ s: g.s, e: g.e, d: g.d })) : undefined,
-          cuts: (t.cuts && t.cuts.length) ? t.cuts.map(c => ({ s: c.s, e: c.e, d: c.d })) : undefined,
-          takesShow: (t.takesShow && t.takesShow.length) ? t.takesShow.map(r => r.slice()) : undefined,
-          harmMarks: (t.harmMarks && t.harmMarks.length) ? t.harmMarks.map(m => ({ on: m.on, off: m.off })) : undefined,
-          quest: (t.qLook || t.qHome || (t.qWaypoints && t.qWaypoints.length)) ? { look: t.qLook || null, home: t.qHome || null, waypoints: t.qWaypoints || [] } : undefined,
-          linkIdx: isLinkedChild(t) ? tracks.indexOf(linkRoot(t)) : undefined,
-          ownPower: t.ownPower || undefined, trailPow: t.trailPow, resPow: t.resPow,
-          audioMime: t.audioMime || null,
-          keys: (t.keys || []).map(k => ({ time: k.time, color: k.color, trailEffect: k.trailEffect, transitionMs: k.transitionMs }))
-        };
-        // Only embed the full audio as base64 when there's no on-disk file
-        // to point to instead (no folder connected, or that write failed) —
-        // otherwise this would needlessly bloat the session file.
-        if(!t.audioFileName && t.audioRaw){
-          entry.audioDataUrl = `data:${t.audioMime || 'application/octet-stream'};base64,${arrayBufferToBase64(t.audioRaw)}`;
-        }
-        return entry;
-      })
+      tracks: tracks.map(t => sessionTrackEntry(t))
     };
   }
 
@@ -8826,25 +8807,10 @@
         }
         if(!arrBuf){ missing++; continue; }
         const buffer = await audioCtx.decodeAudioData(arrBuf.slice(0));
-        const restored = addTrack(tdata.name || 'Track', buffer, {
-          color: tdata.color, icon: tdata.icon, volume: tdata.volume,
-          muted: tdata.muted, solo: tdata.solo, trailEffect: tdata.trailEffect,
-          avatarDataUrl: tdata.avatarDataUrl, avatarShape: tdata.avatarShape,
-          audioFileName: tdata.audioFileName || null,
-          offset: typeof tdata.offset === 'number' && isFinite(tdata.offset) ? tdata.offset : 0,
-          segs: Array.isArray(tdata.segs) ? tdata.segs : null,
-          takesShow: Array.isArray(tdata.takesShow) ? tdata.takesShow : null,
-          cuts: Array.isArray(tdata.cuts) ? tdata.cuts : null,
-          harmMarks: Array.isArray(tdata.harmMarks) ? tdata.harmMarks : null,
-          ownPower: !!tdata.ownPower, trailPow: tdata.trailPow, resPow: tdata.resPow,
-          audioRaw: arrBuf, audioMime: tdata.audioMime || null,
-          keys: Array.isArray(tdata.keys) ? tdata.keys.map(k => ({
-            id: trackKeyIdSeq++, time: k.time, color: k.color, trailEffect: k.trailEffect,
-            transitionMs: typeof k.transitionMs === 'number' ? k.transitionMs : undefined
-          })) : []
-        });
+        const restored = addTrack(tdata.name || 'Track', buffer, trackOptsFromData(tdata, arrBuf));
         if(restored){
           sortKeys(restored); renderKeyMarkers(restored); tdata._restored = restored;
+          if(Array.isArray(tdata.mergedFrom) && tdata.mergedFrom.length) restored.mergedFrom = tdata.mergedFrom;
           if(tdata.quest){ restored.qLook = tdata.quest.look || null; restored.qHome = tdata.quest.home || null; restored.qWaypoints = Array.isArray(tdata.quest.waypoints) ? tdata.quest.waypoints : []; }
         }
       }catch(err){
@@ -9380,6 +9346,59 @@
     return map[ext] || 'application/octet-stream';
   }
 
+  // One track as it's saved in the session file. (A merged track also keeps the tracks it was made from,
+  // so it can be split back into them — "Unmerge" — even after the session is closed and opened again.)
+  function sessionTrackEntry(t){
+    const entry = {
+      // Saved as the track's base (no-key) look, not whatever a key
+      // happened to be overriding it to at the moment of saving —
+      // otherwise reloading would "freeze" that override as the new
+      // default and the keys array below would double up on it.
+      name: t.name, color: t.baseColor, icon: t.icon,
+      volume: t.volume, muted: t.muted, solo: t.solo,
+      trailEffect: t.baseTrailEffect,
+      avatarDataUrl: t.avatarDataUrl, avatarShape: t.avatarShape,
+      audioFileName: t.audioFileName || null,
+      offset: t.offset || 0,
+      segs: (isSplit(t) || segPartial(t)) ? t.segs.map(g => ({ s: g.s, e: g.e, d: g.d })) : undefined,
+      cuts: (t.cuts && t.cuts.length) ? t.cuts.map(c => ({ s: c.s, e: c.e, d: c.d })) : undefined,
+      takesShow: (t.takesShow && t.takesShow.length) ? t.takesShow.map(r => r.slice()) : undefined,
+      harmMarks: (t.harmMarks && t.harmMarks.length) ? t.harmMarks.map(m => ({ on: m.on, off: m.off })) : undefined,
+      quest: (t.qLook || t.qHome || (t.qWaypoints && t.qWaypoints.length)) ? { look: t.qLook || null, home: t.qHome || null, waypoints: t.qWaypoints || [] } : undefined,
+      linkIdx: isLinkedChild(t) ? tracks.indexOf(linkRoot(t)) : undefined,
+      ownPower: t.ownPower || undefined, trailPow: t.trailPow, resPow: t.resPow,
+      audioMime: t.audioMime || null,
+      keys: (t.keys || []).map(k => ({ time: k.time, color: k.color, trailEffect: k.trailEffect, transitionMs: k.transitionMs }))
+    };
+    // Only embed the full audio as base64 when there's no on-disk file
+    // to point to instead (no folder connected, or that write failed) —
+    // otherwise this would needlessly bloat the session file.
+    if(!t.audioFileName && t.audioRaw){
+      entry.audioDataUrl = `data:${t.audioMime || 'application/octet-stream'};base64,${arrayBufferToBase64(t.audioRaw)}`;
+    }
+    if(Array.isArray(t.mergedFrom) && t.mergedFrom.length) entry.mergedFrom = t.mergedFrom.map(e => { const o = Object.assign({}, e); delete o._buf; delete o._raw; return o; });
+    return entry;
+  }
+  // addTrack options from a saved track (the session file, or a merged track's originals)
+  function trackOptsFromData(tdata, arrBuf){
+    return {
+      color: tdata.color, icon: tdata.icon, volume: tdata.volume,
+      muted: tdata.muted, solo: tdata.solo, trailEffect: tdata.trailEffect,
+      avatarDataUrl: tdata.avatarDataUrl, avatarShape: tdata.avatarShape,
+      audioFileName: tdata.audioFileName || null,
+      offset: typeof tdata.offset === 'number' && isFinite(tdata.offset) ? tdata.offset : 0,
+      segs: Array.isArray(tdata.segs) ? tdata.segs : null,
+      takesShow: Array.isArray(tdata.takesShow) ? tdata.takesShow : null,
+      cuts: Array.isArray(tdata.cuts) ? tdata.cuts : null,
+      harmMarks: Array.isArray(tdata.harmMarks) ? tdata.harmMarks : null,
+      ownPower: !!tdata.ownPower, trailPow: tdata.trailPow, resPow: tdata.resPow,
+      audioRaw: arrBuf, audioMime: tdata.audioMime || null,
+      keys: Array.isArray(tdata.keys) ? tdata.keys.map(k => ({
+        id: trackKeyIdSeq++, time: k.time, color: k.color, trailEffect: k.trailEffect,
+        transitionMs: typeof k.transitionMs === 'number' ? k.transitionMs : undefined
+      })) : []
+        };
+  }
   function addTrack(name, buffer, opts){
     opts = opts || {};
     const id = trackIdSeq++;
@@ -10825,6 +10844,7 @@
       trackBarEl.setAttribute('role', 'toolbar'); trackBarEl.setAttribute('aria-label', 'Selected tracks');
       trackBarEl.innerHTML = `<span class="kb-n"></span>
         <button type="button" data-t="merge" title="Combine the selected tracks into one track"><svg viewBox="0 0 24 24"><path d="M17 20.4 18.4 19l-4-4H11v2h2.6zM7 3 2 8h4v6c0 2.8 2.2 5 5 5h0v-2h0a3 3 0 0 1-3-3V8h4zm10.6 0-1.4 1.4L18.8 7H14v2h4.8l-2.6 2.6 1.4 1.4L22.6 8z"/></svg>Merge into one track</button>
+        <button type="button" data-t="unmerge" title="Split this merged track back into the tracks it was made from"><svg viewBox="0 0 24 24"><path d="M14 4l2.29 2.29-2.88 2.88 1.42 1.42 2.88-2.88L20 10V4h-6zm-4 0H4v6l2.29-2.29 4.71 4.7V20h2v-8.41l-5.29-5.3L10 4z"/></svg>Unmerge</button>
         <span class="kb-sep"></span>
         <button type="button" data-t="clear" class="kb-x" title="Clear the selection (Esc)" aria-label="Clear the track selection"><svg viewBox="0 0 24 24"><path d="M18.3 5.71 12 12.01l-6.3-6.3-1.41 1.41 6.3 6.3-6.3 6.3 1.41 1.41 6.3-6.3 6.3 6.3 1.41-1.41-6.3-6.3 6.3-6.3z"/></svg></button>`;
       document.body.appendChild(trackBarEl);
@@ -10832,15 +10852,19 @@
       trackBarEl.addEventListener('click', (e) => {
         const b = e.target.closest('button[data-t]'); if(!b || b.disabled) return;
         if(b.dataset.t === 'merge') mergeTracksAsk();
+        else if(b.dataset.t === 'unmerge'){ const one = tracks.filter(t => t.selected); if(one.length === 1) unmergeTrack(one[0]); }
         else clearSelection();
       });
       window.addEventListener('resize', trackBarPlace);
     }
-    const n = tracks.filter(t => t.selected).length;
+    const selT = tracks.filter(t => t.selected), n = selT.length;
+    const mergedOne = n === 1 && Array.isArray(selT[0].mergedFrom) && selT[0].mergedFrom.length > 0;
     let busy = false; try{ busy = !!(renderState && renderState.active); }catch(e){}
-    trackBarEl.hidden = n < 2 || busy;
+    trackBarEl.hidden = (n < 2 && !mergedOne) || busy;
     if(trackBarEl.hidden) return;
-    trackBarEl.querySelector('.kb-n').textContent = `${n} tracks selected`;
+    trackBarEl.querySelector('[data-t="merge"]').style.display = n < 2 ? 'none' : '';
+    trackBarEl.querySelector('[data-t="unmerge"]').style.display = mergedOne ? '' : 'none';
+    trackBarEl.querySelector('.kb-n').textContent = mergedOne ? `“${selT[0].name}” · merged from ${selT[0].mergedFrom.length} tracks` : `${n} tracks selected`;
     trackBarPlace();
   }
   function trackBarPlace(){
@@ -10941,10 +10965,12 @@
       try{
         for(const LT of (typeof lyrTracks !== 'undefined' ? lyrTracks : [])){
           for(const L of ((LT.lyr && LT.lyr.lines) || [])) for(const w of (L.words || [])){
-            if(Array.isArray(w.sing) && w.sing.some(id => ids.has(id))){ w.sing = [...new Set(w.sing.map(id => ids.has(id) ? nt.id : id))]; }
+            if(Array.isArray(w.sing) && w.sing.some(id => ids.has(id))){ w.singPre = w.sing.slice(); w.sing = [...new Set(w.sing.map(id => ids.has(id) ? nt.id : id))]; }
           }
         }
       }catch(e){ console.error(e); }
+      // (it remembers the tracks it was made from, so it can be unmerged later)
+      nt.mergedFrom = sel.map(t => Object.assign(sessionTrackEntry(t), { linkIdx: undefined, oldId: t.id, _buf: t.buffer, _raw: t.audioRaw }));
       for(const t of sel) removeTrack(t.id);
       // the merged track goes where the top one was
       const i = tracks.indexOf(nt); if(i >= 0){ tracks.splice(i, 1); tracks.splice(Math.min(at, tracks.length), 0, nt); }
@@ -10955,10 +10981,67 @@
       if(typeof Quest !== 'undefined' && Quest.changed) Quest.changed();
       if(wasPlaying){ playheadTime = playAt; startPlayback(); }
       scheduleHistoryCheck(0);
-      toast(`Merged into “${name}”${savedName ? ' — its audio is saved in the audio folder as ' + savedName : ''}. Ctrl+Z splits them back.`, 3600);
+      toast(`Merged into “${name}”${savedName ? ' — its audio is saved in the audio folder as ' + savedName : ''}. Click it and press Unmerge to split them back.`, 3600);
     }catch(err){
       console.error(err);
       toast("Couldn't merge those tracks: " + (err.message || err), 4200);
+    }
+  }
+  // Unmerge: a merged track goes back to the tracks it was made from (their own sound, look, keys and
+  // place), in the merged track's spot. Lyrics it sang go to all of them.
+  async function unmergeTrack(nt){
+    if(renderState && renderState.active){ toast("Can't unmerge while a video is rendering."); return; }
+    const list = Array.isArray(nt && nt.mergedFrom) ? nt.mergedFrom : null;
+    if(!list || !list.length || !tracks.includes(nt)) return;
+    ensureCtx();
+    const wasPlaying = isPlaying, playAt = wasPlaying ? currentPlayheadTime() : playheadTime;
+    toast(`Unmerging “${nt.name}”…`, 1600);
+    try{
+      const audioDir = projectFolderHandle ? await getAudioDirHandle().catch(() => null) : null;
+      const made = [];
+      for(const e of list){
+        let buffer = e._buf || null, raw = e._raw || null;
+        if(!buffer){
+          if(e.audioFileName && audioDir){ try{ const fh = await audioDir.getFileHandle(e.audioFileName); raw = await (await fh.getFile()).arrayBuffer(); }catch(err){ raw = null; } }
+          if(!raw && e.audioDataUrl) raw = dataUrlToArrayBuffer(e.audioDataUrl);
+          if(!raw) continue;
+          buffer = await audioCtx.decodeAudioData(raw.slice(0));
+        }
+        const tr = addTrack(e.name || 'Track', buffer, trackOptsFromData(e, raw));
+        if(!tr) continue;
+        sortKeys(tr); renderKeyMarkers(tr);
+        if(e.quest){ tr.qLook = e.quest.look || null; tr.qHome = e.quest.home || null; tr.qWaypoints = Array.isArray(e.quest.waypoints) ? e.quest.waypoints : []; }
+        if(Array.isArray(e.mergedFrom) && e.mergedFrom.length) tr.mergedFrom = e.mergedFrom;
+        tr._fromOld = e.oldId; made.push(tr);
+      }
+      if(!made.length){ toast("Couldn't find the original tracks' audio to unmerge.", 3600); return; }
+      if(wasPlaying) stopPlayback(false);
+      try{
+        for(const LT of (typeof lyrTracks !== 'undefined' ? lyrTracks : [])){
+          for(const L of ((LT.lyr && LT.lyr.lines) || [])) for(const w of (L.words || [])){
+            if(!Array.isArray(w.sing) || !w.sing.includes(nt.id)) continue;
+            // back to whoever sang it before the merge (when that's known), otherwise all of them
+            let who = Array.isArray(w.singPre) ? made.filter(x => x._fromOld != null && w.singPre.includes(x._fromOld)) : [];
+            if(!who.length) who = made;
+            w.sing = [...new Set(w.sing.flatMap(id => id === nt.id ? who.map(x => x.id) : [id]))]; delete w.singPre;
+          }
+        }
+      }catch(err){ console.error(err); }
+      const at = tracks.indexOf(nt);
+      removeTrack(nt.id);
+      for(const tr of made){ const i = tracks.indexOf(tr); if(i >= 0) tracks.splice(i, 1); }
+      tracks.splice(Math.min(Math.max(0, at), tracks.length), 0, ...made);
+      applyTrackOrderToDOM();
+      clearSelection();
+      resetHarmonyCache(); refreshGains(); relayout(); redrawAllWaveforms(); refreshLinkUI();
+      updateTrackKeyStates();
+      if(typeof Quest !== 'undefined' && Quest.changed) Quest.changed();
+      if(wasPlaying){ playheadTime = playAt; startPlayback(); }
+      scheduleHistoryCheck(0);
+      toast(`Unmerged into ${made.length} tracks: ${made.map(x => '“' + x.name + '”').join(', ')}.`, 3200);
+    }catch(err){
+      console.error(err);
+      toast("Couldn't unmerge that track: " + (err.message || err), 4200);
     }
   }
   // Alt+drag on the timeline: draw a box around keys to pick them
@@ -13639,6 +13722,7 @@
     trackOpacity: 100, waveOpacity: 100, rulerOpacity: 100, panelOpacity: 100,   // % (the track images aren't affected)
     iconSize: 44,         // icon box size (px at 1080p)
     headerScale: 100,     // header size, %
+    nameSize: 100,        // track name tab size, %
     lyricsOn: true,         // kinetic lyrics on the video (once lyrics are timed)
     lyricStyle: 'pop',      // 'pop' = a line at a time, words pop in / 'big' = one big word at a time
     lyricFont: 'Poppins',
@@ -13749,6 +13833,8 @@
     videoSize: 100,       // box width, % of the frame width
     videoRW: 16, videoRH: 9,    // the Custom ratio (width : height)
     videoTrim: true,      // cut away black bars round the video (found automatically)
+    videoFeather: 0,      // soft edges on the video: how far in they fade, % of the box's shorter side (0 = sharp)
+    videoFeatherT: true, videoFeatherB: true, videoFeatherL: true, videoFeatherR: true,   // which edges fade
     videoZoom: 100,       // the picture inside the box: 100 = as Picture sets it, more = zoomed in, less = zoomed out
     videoPanX: 0,         // where the picture sits in the box: -100 (left) .. 100 (right)
     videoPanY: 0,         // -100 (top) .. 100 (bottom)
@@ -13923,6 +14009,32 @@
   // the fill for the background: the plain colour, or the gradient (made once
   // per frame size as a picture, and used as a pattern so every part of the
   // frame that's painted "background" lines up with the rest)
+  // Soft edges on the video: the picture is drawn into its own canvas, the chosen edges are faded out
+  // to see-through there, and that is laid down — so it melts into whatever is behind it (no band).
+  let vidSoftC = null;
+  function drawVideoSoft(ctx, src, rot, x, y, w, h, S){
+    const amt = Math.max(0, Math.min(50, Number(S.videoFeather) || 0)) / 100;
+    const m = ctx.getTransform(), k = Math.max(0.5, Math.min(2, Math.hypot(m.a, m.b)));
+    const cw = Math.max(1, Math.ceil(w * k)), ch = Math.max(1, Math.ceil(h * k));
+    if(!vidSoftC) vidSoftC = document.createElement('canvas');
+    if(vidSoftC.width !== cw || vidSoftC.height !== ch){ vidSoftC.width = cw; vidSoftC.height = ch; }
+    const g = vidSoftC.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, cw, ch);
+    g.setTransform(k, 0, 0, k, 0, 0); drawVideoFramed(g, src, rot, 0, 0, w, h, S);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    const fw = Math.min(cw, ch) * amt;
+    if(fw > 0.5){
+      g.globalCompositeOperation = 'destination-out';
+      // each chosen edge: fully see-through at the very edge, easing to solid inside
+      const ease = (q) => { for(let i = 0; i <= 8; i++){ const f = i / 8, a = 1 - f * f * (3 - 2 * f); q.addColorStop(f, `rgba(0,0,0,${a.toFixed(3)})`); } return q; };
+      if(S.videoFeatherT !== false){ g.fillStyle = ease(g.createLinearGradient(0, 0, 0, fw)); g.fillRect(0, 0, cw, fw); }
+      if(S.videoFeatherB !== false){ g.fillStyle = ease(g.createLinearGradient(0, ch, 0, ch - fw)); g.fillRect(0, ch - fw, cw, fw); }
+      if(S.videoFeatherL !== false){ g.fillStyle = ease(g.createLinearGradient(0, 0, fw, 0)); g.fillRect(0, 0, fw, ch); }
+      if(S.videoFeatherR !== false){ g.fillStyle = ease(g.createLinearGradient(cw, 0, cw - fw, 0)); g.fillRect(cw - fw, 0, fw, ch); }
+      g.globalCompositeOperation = 'source-over';
+    }
+    ctx.drawImage(vidSoftC, x, y, w, h);
+  }
   function bgPaint(){
     const S = recSettings, G = bgGradOf(S);
     if(!G) return S.bg;
@@ -16270,11 +16382,11 @@
   // With "Singing tracks move up" it uses the lanes' own timing (marked
   // REORD_LEAD s early, eased over REORD_MOVE s with the same curve), so the
   // image rides up together with its lane, not after it.
-  function personWeights(root, T){
+  function personWeights(root, T, noLanes){
     const ms = linkMembers(root);
     const lanesMove = true;   // connected tracks' lanes always move together now (even with "Singing tracks move up" off)
     const lead = lanesMove ? REORD_LEAD : 0.25;
-    const sig = ms.map(m => m.id + ':' + (m.offset || 0) + ':' + effectiveGain(m).toFixed(3) + ':' + JSON.stringify(segsOf(m))).join(',') + '|' + lanesMove;
+    const sig = ms.map(m => m.id + ':' + (m.offset || 0) + ':' + effectiveGain(m).toFixed(3) + ':' + JSON.stringify(segsOf(m))).join(',') + '|' + lanesMove + '|' + tracks.map(t => t.id).join(',');
     let P = root._pw;
     if(!P || P.sig !== sig){
       let G = 2; for(const m of ms) G = Math.max(G, Math.ceil(((m.offset || 0) + trackSpan(m)) / REORD_STEP) + 2);
@@ -16294,6 +16406,15 @@
         else {                                                   // before anyone has sung: the first track to start
           let best = 0, bs = Infinity; ms.forEach((m, i) => { const st = (m.offset || 0) + (segsOf(m)[0] ? segsOf(m)[0].s + segsOf(m)[0].d : 0); if(st < bs){ bs = st; best = i; } });
           cur = [best];
+        }
+        // Several of their tracks singing at once: the picture only goes between them when those tracks
+        // are all next to each other in the track list (tracks 3 and 4). If another track sits in between
+        // (tracks 1 and 3, or 1, 3 and 4) it stays on the top one of them (track 1) instead.
+        if(cur.length > 1){
+          const rowOf = (i) => tracks.indexOf(ms[i]);
+          const byRow = cur.slice().sort((a, b) => rowOf(a) - rowOf(b));
+          let together = true; for(let k = 1; k < byRow.length; k++) if(rowOf(byRow[k]) - rowOf(byRow[k - 1]) > 1){ together = false; break; }
+          if(!together){ cur = [byRow[0]]; if(on.length) lastSet = cur.slice(); }
         }
         for(const i of cur) tg[i][g] = 1 / cur.length;
         prev = cur;
@@ -17167,7 +17288,8 @@
 
     // Name tab in the top-left corner, like .clip-label.
     if(recSettings.showNames){
-      const fs = Math.max(8, Math.round(Math.min(14*u, clipH * 0.2)));
+      const nk = Math.max(0.5, Math.min(3, (Number(recSettings.nameSize) || 100) / 100));
+      const fs = Math.max(8, Math.round(Math.min(Math.min(14*u, clipH * 0.2) * nk, clipH * 0.62)));
       ctx.font = `700 ${fs}px Inter, sans-serif`;
       const padX = fs * 0.65, padY = fs * 0.22;
       const tw = Math.min(ctx.measureText(t.name).width, clipW - padX*2);
@@ -18510,21 +18632,19 @@
       // The band is plain background in the real render (that's where the
       // video goes in the editor); the preview marks it with a white
       // placeholder box so it's easy to line up.
-      ctx.fillStyle = bgPaint();
-      ctx.fillRect(0, vidY, RENDER_W, vidH);
+      // (with Soft edges on, no band: the video's edges fade straight into whatever is behind it)
+      const soft = projVideo && (Number(S.videoFeather) || 0) > 0;
+      if(!soft){ ctx.fillStyle = bgPaint(); ctx.fillRect(0, vidY, RENDER_W, vidH); }
       if(projVideo){
         const vo = videoOutAt(pt), va = videoAlphaAt(pt) * (1 - vo);
         if(vo > 0.001){ ctx.save(); ctx.globalAlpha *= vo; ctx.fillStyle = '#000'; ctx.fillRect(bx, vidY, vidW, vidH); ctx.restore(); }
         if(va > 0.001){
           ctx.save(); ctx.globalAlpha *= va;
-          if(projVideo.isImage){
-            drawVideoFramed(ctx, projVideo.img, 0, bx, vidY, vidW, vidH, S);
-          } else if(exporting && projVideo.frameSrc && projVideo.exportFrame){
-            drawVideoFramed(ctx, projVideo.exportFrame, projVideo.frameSrc.rotation, bx, vidY, vidW, vidH, S);
-          } else {
-            const el = exporting ? (projVideo.exporter || projVideo.preview) : projVideo.preview;
-            if(el.readyState >= 2) drawVideoFramed(ctx, el, 0, bx, vidY, vidW, vidH, S);
-          }
+          let src = null, rot = 0;
+          if(projVideo.isImage) src = projVideo.img;
+          else if(exporting && projVideo.frameSrc && projVideo.exportFrame){ src = projVideo.exportFrame; rot = projVideo.frameSrc.rotation; }
+          else { const el = exporting ? (projVideo.exporter || projVideo.preview) : projVideo.preview; if(el.readyState >= 2) src = el; }
+          if(src){ if(soft) drawVideoSoft(ctx, src, rot, bx, vidY, vidW, vidH, S); else drawVideoFramed(ctx, src, rot, bx, vidY, vidW, vidH, S); }
           ctx.restore();
         }
       } else if(!exporting){
@@ -19889,7 +20009,7 @@
       if(key.startsWith('jv')){ el.textContent = recSettings[key] + '%'; return; }
       if(key === 'introLen'){ el.textContent = Number(recSettings[key]).toFixed(1) + ' s'; return; }
       if(key === 'beatPulse'){ el.textContent = recSettings[key] ? recSettings[key] + '%' : 'off'; return; }
-      el.textContent = recSettings[key] + (key === 'zoom' ? ' px/s' : key === 'orbitSpin' ? '°/s' : key === 'orbitHop' ? '/s' : key === 'audioFileOffset' ? ' ms' : (key === 'headerScale' || key === 'videoSize' || key === 'lyricBounce' || key === 'lyricOpacity' || key === 'trackOpacity' || key === 'waveOpacity' || key === 'rulerOpacity' || key === 'panelOpacity' || key === 'orbitX' || key === 'orbitY' || key === 'orbitTilt' || key === 'orbitLift') ? '%' : 'px');
+      el.textContent = recSettings[key] + (key === 'zoom' ? ' px/s' : key === 'orbitSpin' ? '°/s' : key === 'orbitHop' ? '/s' : key === 'audioFileOffset' ? ' ms' : (key === 'headerScale' || key === 'nameSize' || key === 'videoSize' || key === 'videoFeather' || key === 'lyricBounce' || key === 'lyricOpacity' || key === 'trackOpacity' || key === 'waveOpacity' || key === 'rulerOpacity' || key === 'panelOpacity' || key === 'orbitX' || key === 'orbitY' || key === 'orbitTilt' || key === 'orbitLift') ? '%' : 'px');
     });
     const videoFill = recSettings.videoSpace && recSettings.videoFit === 'fill';
     const heightRow = recPanel.querySelector('[data-rec-row="trackHeight"]');
@@ -19908,6 +20028,7 @@
     if(centerRow) centerRow.classList.toggle('disabled', fit || !recSettings.follow);
     resetRecView();
     resetHarmonyCache();
+    { const nsRow = recPanel.querySelector('[data-rec-row="nameSize"]'); if(nsRow) nsRow.classList.toggle('disabled', !recSettings.showNames); }
     const hsRow = recPanel.querySelector('[data-rec-row="headerScale"]');
     if(hsRow) hsRow.classList.toggle('disabled', !recSettings.showHeader);
     ['panelWidth', 'iconSize'].forEach(key => {
@@ -19917,7 +20038,8 @@
     const persistRow = recPanel.querySelector('[data-rec-row="persistImages"]');
     if(persistRow) persistRow.classList.toggle('disabled', !recSettings.showImages);
     ['imgNames', 'imgPlace'].forEach(k => { const r = recPanel.querySelector(`[data-rec-row="${k}"]`); if(r) r.classList.toggle('disabled', !recSettings.showImages); });
-    ['videoFit', 'videoScale', 'videoRatio', 'videoSlot', 'videoSize', 'videoHint', 'videoFrame', 'videoZoom', 'videoPanX', 'videoPanY', 'videoFrameBtns'].forEach(key => {
+    { const fr = recPanel.querySelector('[data-rec-row="videoFeatherSides"]'); if(fr) fr.classList.toggle('disabled', !recSettings.videoSpace || !(recSettings.videoFeather > 0)); }
+    ['videoFit', 'videoScale', 'videoRatio', 'videoSlot', 'videoSize', 'videoFeather', 'videoHint', 'videoFrame', 'videoZoom', 'videoPanX', 'videoPanY', 'videoFrameBtns'].forEach(key => {
       const row = recPanel.querySelector(`[data-rec-row="${key}"]`);
       if(row) row.classList.toggle('disabled', !recSettings.videoSpace || (videoFill && (key === 'videoRatio' || key === 'videoSize')) || (/^videoFrame|^videoZoom|^videoPan/.test(key) && !projVideo));
     });
@@ -22535,12 +22657,13 @@
     ctx.restore();
   }
 
+  { const fa = document.getElementById('recFeatherAll'); if(fa) fa.addEventListener('click', () => { for(const s2 of 'TBLR') recSettings['videoFeather' + s2] = true; if(!(recSettings.videoFeather > 0)) recSettings.videoFeather = 15; saveRecSettings(); syncRecControls(); }); }
   // ---------- Render presets ----------
   // Built-in presets live in the app; everyone else's are saved into their
   // connected project folder (render-presets.saideck.json).
   const PRESET_KEYS = ['widthMode', 'zoom', 'trackHeight', 'fillFrame', 'gap', 'marginTop', 'marginBottom', 'bg', 'bgGrad',
-    'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale',
-    'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
+    'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale', 'nameSize',
+    'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoFeather', 'videoFeatherT', 'videoFeatherB', 'videoFeatherL', 'videoFeatherR', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
     'dimUnplayed', 'showPlayhead', 'fps', 'quality', 'audioKbps', 'rangeMode',
     'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricSnap', 'lyricSnapTo', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
   const BUILTIN_RENDER_PRESETS = [
@@ -22738,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 152;                 // ← goes up by one with every published version
+  const SD_BUILD = 156;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
