@@ -22875,7 +22875,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 170;                 // ← goes up by one with every published version
+  const SD_BUILD = 171;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25623,22 +25623,34 @@
     let T = null, y = casTier(scBal()), tok;
     try{
       tok = await chatAuth();
-      if(CAS.claimRun) await CAS.claimRun;                         // (the last 10× is still being collected: it needs to finish first)
-      else if(CAS.s10me && Object.values(CAS.s10me).some(c => c && c.c === false)) await casClaim10Left(tok);      // (left over from before)
+      // two sets of ten (a0..a9, b0..b9, rules 31): pay into the one that isn't still being collected
+      CAS.run10 = CAS.run10 || {};
+      const left = (k) => CAS.s10me && Object.entries(CAS.s10me).some(([key, c]) => key[0] === k && c && c.c === false);
+      let bank = ['a', 'b'].sort((x, z) => (CAS.lastBank === x) - (CAS.lastBank === z)).find(k => !CAS.run10[k] && !left(k));
+      if(!bank){ const busy = Object.values(CAS.run10).filter(Boolean); if(busy.length) await Promise.race(busy); else await casClaim10Left(tok);
+        bank = ['a', 'b'].find(k => !CAS.run10[k]) || 'a'; }
+      CAS.lastBank = bank; M.bank = bank;
       bet = casFee(scBal()); y = casTier(scBal());
       if(scBal() < bet * 10) return fail(`10× costs ${(bet * 10).toLocaleString()} points — you have ${scBal().toLocaleString()}.`);
       const mk = () => { const body = { [`scores/${me}/s`]: SC.s + bet * 10, [`scores/${me}/t`]: sv };
-        for(let k = 0; k < 10; k++) body[`casino/s10/${me}/a${k}`] = { b: bet, t: sv, c: false, y, o: CAS10_O(k) };
+        for(let k = 0; k < 10; k++) body[`casino/s10/${me}/${M.bank}${k}`] = { b: bet, t: sv, c: false, y, o: CAS10_O(k) };
         return body; };
       const potP = casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }, 6000).then(g => g.ok ? g.json() : null).catch(() => null);      // (read alongside the payment, for collecting)
       let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) });
       potP.then(v => { if(typeof v === 'number') CAS.pot10 = v; });
-      if(r.status === 401){ await casPityLoad(); await scLoad(); bet = casFee(scBal()); y = casTier(scBal());
-        if(scBal() >= bet * 10) r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) }); }
+      if(r.status === 401){
+        // (your points moved under it — the last 10× still paying out — or the luck lines moved: read your points as the
+        //  server has them right now, without waiting for anything, and go again straight away)
+        const q = (path) => casFetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).then(g => g.ok ? g.json() : null).catch(() => null);
+        const [sc] = await Promise.all([q(`scores/${encodeURIComponent(me)}`), casPityLoad().catch(() => {})]);
+        const sb = sc && typeof sc.p === 'number' && typeof sc.s === 'number' ? Math.floor(sc.p) - Math.floor(sc.s) : scBal();
+        if(sc && typeof sc.s === 'number') SC.s = Math.floor(sc.s);       // (only your spends move s, and none is under way)
+        bet = casFee(sb); y = casTier(sb);
+        if(sb >= bet * 10) r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) }); }
       if(!r.ok){ await scLoad(); return fail(r.status === 401 ? 'Slow down a little.' : "Couldn't spin — check your connection."); }
       SC.s += bet * 10;
-      try{ const d = await r.json(); const pick = (k) => { if(d && d[k] && typeof d[k].t === 'number') return d[k].t; let n = d; for(const x of k.split('/')){ n = n && n[x]; } return n && typeof n.t === 'number' ? n.t : null; }; T = pick(`casino/s10/${me}/a0`); }catch(e){}
-      if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}/a0/t.json?auth=${encodeURIComponent(tok)}`); const v = g.ok ? await g.json() : null; T = typeof v === 'number' ? v : null; }
+      try{ const d = await r.json(); const pick = (k) => { if(d && d[k] && typeof d[k].t === 'number') return d[k].t; let n = d; for(const x of k.split('/')){ n = n && n[x]; } return n && typeof n.t === 'number' ? n.t : null; }; T = pick(`casino/s10/${me}/${M.bank}0`); }catch(e){}
+      if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}/${M.bank}0/t.json?auth=${encodeURIComponent(tok)}`); const v = g.ok ? await g.json() : null; T = typeof v === 'number' ? v : null; }
       if(typeof T !== 'number') throw new Error('no time');
     }catch(e){ return fail(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that 10× — it'll be collected next time."); }
     CAS.busy = false;
@@ -25650,7 +25662,12 @@
       list.push({ k, sp, b: bet, t: sp.t, jack: casIsJack(sp.t), w: null, shownAt: 0 });
     }
     // collect them in the background, one after another
-    const claims = CAS.claimRun = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })().finally(() => { if(CAS.claimRun === claims) CAS.claimRun = null; });
+    const bank = M.bank;
+    for(const it of list) it.key = bank + it.k;
+    // (collecting goes one set after the other — two sets collecting at once would clash over your points)
+    const prevQ = CAS.claimQ || Promise.resolve();
+    const claims = CAS.run10[bank] = prevQ.catch(() => {}).then(async () => { for(const it of list){ it.w = await casClaim10(it, tok); } }).finally(() => { if(CAS.run10[bank] === claims) CAS.run10[bank] = null; });
+    CAS.claimQ = claims;
     // and show them one after another with no waiting: the reels land on each result in turn (~0.1 s apiece)
     casRollStop(myM, null);
     await new Promise(done => {
@@ -25697,7 +25714,7 @@
           sp.jp = pot; }
         if(typeof CAS.pf !== 'number') await casPfLoad(tok);
         const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;
-        const body = { [`casino/s10/${me}/a${it.k}/c`]: true };
+        const body = { [`casino/s10/${me}/${it.key || 'a' + it.k}/c`]: true };
         if(win) body[`scores/${me}/p`] = SC.p + win;
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss > 0) body[`casino/pf/${me}`] = CAS.pf + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
@@ -25715,7 +25732,7 @@
           // (someone else's spin moved the jackpot a moment ago, or your points changed elsewhere: read the jackpot, your
           //  points and whether this one's already collected — all at once — and go again right away)
           const q = (path) => casFetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).then(g => g.ok ? g.json() : null).catch(() => null);
-          const [pv, pp, cc, pf] = await Promise.all([q('casino/pot'), q(`scores/${encodeURIComponent(me)}/p`), q(`casino/s10/${encodeURIComponent(me)}/a${it.k}/c`), q(`casino/pf/${encodeURIComponent(me)}`)]);
+          const [pv, pp, cc, pf] = await Promise.all([q('casino/pot'), q(`scores/${encodeURIComponent(me)}/p`), q(`casino/s10/${encodeURIComponent(me)}/${it.key || 'a' + it.k}/c`), q(`casino/pf/${encodeURIComponent(me)}`)]);
           if(typeof pp === 'number') SC.p = Math.floor(pp);
           CAS.pf = typeof pf === 'number' ? pf : 0;
           if(cc === true) return casWin(sp);
@@ -25732,9 +25749,9 @@
       const me = chatUid();
       const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
       const d = g.ok ? await g.json() : null; if(!d) return;
-      for(let k = 0; k < 10; k++){
-        const c = d['a' + k]; if(!c || c.c !== false || typeof c.t !== 'number') continue;
-        const it = { k, sp: { b: c.b, t: c.t + (c.o || 0), y: c.y || 0, base: c.t }, shownAt: 1 };
+      for(const key of Object.keys(d)){
+        const k = +key.slice(1), c = d[key]; if(!/^[ab][0-9]$/.test(key) || !c || c.c !== false || typeof c.t !== 'number') continue;
+        const it = { k, key, sp: { b: c.b, t: c.t + (c.o || 0), y: c.y || 0, base: c.t }, shownAt: 1 };
         await casClaim10(it, tok);
       }
     }catch(e){}
@@ -25799,7 +25816,7 @@
   }
   function casPfFlushSoon(){ clearTimeout(CAS.pfT); CAS.pfT = setTimeout(casPfFlush, 1200); }
   async function casPfFlush(){
-    if(CAS.claimRun || CAS.busy){ casPfFlushSoon(); return; }
+    if((CAS.run10 && (CAS.run10.a || CAS.run10.b)) || CAS.busy){ casPfFlushSoon(); return; }
     for(let tries = 0; tries < 6; tries++){
       try{
         const tok = await chatAuth(), me = chatUid();
@@ -25991,13 +26008,15 @@
   function casSync10(s10){
     const me = chatUid(); CAS.seen10 = CAS.seen10 || {}; CAS.q10 = CAS.q10 || {};
     for(const [u, ch] of Object.entries(s10 || {})){
-      if(u === me || !ch || !ch.a0 || typeof ch.a0.t !== 'number' || chatBanned(u)) continue;
-      const prev = CAS.seen10[u];
-      CAS.seen10[u] = ch.a0.t;
-      if(prev === ch.a0.t || (prev == null && !(ch.a0.t > (CAS.joinT || Infinity)))) continue;
+      if(u === me || !ch || chatBanned(u)) continue;
+      for(const bk of ['a', 'b']){
+      const c0 = ch[bk + '0']; if(!c0 || typeof c0.t !== 'number') continue;
+      const sk = u + ':' + bk, prev = CAS.seen10[sk];
+      CAS.seen10[sk] = c0.t;
+      if(prev === c0.t || (prev == null && !(c0.t > (CAS.joinT || Infinity)))) continue;
       const st = (CAS.seats || {})[u], w = { n: (st && st.n) || 'Someone' };
       const list = [];
-      for(let k = 0; k < 10; k++){ const c = ch['a' + k]; if(c && typeof c.t === 'number') list.push({ b: c.b, t: c.t + (c.o || 0), y: c.y || 0, c: true }); }
+      for(let k = 0; k < 10; k++){ const c = ch[bk + k]; if(c && typeof c.t === 'number') list.push({ b: c.b, t: c.t + (c.o || 0), y: c.y || 0, c: true }); }
       if(!list.length) continue;
       const nm = chatBadName(w.n) ? 'someone' : w.n, lines = [];
       for(const sp of list){ const win = casWin(sp), R3 = casReels(sp.t).map(casSym).join(''), jk = casIsJack(sp.t);
@@ -26005,6 +26024,7 @@
       casFeedMany(lines);
       const m = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(u)}"]`);
       if(m) casShow(m, list[list.length - 1], false);         // (their machine just shows where they ended up)
+      }
     }
   }
   function casSync(){

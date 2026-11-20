@@ -1,1 +1,1 @@
-{"build":170,"version":"V18","file":"SaiDeck.html","notes":"Slots are back to spinning on your own (no rounds). Lots of people spinning 10x at the same time no longer clash: each player's jackpot share goes into their own jar and is added to the jackpot in one go."}
+{"build":171,"version":"V18","file":"SaiDeck.html","notes":"10x no longer gets stuck for seconds: a new 10x never waits for the last one to finish paying out, and a bet that changed slightly while the last one paid out is accepted. Includes the jackpot jars from 170."}
