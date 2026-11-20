@@ -1,1 +1,1 @@
-{"build":167,"version":"V18","file":"SaiDeck.html","notes":"Slots rounds: pick 1x or 10x, and the round starts for everyone at once when all players at the slots have picked (or anyone presses START). Players who did not pick do not spin."}
+{"build":170,"version":"V18","file":"SaiDeck.html","notes":"Slots are back to spinning on your own (no rounds). Lots of people spinning 10x at the same time no longer clash: each player's jackpot share goes into their own jar and is added to the jackpot in one go."}

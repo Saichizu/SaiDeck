@@ -937,6 +937,13 @@
   .td-back{position:absolute;inset:0;background:rgba(6,6,12,.72);}
   .td-box{position:relative;width:min(1000px, calc(100% - 16px));max-height:96vh;display:flex;flex-direction:column;border-radius:18px;background:#17171f;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;animation:chatPopIn .2s ease-out both;outline:none;}
   .td-win:focus{outline:none;}
+  .td-win.float{pointer-events:none;}
+  .td-win.float .td-back{display:none;}
+  .td-win.float .td-box{pointer-events:auto;}
+  .td-win.float .td-box.placed{position:fixed;margin:0;}
+  .td-win.float .td-head{cursor:grab;user-select:none;}
+  .td-win.float.dragging .td-head{cursor:grabbing;}
+  .td-win.float.dim .td-box{opacity:.97;}
   .td-head{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 16px;border-bottom:1px solid var(--border);}
   .td-head b{font:800 15px 'Manrope',sans-serif;} .td-mode{font-size:11.5px;color:var(--text-faint);}
   .td-leave{all:unset;margin-left:auto;cursor:pointer;padding:5px 11px;border-radius:8px;font:700 11.5px 'Inter',sans-serif;color:var(--text-dim);border:1px solid var(--border);} .td-leave:hover{color:#fff;border-color:rgba(255,255,255,.3);}
@@ -22868,7 +22875,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 167;                 // ← goes up by one with every published version
+  const SD_BUILD = 170;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25498,7 +25505,7 @@
     if(!CHAT.gm.casino) gameOpen('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
-    chatAuth().then(t => casClaim10Left(t)).then(() => { casCtl(); chatRenderArcade(); }).catch(() => {});
+    chatAuth().then(t => casClaim10Left(t)).then(() => { casCtl(); chatRenderArcade(); casPfFlushSoon(); }).catch(() => {});
   }
   async function casBeat(){
     if(!CAS.on) return;
@@ -25528,7 +25535,7 @@
         if(CAS.on){
           CAS.seats = (d && d.seats) || {};
           void 0;
-          CAS.pot = d && typeof d.pot === 'number' ? d.pot : CAS_POT0; casPotShow();
+          CAS.pot = (d && typeof d.pot === 'number' ? d.pot : CAS_POT0) + Object.values((d && d.pf) || {}).reduce((a, v) => a + (typeof v === 'number' && v > 0 ? v : 0), 0); casPotShow();
           CAS.pity = d && d.pity && typeof d.pity.a === 'number' ? d.pity : null;
           const sp = (d && d.spin) || {}, me = chatUid();
           // (your own spin is shown the moment it's made — don't let an older copy undo it)
@@ -25536,8 +25543,7 @@
           if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t || (sp[me].t === CAS.spins[me].t && CAS.spins[me].c === true && sp[me].c !== true))) sp[me] = CAS.spins[me];
           CAS.spins = sp;
           CAS.picks = Object.assign({}, (d && d.pick) || {});
-          if(d && d.go) casOnGo(d.go);
-          casAutoGo();
+          CAS.s10me = d && d.s10 ? d.s10[me] : null;
           casSync();
           casSync10((d && d.s10) || {});
         }
@@ -25617,13 +25623,16 @@
     let T = null, y = casTier(scBal()), tok;
     try{
       tok = await chatAuth();
-      await casClaim10Left(tok);                                   // (anything left from an earlier 10× gets collected first)
+      if(CAS.claimRun) await CAS.claimRun;                         // (the last 10× is still being collected: it needs to finish first)
+      else if(CAS.s10me && Object.values(CAS.s10me).some(c => c && c.c === false)) await casClaim10Left(tok);      // (left over from before)
       bet = casFee(scBal()); y = casTier(scBal());
       if(scBal() < bet * 10) return fail(`10× costs ${(bet * 10).toLocaleString()} points — you have ${scBal().toLocaleString()}.`);
       const mk = () => { const body = { [`scores/${me}/s`]: SC.s + bet * 10, [`scores/${me}/t`]: sv };
         for(let k = 0; k < 10; k++) body[`casino/s10/${me}/a${k}`] = { b: bet, t: sv, c: false, y, o: CAS10_O(k) };
         return body; };
+      const potP = casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }, 6000).then(g => g.ok ? g.json() : null).catch(() => null);      // (read alongside the payment, for collecting)
       let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) });
+      potP.then(v => { if(typeof v === 'number') CAS.pot10 = v; });
       if(r.status === 401){ await casPityLoad(); await scLoad(); bet = casFee(scBal()); y = casTier(scBal());
         if(scBal() >= bet * 10) r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) }); }
       if(!r.ok){ await scLoad(); return fail(r.status === 401 ? 'Slow down a little.' : "Couldn't spin — check your connection."); }
@@ -25641,7 +25650,7 @@
       list.push({ k, sp, b: bet, t: sp.t, jack: casIsJack(sp.t), w: null, shownAt: 0 });
     }
     // collect them in the background, one after another
-    const claims = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })();
+    const claims = CAS.claimRun = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })().finally(() => { if(CAS.claimRun === claims) CAS.claimRun = null; });
     // and show them one after another with no waiting: the reels land on each result in turn (~0.1 s apiece)
     casRollStop(myM, null);
     await new Promise(done => {
@@ -25681,17 +25690,21 @@
     for(let tries = 0; tries < 5; tries++){
       try{
         tok = await chatAuth();
-        let pot = (tries === 0 && typeof CAS.pot10 === 'number') ? CAS.pot10 : null;
-        if(pot == null){ const pg = await casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, {}, 6000); const v = pg.ok ? await pg.json() : null; pot = typeof v === 'number' ? v : CAS_POT0; }
-        const jack = casIsJack(sp.t); if(jack) sp.jp = pot;
+        const jack = casIsJack(sp.t);
+        let pot = null;
+        if(jack){ pot = typeof CAS.pot10 === 'number' && tries === 0 ? CAS.pot10 : null;
+          if(pot == null){ const pg = await casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }, 6000); const v = pg.ok ? await pg.json() : null; pot = typeof v === 'number' ? v : CAS_POT0; }
+          sp.jp = pot; }
+        if(typeof CAS.pf !== 'number') await casPfLoad(tok);
         const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;
         const body = { [`casino/s10/${me}/a${it.k}/c`]: true };
         if(win) body[`scores/${me}/p`] = SC.p + win;
-        if(jack) body['casino/pot'] = CAS_POT0; else if(sp.b - win > 0) body['casino/pot'] = pot + loss;
+        if(jack) body['casino/pot'] = CAS_POT0; else if(loss > 0) body[`casino/pf/${me}`] = CAS.pf + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
         if(r.ok){
-          SC.p += win; sp.c = true; CAS.pot10 = jack ? CAS_POT0 : (body['casino/pot'] != null ? body['casino/pot'] : pot);
-          CAS.pot = CAS.pot10; casPotShow();
+          SC.p += win; sp.c = true;
+          if(jack){ CAS.pot10 = CAS_POT0; CAS.pot = CAS_POT0; casPotShow(); }
+          else if(loss > 0){ CAS.pf += loss; casPfFlushSoon(); }
           if(win > 0 && !it.shownAt){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; }
           casHeldSum(); casCtl();
           if(jack && win > 0) casJackpotPost(win);
@@ -25699,10 +25712,15 @@
         }
         CAS.pot10 = null;
         if(r.status === 401){
-          // (already collected? then it's done)
-          const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}/a${it.k}/c.json?auth=${encodeURIComponent(tok)}`);
-          if(g.ok && (await g.json()) === true){ await scLoad(); return casWin(sp); }
-          await scLoad();
+          // (someone else's spin moved the jackpot a moment ago, or your points changed elsewhere: read the jackpot, your
+          //  points and whether this one's already collected — all at once — and go again right away)
+          const q = (path) => casFetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).then(g => g.ok ? g.json() : null).catch(() => null);
+          const [pv, pp, cc, pf] = await Promise.all([q('casino/pot'), q(`scores/${encodeURIComponent(me)}/p`), q(`casino/s10/${encodeURIComponent(me)}/a${it.k}/c`), q(`casino/pf/${encodeURIComponent(me)}`)]);
+          if(typeof pp === 'number') SC.p = Math.floor(pp);
+          CAS.pf = typeof pf === 'number' ? pf : 0;
+          if(cc === true) return casWin(sp);
+          if(typeof pv === 'number') CAS.pot10 = pv;
+          if(tries >= 3) await scLoad();
         }
       }catch(e){ CAS.pot10 = null; }
     }
@@ -25773,6 +25791,26 @@
     el.innerHTML = `<div class="cm-row">${cells}</div><div class="cm-sum">${M.n}/10 · paid ${M.bet.toLocaleString()} · won ${M.won.toLocaleString()} · <b class="${net >= 0 ? 'up' : 'down'}">${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}</b>${done ? ' <button type="button" class="cm-x" title="Hide">✕</button>' : ''}</div>`;
     const x = el.querySelector('.cm-x'); if(x) x.addEventListener('click', () => { el.hidden = true; });
   }
+  // Your jackpot jar (casino/pf/<you>): a losing spin's tenth goes in here (your own spot — no clash with other players
+  // collecting at the same moment), and the jar is emptied into the jackpot in one write a moment after you stop.
+  async function casPfLoad(tok){
+    try{ const g = await casFetch(`${CHAT_DB}/casino/pf/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok || await chatAuth())}`, { cache: 'no-store' }, 6000); const v = g.ok ? await g.json() : null; CAS.pf = typeof v === 'number' ? v : 0; }catch(e){}
+    return CAS.pf || 0;
+  }
+  function casPfFlushSoon(){ clearTimeout(CAS.pfT); CAS.pfT = setTimeout(casPfFlush, 1200); }
+  async function casPfFlush(){
+    if(CAS.claimRun || CAS.busy){ casPfFlushSoon(); return; }
+    for(let tries = 0; tries < 6; tries++){
+      try{
+        const tok = await chatAuth(), me = chatUid();
+        const [pf, pot] = await Promise.all([casPfLoad(tok), casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }, 6000).then(g => g.ok ? g.json() : null).catch(() => null)]);
+        if(!(pf > 0) || typeof pot !== 'number') return;
+        const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify({ [`casino/pf/${me}`]: 0, 'casino/pot': pot + pf }) });
+        if(r.ok){ CAS.pf = 0; CAS.pot = pot + pf; casPotShow(); return; }
+      }catch(e){}
+      await new Promise(z => setTimeout(z, 200 + Math.random() * 600));      // (someone else moved the jackpot that instant)
+    }
+  }
   async function casClaim(sp, potP){
     const me = chatUid();
     // a spin left over from before the inflation fix: its bet was old money, so it's void (and doesn't block the next spin)
@@ -25789,9 +25827,10 @@
         if(jack) sp.jp = pot;
         const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;      // (only a tenth of what's lost goes into the jackpot)
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
-        if(jack) body['casino/pot'] = CAS_POT0; else if(sp.b - win > 0) body['casino/pot'] = pot + loss;
+        if(typeof CAS.pf !== 'number' || tries > 0) await casPfLoad(tok);
+        if(jack) body['casino/pot'] = CAS_POT0; else if(loss > 0) body[`casino/pf/${me}`] = CAS.pf + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
-        if(r.ok){ SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown && win > 0){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; casHeldSum(); } CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
+        if(r.ok){ if(!jack && loss > 0){ CAS.pf += loss; casPfFlushSoon(); } SC.p += win; sp.c = true; CAS.paidT = sp.t; if(!sp.shown && win > 0){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; casHeldSum(); } CAS.pot = jack ? CAS_POT0 : pot + loss; casPotShow(); return win; }
         await scLoad();
       }catch(e){}
     }
@@ -25831,13 +25870,11 @@
       el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj title="Open Blackjack next to the slots">＋ 🃏 Blackjack</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the slots" aria-label="Leave the slots">${ICON_X}</button></div>
         <div class="cas-floor"></div>
         <div class="cas-pot"><span class="cp-l">💰 JACKPOT</span><b class="cp-v">…</b><span class="cp-s">grows with every losing spin — hit 7️⃣7️⃣7️⃣ to win it all</span></div>
-        <div class="cas-ready"></div>
-        <div class="cas-ctl"><button type="button" class="cas-spin" title="Pick 1 spin for the next round (press again to take it back)">1×</button><button type="button" class="cas-spin cas-spin10" title="Pick 10 spins for the next round (press again to take it back)">10×</button><button type="button" class="cas-go" title="Start the round: everyone who picked spins at once">▶ START</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-ctl"><button type="button" class="cas-spin" title="Spin once">1×</button><button type="button" class="cas-spin cas-spin10" title="Spin 10 times at once">10×</button><button type="button" class="cas-leave">Leave</button></div>
         <div class="cas-multi" hidden></div>
         <div class="cas-pays"></div>`;
-      el.querySelector('.cas-spin:not(.cas-spin10)').addEventListener('click', () => casPick(1));
-      el.querySelector('.cas-spin10').addEventListener('click', () => casPick(10));
-      el.querySelector('.cas-go').addEventListener('click', casGo);
+      el.querySelector('.cas-spin:not(.cas-spin10)').addEventListener('click', () => casSpin());
+      el.querySelector('.cas-spin10').addEventListener('click', casSpin10);
       el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
       el.querySelector('.cas-leave').addEventListener('click', () => gameClose('casino'));
       el.querySelector('.cas-x').addEventListener('click', () => gameClose('casino'));
@@ -25859,21 +25896,10 @@
     return out;
   }
   function casRoundCtl(el, fee){
-    const mine = casMyPick(), spinning = CAS.busy || !!CAS.multi;
-    const b1 = el.querySelector('.cas-spin:not(.cas-spin10)'), b10 = el.querySelector('.cas-spin10'), go = el.querySelector('.cas-go');
-    if(b1){ b1.disabled = spinning || !CAS.on || scBal() < fee; b1.classList.toggle('on', mine === 1); b1.textContent = spinning ? '…' : (mine === 1 ? '✓ 1×' : '1×') + ' · ' + fee.toLocaleString(); }
-    if(b10){ b10.disabled = spinning || !CAS.on || scBal() < fee * 10; b10.classList.toggle('on', mine === 10); b10.textContent = spinning && CAS.multi ? `${CAS.multi.n}/10` : (mine === 10 ? '✓ 10×' : '10×') + ' · ' + (fee * 10).toLocaleString(); }
-    const list = casReadyList();
-    if(go){ go.disabled = spinning || !CAS.on || !list.length || CAS.goBusy; go.textContent = CAS.goBusy ? 'starting…' : list.length ? `▶ START · ${list.length} ready` : '▶ START'; }
-    const rd = el.querySelector('.cas-ready');
-    if(rd){ const h = list.length ? 'Next round: ' + list.map(x => `<b>${escapeHtml(x.nm)}</b> ${x.n}×`).join(' · ') : 'Pick 1× or 10× — it starts when everyone here has picked (or anyone presses START).';
-      if(rd.dataset.h !== h){ rd.dataset.h = h; rd.innerHTML = h; } }
-    // (a little tag on each machine that's in the next round)
-    for(const m of el.querySelectorAll('.cas-m')){
-      const x = list.find(q => q.u === m.dataset.u); let tag = m.querySelector('.cas-tag');
-      if(x && !tag){ tag = document.createElement('i'); tag.className = 'cas-tag'; m.querySelector('.cas-cab').appendChild(tag); }
-      if(tag){ if(x) tag.textContent = `ready ${x.n}×`; else tag.remove(); }
-    }
+    const spinning = CAS.busy || !!CAS.multi;
+    const b1 = el.querySelector('.cas-spin:not(.cas-spin10)'), b10 = el.querySelector('.cas-spin10');
+    if(b1){ b1.disabled = spinning || !CAS.on || scBal() < fee; b1.textContent = spinning ? '…' : 'SPIN · ' + fee.toLocaleString(); }
+    if(b10){ b10.disabled = spinning || !CAS.on || scBal() < fee * 10; b10.textContent = spinning && CAS.multi ? `${CAS.multi.n}/10` : '10× · ' + (fee * 10).toLocaleString(); }
   }
   async function casPick(n){
     if(!CAS.on || CAS.busy || CAS.multi) return;
@@ -27088,6 +27114,28 @@
     const d = document.createElement('div'); d.className = 'trd-pop ' + kind; d.textContent = (kind === 'buy' ? '+' : '−') + q.toLocaleString(); st.appendChild(d); setTimeout(() => d.remove(), 1200);
   }
   // ----- the window -----
+  // a game window that floats over the others instead of covering everything: drag it by its title bar, it stays
+  // where you left it (next time too), and the windows under it (Slots, Blackjack…) keep working
+  function floatWin(w, key){
+    w.classList.add('float');
+    const box = w.querySelector('.td-box'), head = w.querySelector('.td-head'); if(!box || !head) return;
+    const place = (x, y) => {
+      const r = box.getBoundingClientRect();
+      x = Math.max(8 - r.width + 120, Math.min(innerWidth - 120, x)); y = Math.max(8, Math.min(innerHeight - 48, y));
+      box.classList.add('placed'); box.style.left = x + 'px'; box.style.top = y + 'px';
+    };
+    try{ const p = JSON.parse(localStorage.getItem('sdWin.' + key) || 'null'); if(p) requestAnimationFrame(() => place(p.x, p.y)); }catch(e){}
+    head.addEventListener('pointerdown', (e) => {
+      if(e.button !== 0 || e.target.closest('button, input, a, select')) return;
+      const r = box.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      w.classList.add('dragging'); head.setPointerCapture(e.pointerId);
+      const mv = (ev) => place(ev.clientX - dx, ev.clientY - dy);
+      const up = () => { w.classList.remove('dragging'); head.removeEventListener('pointermove', mv); head.removeEventListener('pointerup', up); head.removeEventListener('pointercancel', up);
+        const q = box.getBoundingClientRect(); try{ localStorage.setItem('sdWin.' + key, JSON.stringify({ x: q.left, y: q.top })); }catch(e2){} };
+      head.addEventListener('pointermove', mv); head.addEventListener('pointerup', up); head.addEventListener('pointercancel', up);
+      e.preventDefault();
+    });
+  }
   function trdOpen(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(TRD.on) return; TRD.on = true; TRD.drawKey = ''; TRD.tapeKey = null; TRD.lastP = 0; TRD.woke = false;
@@ -27105,7 +27153,7 @@
         <div class="trd-low"><div class="trd-pl"><div class="trd-ph">📊 EVERYONE'S PROFIT <i>(recent)</i></div><div class="trd-plw"><canvas class="trd-cv2"></canvas><canvas class="trd-ov2"></canvas><div class="trd-tip" hidden></div></div></div>
           <div class="trd-side"><div class="trd-ph">🏆 BEST TRADERS <i>(all-time)</i></div><ol class="trd-rank"></ol></div></div>
       </div></div>`;
-    document.body.appendChild(w); TRD.win = w;
+    document.body.appendChild(w); TRD.win = w; floatWin(w, 'trd');
     const fit = () => { if(!TRD.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v){ w.style.right = v; TRD.drawKey = ''; } };
     fit(); TRD.fit = setInterval(fit, 400); window.addEventListener('resize', fit);
     TRD.fitOff = () => { clearInterval(TRD.fit); window.removeEventListener('resize', fit); };
@@ -27402,7 +27450,7 @@
     document.body.appendChild(w); CF.win = w;
     const fit = () => { if(!CF.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v) w.style.right = v; };
     fit(); CF.fit = setInterval(fit, 400); window.addEventListener('resize', fit); CF.fitOff = () => { clearInterval(CF.fit); window.removeEventListener('resize', fit); };
-    w.querySelector('.td-x').addEventListener('click', cfClose); w.querySelector('.td-back').addEventListener('click', cfClose);
+    w.querySelector('.td-x').addEventListener('click', cfClose); w.querySelector('.td-back').addEventListener('click', cfClose); floatWin(w, 'cf');
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); cfClose(); } });
     w.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { CF.side = b.dataset.s; cfRender(); }));
     w.querySelectorAll('.cf-zone').forEach(z => z.addEventListener('click', () => { CF.side = z.dataset.side; cfRender(); }));
