@@ -1,1 +1,1 @@
-{"build":157,"version":"V18","file":"SaiDeck.html","notes":"Fixed a bug that could quietly take points: when the app re-read your points while a payment was still finishing, it counted that payment twice, and the next thing you did charged you the extra. Rewards, quests and bonuses also no longer re-send your spent total."}
+{"build":158,"version":"V18","file":"SaiDeck.html","notes":"Slots 10x is much faster: the reels spin the whole time and the results drop in one every 0.5 s (about 5 seconds for all ten). Also includes the points fix from 157."}
