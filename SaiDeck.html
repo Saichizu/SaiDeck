@@ -673,6 +673,13 @@
   .cas-bet input{width:64px;text-align:center;padding:6px 4px;border-radius:8px;border:1px solid rgba(245,208,74,.45);background:#14151c;color:#ffe08a;font:800 14px 'Inter',sans-serif;}
   .cas-chips{display:flex;gap:4px;}
   .cas-chips button{border-radius:999px;border:1px dashed rgba(245,208,74,.5);}
+  .cas-ready{font:600 12px 'Manrope',sans-serif;color:var(--muted,#b9a);text-align:center;margin:2px 0 6px;min-height:16px;}
+  .cas-ready b{color:#ffd27a;}
+  .cas-spin.on{box-shadow:0 0 0 3px #fff8,0 0 18px #ffb84799;}
+  .cas-go{all:unset;cursor:pointer;padding:10px 22px;border-radius:999px;font:900 14px 'Manrope',sans-serif;letter-spacing:.05em;color:#08200f;background:linear-gradient(135deg,#7dffb0,#2bd46d);}
+  .cas-go:disabled{opacity:.45;cursor:default;}
+  .cas-m .cas-cab{position:relative;}
+  .cas-tag{position:absolute;top:-8px;right:-6px;font:800 10px 'Manrope',sans-serif;font-style:normal;padding:2px 7px;border-radius:999px;background:#2bd46d;color:#06210f;box-shadow:0 2px 6px #0006;}
   .cas-spin{all:unset;cursor:pointer;padding:10px 26px;border-radius:999px;font:900 14px 'Manrope',sans-serif;letter-spacing:.05em;color:#2a0d0d;background:linear-gradient(135deg,#ffd76a,#ff7a3c);box-shadow:0 6px 18px rgba(255,140,60,.4);}
   .cas-spin:disabled{opacity:.5;cursor:default;} .cas-spin:active:not(:disabled){transform:scale(.95);}
   .cas-spin10{padding:10px 16px;background:linear-gradient(135deg,#c8a2ff,#7a5cff);color:#140a2a;box-shadow:0 6px 18px rgba(130,90,255,.4);}
@@ -22861,7 +22868,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 165;                 // ← goes up by one with every published version
+  const SD_BUILD = 167;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23815,7 +23822,8 @@
   }
   // the games: Slots and Blackjack can both be open at once, side by side (you sit at both)
   function gameOpen(g){
-    if(CHAT.side) { CHAT.side = null; chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); }
+    // (the Arcade — Trading, Coin Flip, Tower Defense… — stays open next to the games, so you can play them all at once)
+    if(CHAT.side && CHAT.side !== 'arcade') { CHAT.side = null; chatRenderSide(); chatRenderArcade(); chatRenderAlerts(); }
     CHAT.gm[g] = true; CHAT.gmLast = g;
     casRender(); bjRender(); casBarRender(); chatBackSync();
   }
@@ -25503,6 +25511,7 @@
     if(S && S.spins > 0) casSessionPost(S);
     clearInterval(CAS.poll); CAS.poll = 0; liveClose('casino');
     chatAuth().then(tok => fetch(`${CHAT_DB}/casino/seats/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
+    if(CAS.mine || (CAS.picks && CAS.picks[chatUid()])){ CAS.mine = null; if(CAS.picks) delete CAS.picks[chatUid()]; chatAuth().then(tok => fetch(`${CHAT_DB}/casino/pick/${encodeURIComponent(chatUid())}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {}); }
   }
   window.addEventListener('pagehide', () => { if(CAS.on) casLeave(); });
   // (the casino is checked twice a second instead of kept open as a live stream: the browser only keeps a few
@@ -25518,6 +25527,7 @@
         const d = r.ok ? await r.json() : null;
         if(CAS.on){
           CAS.seats = (d && d.seats) || {};
+          void 0;
           CAS.pot = d && typeof d.pot === 'number' ? d.pot : CAS_POT0; casPotShow();
           CAS.pity = d && d.pity && typeof d.pity.a === 'number' ? d.pity : null;
           const sp = (d && d.spin) || {}, me = chatUid();
@@ -25525,6 +25535,9 @@
           // (…nor an older copy from before it was paid out: quick spins in a row would try to collect it twice)
           if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t || (sp[me].t === CAS.spins[me].t && CAS.spins[me].c === true && sp[me].c !== true))) sp[me] = CAS.spins[me];
           CAS.spins = sp;
+          CAS.picks = Object.assign({}, (d && d.pick) || {});
+          if(d && d.go) casOnGo(d.go);
+          casAutoGo();
           casSync();
           casSync10((d && d.s10) || {});
         }
@@ -25629,27 +25642,29 @@
     }
     // collect them in the background, one after another
     const claims = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })();
-    // and show them all straight away, in order (one update of the screen, one sound)
-    {
-      const lines = []; let best = null, bestW = -1;
-      for(const it of list){
+    // and show them one after another with no waiting: the reels land on each result in turn (~0.1 s apiece)
+    casRollStop(myM, null);
+    await new Promise(done => {
+      let i = 0;
+      const step = () => {
+        if(i >= list.length){ done(); return; }
+        const it = list[i++];
         const w = it.w != null ? it.w : casWin(Object.assign({ jp: CAS.pot }, it.sp));
         const r = { b: it.b, t: it.t, w: Math.max(0, w), jack: it.jack };
         it.shownAt = Date.now();
-        if(CAS.heldBy) delete CAS.heldBy[it.t];
+        if(CAS.heldBy) delete CAS.heldBy[it.t]; casHeldSum();
         M.n++; M.bet += r.b; M.won += r.w; M.res.push(r);
         if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += r.b; CAS.sess.won += r.w; }
-        const sy = casReels(r.t).map(casSym).join('');
-        if(r.jack){ M.jack = r.w; lines.push([`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true]); }
-        else lines.push([`${chatName() || 'Someone'} → ${sy} ${r.w > 0 ? 'won ' + r.w : 'lost'}`, r.w >= 300]);
-        if(r.jack || r.w > bestW){ if(!(best && best.jack)){ best = r; bestW = r.w; } }
-      }
-      casHeldSum(); casMultiShow(); casCtl(); casFeedMany(lines);
-      if(best) try{ sfxSlotResult(casMult(best.t), best.w > best.b || best.jack ? 0.9 : 0.45); }catch(e){}
-      if(M.jack) toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${M.jack.toLocaleString()} points!`, 5000);
-      if(myM && M.won > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: M.jack ? 1400 : 600 });
-      chatRenderArcade();
-    }
+        casFlash(myM, r);
+        casMultiShow(); casCtl();
+        if(r.w > r.b || r.jack) try{ sfxSlotResult(casMult(r.t), r.jack ? 1 : 0.6); }catch(e){}
+        if(r.jack){ M.jack = r.w; toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${r.w.toLocaleString()} points!`, 5000); }
+        if(r.jack){ setTimeout(step, 900); return; }        // (a jackpot gets a moment)
+        setTimeout(step, 110);
+      };
+      step();
+    });
+    chatRenderArcade();
     const last = M.res[M.res.length - 1]; CAS.lastM = M;
     casRollStop(myM, last);
     CAS.multi = null; casCtl(); casMultiShow(M, true);
@@ -25721,6 +25736,14 @@
       st.getAnimations().forEach(a => a.cancel());
       st.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${-10 * h}px)` }], { duration: 520 + i * 90, iterations: Infinity, easing: 'linear' });
     });
+  }
+  function casFlash(m, r){
+    if(!m || !r) return;
+    const R3 = casReels(r.t), strips = [...m.querySelectorAll('.cas-strip')];
+    strips.forEach((st, k) => { st.innerHTML = `<span>${casSym(R3[k])}</span>`; try{ st.animate([{ transform: 'translateY(-45%)' }, { transform: 'translateY(0)' }], { duration: 90 + k * 15, easing: 'ease-out' }); }catch(e){} });
+    const res = m.querySelector('.cas-res');
+    if(res) res.innerHTML = r.jack ? `<b class="w">💰 JACKPOT! ${r.w.toLocaleString()}</b>` : r.w > 0 ? `won <b class="w">${r.w}</b>` : 'lost';
+    m.classList.toggle('won', r.w > 0); m.classList.toggle('big', r.w >= 300 || r.jack);
   }
   function casRollStop(m, r){
     if(!m) return;
@@ -25808,23 +25831,109 @@
       el.innerHTML = `<div class="cas-head"><div><b>🎰 Casino</b><span>Bet your points on a slot machine. Everyone in here sees every spin.</span></div><button type="button" class="cas-sw" data-go-bj title="Open Blackjack next to the slots">＋ 🃏 Blackjack</button><div class="cas-bal"><b></b><span>points</span></div><button type="button" class="cas-x" title="Leave the slots" aria-label="Leave the slots">${ICON_X}</button></div>
         <div class="cas-floor"></div>
         <div class="cas-pot"><span class="cp-l">💰 JACKPOT</span><b class="cp-v">…</b><span class="cp-s">grows with every losing spin — hit 7️⃣7️⃣7️⃣ to win it all</span></div>
-        <div class="cas-ctl"><button type="button" class="cas-spin">SPIN · 50</button><button type="button" class="cas-spin cas-spin10" title="Spin 10 times in a row (press again to stop)">10×</button><button type="button" class="cas-leave">Leave</button></div>
+        <div class="cas-ready"></div>
+        <div class="cas-ctl"><button type="button" class="cas-spin" title="Pick 1 spin for the next round (press again to take it back)">1×</button><button type="button" class="cas-spin cas-spin10" title="Pick 10 spins for the next round (press again to take it back)">10×</button><button type="button" class="cas-go" title="Start the round: everyone who picked spins at once">▶ START</button><button type="button" class="cas-leave">Leave</button></div>
         <div class="cas-multi" hidden></div>
-        <div class="cas-pays"></div>
-        <div class="cas-feed"></div>`;
-      el.querySelector('.cas-spin:not(.cas-spin10)').addEventListener('click', () => casSpin());
-      el.querySelector('.cas-spin10').addEventListener('click', casSpin10);
+        <div class="cas-pays"></div>`;
+      el.querySelector('.cas-spin:not(.cas-spin10)').addEventListener('click', () => casPick(1));
+      el.querySelector('.cas-spin10').addEventListener('click', () => casPick(10));
+      el.querySelector('.cas-go').addEventListener('click', casGo);
       el.querySelector('[data-go-bj]').addEventListener('click', () => bjJoin());
       el.querySelector('.cas-leave').addEventListener('click', () => gameClose('casino'));
       el.querySelector('.cas-x').addEventListener('click', () => gameClose('casino'));
     }
     casSync(); casCtl();
   }
+  // ----- slots rounds: pick 1× or 10×, then anyone presses START and everyone who picked spins at the same moment -----
+  const CAS_PICK_TTL = 15 * 60 * 1000;
+  const casMyPick = () => CAS.pickLocal !== undefined ? CAS.pickLocal : (CAS.mine && CAS.mine.n) || 0;      // (your own pick is kept locally — CAS.mine)
+  function casReadyList(){
+    const now = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0), me = chatUid(), out = [];
+    for(const [u, p] of Object.entries(CAS.picks || {})){
+      if(!p || !(p.n === 1 || p.n === 10) || now - (p.t || 0) > CAS_PICK_TTL || chatBanned(u)) continue;
+      if(u === me) continue;
+      const st = (CAS.seats || {})[u]; if(!st || !casSeatLive(st)) continue;
+      out.push({ u, n: p.n, nm: chatBadName(st.n) ? 'someone' : st.n });
+    }
+    const mine = casMyPick(); if(mine) out.unshift({ u: me, n: mine, nm: 'you' });
+    return out;
+  }
+  function casRoundCtl(el, fee){
+    const mine = casMyPick(), spinning = CAS.busy || !!CAS.multi;
+    const b1 = el.querySelector('.cas-spin:not(.cas-spin10)'), b10 = el.querySelector('.cas-spin10'), go = el.querySelector('.cas-go');
+    if(b1){ b1.disabled = spinning || !CAS.on || scBal() < fee; b1.classList.toggle('on', mine === 1); b1.textContent = spinning ? '…' : (mine === 1 ? '✓ 1×' : '1×') + ' · ' + fee.toLocaleString(); }
+    if(b10){ b10.disabled = spinning || !CAS.on || scBal() < fee * 10; b10.classList.toggle('on', mine === 10); b10.textContent = spinning && CAS.multi ? `${CAS.multi.n}/10` : (mine === 10 ? '✓ 10×' : '10×') + ' · ' + (fee * 10).toLocaleString(); }
+    const list = casReadyList();
+    if(go){ go.disabled = spinning || !CAS.on || !list.length || CAS.goBusy; go.textContent = CAS.goBusy ? 'starting…' : list.length ? `▶ START · ${list.length} ready` : '▶ START'; }
+    const rd = el.querySelector('.cas-ready');
+    if(rd){ const h = list.length ? 'Next round: ' + list.map(x => `<b>${escapeHtml(x.nm)}</b> ${x.n}×`).join(' · ') : 'Pick 1× or 10× — it starts when everyone here has picked (or anyone presses START).';
+      if(rd.dataset.h !== h){ rd.dataset.h = h; rd.innerHTML = h; } }
+    // (a little tag on each machine that's in the next round)
+    for(const m of el.querySelectorAll('.cas-m')){
+      const x = list.find(q => q.u === m.dataset.u); let tag = m.querySelector('.cas-tag');
+      if(x && !tag){ tag = document.createElement('i'); tag.className = 'cas-tag'; m.querySelector('.cas-cab').appendChild(tag); }
+      if(tag){ if(x) tag.textContent = `ready ${x.n}×`; else tag.remove(); }
+    }
+  }
+  async function casPick(n){
+    if(!CAS.on || CAS.busy || CAS.multi) return;
+    if(!SC.loaded) await scLoad();
+    const fee = casFee(scBal());
+    const cur = casMyPick(), want = cur === n ? 0 : n;
+    if(want && scBal() < fee * want){ toast(`${want}× costs ${(fee * want).toLocaleString()} points — you have ${scBal().toLocaleString()}.`, 2400); return; }
+    CAS.pickLocal = want; casCtl();
+    try{
+      const tok = await chatAuth(), me = chatUid();
+      const url = `${CHAT_DB}/casino/pick/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`;
+      const r = want ? await fetch(url, { method: 'PUT', body: JSON.stringify({ n: want, t: { '.sv': 'timestamp' } }) }) : await fetch(url, { method: 'DELETE' });
+      if(!r.ok) throw new Error(r.status);
+      CAS.mine = want ? { n: want, t: Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0) } : null;
+    }catch(e){ toast("Couldn't save your pick — check your connection.", 2200); }
+    CAS.pickLocal = undefined; casCtl(); casAutoGo();
+  }
+  async function casGo(auto){
+    if(!CAS.on || CAS.goBusy || !casReadyList().length) return;
+    CAS.goBusy = true; casCtl();
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/casino/go.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ t: { '.sv': 'timestamp' }, u: chatUid() }) });
+      if(r.ok){
+        let d = await r.json().catch(() => null);
+        if(!(d && typeof d.t === 'number')){ const g = await fetch(`${CHAT_DB}/casino/go.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }).catch(() => null); d = g && g.ok ? await g.json().catch(() => null) : null; }
+        if(d && typeof d.t === 'number') casOnGo(d);
+      }
+      else if(auto !== true) toast('Someone just started a round — try again in a second.', 2000);
+    }catch(e){ toast("Couldn't start — check your connection.", 2200); }
+    CAS.goBusy = false; casCtl();
+  }
+  // when everyone sitting at the slots has picked, the round starts by itself (any one of them presses it — the rules
+  // let only one Start through every 1.5 s, so the others' tries just fail quietly)
+  function casAutoGo(){
+    if(!CAS.on || CAS.goBusy || CAS.busy || CAS.multi || !casMyPick()) return;
+    const me = chatUid(), list = casReadyList();
+    const seated = Object.entries(CAS.seats || {}).filter(([u, st]) => u !== me && casSeatLive(st) && !chatBanned(u)).map(([u]) => u);
+    if(!seated.every(u => list.some(x => x.u === u))) return;
+    if(CAS.autoAt && Date.now() - CAS.autoAt < 2500) return;
+    CAS.autoAt = Date.now();
+    setTimeout(() => { if(casMyPick() && !CAS.busy && !CAS.multi) casGo(true); }, seated.length ? 150 + Math.random() * 500 : 0);
+  }
+  // a Start was pressed (seen in the casino data, or our own): spin if you picked
+  function casOnGo(go){
+    if(!go || typeof go.t !== 'number' || go.t === CAS.goSeen) return;
+    const first = CAS.goSeen == null; CAS.goSeen = go.t;
+    if(first && !(go.t > (CAS.joinT || Infinity))) return;            // (a Start from before you sat down)
+    const me = chatUid(), p = CAS.mine, n = (p && p.n) || 0;
+    if(!n || (p.t && p.t > go.t + 1500)) return;                       // (you didn't pick — or picked after this Start)
+    CAS.mine = null; if(CAS.picks) delete CAS.picks[me];
+    chatAuth().then(tok => fetch(`${CHAT_DB}/casino/pick/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' })).catch(() => {});
+    if(n === 10) casSpin10(); else casSpin();
+    casCtl();
+  }
   function casCtl(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
     el.querySelector('.cas-bal b').textContent = SC.loaded ? Math.max(0, scBal() - casHeldSum()) : '…';
-    const sb = el.querySelector('.cas-spin:not(.cas-spin10)'); const fee = casFee(scBal()), tier = casTier(); sb.disabled = CAS.busy || !!CAS.multi || !CAS.on || scBal() < fee; sb.textContent = CAS.busy || CAS.multi ? '…' : `SPIN · ${fee.toLocaleString()}`;
-    { const b10 = el.querySelector('.cas-spin10'); if(b10){ b10.disabled = !CAS.multi && (CAS.busy || !CAS.on || scBal() < fee); b10.textContent = CAS.multi ? (CAS.multi.stop ? 'stopping…' : `■ ${CAS.multi.n}/10`) : '10×'; b10.classList.toggle('on', !!CAS.multi); } }
+    const fee = casFee(scBal()), tier = casTier();
+    casRoundCtl(el, fee);
     { const pe = el.querySelector('.cas-pays'); if(pe){ const P = CAS_PAY[tier], x = (m) => (m / 10).toLocaleString() + '×';
       const h = `${tier ? `<b class="cas-pity">🍀 ${CAS_TIER_NAME[tier]}: better payouts while you're ${tier === 2 ? 'in the bottom third' : 'in the middle'} of the leaderboard</b>` : ''}A spin costs 1% of your points (at least ${CAS_MIN}) · 7️⃣7️⃣7️⃣ = the JACKPOT · 💎💎💎 ${x(P[0])} · any three ${x(P[1])} · two 💎 or 7️⃣ ${x(P[2])} · any two ${x(P[3])} · one 7️⃣ ${x(P[4])}`;
       if(pe.dataset.h !== h){ pe.dataset.h = h; pe.innerHTML = h; } } }
@@ -30635,12 +30744,14 @@
   }
   // several history lines at once (oldest first), in one go — cheap even when lots of people spin 10×
   function casFeedMany(lines){
+    return;      // (the slots history was taken out — Nov 20 — to keep a busy casino smooth)
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el || !lines.length) return;
     const f = document.createDocumentFragment();
     for(let i = lines.length - 1; i >= 0; i--){ const d = document.createElement('div'); d.className = 'cas-f' + (lines[i][1] ? ' big' : ''); d.textContent = lines[i][0]; f.appendChild(d); }
     el.prepend(f); while(el.children.length > 30) el.lastChild.remove();
   }
   function casFeed(txt, big){
+    return;      // (no slots history any more)
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
     el.prepend(d); while(el.children.length > 30) el.lastChild.remove();

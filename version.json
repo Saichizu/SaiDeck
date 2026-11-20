@@ -1,1 +1,1 @@
-{"build":165,"version":"V18","file":"SaiDeck.html","notes":"Slots 10x shows all ten results at once, in order, the moment the spin is paid. Other players' 10x spins also appear at once in one update, so lots of people spinning does not lag."}
+{"build":167,"version":"V18","file":"SaiDeck.html","notes":"Slots rounds: pick 1x or 10x, and the round starts for everyone at once when all players at the slots have picked (or anyone presses START). Players who did not pick do not spin."}
