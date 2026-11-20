@@ -1,1 +1,1 @@
-{"build":158,"version":"V18","file":"SaiDeck.html","notes":"Slots 10x is much faster: the reels spin the whole time and the results drop in one every 0.5 s (about 5 seconds for all ten). Also includes the points fix from 157."}
+{"build":159,"version":"V18","file":"SaiDeck.html","notes":"Slots 10x is instant: one payment buys all ten spins, the reels spin once and the results drop in one every 0.5 s. Updating works for a SaiDeck kept straight in Downloads/Desktop: if the folder window gets cancelled, pick the SaiDeck file itself instead."}

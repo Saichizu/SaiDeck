@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 158;                 // ← goes up by one with every published version
+  const SD_BUILD = 159;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22994,8 +22994,40 @@
       sdAfterUpdate(v);
     }catch(err){
       if(opts.auto) throw err;
-      if(err && err.name === 'AbortError') toast('Update cancelled.', 1600);
+      if(err && err.name === 'AbortError'){
+        sdBusy = false; sdBtn.classList.remove('busy');
+        if(await lyrConfirm('Pick the SaiDeck file instead?', SD_PICK_HELP_F(), 'Pick the file')) sdSaveOver(v).catch(e2 => { if(!(e2 && e2.name === 'AbortError')) toast(`Couldn't update: ${e2.message || e2}`, 5200); else toast('Update cancelled.', 1600); });
+      }
       else { console.error(err); toast(`Couldn't update: ${err.message || err}`, 5200); }
+    }finally{ sdBusy = false; sdBtn.classList.remove('busy'); }
+  }
+  // Plan B for updating: pick the SaiDeck FILE itself and write the new version over it. Chrome won't let a page pick
+  // some whole folders (Downloads, Desktop, Documents, your user folder — "contains system files"), so for a SaiDeck
+  // kept straight in one of those the folder pick always ends as "cancelled". Picking a single file there is fine.
+  const SD_PICK_HELP_F = () => { const H = sdHere() || {}; const nm = (location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '') || 'SaiDeck.html';
+    return `Chrome doesn't let SaiDeck pick some folders as a whole (like Downloads or Desktop), so the folder window closes as "cancelled".\n\nInstead, pick this SaiDeck file itself in the next window — “${nm}”${H.path ? ` in ${H.path}` : ''} — and press Save / Replace. The new version is written over it.`; };
+  async function sdSaveOver(v, step){
+    const here = (location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '') || 'SaiDeck.html';
+    if(!window.showSaveFilePicker) throw new Error("This browser can't save files — use Chrome or Edge.");
+    // (the window has to open straight from the click, so it comes before the download)
+    const fh = await window.showSaveFilePicker({ suggestedName: here, startIn: 'downloads', id: 'saideck-file', types: [{ description: 'SaiDeck', accept: { 'text/html': ['.html'] } }] });
+    if(fh.name !== here) throw new Error(`that's “${fh.name}” — pick “${here}” (the SaiDeck file you have open) so it gets replaced.`);
+    sdBusy = true; sdBtn.classList.add('busy');
+    try{
+      if(step) step('Downloading the new SaiDeck…'); else toast('Downloading the new SaiDeck…', 2500);
+      const want = v.build | 0, sha = v._sha || await sdLatestSha();
+      const r = await fetch(`https://raw.githubusercontent.com/${SD_REPO}/${sha || 'main'}/${v.file || 'SaiDeck.html'}` + (sha ? '' : '?t=' + Date.now()), { cache: 'no-store' });
+      if(!r.ok) throw new Error('GitHub answered ' + r.status);
+      const src = await r.text();
+      if(!/const SD_BUILD = \d+;/.test(src) || src.length < 100000) throw new Error('The download looks incomplete — nothing was changed.');
+      const got = sdBuildOf(src);
+      if(got < want) throw new Error(`GitHub is still handing out the old file (build ${got}) — nothing was changed. Try again in a minute or two.`);
+      if(step) step('Installing…');
+      const w = await fh.createWritable(); await w.write(src); await w.close();
+      const now = sdBuildOf(await (await fh.getFile()).text());
+      if(now < got) throw new Error("The new version couldn't be written (is the file open somewhere else, or read-only?).");
+      sdPending = { build: got, file: here, folder: '' };
+      if(step){ step('Done — starting the new SaiDeck…'); setTimeout(sdReload, 500); } else sdAfterUpdate(v);
     }finally{ sdBusy = false; sdBtn.classList.remove('busy'); }
   }
   // After an update: offer to save, then reload into the new version straight away
@@ -23097,8 +23129,13 @@
           { const H = sdHere() || {}; step(`SaiDeck needs your OK to save the new version into its own folder${H.path ? ` (${H.path})` : ''}.`); } sdOv.classList.add('err');
           sdOverlayButtons([['Continue update', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true]]);
         } else {
-          step(err && err.name === 'AbortError' ? 'The update was cancelled.' : `Couldn't update: ${(err && err.message) || err}`); sdOv.classList.add('err');
-          sdOverlayButtons([['Try again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true], ['Use this version for now', sdOverlayClose]]);
+          const ab = err && err.name === 'AbortError';
+          step(ab ? 'The folder window was cancelled — Chrome doesn\'t let SaiDeck pick some folders (like Downloads or Desktop). Pick the SaiDeck file itself instead.' : `Couldn't update: ${(err && err.message) || err}`); sdOv.classList.add('err');
+          const viaFile = () => { step(`Pick “${(decodeURIComponent(location.pathname.split('/').pop() || '') || 'SaiDeck.html')}” (this SaiDeck file) and press Save / Replace…`); sdOv.classList.remove('err'); sdOverlayButtons([]);
+            sdSaveOver(v, step).catch(e2 => { step(e2 && e2.name === 'AbortError' ? 'Cancelled.' : `Couldn't update: ${(e2 && e2.message) || e2}`); sdOv.classList.add('err');
+              sdOverlayButtons([['Pick the SaiDeck file', viaFile, true], ['Try the folder again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }], ['Use this version for now', sdOverlayClose]]); }); };
+          sdOverlayButtons(ab ? [['Pick the SaiDeck file', viaFile, true], ['Try the folder again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }], ['Use this version for now', sdOverlayClose]]
+            : [['Try again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true], ['Pick the SaiDeck file', viaFile], ['Use this version for now', sdOverlayClose]]);
         }
       }
     };
@@ -25412,6 +25449,7 @@
     if(!CHAT.gm.casino) gameOpen('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
+    chatAuth().then(t => casClaim10Left(t)).then(() => { casCtl(); chatRenderArcade(); }).catch(() => {});
   }
   async function casBeat(){
     if(!CAS.on) return;
@@ -25505,59 +25543,127 @@
     CAS.busy = false; casCtl(); chatRenderArcade();
     return res;
   }
-  // 10 spins in a row: the reels keep spinning the whole time while the real spins (each one paid and checked by
-  // the server on its own) run as fast as the server allows; the results drop into the row below one every 0.5 s,
-  // and each win shows in your points as its result appears. About 5 s for all ten.
+  // 10× in ONE payment (casino/s10/<me>/a0..a9, rules 27): the server stamps one time t and spin k's result is the
+  // one at t + k×1009, so all ten results are known the moment the payment is answered. The reels spin once, the
+  // results drop in one every 0.5 s, and the ten spins are collected one by one in the background meanwhile
+  // (each exactly like a single spin). Wins show in your points as their result appears.
+  const CAS10_O = (k) => k * 1009;
   async function casSpin10(){
-    if(CAS.multi){ CAS.multi.stop = true; casCtl(); return; }              // (pressing it again stops early)
+    if(CAS.multi){ CAS.multi.fast = true; return; }              // (pressing it again shows the rest at once)
     if(!CAS.on || CAS.busy) return;
     if(!SC.loaded) await scLoad();
-    if(scBal() < casFee(scBal())){ toast(`A spin costs at least ${CAS_MIN} points — you have ${scBal()}.`, 2200); return; }
-    const M = CAS.multi = { n: 0, bet: 0, won: 0, res: [], q: [], stop: false, netDone: false };
-    const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(chatUid())}"]`);
-    casMultiShow(); casCtl(); casRollStart(myM);
-    // the display: one result every 0.5 s
-    const shown = new Promise(done => {
-      const step = () => {
-        if(M.q.length){
-          const r = M.q.shift();
-          M.n++; M.bet += r.b; M.won += r.w; M.res.push(r);
-          if(r.sp) r.sp.shown = true;
-          if(CAS.heldBy) delete CAS.heldBy[r.t]; casHeldSum(); casCtl();
-          casMultiShow();
-          try{ sfxSlotResult(casMult(r.t), r.w > r.b || r.jack ? 0.9 : 0.45); }catch(e){}
-          const sy = casReels(r.t).map(casSym).join('');
-          if(r.jack){ toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${r.w.toLocaleString()} points!`, 5000); casFeed(`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true); }
-          else if(r.w >= 300) casFeed(`${chatName() || 'Someone'} → ${sy} won ${r.w}`, true);
-          if(myM && r.w > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: r.jack ? 1400 : 600 });
-          chatRenderArcade();
-        } else if(M.netDone){ clearInterval(M.tick); done(); }
-      };
-      M.tick = setInterval(step, 500);
-    });
-    // the spins themselves, back to back (the server wants them at least 250 ms apart)
-    let lastAt = 0;
-    for(let i = 0; i < 10 && CAS.on && !M.stop; i++){
-      if(scBal() < casFee(scBal())) break;
-      const gap = 300 - (Date.now() - lastAt); if(gap > 0) await new Promise(z => setTimeout(z, gap));
-      lastAt = Date.now();
-      let r = await casSpin(true, true);
-      if(r && r.err === 401){ await new Promise(z => setTimeout(z, 450)); lastAt = Date.now(); r = await casSpin(true, true); }     // (one more go if it was a hair too quick)
-      if(!r || r.err) break;
-      M.q.push(r);
-      if(r.jack) break;          // (a jackpot ends the run, so you get to see it)
+    let bet = casFee(scBal());
+    if(scBal() < bet * 10){ toast(`10× costs ${(bet * 10).toLocaleString()} points (10 spins) — you have ${scBal().toLocaleString()}.`, 2600); return; }
+    const me = chatUid(), sv = { '.sv': 'timestamp' };
+    const myM = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(me)}"]`);
+    const M = CAS.multi = { n: 0, bet: 0, won: 0, res: [], q: [], fast: false };
+    CAS.busy = true; casMultiShow(); casCtl(); casRollStart(myM);
+    const fail = (msg) => { CAS.busy = false; CAS.multi = null; casRollStop(myM, null); casMultiShow(null); casCtl(); if(msg) toast(msg, 2600); };
+    let T = null, y = casTier(scBal()), tok;
+    try{
+      tok = await chatAuth();
+      await casClaim10Left(tok);                                   // (anything left from an earlier 10× gets collected first)
+      bet = casFee(scBal()); y = casTier(scBal());
+      if(scBal() < bet * 10) return fail(`10× costs ${(bet * 10).toLocaleString()} points — you have ${scBal().toLocaleString()}.`);
+      const mk = () => { const body = { [`scores/${me}/s`]: SC.s + bet * 10, [`scores/${me}/t`]: sv };
+        for(let k = 0; k < 10; k++) body[`casino/s10/${me}/a${k}`] = { b: bet, t: sv, c: false, y, o: CAS10_O(k) };
+        return body; };
+      let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) });
+      if(r.status === 401){ await casPityLoad(); await scLoad(); bet = casFee(scBal()); y = casTier(scBal());
+        if(scBal() >= bet * 10) r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) }); }
+      if(!r.ok){ await scLoad(); return fail(r.status === 401 ? 'Slow down a little.' : "Couldn't spin — check your connection."); }
+      SC.s += bet * 10;
+      try{ const d = await r.json(); const pick = (k) => { if(d && d[k] && typeof d[k].t === 'number') return d[k].t; let n = d; for(const x of k.split('/')){ n = n && n[x]; } return n && typeof n.t === 'number' ? n.t : null; }; T = pick(`casino/s10/${me}/a0`); }catch(e){}
+      if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}/a0/t.json?auth=${encodeURIComponent(tok)}`); const v = g.ok ? await g.json() : null; T = typeof v === 'number' ? v : null; }
+      if(typeof T !== 'number') throw new Error('no time');
+    }catch(e){ return fail(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that 10× — it'll be collected next time."); }
+    CAS.busy = false;
+    for(let i = 0; i < 10; i++) questEvSafe('spin');
+    // all ten results, right now
+    const list = [];
+    for(let k = 0; k < 10; k++){
+      const sp = { b: bet, t: T + CAS10_O(k), y, c: false, k, base: T, multi: true };
+      list.push({ k, sp, b: bet, t: sp.t, jack: casIsJack(sp.t), w: null, shownAt: 0 });
     }
-    M.netDone = true;
-    await shown;
+    // collect them in the background, one after another
+    const claims = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })();
+    // and show them, one every 0.5 s
+    await new Promise(done => {
+      let i = 0;
+      const step = () => {
+        if(i >= list.length){ done(); return; }
+        const it = list[i++];
+        const w = it.w != null ? it.w : casWin(Object.assign({ jp: CAS.pot }, it.sp));
+        const r = { b: it.b, t: it.t, w: Math.max(0, w), jack: it.jack };
+        it.shownAt = Date.now();
+        if(CAS.heldBy) delete CAS.heldBy[it.t]; casHeldSum();
+        M.n++; M.bet += r.b; M.won += r.w; M.res.push(r); casMultiShow(); casCtl();
+        if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += r.b; CAS.sess.won += r.w; }
+        try{ sfxSlotResult(casMult(r.t), r.w > r.b || r.jack ? 0.9 : 0.45); }catch(e){}
+        const sy = casReels(r.t).map(casSym).join('');
+        if(r.jack){ M.jack = r.w; toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${r.w.toLocaleString()} points!`, 5000); casFeed(`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true); }
+        else if(r.w >= 300) casFeed(`${chatName() || 'Someone'} → ${sy} won ${r.w}`, true);
+        if(myM && r.w > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: r.jack ? 1400 : 600 });
+        chatRenderArcade();
+        setTimeout(step, M.fast ? 60 : 500);
+      };
+      setTimeout(step, 500);
+    });
     const last = M.res[M.res.length - 1]; CAS.lastM = M;
     casRollStop(myM, last);
     CAS.multi = null; casCtl(); casMultiShow(M, true);
-    setTimeout(() => { casHeldSum(); casCtl(); }, 3000);
-    if(M.n){
-      const net = M.won - M.bet;
-      if(!M.jack && !(last && last.jack)) toast(`${M.n} spin${M.n === 1 ? '' : 's'}: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
-      chatRenderArcade();
-    } else toast("Couldn't spin — check your connection.", 2200);
+    const net = M.won - M.bet;
+    if(!M.jack) toast(`10 spins: paid ${M.bet.toLocaleString()}, won ${M.won.toLocaleString()} — ${net >= 0 ? '+' : '−'}${Math.abs(net).toLocaleString()}`, 3200);
+    await claims.catch(() => {});
+    casHeldSum(); casCtl(); chatRenderArcade();
+  }
+  function questEvSafe(k){ try{ questEv(k); }catch(e){} }
+  // collect one of the ten (same payouts and jackpot rules as a single spin)
+  async function casClaim10(it, tok){
+    const me = chatUid(), sp = it.sp;
+    { const ic = await inflCfg(); if(ic && ic.at && it.sp.base < ic.at) return 0; }
+    for(let tries = 0; tries < 5; tries++){
+      try{
+        tok = await chatAuth();
+        let pot = (tries === 0 && typeof CAS.pot10 === 'number') ? CAS.pot10 : null;
+        if(pot == null){ const pg = await casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, {}, 6000); const v = pg.ok ? await pg.json() : null; pot = typeof v === 'number' ? v : CAS_POT0; }
+        const jack = casIsJack(sp.t); if(jack) sp.jp = pot;
+        const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;
+        const body = { [`casino/s10/${me}/a${it.k}/c`]: true };
+        if(win) body[`scores/${me}/p`] = SC.p + win;
+        if(jack) body['casino/pot'] = CAS_POT0; else if(sp.b - win > 0) body['casino/pot'] = pot + loss;
+        const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+        if(r.ok){
+          SC.p += win; sp.c = true; CAS.pot10 = jack ? CAS_POT0 : (body['casino/pot'] != null ? body['casino/pot'] : pot);
+          CAS.pot = CAS.pot10; casPotShow();
+          if(win > 0 && !it.shownAt){ CAS.heldBy = CAS.heldBy || {}; CAS.heldBy[sp.t] = { w: win, at: Date.now() }; }
+          casHeldSum(); casCtl();
+          if(jack && win > 0) casJackpotPost(win);
+          return win;
+        }
+        CAS.pot10 = null;
+        if(r.status === 401){
+          // (already collected? then it's done)
+          const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}/a${it.k}/c.json?auth=${encodeURIComponent(tok)}`);
+          if(g.ok && (await g.json()) === true){ await scLoad(); return casWin(sp); }
+          await scLoad();
+        }
+      }catch(e){ CAS.pot10 = null; }
+    }
+    return casWin(sp);
+  }
+  // anything left uncollected from an earlier 10× (app closed in the middle, connection lost…)
+  async function casClaim10Left(tok){
+    try{
+      const me = chatUid();
+      const g = await casFetch(`${CHAT_DB}/casino/s10/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`, {}, 6000);
+      const d = g.ok ? await g.json() : null; if(!d) return;
+      for(let k = 0; k < 10; k++){
+        const c = d['a' + k]; if(!c || c.c !== false || typeof c.t !== 'number') continue;
+        const it = { k, sp: { b: c.b, t: c.t + (c.o || 0), y: c.y || 0, base: c.t }, shownAt: 1 };
+        await casClaim10(it, tok);
+      }
+    }catch(e){}
   }
   // the reels spinning nonstop during 10× (a looping strip), and landing on the last result at the end
   function casRollStart(m){
