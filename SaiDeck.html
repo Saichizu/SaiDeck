@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 160;                 // ← goes up by one with every published version
+  const SD_BUILD = 161;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23344,6 +23344,18 @@
   // worst ones again by the database rules.
   // =====================================================================
   const CHAT_DB = 'https://saideck-chat-default-rtdb.asia-southeast1.firebasedatabase.app';
+  // The database only speaks HTTP/1.1, and Chrome allows 6 connections to one host — shared by ALL tabs. Every live
+  // stream holds one for good (chat, pokes, online list are always on), so with Slots + Blackjack streaming too, the
+  // 6th connection was gone and every request (bets, the dealer's cards) waited forever: the game froze until one was
+  // closed. So SaiDeck keeps at most ES_MAX streams of its own; a game past that reads by plain requests instead.
+  const ES_MAX = 4, ES_OPEN = new Set();
+  { const RealES = window.EventSource;
+    if(RealES){ const W = function(url, o){ const es = new RealES(url, o);
+        if(String(url).startsWith(CHAT_DB)){ ES_OPEN.add(es); const c0 = es.close.bind(es); es.close = () => { ES_OPEN.delete(es); c0(); };
+          es.addEventListener('error', () => { if(es.readyState === 2) ES_OPEN.delete(es); }); }
+        return es; };
+      W.prototype = RealES.prototype; W.CONNECTING = 0; W.OPEN = 1; W.CLOSED = 2; window.EventSource = W; } }
+  const esCount = () => { for(const e of ES_OPEN) if(e.readyState === 2) ES_OPEN.delete(e); return ES_OPEN.size; };
   const CHAT_KEY = 'AIzaSyB70Dgbvg4LNOIIj1Cxszb_qUZLZLJ_XkA';     // (the project's public web key: only identifies the project)
   const CHAT_ROOM = 'saideck-lobby', CHAT_MAX = 50, CHAT_NAME_MAX = 20;
   // ----- the word guard -----
@@ -26703,6 +26715,8 @@
     if(!L){ L = { data: null, ready: false, waiters: [], want: true }; LIVE.set(path, L); }
     L.want = true;
     if(L.es || L.opening) return L;
+    if(esCount() >= ES_MAX){ L.poll = true; return L; }      // (no connection to spare: read it by plain requests — see ES_MAX)
+    L.poll = false;
     L.opening = true;
     try{
       const tok = await chatAuth();
@@ -26726,6 +26740,13 @@
   // a copy of the live data (waits for the first snapshot)
   async function liveGet(path){
     const L = await liveOpen(path);
+    if(L.poll && !L.es){
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+      if(!r.ok) throw new Error('no data');
+      L.data = await r.json(); L.ready = true; L.at = Date.now();
+      return L.data == null ? null : structuredClone(L.data);
+    }
     if(!L.ready) await new Promise(r => { L.waiters.push(r); setTimeout(r, 7000); });
     if(!L.ready) throw new Error('no live data yet');
     return L.data == null ? null : structuredClone(L.data);

@@ -1,1 +1,1 @@
-{"build":160,"version":"V18","file":"SaiDeck.html","notes":"Half of what is lost at Blackjack (vs the bot), Coin Flip and Trading now goes into the slots jackpot."}
+{"build":161,"version":"V18","file":"SaiDeck.html","notes":"Fixed Slots + Blackjack freezing when both are open: SaiDeck now keeps its live connections under the browser limit (extra games read by plain requests instead)."}
