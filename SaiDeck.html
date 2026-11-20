@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 161;                 // ← goes up by one with every published version
+  const SD_BUILD = 163;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23345,13 +23345,16 @@
   // =====================================================================
   const CHAT_DB = 'https://saideck-chat-default-rtdb.asia-southeast1.firebasedatabase.app';
   // The database only speaks HTTP/1.1, and Chrome allows 6 connections to one host — shared by ALL tabs. Every live
-  // stream holds one for good (chat, pokes, online list are always on), so with Slots + Blackjack streaming too, the
-  // 6th connection was gone and every request (bets, the dealer's cards) waited forever: the game froze until one was
-  // closed. So SaiDeck keeps at most ES_MAX streams of its own; a game past that reads by plain requests instead.
-  const ES_MAX = 4, ES_OPEN = new Set();
+  // stream holds one for good (chat, pokes, online list, + each open game), so with Slots + Blackjack open there was no
+  // connection left and every request (bets, the dealer's cards) waited: the game froze. So all the live STREAMS go to
+  // the same database written with a trailing dot ("…firebasedatabase.app.") — Chrome counts that as a different host
+  // with its own 6 connections — and normal requests keep all 6 of the plain address to themselves.
+  // (If ever more than 6 streams were open at once, a game past that reads by plain requests instead of waiting.)
+  const CHAT_DB_ES = CHAT_DB + '.', ES_MAX = 6, ES_OPEN = new Set();
   { const RealES = window.EventSource;
-    if(RealES){ const W = function(url, o){ const es = new RealES(url, o);
-        if(String(url).startsWith(CHAT_DB)){ ES_OPEN.add(es); const c0 = es.close.bind(es); es.close = () => { ES_OPEN.delete(es); c0(); };
+    if(RealES){ const W = function(url, o){ let u = String(url); if(u.startsWith(CHAT_DB + '/')) u = CHAT_DB_ES + u.slice(CHAT_DB.length);
+        const es = new RealES(u, o);
+        if(u.startsWith(CHAT_DB_ES + '/')){ ES_OPEN.add(es); const c0 = es.close.bind(es); es.close = () => { ES_OPEN.delete(es); c0(); };
           es.addEventListener('error', () => { if(es.readyState === 2) ES_OPEN.delete(es); }); }
         return es; };
       W.prototype = RealES.prototype; W.CONNECTING = 0; W.OPEN = 1; W.CLOSED = 2; window.EventSource = W; } }
@@ -25457,7 +25460,7 @@
   async function casJoin(){
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
-    CAS.on = true; CAS.seen = {}; CAS.feed = []; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0; CAS.heldBy = {};
+    CAS.on = true; CAS.seen = {}; CAS.seen10 = {}; CAS.feed = []; CAS.joinT = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0) - 2000; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0; CAS.heldBy = {};
     if(!CHAT.gm.casino) gameOpen('casino');
     casBeat(); clearInterval(CAS.hb); CAS.hb = setInterval(casBeat, 30000);
     casListen(); casRender();
@@ -25497,6 +25500,7 @@
           if(CAS.spins[me] && (!sp[me] || sp[me].t < CAS.spins[me].t || (sp[me].t === CAS.spins[me].t && CAS.spins[me].c === true && sp[me].c !== true))) sp[me] = CAS.spins[me];
           CAS.spins = sp;
           casSync();
+          casSync10((d && d.s10) || {});
         }
       }catch(e){}
       CAS.polling = false;
@@ -25614,7 +25618,7 @@
         try{ sfxSlotResult(casMult(r.t), r.w > r.b || r.jack ? 0.9 : 0.45); }catch(e){}
         const sy = casReels(r.t).map(casSym).join('');
         if(r.jack){ M.jack = r.w; toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${r.w.toLocaleString()} points!`, 5000); casFeed(`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true); }
-        else if(r.w >= 300) casFeed(`${chatName() || 'Someone'} → ${sy} won ${r.w}`, true);
+        else casFeed(`${chatName() || 'Someone'} → ${sy} ${r.w > 0 ? 'won ' + r.w : 'lost'}`, r.w >= 300);
         if(myM && r.w > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: r.jack ? 1400 : 600 });
         chatRenderArcade();
         setTimeout(step, M.fast ? 60 : 500);
@@ -25822,6 +25826,29 @@
     try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`); if(r.ok){ const v = await r.json(); CAS.pot = typeof v === 'number' ? v : CAS_POT0; casPotShow(); } }catch(e){}
   }, 15000);
   // the machines on the floor (one per person sitting), kept in place so the reels can roll
+  // other players' 10× spins (casino/s10): their ten results go into the history (and onto their machine) one every
+  // 0.5 s, like they see them. (The first look after sitting down doesn't replay what happened before.)
+  function casSync10(s10){
+    const me = chatUid(); CAS.seen10 = CAS.seen10 || {}; CAS.q10 = CAS.q10 || {};
+    for(const [u, ch] of Object.entries(s10 || {})){
+      if(u === me || !ch || !ch.a0 || typeof ch.a0.t !== 'number' || chatBanned(u)) continue;
+      const prev = CAS.seen10[u];
+      CAS.seen10[u] = ch.a0.t;
+      if(prev === ch.a0.t || (prev == null && !(ch.a0.t > (CAS.joinT || Infinity)))) continue;
+      const st = (CAS.seats || {})[u], w = { n: (st && st.n) || 'Someone' };
+      const list = [];
+      for(let k = 0; k < 10; k++){ const c = ch['a' + k]; if(c && typeof c.t === 'number') list.push({ b: c.b, t: c.t + (c.o || 0), y: c.y || 0, c: true }); }
+      clearInterval(CAS.q10[u]);
+      let i = 0;
+      CAS.q10[u] = setInterval(() => {
+        if(!CAS.on || i >= list.length){ clearInterval(CAS.q10[u]); delete CAS.q10[u]; return; }
+        const sp = list[i++];
+        const m = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(u)}"]`);
+        if(m) casShow(m, sp, true, w);
+        else { const win = casWin(sp), R = casReels(sp.t).map(casSym).join(''); casFeed(`${chatBadName(w.n) ? 'someone' : w.n} → ${R} ${casIsJack(sp.t) ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || casIsJack(sp.t)); }
+      }, 500);
+    }
+  }
   function casSync(){
     const el = chatPanel.querySelector('.chat-casino'); if(!el || !el.dataset.built) return;
     const floor = el.querySelector('.cas-floor'), me = chatUid();
@@ -25846,7 +25873,8 @@
       const sp = CAS.spins[w.u];
       if(sp && typeof sp.t === 'number'){
         const prev = CAS.seen[w.u];
-        if(prev == null){ CAS.seen[w.u] = sp.t; casShow(m, sp, false); }
+        if(prev == null && !(w.u !== me && sp.t > (CAS.joinT || Infinity))){ CAS.seen[w.u] = sp.t; casShow(m, sp, false); }      // (a spin from before you sat down: just shown, not added to the history)
+        else if(prev == null){ CAS.seen[w.u] = sp.t; casShow(m, sp, true, w); }
         else if(sp.t !== prev){ CAS.seen[w.u] = sp.t; casShow(m, sp, true, w); }
       }
     });
@@ -30585,7 +30613,7 @@
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
     const d = document.createElement('div'); d.className = 'cas-f' + (big ? ' big' : ''); d.textContent = txt;
-    el.prepend(d); while(el.children.length > 12) el.lastChild.remove();
+    el.prepend(d); while(el.children.length > 30) el.lastChild.remove();
     d.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 250 });
   }
   // ----- The Great Deflation: the inflation fix (config/infl = { i, at, bm, pm }) -----

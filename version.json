@@ -1,1 +1,1 @@
-{"build":161,"version":"V18","file":"SaiDeck.html","notes":"Fixed Slots + Blackjack freezing when both are open: SaiDeck now keeps its live connections under the browser limit (extra games read by plain requests instead)."}
+{"build":163,"version":"V18","file":"SaiDeck.html","notes":"The slots history now shows everyone's results, including other players' 10x spins (one every 0.5 s, like they see them), and all of your own 10x results."}
