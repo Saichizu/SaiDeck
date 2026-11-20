@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 163;                 // ← goes up by one with every published version
+  const SD_BUILD = 165;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -22994,7 +22994,11 @@
       sdAfterUpdate(v);
     }catch(err){
       if(opts.auto) throw err;
-      if(err && err.name === 'AbortError'){
+      if(err && /can't save files/.test(err.message || '')){
+        sdBusy = false; sdBtn.classList.remove('busy');
+        if(await lyrConfirm("This browser can't update SaiDeck by itself", "Your browser doesn't let pages save into your folders (Opera, Brave and Firefox block it — Chrome and Edge allow it).\n\nSaiDeck can download the new version instead; then open the downloaded file (or put it in place of the old one).", 'Download it')) sdDownloadNew(v).catch(e2 => toast(`Couldn't download it: ${e2.message || e2}`, 5200));
+      }
+      else if(err && err.name === 'AbortError'){
         sdBusy = false; sdBtn.classList.remove('busy');
         if(await lyrConfirm('Pick the SaiDeck file instead?', SD_PICK_HELP_F(), 'Pick the file')) sdSaveOver(v).catch(e2 => { if(!(e2 && e2.name === 'AbortError')) toast(`Couldn't update: ${e2.message || e2}`, 5200); else toast('Update cancelled.', 1600); });
       }
@@ -23006,6 +23010,24 @@
   // kept straight in one of those the folder pick always ends as "cancelled". Picking a single file there is fine.
   const SD_PICK_HELP_F = () => { const H = sdHere() || {}; const nm = (location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '') || 'SaiDeck.html';
     return `Chrome doesn't let SaiDeck pick some folders as a whole (like Downloads or Desktop), so the folder window closes as "cancelled".\n\nInstead, pick this SaiDeck file itself in the next window — “${nm}”${H.path ? ` in ${H.path}` : ''} — and press Save / Replace. The new version is written over it.`; };
+  // Plan C: an ordinary browser download of the new SaiDeck (any browser can do this — Opera, Brave and Firefox
+  // don't let pages write to your folders). You then open the downloaded file, or put it in place of the old one.
+  async function sdDownloadNew(v, step){
+    const here = (location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '') || 'SaiDeck.html';
+    if(step) step('Downloading the new SaiDeck…'); else toast('Downloading the new SaiDeck…', 2500);
+    const want = v.build | 0, sha = v._sha || await sdLatestSha();
+    const r = await fetch(`https://raw.githubusercontent.com/${SD_REPO}/${sha || 'main'}/${v.file || 'SaiDeck.html'}` + (sha ? '' : '?t=' + Date.now()), { cache: 'no-store' });
+    if(!r.ok) throw new Error('GitHub answered ' + r.status);
+    const src = await r.text();
+    if(!/const SD_BUILD = \d+;/.test(src) || src.length < 100000) throw new Error('The download looks incomplete.');
+    const got = sdBuildOf(src);
+    if(got < want) throw new Error(`GitHub is still handing out the old file (build ${got}). Try again in a minute or two.`);
+    const url = URL.createObjectURL(new Blob([src], { type: 'text/html' }));
+    const a = document.createElement('a'); a.href = url; a.download = here; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    const msg = `Downloaded build ${got}. Open the new “${here}” from your Downloads (your browser may name it “${here.replace(/\.html$/i, '')} (1).html”) — or move it over your old one so you keep using the same file. Close this one afterwards.`;
+    if(step) step(msg); else lyrConfirm('New SaiDeck downloaded', msg, 'OK');
+  }
   async function sdSaveOver(v, step){
     const here = (location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '') || 'SaiDeck.html';
     if(!window.showSaveFilePicker) throw new Error("This browser can't save files — use Chrome or Edge.");
@@ -23134,8 +23156,12 @@
           const viaFile = () => { step(`Pick “${(decodeURIComponent(location.pathname.split('/').pop() || '') || 'SaiDeck.html')}” (this SaiDeck file) and press Save / Replace…`); sdOv.classList.remove('err'); sdOverlayButtons([]);
             sdSaveOver(v, step).catch(e2 => { step(e2 && e2.name === 'AbortError' ? 'Cancelled.' : `Couldn't update: ${(e2 && e2.message) || e2}`); sdOv.classList.add('err');
               sdOverlayButtons([['Pick the SaiDeck file', viaFile, true], ['Try the folder again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }], ['Use this version for now', sdOverlayClose]]); }); };
-          sdOverlayButtons(ab ? [['Pick the SaiDeck file', viaFile, true], ['Try the folder again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }], ['Use this version for now', sdOverlayClose]]
-            : [['Try again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true], ['Pick the SaiDeck file', viaFile], ['Use this version for now', sdOverlayClose]]);
+          const viaDl = () => { sdOv.classList.remove('err'); sdOverlayButtons([]); sdDownloadNew(v, step).then(() => sdOverlayButtons([['Close', sdOverlayClose, true]])).catch(e3 => { step(`Couldn't download it: ${(e3 && e3.message) || e3}`); sdOv.classList.add('err'); sdOverlayButtons([['Try again', viaDl, true], ['Use this version for now', sdOverlayClose]]); }); };
+          const noFs = !window.showDirectoryPicker || !window.showSaveFilePicker || /can't save files/.test((err && err.message) || '') || (err && (err.name === 'SecurityError' || err.name === 'NotAllowedError'));
+          if(noFs) step("This browser doesn't let SaiDeck update itself (Opera, Brave and Firefox block saving into your folders — Chrome and Edge allow it). Download the new version instead, then open it.");
+          sdOverlayButtons(noFs ? [['Download the new version', viaDl, true], ['Use this version for now', sdOverlayClose]]
+            : ab ? [['Pick the SaiDeck file', viaFile, true], ['Download it instead', viaDl], ['Use this version for now', sdOverlayClose]]
+            : [['Try again', () => { step('Updating…'); sdOv.classList.remove('err'); sdOverlayButtons([]); go(false); }, true], ['Pick the SaiDeck file', viaFile], ['Download it instead', viaDl], ['Use this version for now', sdOverlayClose]]);
         }
       }
     };
@@ -25603,28 +25629,27 @@
     }
     // collect them in the background, one after another
     const claims = (async () => { for(const it of list){ it.w = await casClaim10(it, tok); } })();
-    // and show them, one every 0.5 s
-    await new Promise(done => {
-      let i = 0;
-      const step = () => {
-        if(i >= list.length){ done(); return; }
-        const it = list[i++];
+    // and show them all straight away, in order (one update of the screen, one sound)
+    {
+      const lines = []; let best = null, bestW = -1;
+      for(const it of list){
         const w = it.w != null ? it.w : casWin(Object.assign({ jp: CAS.pot }, it.sp));
         const r = { b: it.b, t: it.t, w: Math.max(0, w), jack: it.jack };
         it.shownAt = Date.now();
-        if(CAS.heldBy) delete CAS.heldBy[it.t]; casHeldSum();
-        M.n++; M.bet += r.b; M.won += r.w; M.res.push(r); casMultiShow(); casCtl();
+        if(CAS.heldBy) delete CAS.heldBy[it.t];
+        M.n++; M.bet += r.b; M.won += r.w; M.res.push(r);
         if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += r.b; CAS.sess.won += r.w; }
-        try{ sfxSlotResult(casMult(r.t), r.w > r.b || r.jack ? 0.9 : 0.45); }catch(e){}
         const sy = casReels(r.t).map(casSym).join('');
-        if(r.jack){ M.jack = r.w; toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${r.w.toLocaleString()} points!`, 5000); casFeed(`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true); }
-        else casFeed(`${chatName() || 'Someone'} → ${sy} ${r.w > 0 ? 'won ' + r.w : 'lost'}`, r.w >= 300);
-        if(myM && r.w > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: r.jack ? 1400 : 600 });
-        chatRenderArcade();
-        setTimeout(step, M.fast ? 60 : 500);
-      };
-      setTimeout(step, 500);
-    });
+        if(r.jack){ M.jack = r.w; lines.push([`${chatName() || 'Someone'} → ${sy} HIT THE JACKPOT!`, true]); }
+        else lines.push([`${chatName() || 'Someone'} → ${sy} ${r.w > 0 ? 'won ' + r.w : 'lost'}`, r.w >= 300]);
+        if(r.jack || r.w > bestW){ if(!(best && best.jack)){ best = r; bestW = r.w; } }
+      }
+      casHeldSum(); casMultiShow(); casCtl(); casFeedMany(lines);
+      if(best) try{ sfxSlotResult(casMult(best.t), best.w > best.b || best.jack ? 0.9 : 0.45); }catch(e){}
+      if(M.jack) toast(`🎰 7️⃣ 7️⃣ 7️⃣ — JACKPOT! You won ${M.jack.toLocaleString()} points!`, 5000);
+      if(myM && M.won > 0) myM.animate([{ boxShadow: '0 0 0 0 rgba(245,208,74,.9)' }, { boxShadow: '0 0 0 14px rgba(245,208,74,0)' }], { duration: M.jack ? 1400 : 600 });
+      chatRenderArcade();
+    }
     const last = M.res[M.res.length - 1]; CAS.lastM = M;
     casRollStop(myM, last);
     CAS.multi = null; casCtl(); casMultiShow(M, true);
@@ -25838,15 +25863,13 @@
       const st = (CAS.seats || {})[u], w = { n: (st && st.n) || 'Someone' };
       const list = [];
       for(let k = 0; k < 10; k++){ const c = ch['a' + k]; if(c && typeof c.t === 'number') list.push({ b: c.b, t: c.t + (c.o || 0), y: c.y || 0, c: true }); }
-      clearInterval(CAS.q10[u]);
-      let i = 0;
-      CAS.q10[u] = setInterval(() => {
-        if(!CAS.on || i >= list.length){ clearInterval(CAS.q10[u]); delete CAS.q10[u]; return; }
-        const sp = list[i++];
-        const m = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(u)}"]`);
-        if(m) casShow(m, sp, true, w);
-        else { const win = casWin(sp), R = casReels(sp.t).map(casSym).join(''); casFeed(`${chatBadName(w.n) ? 'someone' : w.n} → ${R} ${casIsJack(sp.t) ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || casIsJack(sp.t)); }
-      }, 500);
+      if(!list.length) continue;
+      const nm = chatBadName(w.n) ? 'someone' : w.n, lines = [];
+      for(const sp of list){ const win = casWin(sp), R3 = casReels(sp.t).map(casSym).join(''), jk = casIsJack(sp.t);
+        lines.push([`${nm} → ${R3} ${jk ? 'HIT THE JACKPOT!' : win > 0 ? 'won ' + win : 'lost'}`, win >= 300 || jk]); }
+      casFeedMany(lines);
+      const m = chatPanel.querySelector(`.chat-casino .cas-m[data-u="${CSS.escape(u)}"]`);
+      if(m) casShow(m, list[list.length - 1], false);         // (their machine just shows where they ended up)
     }
   }
   function casSync(){
@@ -30609,6 +30632,13 @@
     toast('🎁 A mystery crate just dropped in the chat — points or a trick? First to open it finds out!', 4200);
     if(sfxOn()){ const ac = sfxCtx(); if(ac){ const t0 = ac.currentTime; [523, 659, 784, 1047, 1319].forEach((f, i) => sfxTone(ac, t0 + i * .06, 'triangle', f, f, .2, .12)); } }
     crateFetch(m._k).then(() => { if(CHAT.open) chatRenderMessages(); });
+  }
+  // several history lines at once (oldest first), in one go — cheap even when lots of people spin 10×
+  function casFeedMany(lines){
+    const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el || !lines.length) return;
+    const f = document.createDocumentFragment();
+    for(let i = lines.length - 1; i >= 0; i--){ const d = document.createElement('div'); d.className = 'cas-f' + (lines[i][1] ? ' big' : ''); d.textContent = lines[i][0]; f.appendChild(d); }
+    el.prepend(f); while(el.children.length > 30) el.lastChild.remove();
   }
   function casFeed(txt, big){
     const el = chatPanel.querySelector('.chat-casino .cas-feed'); if(!el) return;
