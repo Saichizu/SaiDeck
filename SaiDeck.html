@@ -22875,7 +22875,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 171;                 // ← goes up by one with every published version
+  const SD_BUILD = 172;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25436,7 +25436,10 @@
   // database checks that the bet was paid and the winnings are exactly right.
   const CAS_SYMS = ['🍒', '🍋', '🍊', '🔔', '💎', '7️⃣'];
   const CAS = { on: false, es: null, seats: {}, spins: {}, seen: {}, feed: [], busy: false, hb: 0, bet: 50, pot: null };
-  const casReels = (T) => [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
+  const casReels = (T) => (CAS.forced && CAS.forced.has(T)) ? [5, 5, 5] : [T % 6, Math.floor(T / 6) % 6, Math.floor(T / 36) % 6];
+  // (the admin can make someone's next spin the jackpot: config/jack/<uid> = true; it's read alongside the payment)
+  const casForcedP = (tok) => fetch(`${CHAT_DB}/config/jack/${encodeURIComponent(chatUid())}.json`, { cache: 'no-store' }).then(g => g.ok ? g.json() : null).then(v => v === true).catch(() => false);
+  function casForce(T){ CAS.forced = CAS.forced || new Set(); CAS.forced.add(T); }
   // A spin costs 1% of your points (at least 10, no top limit) — the database works out the same.
   // What a result pays is in tenths of your bet, and the lower you are on the leaderboard the better
   // it pays (pity luck): tier 2 = the bottom third, tier 1 = the middle third (config/pity holds the lines).
@@ -25574,6 +25577,7 @@
       const tok = await chatAuth(), body = {};
       // (10×: read the jackpot while the payment goes, so collecting needs one trip less)
       const potP = multi ? casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, {}, 6000).then(g => g.ok ? g.json() : null).catch(() => null) : null;
+      const fP = casForcedP(tok);
       body[`scores/${me}/s`] = SC.s + bet; body[`scores/${me}/t`] = sv; body[`casino/spin/${me}`] = { b: bet, t: sv, c: false, y };
       let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
       // (the pity lines may have just moved: read them again and retry once with the tier the server will take)
@@ -25586,6 +25590,7 @@
       let T = null; try{ const d = await r.json(); T = d && d[`casino/spin/${me}`] && d[`casino/spin/${me}`].t; }catch(e){}
       if(typeof T !== 'number'){ const g = await casFetch(`${CHAT_DB}/casino/spin/${encodeURIComponent(me)}.json?auth=${encodeURIComponent(tok)}`); const d = g.ok ? await g.json() : null; T = d && d.t; }
       if(typeof T !== 'number') throw new Error('no time');
+      if(await fP) casForce(T);
       const sp = { b: bet, t: T, c: false, y }; CAS.spins[me] = sp;
       if(CAS.sess){ CAS.sess.spins++; CAS.sess.bet += bet; CAS.sess.won += casWin({ b: bet, t: T, y }); }
       CAS.seen[me] = T;
@@ -25636,6 +25641,7 @@
         for(let k = 0; k < 10; k++) body[`casino/s10/${me}/${M.bank}${k}`] = { b: bet, t: sv, c: false, y, o: CAS10_O(k) };
         return body; };
       const potP = casFetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }, 6000).then(g => g.ok ? g.json() : null).catch(() => null);      // (read alongside the payment, for collecting)
+      M.fP = casForcedP(tok);
       let r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(mk()) });
       potP.then(v => { if(typeof v === 'number') CAS.pot10 = v; });
       if(r.status === 401){
@@ -25654,6 +25660,7 @@
       if(typeof T !== 'number') throw new Error('no time');
     }catch(e){ return fail(e && e.name === 'AbortError' ? 'The casino is taking too long to answer — try again in a moment.' : "Couldn't finish that 10× — it'll be collected next time."); }
     CAS.busy = false;
+    if(M.fP && await M.fP) casForce(T);              // (the admin set this one: the first of the ten is the jackpot)
     for(let i = 0; i < 10; i++) questEvSafe('spin');
     // all ten results, right now
     const list = [];
@@ -25715,6 +25722,7 @@
         if(typeof CAS.pf !== 'number') await casPfLoad(tok);
         const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;
         const body = { [`casino/s10/${me}/${it.key || 'a' + it.k}/c`]: true };
+        if(CAS.forced && CAS.forced.has(sp.t)) body[`config/jack/${me}`] = { '.sv': 'timestamp' };
         if(win) body[`scores/${me}/p`] = SC.p + win;
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss > 0) body[`casino/pf/${me}`] = CAS.pf + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
@@ -25844,6 +25852,7 @@
         if(jack) sp.jp = pot;
         const win = casWin(sp), loss = !jack ? Math.floor(Math.max(0, sp.b - win) / 10) : 0;      // (only a tenth of what's lost goes into the jackpot)
         body[`casino/spin/${me}/c`] = true; if(win) body[`scores/${me}/p`] = SC.p + win;
+        if(CAS.forced && CAS.forced.has(sp.t)) body[`config/jack/${me}`] = { '.sv': 'timestamp' };
         if(typeof CAS.pf !== 'number' || tries > 0) await casPfLoad(tok);
         if(jack) body['casino/pot'] = CAS_POT0; else if(loss > 0) body[`casino/pf/${me}`] = CAS.pf + loss;
         const r = await casFetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
@@ -27019,7 +27028,8 @@
     const H = ((r.lt % 10007) * 2654 + (k % 10007) * 40503 + km * km * 97) % 10007;
     const trend = (((k - k % 40) / 40 * 7919 + r.S) % 31) - 15;      // (a mood every 40 ticks)
     const rev = P < 300 ? 40 : P < 600 ? 15 : P > 3500 ? -30 : P > 2000 ? -12 : 0;
-    const E = H % 53 === 0 ? 350 : (H % 47 === 0 && P > 500) ? -300 : 0;
+    const X0 = TRD.x && typeof TRD.x.k === 'number' && TRD.x.k === k ? TRD.x.m : null;      // (the admin's whale pump / crash, trade/x)
+    const E = X0 != null ? X0 : H % 53 === 0 ? 350 : (H % 47 === 0 && P > 500) ? -300 : 0;
     const X = P * (1000 + (H % 241) - 120 + trend + rev + E), Q = (X - X % 1000) / 1000;
     return { k, P: Q >= 100 ? Q : 100 };
   }
@@ -27064,7 +27074,7 @@
   }
   async function trdLoad(){
     const d = (await liveGet('trade')) || {};
-    TRD.r = d.r && d.r.lt ? d.r : null; TRD.h = d.h || {}; TRD.p = d.p || {}; TRD.f = d.f || {}; TRD.live = d.on || {};
+    TRD.r = d.r && d.r.lt ? d.r : null; TRD.x = d.x || null; TRD.h = d.h || {}; TRD.p = d.p || {}; TRD.f = d.f || {}; TRD.live = d.on || {};
   }
   // keep the market moving while you're in it
   async function trdStep(){
