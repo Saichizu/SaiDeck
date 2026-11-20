@@ -22861,7 +22861,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 159;                 // ← goes up by one with every published version
+  const SD_BUILD = 160;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26797,6 +26797,28 @@
     return { k, P: Q >= 100 ? Q : 100 };
   }
   async function trdGet(path){ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); if(!r.ok) throw new Error('get ' + r.status); return r.json(); }
+  // the slots jackpot right now (for writes that add to it — the rules want the exact new total)
+  async function potNow(){ try{ const tok = await chatAuth(); const g = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); const v = g.ok ? await g.json() : null; return typeof v === 'number' ? v : null; }catch(e){ return null; } }
+  function potShown(v){ if(typeof v !== 'number') return; CAS.pot = v; try{ casPotShow(); chatTickerSync && chatTickerSync(); }catch(e){} }
+  // Trading: when your bag is empty and you're down overall, half of that loss goes into the jackpot (lp = how much of it already has)
+  async function trdPotFeed(){
+    const me = chatUid();
+    for(let tries = 0; tries < 4; tries++){
+      const mp = TRD.p[me]; if(!mp || mp.sh !== 0 || !(mp.c > mp.g)) return;
+      if(typeof mp.lp !== 'number'){ await trdLpBase(); return; }
+      const lp = Math.floor((mp.c - mp.g) / 2), add = lp - mp.lp; if(!(add > 0)) return;
+      const pot = await potNow(); if(pot == null) return;
+      if(await trdPatch({ [`trade/p/${me}/lp`]: lp, 'casino/pot': pot + add })){ mp.lp = lp; potShown(pot + add); return; }
+      await new Promise(z => setTimeout(z, 300 + Math.random() * 700));
+    }
+  }
+  // (the first time: where you stand now is the starting line — losses from before this don't go into the jackpot)
+  async function trdLpBase(){
+    const me = chatUid(), mp = TRD.p[me], r = TRD.r; if(!mp || typeof mp.lp === 'number' || mp.r !== TRD_ID || !r || !(r.P > 0)) return;
+    const most = mp.c > mp.g ? Math.floor((mp.c - mp.g) / 2) : 0;
+    const lp = Math.max(0, Math.min(most, Math.floor(Math.max(0, mp.c - mp.g - mp.sh * r.P) / 2)));
+    if(await trdPatch({ [`trade/p/${me}/lp`]: lp })) mp.lp = lp;
+  }
   async function trdPatch(body){ try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) }); return r.ok; }catch(e){ return false; } }
   // a notice card in the chat (Tower Defense and Trading use these)
   async function chatNotice(e, v, txt){
@@ -26842,6 +26864,7 @@
         else await trdPatch({ [`trade/p/${me}`]: { r: TRD_ID, sh: 0, c: 0, g: 0 } });
         await trdLoad();
       }
+      if(TRD.p[me] && typeof TRD.p[me].lp !== 'number' && !TRD.lpTried){ TRD.lpTried = true; trdLpBase(); }
     }catch(e){}
     TRD.busy = false;
     if(TRD.on) trdRender();
@@ -26873,6 +26896,7 @@
     if(cur) body[`trade/p/${me}/x/${n}`] = { k: r.k, q: -q, p: P };
     if(await trdPatch(body)){
       SC.p += got - back; SC.s -= back;
+      if(mp.sh - q === 0){ mp.sh = 0; mp.g = (mp.g || 0) + got; trdPotFeed(); }
       if(auto) toast(`💸 Your old ${q.toLocaleString()} shares paid out ${got.toLocaleString()} points.`, 3000);
       else { trdFx('sell', q); try{ sfxChip(); }catch(e){} const pn = trdPnl({ c: mp.c, g: (mp.g || 0) + got, sh: mp.sh - q }, P); if(got >= 100000 && mp.sh - q === 0) trdNote(`cashed out ${trdK(got)} of ${TRD_SYM} · all-time ${trdSg(pn)} ${pn >= 0 ? '🤑' : '💀'}`); }
     } else if(!auto){ toast('The price just moved — try again.', 1500); await scLoad(); }
@@ -27135,7 +27159,12 @@
           if(!SC.loaded) await scLoad();
           const won = cfRes(F) === mb.s;
           const body = won ? { [`coin/b/${me}/c`]: true, [`scores/${me}/p`]: SC.p + mb.a, [`scores/${me}/s`]: SC.s - mb.a, [`scores/${me}/t`]: { '.sv': 'timestamp' } } : { [`coin/b/${me}/c`]: true };
-          if(await trdPatch(body)){ mb.c = true; if(won){ SC.p += mb.a; SC.s -= mb.a; if(mb.a >= 100000) trdNote2(`won ${trdK(mb.a)} on ${CF_NAME[mb.s]} 🪙`); } }
+          let fed = false;
+          if(!won && mb.a >= 2){      // (half the lost stake goes into the slots jackpot — a couple of goes in case it just moved)
+            for(let k = 0; k < 3 && !fed; k++){ const pot = await potNow(); if(pot == null) break;
+              if(await trdPatch(Object.assign({}, body, { 'casino/pot': pot + Math.floor(mb.a / 2) }))){ fed = true; potShown(pot + Math.floor(mb.a / 2)); } }
+          }
+          if(fed || await trdPatch(body)){ mb.c = true; if(won){ SC.p += mb.a; SC.s -= mb.a; if(mb.a >= 100000) trdNote2(`won ${trdK(mb.a)} on ${CF_NAME[mb.s]} 🪙`); } }
           else if(mb.n !== R.n && mb.n !== R.pn){ /* too old to check now */ }
         }
       }
@@ -28775,7 +28804,7 @@
         const tok = await chatAuth();
         const pg = await fetch(`${CHAT_DB}/casino/pot.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
         const v = pg.ok ? await pg.json() : null, pot = typeof v === 'number' ? v : CAS_POT0;
-        const add = Math.max(1, Math.floor(lost / 10)), body = { 'casino/pot': pot + add }; body[`casino/bjl/${me}`] = R;      // (a tenth of what's lost)
+        const add = Math.max(1, Math.floor(lost / 2)), body = { 'casino/pot': pot + add }; body[`casino/bjl/${me}`] = R;      // (half of what's lost)
         const w = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
         if(w.ok){ chatLS('bjpot', String(R)); CAS.pot = pot + add; try{ casPotShow(); chatTickerSync && chatTickerSync(); }catch(e){} return; }
       }catch(e){}
