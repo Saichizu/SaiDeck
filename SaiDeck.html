@@ -22936,7 +22936,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 184;                 // ← goes up by one with every published version
+  const SD_BUILD = 185;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -32070,8 +32070,8 @@
     if(text.length > mx){ toast(`Messages can be up to ${mx} characters.`, 2000); return; }
     if(chatBad(text)){ toast("That message has a word that isn't allowed — please keep it friendly.", 2800); ta.focus(); return; }
     if(chatBadName(chatName())){ toast('Please change your chat name first (the gear button).', 2800); return; }
-    const slow = Math.max(1.5, Number(CHAT.cfg.slow) || 0) * 1000, wait = slow - (Date.now() - (CHAT.lastSend || 0));
-    if(wait > 0){ toast(slow > 1500 ? `Slow mode is on — you can send again in ${Math.ceil(wait / 1000)} s.` : 'Slow down a little — one message at a time.', 1800); return; }
+    // (no slow mode: send as fast as you type — only a double press of Enter within 0.2 s is ignored)
+    if(Date.now() - (CHAT.lastSend || 0) < 200) return;
     CHAT.lastSend = Date.now();
     const send = chatPanel.querySelector('.chat-send'); if(send){ send.disabled = true; send.classList.remove('fly'); void send.offsetWidth; send.classList.add('fly'); setTimeout(() => send.classList.remove('fly'), 600); }
     try{
