@@ -853,6 +853,17 @@
   @keyframes trdFu{from{background:rgba(53,208,126,.45);color:#b6ffd4;}} @keyframes trdFd{from{background:rgba(255,77,106,.45);color:#ffd0d8;}}
   .trd-ch{font:800 13px 'Inter',sans-serif;padding:3px 8px;border-radius:6px;}
   .trd-main .up{color:#35d07e;} .trd-main .down{color:#ff4d6a;} .trd-ch.up{background:rgba(53,208,126,.14);} .trd-ch.down{background:rgba(255,77,106,.14);}
+  .trd-real{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:rgba(118,185,0,.07);border:1px solid rgba(118,185,0,.28);font:600 11px 'Manrope',sans-serif;}
+  .trd-real:hover{background:rgba(118,185,0,.13);} .trd-real.on{border-color:#76b900;box-shadow:0 0 0 2px rgba(118,185,0,.25);}
+  .trd-real div{display:flex;flex-direction:column;line-height:1.15;} .trd-real b{font:900 13px 'Manrope',sans-serif;} .trd-real small{opacity:.55;font-size:10px;}
+  .trd-real .px{font:800 16px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;} .trd-real .ch{font-weight:800;} .trd-real .sp{width:86px;height:28px;}
+  .trd-logo.nv{background:linear-gradient(135deg,#76b900,#3d6300) !important;color:#fff;}
+  .trd-realv{position:absolute;inset:0;background:#0b0e13;display:flex;flex-direction:column;z-index:4;}
+  .trd-realv .rv-bar{display:flex;align-items:center;gap:8px;padding:8px 10px 2px;font:600 12px 'Manrope',sans-serif;} .trd-realv .rv-bar small{opacity:.55;}
+  .trd-realv .rv-px{font:800 15px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;margin-left:6px;}
+  .trd-realv .rv-tabs{display:flex;gap:4px;margin-left:auto;} .trd-realv .rv-tabs button,.trd-realv .rv-x{all:unset;cursor:pointer;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.06);font:700 11px 'Manrope',sans-serif;}
+  .trd-realv .rv-tabs button.on{background:#76b900;color:#0b1400;} .trd-realv .rv-x{background:rgba(255,255,255,.1);}
+  .trd-realv .rv-cv{flex:1;width:100%;min-height:0;display:block;} .trd-realv .rv-note{position:absolute;left:12px;bottom:22px;font:600 10px 'Manrope',sans-serif;opacity:.4;pointer-events:none;}
   .trd-bag{margin-left:auto;display:flex;gap:6px;} .trd-bag > div{display:flex;flex-direction:column;gap:2px;white-space:nowrap;padding:6px 11px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font:600 12px 'Inter',sans-serif;color:var(--text-dim);}
   .trd-bag small{font:800 9px 'Inter',sans-serif;letter-spacing:.12em;color:var(--text-faint);} .trd-bag b{color:#fff;}
   .trd-chart{position:relative;height:280px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);overflow:hidden;} .trd-cv,.trd-cv2{width:100%;height:100%;display:block;}
@@ -22875,7 +22886,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 174;                 // ← goes up by one with every published version
+  const SD_BUILD = 175;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -27111,8 +27122,8 @@
         await trdPatch({ 'trade/r': { id: TRD_ID, S: Math.floor(Math.random() * 999983), k: 0, P: 1000, lt: { '.sv': 'timestamp' } } });
         await trdLoad();
       } else if(now - TRD.r.lt >= TRD_OFF + 3000){
-        const missed = Math.floor((now - TRD.r.lt) / TRD_OFF);
-        if(await trdCatchUp() && !TRD.woke){ TRD.woke = true; trdNote(`opened the market — ${TRD_SYM} moved ${missed.toLocaleString()} ticks while it was closed 📈`); }
+        const gone = now - TRD.r.lt, dur = gone < 3600000 ? Math.round(gone / 60000) + ' min' : gone < 172800000 ? Math.round(gone / 3600000) + ' h' : Math.round(gone / 86400000) + ' days';
+        if(await trdCatchUp() && !TRD.woke){ TRD.woke = true; trdNote(`${TRD_SYM} caught up ${dur} while closed 📈`); }
       } else if(now >= TRD.r.lt + TRD_TICK){
         const r = TRD.r, slept = now - r.lt > 300000, n = trdNext(r);
         if(await trdPatch({ 'trade/r/k': n.k, 'trade/r/P': n.P, 'trade/r/lt': { '.sv': 'timestamp' }, [`trade/h/${n.k % TRD_WIN}`]: { k: n.k, P: n.P, t: { '.sv': 'timestamp' } } })){
@@ -27202,8 +27213,9 @@
       <div class="td-head trd-head"><b>📈 SaiDeck Exchange</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="trd-who"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
       <div class="trd-tape"><div class="trd-tape-in"></div></div>
       <div class="trd-main">
-        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><div class="trd-bag"></div></div>
-        <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div></div>
+        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><button type="button" class="trd-real" title="NVIDIA — the real price (from CNBC, may be a little delayed). Just to look at, not tradeable. Click for its chart."><span class="trd-logo nv">N</span><div><b>NVDA</b><small class="st">real · loading…</small></div><span class="px">…</span><span class="ch"></span><canvas class="sp"></canvas></button><div class="trd-bag"></div></div>
+        <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div>
+          <div class="trd-realv" hidden><div class="rv-bar"><span class="trd-logo nv">N</span><b>NVDA</b><small>NVIDIA · real price</small><span class="rv-px"></span><span class="rv-tabs"><button type="button" data-rr="1D" class="on">1D</button><button type="button" data-rr="5D">5D</button><button type="button" data-rr="1M">1Y</button></span><button type="button" class="rv-x">← back to ${TRD_SYM}</button></div><canvas class="rv-cv"></canvas><div class="rv-note"></div></div></div>
         <div class="trd-acts">
           <div class="trd-grp buy"><span class="trd-l">BUY</span><input class="trd-in" data-in="b" inputmode="decimal" placeholder="points" aria-label="Points to spend"><span class="trd-qk">${['1k', '10k', '100k', '1m'].map(a => `<button type="button" class="trd-c" data-ab="${a}">+${a.toUpperCase()}</button>`).join('')}<button type="button" class="trd-c" data-ab="max">MAX</button></span><button type="button" class="trd-b buy all" data-buy>BUY 🚀</button></div>
           <div class="trd-grp sell"><span class="trd-l">SELL</span><input class="trd-in" data-in="s" inputmode="decimal" placeholder="shares" aria-label="Shares to sell"><span class="trd-qk"><button type="button" class="trd-c" data-as="half">HALF</button><button type="button" class="trd-c" data-as="all">ALL</button></span><button type="button" class="trd-b sell all" data-sell>SELL 🧻</button></div>
@@ -27217,6 +27229,11 @@
     TRD.fitOff = () => { clearInterval(TRD.fit); window.removeEventListener('resize', fit); };
     w.querySelector('.td-x').addEventListener('click', trdClose); w.querySelector('.td-back').addEventListener('click', trdClose);
     w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); trdClose(); } });
+    // NVIDIA, the real one (just to look at)
+    w.querySelector('.trd-real').addEventListener('click', () => trdRealShow(!TRD.realOn));
+    w.querySelector('.rv-x').addEventListener('click', () => trdRealShow(false));
+    for(const b of w.querySelectorAll('[data-rr]')) b.addEventListener('click', () => { TRD.realR = b.dataset.rr; for(const x of w.querySelectorAll('[data-rr]')) x.classList.toggle('on', x === b); trdRealTick(true); });
+    TRD.realOn = false; TRD.realR = '1D'; trdRealTick(true); TRD.realT = setInterval(() => trdRealTick(false), 30000);
     // amounts: type them, or add with the quick buttons
     const inB = w.querySelector('[data-in="b"]'), inS = w.querySelector('[data-in="s"]'), prev = w.querySelector('.trd-prev');
     const showPrev = () => {
@@ -27247,8 +27264,91 @@
     if(!SC.loaded) scLoad().catch(() => {});
     trdStep(); TRD.poll = setInterval(trdStep, 1000);
   }
+  // ----- NVDA: the real NVIDIA price beside $CRDA, just for fun (CNBC's public quote + chart data; works from a local
+  // file too). Quote every 30 s, chart every 2 min (1D) / 10 min (5D, 1Y). Not tradeable. -----
+  const TRD_REAL = { q: 'https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=NVDA&requestMethod=itv&noform=1&output=json', c: (r) => `https://ts-api.cnbc.com/harmony/app/charts/${r}.json?symbol=NVDA` };
+  async function trdRealTick(force){
+    if(!TRD.on) return;
+    TRD.real = TRD.real || { bars: {}, at: {} };
+    const R = TRD.real, now = Date.now();
+    try{
+      if(force || !R.q || now - (R.qAt || 0) > 25000){
+        const j = await fetch(TRD_REAL.q, { cache: 'no-store' }).then(r => r.ok ? r.json() : null);
+        const q = j && j.FormattedQuoteResult && j.FormattedQuoteResult.FormattedQuote && j.FormattedQuoteResult.FormattedQuote[0];
+        if(q && q.last){ R.q = q; R.qAt = now; }
+      }
+      const rr = ['1D', TRD.realR || '1D'];
+      for(const r of new Set(rr)){
+        const ttl = r === '1D' ? 120000 : 600000;
+        if(force && r === TRD.realR || !R.bars[r] || now - (R.at[r] || 0) > ttl){
+          const j = await fetch(TRD_REAL.c(r), { cache: 'no-store' }).then(x => x.ok ? x.json() : null);
+          const b = j && j.barData && j.barData.priceBars;
+          if(Array.isArray(b) && b.length) { R.bars[r] = b.map(x => ({ t: +x.tradeTimeinMills, o: +x.open, h: +x.high, l: +x.low, c: +x.close, v: +x.volume || 0 })).filter(x => x.t && isFinite(x.c)); R.at[r] = now; }
+        }
+      }
+      R.err = false;
+    }catch(e){ R.err = true; }
+    trdRealRender();
+  }
+  function trdRealShow(on){
+    TRD.realOn = !!on; const W = TRD.win; if(!W) return;
+    W.querySelector('.trd-realv').hidden = !on; W.querySelector('.trd-real').classList.toggle('on', !!on);
+    if(on) trdRealTick(false);
+  }
+  function trdRealRender(){
+    const W = TRD.win, R = TRD.real; if(!W || !R) return;
+    const q = R.q, card = W.querySelector('.trd-real');
+    if(q){
+      const last = parseFloat(q.last), chp = parseFloat(q.change_pct), up = !(chp < 0);
+      const ext = q.ExtendedMktQuote && q.ExtendedMktQuote.last ? q.ExtendedMktQuote : null;
+      const st = q.curmktstatus === 'REG_MKT' ? 'real · market open' : q.curmktstatus === 'PRE_MKT' ? 'real · pre-market' : q.curmktstatus === 'POST_MKT' ? 'real · after hours' : 'real · market closed';
+      card.querySelector('.px').textContent = '$' + last.toFixed(2);
+      const ch = card.querySelector('.ch'); ch.textContent = `${up ? '▲' : '▼'} ${Math.abs(chp).toFixed(2)}%`; ch.style.color = up ? '#35d07e' : '#ff4d6a';
+      card.querySelector('.st').textContent = st + (ext ? ` · ${ext.type === 'PRE_MKT' ? 'pre' : 'after'} $${parseFloat(ext.last).toFixed(2)}` : '');
+      const rp = W.querySelector('.rv-px'); rp.innerHTML = `$${last.toFixed(2)} <span style="color:${up ? '#35d07e' : '#ff4d6a'}">${up ? '▲' : '▼'} ${q.change} (${Math.abs(chp).toFixed(2)}%)</span>`;
+    } else if(R.err) card.querySelector('.st').textContent = "real · can't reach the quote";
+    // the little line on the card: today
+    const b1 = R.bars['1D'];
+    if(b1 && b1.length > 1){
+      const cv = card.querySelector('.sp'), dpr = Math.min(2, window.devicePixelRatio || 1), Wd = 86 * dpr, Hd = 28 * dpr;
+      if(cv.width !== Wd){ cv.width = Wd; cv.height = Hd; }
+      const x = cv.getContext('2d'); x.clearRect(0, 0, Wd, Hd);
+      const day = b1.filter(b => b.t >= b1[b1.length - 1].t - 20 * 3600000), cs = day.map(b => b.c), lo = Math.min(...cs), hi = Math.max(...cs);
+      const up = cs[cs.length - 1] >= cs[0];
+      x.strokeStyle = up ? '#35d07e' : '#ff4d6a'; x.lineWidth = 1.5 * dpr; x.beginPath();
+      cs.forEach((v, i) => { const X = i / (cs.length - 1) * (Wd - 2) + 1, Y = Hd - 2 - (v - lo) / ((hi - lo) || 1) * (Hd - 4); i ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.stroke();
+    }
+    if(TRD.realOn) trdRealDraw();
+  }
+  // the NVDA chart: candles (grouped to fit), a price scale on the right, the time along the bottom (your clock)
+  function trdRealDraw(){
+    const W = TRD.win; if(!W) return; const cv = W.querySelector('.rv-cv'), bars = TRD.real && TRD.real.bars[TRD.realR];
+    const { x, W: Wd, H: Hh, dpr } = trdCanvas(cv); x.clearRect(0, 0, Wd, Hh);
+    const note = W.querySelector('.rv-note'); note.textContent = 'Real NVIDIA data from CNBC (may be delayed) · just to look at, not tradeable';
+    if(!bars || bars.length < 2){ x.fillStyle = 'rgba(255,255,255,.5)'; x.font = `${Math.round(12 * dpr)}px Inter, sans-serif`; x.fillText(TRD.real && TRD.real.err ? "Couldn't reach the NVIDIA data right now." : 'Loading NVIDIA…', 14 * dpr, 24 * dpr); return; }
+    const pad = 8 * dpr, right = 62 * dpr, axH = 16 * dpr, top = 8 * dpr, bot = Hh - axH - 6 * dpr;
+    const n = Math.max(20, Math.floor((Wd - pad - right) / (7 * dpr))), g = Math.max(1, Math.ceil(bars.length / n));
+    const cs = []; for(let i = 0; i < bars.length; i += g){ const s = bars.slice(i, i + g); cs.push({ t: s[0].t, o: s[0].o, c: s[s.length - 1].c, h: Math.max(...s.map(b => b.h)), l: Math.min(...s.map(b => b.l)) }); }
+    let lo = Math.min(...cs.map(c => c.l)), hi = Math.max(...cs.map(c => c.h)); const m = (hi - lo) * .06 || 1; lo -= m; hi += m;
+    const cw = (Wd - pad - right) / cs.length, X = (i) => pad + cw * (i + .5), Y = (v) => top + (bot - top) * (hi - v) / (hi - lo);
+    x.font = `${Math.round(10 * dpr)}px Inter, sans-serif`; x.textBaseline = 'middle'; x.textAlign = 'left';
+    for(let k = 0; k <= 4; k++){ const v = lo + (hi - lo) * k / 4, y = Y(v); x.strokeStyle = 'rgba(255,255,255,.05)'; x.beginPath(); x.moveTo(pad, y); x.lineTo(Wd - right, y); x.stroke(); x.fillStyle = 'rgba(255,255,255,.35)'; x.fillText('$' + v.toFixed(2), Wd - right + 6 * dpr, y); }
+    cs.forEach((c, i) => { const up = c.c >= c.o, col = up ? '#35d07e' : '#ff4d6a', cx = X(i); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = Math.max(1, dpr);
+      x.beginPath(); x.moveTo(cx, Y(c.h)); x.lineTo(cx, Y(c.l)); x.stroke(); const y1 = Y(Math.max(c.o, c.c)), y2 = Y(Math.min(c.o, c.c)), bw = Math.max(1.5 * dpr, cw * .62); x.fillRect(cx - bw / 2, y1, bw, Math.max(1.2 * dpr, y2 - y1)); });
+    // the last price
+    const L = cs[cs.length - 1].c, ly = Y(L), lc = L >= cs[0].o ? '#35d07e' : '#ff4d6a';
+    x.setLineDash([2 * dpr, 3 * dpr]); x.strokeStyle = lc; x.beginPath(); x.moveTo(pad, ly); x.lineTo(Wd - right, ly); x.stroke(); x.setLineDash([]);
+    x.fillStyle = lc; x.fillRect(Wd - right + 2 * dpr, ly - 9 * dpr, right - 4 * dpr, 18 * dpr); x.fillStyle = '#071a10'; x.font = `800 ${Math.round(10.5 * dpr)}px Inter, sans-serif`; x.textAlign = 'center'; x.fillText('$' + L.toFixed(2), Wd - right / 2, ly);
+    // time row
+    const daily = TRD.realR === '1M', dayOf = (t) => new Date(t).toDateString();
+    x.fillStyle = 'rgba(255,255,255,.42)'; x.font = `${Math.round(9.5 * dpr)}px Inter, sans-serif`; x.textAlign = 'center';
+    const every = Math.max(1, Math.ceil(70 * dpr / cw)); let lastX = -1e9, lastDay = null;
+    cs.forEach((c, i) => { const d = dayOf(c.t), newDay = !daily && lastDay && d !== lastDay; if(i % every && !newDay){ lastDay = d; return; } const cx = X(i); if(cx - lastX < 52 * dpr){ lastDay = d; return; }
+      const dt = new Date(c.t), lab = daily ? dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : newDay || TRD.realR === '5D' && i === 0 ? dt.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' }) : String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+      x.fillStyle = newDay ? 'rgba(255,214,110,.75)' : 'rgba(255,255,255,.42)'; x.fillText(lab, cx, Hh - axH / 2); lastX = cx; lastDay = d; });
+  }
   function trdClose(){
-    if(!TRD.on) return; TRD.on = false; clearInterval(TRD.poll); if(TRD.fitOff) TRD.fitOff();
+    if(!TRD.on) return; TRD.on = false; clearInterval(TRD.poll); clearInterval(TRD.realT); if(TRD.fitOff) TRD.fitOff();
     trdPatch({ [`trade/on/${chatUid()}`]: null }); liveClose('trade');
     if(TRD.win){ TRD.win.remove(); TRD.win = null; }
   }
