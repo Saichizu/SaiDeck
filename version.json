@@ -1,1 +1,1 @@
-{"build":172,"version":"V18","file":"SaiDeck.html","notes":"Admin can set someone's next slots spin to hit the jackpot, and trigger a whale pump or market crash in Trading."}
+{"build":173,"version":"V18","file":"SaiDeck.html","notes":"The market keeps moving while nobody has Trading open (a tick a minute). Whoever opens it next fills in the missed ticks, and the chart sweeps forward to where the price is now."}

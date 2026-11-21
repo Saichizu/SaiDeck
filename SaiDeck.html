@@ -22875,7 +22875,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 172;                 // ← goes up by one with every published version
+  const SD_BUILD = 173;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -27018,7 +27018,7 @@
   // it left off when someone comes back. trade/r = the market, trade/h = recent prices, trade/on = who's in,
   // trade/p/<uid> = positions (c = what all your shares cost, g = what you got back — all-time). -----
   const TRD = { on: false, win: null, r: null, h: {}, p: {}, f: {}, live: {}, poll: 0, busy: false, hbAt: 0, drawKey: '', lastP: 0, noteAt: 0, woke: false };
-  const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 480, TRD_TICK = 2000;      // (a tick every 2 s; the chart keeps the last 16 min)
+  const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 480, TRD_TICK = 2000, TRD_OFF = 60000;      // (TRD_OFF: while nobody has the market open it still moves, a tick a minute — rules 33)      // (a tick every 2 s; the chart keeps the last 16 min)
   const trdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
   const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
   const trdSg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
@@ -27076,6 +27076,31 @@
     const d = (await liveGet('trade')) || {};
     TRD.r = d.r && d.r.lt ? d.r : null; TRD.x = d.x || null; TRD.h = d.h || {}; TRD.p = d.p || {}; TRD.f = d.f || {}; TRD.live = d.on || {};
   }
+  // The market kept moving while nobody had it open (a tick a minute): work out every missed tick (the same sums as the
+  // rules), write them in one go per 400 (each checked against the one before it), and sweep the chart to where it's at now.
+  async function trdCatchUp(){
+    const r0 = TRD.r, now = trdNow(); if(!r0 || now - r0.lt < TRD_OFF + 3000) return false;
+    const k0 = r0.k; let cur = { id: r0.id, S: r0.S, k: r0.k, P: r0.P, lt: r0.lt };
+    while(cur.lt + TRD_OFF <= trdNow() - 1500){
+      const body = {}; let prevKey = 'r', n = 0, last = null;
+      while(n < 400 && cur.lt + TRD_OFF <= trdNow() - 1500){
+        const nx = trdNext(cur), t = cur.lt + TRD_OFF, key = String(nx.k % TRD_WIN);
+        body[`trade/h/${key}`] = { k: nx.k, P: nx.P, t, q: cur.P, u: cur.lt, pv: prevKey };
+        prevKey = key; cur = { id: cur.id, S: cur.S, k: nx.k, P: nx.P, lt: t }; n++; last = body[`trade/h/${key}`];
+      }
+      if(!n) break;
+      body['trade/r'] = { id: cur.id, S: cur.S, k: cur.k, P: cur.P, lt: cur.lt, hi: prevKey };
+      if(!(await trdPatch(body))){ await trdLoad(); return false; }      // (someone else caught it up a moment ago)
+      for(const [path, v] of Object.entries(body)) if(path.startsWith('trade/h/')) TRD.h[path.slice(8)] = v;
+      TRD.r = Object.assign({}, cur);
+    }
+    if(TRD.r.k > k0){
+      const k1 = TRD.r.k, from = Math.max(k0, k1 - TRD_WIN + 60);
+      TRD.sweep = { k0: from, k1, t0: performance.now(), dur: Math.max(1200, Math.min(4000, 700 + (k1 - from) * 6)) };
+      return true;
+    }
+    return false;
+  }
   // keep the market moving while you're in it
   async function trdStep(){
     if(TRD.busy || !chatName()) return; TRD.busy = true;
@@ -27085,6 +27110,9 @@
       if(!TRD.r){
         await trdPatch({ 'trade/r': { id: TRD_ID, S: Math.floor(Math.random() * 999983), k: 0, P: 1000, lt: { '.sv': 'timestamp' } } });
         await trdLoad();
+      } else if(now - TRD.r.lt >= TRD_OFF + 3000){
+        const missed = Math.floor((now - TRD.r.lt) / TRD_OFF);
+        if(await trdCatchUp() && !TRD.woke){ TRD.woke = true; trdNote(`opened the market — ${TRD_SYM} moved ${missed.toLocaleString()} ticks while it was closed 📈`); }
       } else if(now >= TRD.r.lt + TRD_TICK){
         const r = TRD.r, slept = now - r.lt > 300000, n = trdNext(r);
         if(await trdPatch({ 'trade/r/k': n.k, 'trade/r/P': n.P, 'trade/r/lt': { '.sv': 'timestamp' }, [`trade/h/${n.k % TRD_WIN}`]: { k: n.k, P: n.P, t: { '.sv': 'timestamp' } } })){
@@ -27226,7 +27254,14 @@
   }
   function trdRender(){
     const W = TRD.win, r = TRD.r; if(!W || !r) return;
-    const me = chatUid(), now = trdNow(), H = trdHist(), mp = trdPos(), P = r.P;
+    const me = chatUid(), now = trdNow(), mp = trdPos();
+    let H = trdHist(), P = r.P;
+    if(TRD.sweep){
+      const sw = TRD.sweep, pr = Math.min(1, (performance.now() - sw.t0) / sw.dur), e = pr < .5 ? 2 * pr * pr : 1 - Math.pow(-2 * pr + 2, 2) / 2;
+      const kv = Math.round(sw.k0 + (sw.k1 - sw.k0) * e);
+      const Hv = H.filter(h => h.k <= kv); if(Hv.length){ H = Hv; P = Hv[Hv.length - 1].P; }
+      if(pr < 1) requestAnimationFrame(() => { if(TRD.on) trdRender(); }); else TRD.sweep = null;
+    }
     const p0 = H.length ? H[0].P : 1000, ch = (P / p0 - 1) * 100;
     // the price: flashes green / red when it moves
     const px = W.querySelector('.trd-px');
@@ -27234,7 +27269,7 @@
       px.textContent = P.toLocaleString();
       if(TRD.lastP){ px.classList.remove('fu', 'fd'); void px.offsetWidth; px.classList.add(P > TRD.lastP ? 'fu' : 'fd'); }
       // a big jump: the whale / crash banner
-      if(TRD.lastP && Math.abs(P / TRD.lastP - 1) > 0.2){ const up = P > TRD.lastP, ev = W.querySelector('.trd-ev'); ev.hidden = false; ev.className = 'trd-ev ' + (up ? 'up' : 'down'); ev.textContent = up ? '🐋 WHALE PUMP!' : '💥 MARKET CRASH!'; W.querySelector('.trd-chart').classList.remove('shake'); void W.offsetWidth; W.querySelector('.trd-chart').classList.add('shake'); try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { ev.hidden = true; }, 2400); }
+      if(TRD.lastP && !TRD.sweep && Math.abs(P / TRD.lastP - 1) > 0.2){ const up = P > TRD.lastP, ev = W.querySelector('.trd-ev'); ev.hidden = false; ev.className = 'trd-ev ' + (up ? 'up' : 'down'); ev.textContent = up ? '🐋 WHALE PUMP!' : '💥 MARKET CRASH!'; W.querySelector('.trd-chart').classList.remove('shake'); void W.offsetWidth; W.querySelector('.trd-chart').classList.add('shake'); try{ (up ? sfxTdWin : sfxTdTwist)(); }catch(e){} clearTimeout(TRD.evT); TRD.evT = setTimeout(() => { ev.hidden = true; }, 2400); }
       TRD.lastP = P;
     }
     const chEl = W.querySelector('.trd-ch'); chEl.textContent = `${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch).toFixed(1)}%`; chEl.className = 'trd-ch ' + (ch >= 0 ? 'up' : 'down');
@@ -27264,7 +27299,7 @@
       W.querySelector('.trd-tape-in').innerHTML = items + items;
     }
     // the charts: only redrawn when something changed
-    const key = r.k + '|' + tapeKey + '|' + people.map(x => x.u + x.p.sh).join() + '|' + (TRD.focus || '');
+    const key = r.k + '|' + (H.length ? H[H.length - 1].k : 0) + '|' + tapeKey + '|' + people.map(x => x.u + x.p.sh).join() + '|' + (TRD.focus || '');
     if(key !== TRD.drawKey){ TRD.drawKey = key; trdDraw(W.querySelector('.trd-cv'), H, trades, trdEntries(TRD.focus || me, byK)); trdDrawPL(W.querySelector('.trd-cv2'), H, people, byK); }
   }
   // where someone's shares were bought: each buy still in the bag, and the average (worked out oldest trade first)
@@ -27307,7 +27342,7 @@
     const cs = []; let prev = null;
     for(const h of H){ const i = Math.floor((h.k - kStart) / C); if(i < 0) continue; let c = cs[i]; if(!c){ c = cs[i] = { o: prev != null ? prev : h.P, c: h.P, hi: h.P, lo: h.P, v: 0, gap: false }; if(prev != null) { c.hi = Math.max(c.hi, prev); c.lo = Math.min(c.lo, prev); } } c.c = h.P; c.hi = Math.max(c.hi, h.P); c.lo = Math.min(c.lo, h.P); prev = h.P; }
     // naps: a long wait between two ticks
-    for(let j = 1; j < H.length; j++) if(H[j].t && H[j - 1].t && H[j].t - H[j - 1].t > 15000){ const i = Math.floor((H[j].k - kStart) / C); if(cs[i]) cs[i].gap = true; }
+    for(let j = 1; j < H.length; j++) if(H[j].t && H[j - 1].t && H[j].u == null && H[j].t - H[j - 1].t > 15000){ const i = Math.floor((H[j].k - kStart) / C); if(cs[i]) cs[i].gap = true; }
     for(const t of trades){ const i = Math.floor((t.k - kStart) / C); if(cs[i]) cs[i].v += Math.abs(t.q); }
     let lo = Infinity, hi = -Infinity, vmax = 1; for(const c of cs) if(c){ lo = Math.min(lo, c.lo); hi = Math.max(hi, c.hi); vmax = Math.max(vmax, c.v); }
     if(hi - lo < 40){ hi += 20; lo -= 20; } const m = (hi - lo) * .08; hi += m; lo -= m;
