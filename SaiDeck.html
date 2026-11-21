@@ -22893,7 +22893,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 178;                 // ← goes up by one with every published version
+  const SD_BUILD = 179;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25477,7 +25477,7 @@
     return (a === 5 || b === 5 || c === 5) ? 4 : 5;
   }
   // what a bet of b at pity tier y pays for a spin at T (-1 = the jackpot)
-  function casPayAt(b, y, T){ const k = casClass(T); if(k < 0) return -1; const m = (CAS_PAY[y | 0] || CAS_PAY[0])[k]; return Math.floor((b | 0) * m / 10); }
+  function casPayAt(b, y, T){ const k = casClass(T); if(k < 0) return -1; const m = (CAS_PAY[y | 0] || CAS_PAY[0])[k]; return Math.floor(Math.floor(Number(b) || 0) * m / 10); }      // (no `b | 0` — that wraps past 2.1 billion)
   function casPayT(T){ return casPayAt(50, 0, T); }
   // what a spin paid out (a jackpot pays whatever the pot was)
   function casWin(sp){ if(!sp || !(sp.b > 0)) return 0; const v = casPayAt(sp.b, sp.y, sp.t); return v < 0 ? (sp.jp || CAS.pot || CAS_POT0) : v; }
