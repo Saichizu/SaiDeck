@@ -1,1 +1,1 @@
-{"build":173,"version":"V18","file":"SaiDeck.html","notes":"The market keeps moving while nobody has Trading open (a tick a minute). Whoever opens it next fills in the missed ticks, and the chart sweeps forward to where the price is now."}
+{"build":174,"version":"V18","file":"SaiDeck.html","notes":"Trading chart has a time row along the bottom (clock times, and the date where the day changes); hovering a candle shows its time."}
