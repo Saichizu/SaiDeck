@@ -22893,7 +22893,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 179;                 // ← goes up by one with every published version
+  const SD_BUILD = 180;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26980,8 +26980,18 @@
       L.data = await r.json(); L.ready = true; L.at = Date.now();
       return L.data == null ? null : structuredClone(L.data);
     }
-    if(!L.ready) await new Promise(r => { L.waiters.push(r); setTimeout(r, 7000); });
-    if(!L.ready) throw new Error('no live data yet');
+    if(!L.ready) await new Promise(r => { L.waiters.push(r); setTimeout(r, L.fails ? 250 : 3500); });
+    if(!L.ready){
+      // (the live line didn't deliver — some networks, browsers or antivirus block or hold up these streams: read it with a
+      //  plain request instead, so the game still shows; the stream keeps trying in the background)
+      L.fails = (L.fails || 0) + 1;
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+      if(!r.ok) throw new Error('no data');
+      const d = await r.json(); if(!L.ready){ L.pd = d; L.pAt = Date.now(); }
+      return d == null ? null : structuredClone(d);
+    }
+    L.fails = 0;
     return L.data == null ? null : structuredClone(L.data);
   }
   const liveResp = async (path) => { try{ const d = await liveGet(path); return { ok: true, json: async () => d }; }catch(e){ return { ok: false, status: 0, json: async () => null }; } };

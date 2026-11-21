@@ -1,1 +1,1 @@
-{"build": 179, "version": "V18", "file": "SaiDeck.html", "notes": "Fixed slots getting stuck spinning forever for players with more than ~214 billion points."}
+{"build": 180, "version": "V18", "file": "SaiDeck.html", "notes": "Trading (and the other live games) no longer stay blank when your network blocks the live connection: it falls back to normal requests."}
