@@ -1,1 +1,1 @@
-{"build":175,"version":"V18","file":"SaiDeck.html","notes":"Trading shows the real NVIDIA (NVDA) price beside $CRDA, just for fun: click it for its 1D / 5D / 1Y chart. Shorter catch-up notice."}
+{"build":176,"version":"V18","file":"SaiDeck.html","notes":"Fixed the NVIDIA chart covering the $CRDA chart (blank, and Back did nothing)."}
