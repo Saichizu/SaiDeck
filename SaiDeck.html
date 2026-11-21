@@ -860,6 +860,12 @@
   .trd-logo.nv{background:linear-gradient(135deg,#76b900,#3d6300) !important;color:#fff;}
   .trd-realv{position:absolute;inset:0;background:#0b0e13;display:flex;flex-direction:column;z-index:4;}
   .trd-realv[hidden]{display:none;}
+  .trd-realv .rv-trade{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 10px 8px;border-top:1px solid rgba(255,255,255,.06);font:600 12px 'Manrope',sans-serif;}
+  .trd-realv .rv-bag{font-weight:800;} .trd-realv .rv-grp{display:flex;gap:4px;align-items:center;}
+  .trd-realv .rv-in{width:92px;padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:inherit;font:700 12px 'Manrope',sans-serif;}
+  .trd-realv .rv-b{all:unset;cursor:pointer;padding:5px 12px;border-radius:8px;font:900 12px 'Manrope',sans-serif;} .trd-realv .rv-b.buy{background:#35d07e;color:#06210f;} .trd-realv .rv-b.sell{background:#ff4d6a;color:#2a0510;}
+  .trd-realv .rv-b:disabled{opacity:.45;cursor:default;} .trd-realv .rv-c{all:unset;cursor:pointer;padding:4px 7px;border-radius:7px;background:rgba(255,255,255,.07);font:800 10.5px 'Manrope',sans-serif;}
+  .trd-realv .rv-hint{opacity:.6;font-size:11px;} .trd-realv .rv-note{bottom:auto;top:38px;left:14px;}
   .trd-realv .rv-bar{display:flex;align-items:center;gap:8px;padding:8px 10px 2px;font:600 12px 'Manrope',sans-serif;} .trd-realv .rv-bar small{opacity:.55;}
   .trd-realv .rv-px{font:800 15px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;margin-left:6px;}
   .trd-realv .rv-tabs{display:flex;gap:4px;margin-left:auto;} .trd-realv .rv-tabs button,.trd-realv .rv-x{all:unset;cursor:pointer;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.06);font:700 11px 'Manrope',sans-serif;}
@@ -22887,7 +22893,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 176;                 // ← goes up by one with every published version
+  const SD_BUILD = 177;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -27214,9 +27220,13 @@
       <div class="td-head trd-head"><b>📈 SaiDeck Exchange</b><span class="trd-live"><i></i><span>LIVE</span></span><span class="trd-who"></span><button type="button" class="td-x" aria-label="Close">✕</button></div>
       <div class="trd-tape"><div class="trd-tape-in"></div></div>
       <div class="trd-main">
-        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><button type="button" class="trd-real" title="NVIDIA — the real price (from CNBC, may be a little delayed). Just to look at, not tradeable. Click for its chart."><span class="trd-logo nv">N</span><div><b>NVDA</b><small class="st">real · loading…</small></div><span class="px">…</span><span class="ch"></span><canvas class="sp"></canvas></button><div class="trd-bag"></div></div>
+        <div class="trd-top"><div class="trd-tk"><span class="trd-logo">C</span><div><b class="trd-sym">${TRD_SYM}</b><small>${TRD_CO} · ticks every 2 s</small></div><span class="trd-px">…</span><span class="trd-ch"></span></div><button type="button" class="trd-real" title="NVIDIA — the real price (from CNBC, may be a little delayed). Click for its chart and to buy or sell it with points (1 point = $1)."><span class="trd-logo nv">N</span><div><b>NVDA</b><small class="st">real · loading…</small></div><span class="px">…</span><span class="ch"></span><canvas class="sp"></canvas></button><div class="trd-bag"></div></div>
         <div class="trd-chart"><canvas class="trd-cv"></canvas><canvas class="trd-ov"></canvas><div class="trd-tip" hidden></div><div class="trd-ev" hidden></div><div class="trd-paused" hidden>⏸ The market was asleep — waking it up…</div>
-          <div class="trd-realv" hidden><div class="rv-bar"><span class="trd-logo nv">N</span><b>NVDA</b><small>NVIDIA · real price</small><span class="rv-px"></span><span class="rv-tabs"><button type="button" data-rr="1D" class="on">1D</button><button type="button" data-rr="5D">5D</button><button type="button" data-rr="1M">1Y</button></span><button type="button" class="rv-x">← back to ${TRD_SYM}</button></div><canvas class="rv-cv"></canvas><div class="rv-note"></div></div></div>
+          <div class="trd-realv" hidden><div class="rv-bar"><span class="trd-logo nv">N</span><b>NVDA</b><small>NVIDIA · real price</small><span class="rv-px"></span><span class="rv-tabs"><button type="button" data-rr="1D" class="on">1D</button><button type="button" data-rr="5D">5D</button><button type="button" data-rr="1M">1Y</button></span><button type="button" class="rv-x">← back to ${TRD_SYM}</button></div><canvas class="rv-cv"></canvas><div class="rv-note"></div>
+            <div class="rv-trade"><span class="rv-bag">Your NVDA: …</span>
+              <span class="rv-grp"><input class="rv-in" data-nv="b" inputmode="decimal" placeholder="points" aria-label="Points to spend on NVDA"><button type="button" class="rv-b buy" data-nvb="buy">BUY</button></span>
+              <span class="rv-grp"><input class="rv-in" data-nv="s" inputmode="decimal" placeholder="shares" aria-label="NVDA shares to sell"><button type="button" class="rv-c" data-nvs="half">HALF</button><button type="button" class="rv-c" data-nvs="all">ALL</button><button type="button" class="rv-b sell" data-nvb="sell">SELL</button></span>
+              <span class="rv-hint"></span></div></div></div>
         <div class="trd-acts">
           <div class="trd-grp buy"><span class="trd-l">BUY</span><input class="trd-in" data-in="b" inputmode="decimal" placeholder="points" aria-label="Points to spend"><span class="trd-qk">${['1k', '10k', '100k', '1m'].map(a => `<button type="button" class="trd-c" data-ab="${a}">+${a.toUpperCase()}</button>`).join('')}<button type="button" class="trd-c" data-ab="max">MAX</button></span><button type="button" class="trd-b buy all" data-buy>BUY 🚀</button></div>
           <div class="trd-grp sell"><span class="trd-l">SELL</span><input class="trd-in" data-in="s" inputmode="decimal" placeholder="shares" aria-label="Shares to sell"><span class="trd-qk"><button type="button" class="trd-c" data-as="half">HALF</button><button type="button" class="trd-c" data-as="all">ALL</button></span><button type="button" class="trd-b sell all" data-sell>SELL 🧻</button></div>
@@ -27234,7 +27244,11 @@
     w.querySelector('.trd-real').addEventListener('click', () => trdRealShow(!TRD.realOn));
     w.querySelector('.rv-x').addEventListener('click', () => trdRealShow(false));
     for(const b of w.querySelectorAll('[data-rr]')) b.addEventListener('click', () => { TRD.realR = b.dataset.rr; for(const x of w.querySelectorAll('[data-rr]')) x.classList.toggle('on', x === b); trdRealTick(true); });
-    TRD.realOn = false; TRD.realR = '1D'; trdRealTick(true); TRD.realT = setInterval(() => trdRealTick(false), 30000);
+    w.querySelector('[data-nvb="buy"]').addEventListener('click', () => nvBuy(amtParse(w.querySelector('[data-nv="b"]').value)));
+    w.querySelector('[data-nvb="sell"]').addEventListener('click', () => nvSell(amtParse(w.querySelector('[data-nv="s"]').value)));
+    for(const b of w.querySelectorAll('[data-nvs]')) b.addEventListener('click', () => { const sh = (TRD.nvPos && TRD.nvPos.sh) || 0; w.querySelector('[data-nv="s"]').value = b.dataset.nvs === 'all' ? sh : Math.floor(sh / 2); nvHint(); });
+    for(const i of w.querySelectorAll('[data-nv]')) i.addEventListener('input', nvHint);
+    TRD.realOn = false; TRD.realR = '1D'; trdRealTick(true); nvLoadPos(); TRD.realT = setInterval(() => trdRealTick(false), 30000);
     // amounts: type them, or add with the quick buttons
     const inB = w.querySelector('[data-in="b"]'), inS = w.querySelector('[data-in="s"]'), prev = w.querySelector('.trd-prev');
     const showPrev = () => {
@@ -27291,6 +27305,49 @@
     }catch(e){ R.err = true; }
     trdRealRender();
   }
+  // ----- buying NVDA with points (1 point = $1). The price used is the real one your SaiDeck just got from CNBC, posted
+  // to nv/q with the trade (rules 34: anyone may post it). Positions nv/p/<uid> = {sh, c, g} like $CRDA. -----
+  const nvPrice = () => { const q = TRD.real && TRD.real.q; if(!q) return null; const ext = q.ExtendedMktQuote && parseFloat(q.ExtendedMktQuote.last); const v = ext > 0 ? ext : parseFloat(q.last); return v > 0 ? Math.round(v * 100) : null; };      // (cents)
+  async function nvLoadPos(){ try{ const d = await trdGet(`nv/p/${encodeURIComponent(chatUid())}`); TRD.nvPos = d && typeof d.sh === 'number' ? d : { sh: 0, c: 0, g: 0 }; }catch(e){ TRD.nvPos = TRD.nvPos || { sh: 0, c: 0, g: 0 }; } nvHint(); }
+  function nvHint(){
+    const W = TRD.win; if(!W) return; const P = nvPrice(), pos = TRD.nvPos || { sh: 0, c: 0, g: 0 };
+    const worth = P ? Math.floor(pos.sh * P / 100) : 0, pl = pos.g + worth - pos.c;
+    W.querySelector('.rv-bag').innerHTML = `Your NVDA: <b>${pos.sh.toLocaleString()}</b> sh · worth <b>${trdK(worth)}</b> · <b class="${pl >= 0 ? 'up' : 'down'}" style="color:${pl >= 0 ? '#35d07e' : '#ff4d6a'}">${pl >= 0 ? '+' : '−'}${trdK(Math.abs(pl))}</b>`;
+    const pts = amtParse(W.querySelector('[data-nv="b"]').value), sh = amtParse(W.querySelector('[data-nv="s"]').value), bits = [];
+    if(P && pts > 0){ const q = Math.floor(Math.min(pts, SC.loaded ? scBal() : pts) * 100 / P); bits.push(q ? `buys ${q.toLocaleString()} sh for ${Math.ceil(q * P / 100).toLocaleString()}` : `1 share costs ${Math.ceil(P / 100).toLocaleString()}`); }
+    if(P && sh > 0 && pos.sh){ const q = Math.min(sh, pos.sh); bits.push(`sells ${q.toLocaleString()} sh for ${Math.floor(q * P / 100).toLocaleString()}`); }
+    W.querySelector('.rv-hint').textContent = P ? (bits.join(' · ') || `1 point = $1 · price $${(P / 100).toFixed(2)}`) : 'waiting for the price…';
+  }
+  async function nvTrade(build){
+    if(TRD.nvBusy) return; TRD.nvBusy = true;
+    try{
+      await trdRealTick(true); const P = nvPrice(); if(!P){ toast("Can't get NVIDIA's price right now.", 2400); return; }
+      if(!SC.loaded) await scLoad();
+      const me = chatUid(), d = await trdGet(`nv/p/${encodeURIComponent(me)}`).catch(() => null), pos = d && typeof d.sh === 'number' ? d : { sh: 0, c: 0, g: 0 };
+      const sv = { '.sv': 'timestamp' }, plan = build(P, pos, me); if(!plan) return;
+      const body = Object.assign({ 'nv/q': { P, t: sv }, [`scores/${me}/t`]: sv }, plan.body);
+      if(await trdPatch(body)){ plan.done(); TRD.nvPos = plan.pos; toast(plan.msg, 2600); chatRenderArcade(); if(TRD.win) for(const i of TRD.win.querySelectorAll('[data-nv]')) i.value = ''; }
+      else { await scLoad(); toast("That didn't go through — try again.", 2400); }
+    }finally{ TRD.nvBusy = false; nvHint(); }
+  }
+  function nvBuy(pts){
+    if(!(pts > 0)){ toast('Type how many points to spend.', 2000); return; }
+    nvTrade((P, pos, me) => {
+      const q = Math.floor(Math.min(pts, scBal()) * 100 / P), cost = Math.ceil(q * P / 100);
+      if(q < 1){ toast(`1 NVDA share costs ${Math.ceil(P / 100).toLocaleString()} points.`, 2400); return null; }
+      const np = { sh: pos.sh + q, c: pos.c + cost, g: pos.g };
+      return { pos: np, body: { [`nv/p/${me}`]: np, [`scores/${me}/s`]: SC.s + cost }, done: () => { SC.s += cost; }, msg: `Bought ${q.toLocaleString()} NVDA for ${cost.toLocaleString()} points.` };
+    });
+  }
+  function nvSell(sh){
+    if(!(sh > 0)){ toast('Type how many shares to sell.', 2000); return; }
+    nvTrade((P, pos, me) => {
+      const q = Math.min(Math.floor(sh), pos.sh); if(q < 1){ toast("You don't have NVDA shares.", 2000); return null; }
+      const got = Math.floor(q * P / 100), rem = Math.min(pos.c - pos.g, SC.s), back = rem <= 0 ? 0 : Math.min(rem, got);
+      const np = { sh: pos.sh - q, c: pos.c, g: pos.g + got };
+      return { pos: np, body: { [`nv/p/${me}`]: np, [`scores/${me}/p`]: SC.p + got - back, [`scores/${me}/s`]: SC.s - back }, done: () => { SC.p += got - back; SC.s -= back; }, msg: `Sold ${q.toLocaleString()} NVDA for ${got.toLocaleString()} points.` };
+    });
+  }
   function trdRealShow(on){
     TRD.realOn = !!on; const W = TRD.win; if(!W) return;
     W.querySelector('.trd-realv').hidden = !on; W.querySelector('.trd-real').classList.toggle('on', !!on);
@@ -27320,12 +27377,13 @@
       cs.forEach((v, i) => { const X = i / (cs.length - 1) * (Wd - 2) + 1, Y = Hd - 2 - (v - lo) / ((hi - lo) || 1) * (Hd - 4); i ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.stroke();
     }
     if(TRD.realOn) trdRealDraw();
+    nvHint();
   }
   // the NVDA chart: candles (grouped to fit), a price scale on the right, the time along the bottom (your clock)
   function trdRealDraw(){
     const W = TRD.win; if(!W) return; const cv = W.querySelector('.rv-cv'), bars = TRD.real && TRD.real.bars[TRD.realR];
     const { x, W: Wd, H: Hh, dpr } = trdCanvas(cv); x.clearRect(0, 0, Wd, Hh);
-    const note = W.querySelector('.rv-note'); note.textContent = 'Real NVIDIA data from CNBC (may be delayed) · just to look at, not tradeable';
+    const note = W.querySelector('.rv-note'); note.textContent = 'Real NVIDIA data from CNBC (may be delayed) · 1 point = $1';
     if(!bars || bars.length < 2){ x.fillStyle = 'rgba(255,255,255,.5)'; x.font = `${Math.round(12 * dpr)}px Inter, sans-serif`; x.fillText(TRD.real && TRD.real.err ? "Couldn't reach the NVIDIA data right now." : 'Loading NVIDIA…', 14 * dpr, 24 * dpr); return; }
     const pad = 8 * dpr, right = 62 * dpr, axH = 16 * dpr, top = 8 * dpr, bot = Hh - axH - 6 * dpr;
     const n = Math.max(20, Math.floor((Wd - pad - right) / (7 * dpr))), g = Math.max(1, Math.ceil(bars.length / n));
