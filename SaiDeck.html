@@ -4916,6 +4916,7 @@
         <div class="rec-row" data-rec-row="videoScale" data-hl="video"><span>Picture</span><div class="seg" data-rec="videoScale"><button type="button" data-value="cover">Crop to fill</button><button type="button" data-value="contain">Show whole video</button></div></div>
         <div class="rec-row" data-rec-row="videoRatio" data-hl="video"><span>Ratio</span><div class="seg" data-rec="videoRatio"><button type="button" data-value="video" class="rec-ratio-video" hidden>Video</button><button type="button" data-value="16:9">16:9</button><button type="button" data-value="4:3">4:3</button><button type="button" data-value="1:1">1:1</button><button type="button" data-value="4:5">4:5</button><button type="button" data-value="9:16">9:16</button><button type="button" data-value="custom" title="Your own width : height — type it below, or drag the edges of the video box in the preview">Custom</button></div></div>
         <div class="rec-row rec-ratio-custom" data-rec-row="videoRatioCustom" data-hl="video" title="The box's shape: width : height (any numbers — 16 : 9, 1080 : 700…). Or drag the box's edges in the preview."><span>Custom ratio</span><span class="rec-ratio-in"><input type="number" min="1" max="10000" step="1" data-rec="videoRW"><b>:</b><input type="number" min="1" max="10000" step="1" data-rec="videoRH"></span></div>
+        <div class="rec-row" data-rec-row="videoEnd" data-hl="video" title="When the video ends before the song. Fade out: it fades to see-through, then the tracks slide into its place. Wipe away: the tracks and the panel slide up over it, wiping it off as they go."><span>When it ends</span><div class="seg" data-rec="videoEnd"><button type="button" data-value="fade">Fade out</button><button type="button" data-value="wipe">Wipe away</button></div></div>
         <div class="rec-row" data-rec-row="videoSlot" data-hl="video"><span>Position</span><select class="rec-select" data-rec="videoSlot"></select></div>
         <div class="rec-row rs" data-rec-row="videoSize" data-hl="video"><span>Size</span><input type="range" min="20" max="100" step="1" data-rec="videoSize"><span class="rec-val" data-rec-val="videoSize"></span></div>
         <div class="rec-row rs" data-rec-row="videoFeather" data-hl="video" title="Soften the edges of the video so it fades into whatever is behind it (no background band) instead of ending in a hard line. 0 = sharp edges."><span>Soft edges</span><input type="range" min="0" max="50" step="1" data-rec="videoFeather"><span class="rec-val" data-rec-val="videoFeather"></span></div>
@@ -13860,6 +13861,7 @@
     videoSpace: false,    // leave a box for a video added later in an editor
     videoRatio: '16:9',   // shape of that box
     videoFit: 'fit',
+    videoEnd: 'fade',     // a video that ends before the song: 'fade' (to see-through, then the tracks close up) / 'wipe' (the tracks slide up over it)
     videoScale: 'cover',  // 'cover' = video fills the box (edges trimmed) / 'contain' = whole video shows      // 'fit' = box of that ratio / 'fill' = box takes all the empty space left
     videoSlot: 'frameTop',// 'frameTop' / '0'..'n' (before track n; n = after the last) / 'frameBottom'
     videoSize: 100,       // box width, % of the frame width
@@ -13891,7 +13893,7 @@
   var videoDelaySec = 0;       // the video only appears this far into the song…
   var videoFadeSec = 0.8;      // …fading in over this long
   var videoLenSec = 0;         // how much of the video is used (0 = for the rest of the song)
-  var videoFadeOutSec = 0.8;   // a shortened video fades to black over this long at its end
+  var videoFadeOutSec = 0.8;   // a video that ends before the song fades out (to see-through) over this long at its end
   var pendingVideoInfo = null; // a loaded session's video that still needs adding again
   try{
     const saved = JSON.parse(localStorage.getItem('trackdeck.recSettings') || 'null');
@@ -17938,13 +17940,15 @@
     const co = Math.cos(cam.rot), si = Math.sin(cam.rot), w = V.x1 - V.x0, h = V.y1 - V.y0;
     const extW = Math.abs(co) * w + Math.abs(si) * h, extH = Math.abs(si) * w + Math.abs(co) * h;
     const sV = Math.min(geo.W / Math.max(1, extW), (bot - top) / Math.max(1, extH));
-    const s = Math.min(cam.s, Math.max(1, sV));
+    // (as an ended video's box closes up, the camera eases back to its own zoom — no jump when the box is gone)
+    const g = Math.max(0, Math.min(1, V.g || 0));
+    const s = Math.min(cam.s, Math.max(1, sV)) * (1 - g) + cam.s * g;
     // where the box's corners land on screen, then slide them inside
     const P = (x, y) => [geo.cx + s * (co * (x - cam.fx) - si * (y - cam.fy)), geo.cy + s * (si * (x - cam.fx) + co * (y - cam.fy))];
     const C = [P(V.x0, V.y0), P(V.x1, V.y0), P(V.x0, V.y1), P(V.x1, V.y1)];
     const xs = C.map(c => c[0]), ys = C.map(c => c[1]);
     const fit = (mn, mx, lo, hi) => { if(mx - mn > hi - lo) return (lo + hi) / 2 - (mn + mx) / 2; if(mn < lo) return lo - mn; if(mx > hi) return hi - mx; return 0; };
-    const dx = fit(Math.min(...xs), Math.max(...xs), 0, geo.W), dy = fit(Math.min(...ys), Math.max(...ys), top, bot);
+    const dx = fit(Math.min(...xs), Math.max(...xs), 0, geo.W) * (1 - g), dy = fit(Math.min(...ys), Math.max(...ys), top, bot) * (1 - g);
     if(s === cam.s && !dx && !dy) return cam;
     return Object.assign({}, cam, { s, fx: cam.fx - (co * dx + si * dy) / s, fy: cam.fy - (-si * dx + co * dy) / s });
   }
@@ -18110,6 +18114,16 @@
   function renderFrameDraw(ctx, dtSec){
     fxLiteFrame = smoothPreview && !(renderState && renderState.active) && renderOfflineTime == null;
     if(fxLiteFrame){ liteSavedColors = tracks.map(t => [t, t.color]); for(const t of tracks) t.color = SMOOTH_COLOR; }
+    else {
+      // a Freedit can theme the tracks' colours for this frame (G.trackColor(track, index, count, T) → '#rrggbb' or null)
+      const G = fdGen();
+      if(G && typeof G.trackColor === 'function'){
+        try{
+          const n = tracks.length, out = tracks.map((t, i) => G.trackColor(t, i, n, renderNowTime));
+          if(out.some(c => isHex6(c))){ liteSavedColors = tracks.map(t => [t, t.color]); tracks.forEach((t, i) => { if(isHex6(out[i])) t.color = out[i].toLowerCase(); }); }
+        }catch(e){ console.error(e); }
+      }
+    }
     try{ renderFrameDrawInner(ctx, dtSec); }
     finally{ restoreLiteColors(); fxLiteFrame = false; }
   }
@@ -18182,6 +18196,10 @@
         vidH = spare >= 24*u ? Math.floor(spare) : 0;
       }
     }
+    // (the video has ended before the song: once it has faded out, its box closes up and the tracks slide into its place)
+    const vidGone = (S.videoSpace && vidH > 0) ? videoGoneAt(pt) : 0;
+    const vidH0 = vidH, vidW0 = vidW;      // (its full size: a wipe keeps drawing it at that size, cut to what's left)
+    if(vidGone > 0){ vidH = vidGone >= 1 ? 0 : vidH * (1 - vidGone); }
     const vidTop = vidSlot === 'frameTop' ? vidH : 0;
     const vidBottom = vidSlot === 'frameBottom' ? vidH : 0;
     const headerY = mT + vidTop;
@@ -18194,7 +18212,7 @@
     const gap = S.gap * u;
     const n = Math.max(1, nT);
     const areaTop = topH;              // the first track sits right under the top bars
-    const gapGap = (typeof vidSlot === 'number') ? vidH + gap : 0;  // the video box plus one more gap
+    const gapGap = (typeof vidSlot === 'number') ? (vidH + gap) * (1 - vidGone) : 0;  // the video box plus one more gap (closing with it)
     const areaH = Math.max(8, contentBottom - areaTop - gap - gapGap - vidBottom);
     const fitH = (areaH - gap*(n-1)) / n;
     const fillTracks = S.fillFrame && !(S.videoSpace && S.videoFit === 'fill');
@@ -18281,7 +18299,7 @@
       // the instrumental lanes playing right now (kept in the shot)
       fitTop: vidTop ? null : topH,      // (the header + ruler stay over the top while zoomed)
       // a Freedit's camera keeps the whole video box on screen (between the bars and the bottom margin)
-      vid: (S.videoSpace && vidH > 0 && S.beatOn && S.freeditMode && S.freeditMode !== 'beat') ? { x0: (RENDER_W - vidW) / 2, y0: vidY, x1: (RENDER_W + vidW) / 2, y1: vidY + vidH } : null,
+      vid: (S.videoSpace && vidH > 0 && S.beatOn && S.freeditMode && S.freeditMode !== 'beat') ? { x0: (RENDER_W - vidW) / 2, y0: vidY, x1: (RENDER_W + vidW) / 2, y1: vidY + vidH, g: vidGone } : null,
       inst: S.fdKeepInst !== false ? rows.map((t, i) => (t && t.icon !== 'mic' && t.buffer && isTrackSounding(t, pt) && effectiveGain(t) > 0.001) ? i : -1).filter(i => i >= 0) : null };
     const M0 = ctx.getTransform();          // (the frame's own transform, before the camera: for the margin strips)
     const cam = keepSingersInView(junnyyActive() ? junnyyCamera(pt, camGeo) : jvkeActive() ? jvkeCamera(pt, camGeo) : frierenActive() ? frierenCamera(pt, camGeo) : forestActive() ? forestCamera(pt, camGeo) : todohActive() ? todohCamera(pt, camGeo) : davidActive() ? davidCamera(pt, camGeo) : khaiiActive() ? khaiiCamera(pt, camGeo) : sageActive() ? sageCamera(pt, camGeo) : saichizuActive() ? saichizuCamera(pt, camGeo) : (fdGen() && fdGen().camera) ? fdGen().camera(pt, camGeo) : beatCameraAt(pt, camGeo), camGeo, dtSec);
@@ -18666,17 +18684,22 @@
       // placeholder box so it's easy to line up.
       // (with Soft edges on, no band: the video's edges fade straight into whatever is behind it)
       const soft = projVideo && (Number(S.videoFeather) || 0) > 0;
-      if(!soft){ ctx.fillStyle = bgPaint(); ctx.fillRect(0, vidY, RENDER_W, vidH); }
+      const vo = projVideo ? videoOutAt(pt) : 0;
+      // (as the video fades out, its band fades with it: see-through, whatever is behind shows)
+      if(!soft && vo < 0.999){ ctx.save(); ctx.globalAlpha *= 1 - vo; ctx.fillStyle = bgPaint(); ctx.fillRect(0, vidY, RENDER_W, vidH); ctx.restore(); }
       if(projVideo){
-        const vo = videoOutAt(pt), va = videoAlphaAt(pt) * (1 - vo);
-        if(vo > 0.001){ ctx.save(); ctx.globalAlpha *= vo; ctx.fillStyle = '#000'; ctx.fillRect(bx, vidY, vidW, vidH); ctx.restore(); }
+        const va = videoAlphaAt(pt) * (1 - vo);
         if(va > 0.001){
           ctx.save(); ctx.globalAlpha *= va;
           let src = null, rot = 0;
           if(projVideo.isImage) src = projVideo.img;
           else if(exporting && projVideo.frameSrc && projVideo.exportFrame){ src = projVideo.exportFrame; rot = projVideo.frameSrc.rotation; }
           else { const el = exporting ? (projVideo.exporter || projVideo.preview) : projVideo.preview; if(el.readyState >= 2) src = el; }
-          if(src){ if(soft) drawVideoSoft(ctx, src, rot, bx, vidY, vidW, vidH, S); else drawVideoFramed(ctx, src, rot, bx, vidY, vidW, vidH, S); }
+          // (wiping away: still drawn at its full size where it was, cut to the part the tracks haven't covered yet)
+          const wipe = vidGone > 0 && videoWipeOn(), vy = wipe && vidSlot === 'frameBottom' ? vidY + vidH - vidH0 : vidY, vh = wipe ? vidH0 : vidH;
+          if(src && wipe){ ctx.save(); ctx.beginPath(); ctx.rect(bx - 1, vidY, vidW + 2, vidH); ctx.clip(); }
+          if(src){ if(soft) drawVideoSoft(ctx, src, rot, bx, vy, vidW, vh, S); else drawVideoFramed(ctx, src, rot, bx, vy, vidW, vh, S); }
+          if(src && wipe) ctx.restore();
           ctx.restore();
         }
       } else if(!exporting){
@@ -21111,10 +21134,30 @@
   }
   // the video time shown at song time T (it holds its first frame until it appears)
   function videoTimeAt(T){ const d = Math.max(0, T - videoDelaySec); return videoStartSec + (videoLenSec > 0 ? Math.min(d, videoLenSec) : d); }
-  // a shortened video: 0 while playing, rising to 1 as it fades to black at its end
+  // when the video ends on the song's clock (a shortened video, or one shorter than the song) — Infinity if it never does
+  function videoEndSec(){
+    if(!projVideo || projVideo.isImage) return Infinity;
+    const len = videoLenSec > 0 ? videoLenSec : Math.max(0, (Number(projVideo.dur) || 0) - videoStartSec);
+    // (everything finishes a little BEFORE its real last frame: right at the end a video can give no frame or a black
+    //  one, which showed as a black rectangle)
+    return len > 0.05 ? videoDelaySec + Math.max(0.05, len - VIDEO_END_LEAD) : Infinity;
+  }
+  const VIDEO_END_LEAD = 0.35;
+  // a video that ends before the song: 0 while playing, rising to 1 as it fades out to see-through at its end
+  const videoWipeOn = () => recSettings.videoEnd === 'wipe';
+  const VIDEO_WIPE_SEC = 0.9;
   function videoOutAt(T){
-    if(!(videoLenSec > 0)) return 0;
-    const end = videoDelaySec + videoLenSec, f = videoFadeOutSec > 0 ? Math.max(0, Math.min(1, (T - (end - videoFadeOutSec)) / videoFadeOutSec)) : (T >= end ? 1 : 0);
+    const end = videoEndSec(); if(!isFinite(end) || videoWipeOn()) return 0;
+    const fo = videoFadeOutSec > 0 ? videoFadeOutSec : 0;
+    const f = fo > 0 ? Math.max(0, Math.min(1, (T - (end - fo)) / fo)) : (T >= end ? 1 : 0);
+    return f * f * (3 - 2 * f);
+  }
+  // …then its box closes up (0 → 1) so the tracks slide in to fill its place
+  const VIDEO_CLOSE_SEC = 0.6;
+  function videoGoneAt(T){
+    const end = videoEndSec(); if(!isFinite(end)) return 0;
+    // (wipe: the tracks start moving up over it just before its last frame, and have covered it as it ends)
+    const f = videoWipeOn() ? Math.max(0, Math.min(1, (T - (end - VIDEO_WIPE_SEC)) / VIDEO_WIPE_SEC)) : Math.max(0, Math.min(1, (T - end) / VIDEO_CLOSE_SEC));
     return f * f * (3 - 2 * f);
   }
   // how visible the video is at song time T (0 before it appears, then fades in)
@@ -21754,7 +21797,7 @@
         <div class="vcrop-head">
           <div>
             <div class="confirm-title" id="vcTitle">Choose where the video starts</div>
-            <div class="vcrop-sub">The video plays for as long as your song (<b>${fmtTime(songDur)}</b>), or shorter if you like. Drag the red window along the video, drag its right edge in to cut it shorter (it fades to black at the end), then press play to check it lines up with the music.</div>
+            <div class="vcrop-sub">The video plays for as long as your song (<b>${fmtTime(songDur)}</b>), or shorter if you like. Drag the red window along the video, drag its right edge in to cut it shorter (it fades out at the end and the tracks slide into its place), then press play to check it lines up with the music.</div>
           </div>
           <button type="button" class="vcrop-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button>
         </div>
@@ -21782,9 +21825,9 @@
           <label title="How long it takes to fade in from invisible to fully visible">Fade in over <input type="number" class="rec-num vc-fade" min="0" max="10" step="0.05"> s</label>
         </div>
         <div class="vcrop-delay">
-          <label title="How much of the video to use (to the millisecond). Shorter than the song: it fades to black at the end">Use <input type="number" class="rec-num vc-len" min="0.1" step="0.001"> s of the video</label>
+          <label title="How much of the video to use (to the millisecond). Shorter than the song: it fades out at the end and the tracks slide into its place">Use <input type="number" class="rec-num vc-len" min="0.1" step="0.001"> s of the video</label>
           <button type="button" class="rec-small-btn vc-full" title="Use the video for the rest of the song">Full length</button>
-          <label title="How long it takes to fade to black at the end">Fade to black over <input type="number" class="rec-num vc-fout" min="0" max="10" step="0.05"> s</label>
+          <label title="How long it takes to fade out at the end (then the tracks slide into its place)">Fade out over <input type="number" class="rec-num vc-fout" min="0" max="10" step="0.05"> s</label>
         </div>
         <div class="vcrop-info">Start <b class="i-s"></b> · End <b class="i-e"></b> · Video length <b>${fmtTime(D)}</b></div>
         <div class="confirm-actions">
@@ -22893,7 +22936,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 180;                 // ← goes up by one with every published version
+  const SD_BUILD = 184;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;

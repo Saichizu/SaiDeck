@@ -1,1 +1,1 @@
-{"build": 180, "version": "V18", "file": "SaiDeck.html", "notes": "Trading (and the other live games) no longer stay blank when your network blocks the live connection: it falls back to normal requests."}
+{"build": 184, "version": "V18", "file": "SaiDeck.html", "notes": "The video's fade / wipe now finishes a moment before its last frame, so no black rectangle at the end."}
