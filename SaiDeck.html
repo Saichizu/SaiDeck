@@ -1679,16 +1679,17 @@
     flex-shrink:0;
   }
   .brand .mark{
-    width:22px;height:22px;border-radius:6px;
-    background:linear-gradient(135deg,#e5484d,#ff7a59);
+    width:26px;height:26px;border-radius:8px;
+    background:transparent;
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 0 0 1px rgba(255,255,255,.08) inset;
   }
   .brand .mark svg{width:13px;height:13px;}
+  .brand .mark img{width:26px;height:26px;display:block;filter:drop-shadow(0 0 6px rgba(255,90,200,.45));}
   .brand-switch{display:inline-flex;align-items:center;gap:8px;cursor:default;border-radius:8px;padding:3px 6px 3px 3px;margin-left:-3px;transition:background .12s ease;}
   .track-header.drop-replace{outline:2px dashed var(--accent, #e5484d);outline-offset:-3px;background:rgba(229,72,77,.12);}
   .track-header.drop-replace::after{content:attr(data-drop-msg);position:absolute;left:8px;right:8px;bottom:6px;text-align:center;font:700 11px Inter,sans-serif;color:#fff;background:rgba(229,72,77,.9);border-radius:6px;padding:3px 0;pointer-events:none;z-index:5;}
-  .app.quest-mode .brand .mark{background:linear-gradient(135deg,#5b7cff,#b46bff);}
+  .app.quest-mode .brand .mark{background:transparent;}
   #questHost{flex:1;min-height:0;display:none;}
   .app.quest-mode #questHost{display:block;}
   .app.quest-mode > .toolbar, .app.quest-mode > .workspace{display:none !important;}
@@ -2753,9 +2754,9 @@
      along the top, the waveform in the full bright colour, slate lanes */
   body.clips-bright{--lane-bg:#1a1d22;}
   body.clips-bright .clip, body.clips-bright .clip-seg{
-    background:color-mix(in srgb, var(--tc) 48%, #14171b 52%);
-    border-color:color-mix(in srgb, var(--tc) 45%, #000 55%);
-    border-radius:4px;
+    background:var(--tc-body, color-mix(in srgb, var(--tc) 48%, #14171b 52%));
+    border-color:var(--tc-edge, color-mix(in srgb, var(--tc) 45%, #000 55%));
+    border-radius:6px;
   }
   body.clips-bright .clip.split{background:transparent;border-color:transparent;}
   .clip-ghost{
@@ -2766,6 +2767,11 @@
     transition:background .12s ease, border-color .12s ease;
   }
   .clip-ghost:hover{background:color-mix(in srgb, var(--tc) 22%, transparent);border-color:color-mix(in srgb, var(--tc) 75%, transparent);border-style:solid;}
+  .seg-grip{display:none;position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize;pointer-events:auto;z-index:5;}
+  .seg-grip.l{left:-5px;} .seg-grip.r{right:-5px;}
+  .clip-seg.takes .seg-grip{display:block;}
+  .seg-grip::after{content:'';position:absolute;top:22%;bottom:22%;left:3px;width:4px;border-radius:2px;background:rgba(255,255,255,.0);transition:background .12s;}
+  .seg-grip:hover::after{background:rgba(255,255,255,.75);}
   .clip-seg.sel{box-shadow:0 0 0 2px #fff, 0 0 12px rgba(255,255,255,.35);}
   .clip.split .clip-label{pointer-events:auto;cursor:grab;}
   .clip.split .clip-label.seg-name{pointer-events:none;}
@@ -4304,7 +4310,6 @@
     <div class="brand">
       <span class="brand-switch" id="brandSwitch">
         <span class="mark" id="brandMark">
-          <svg viewBox="0 0 24 24"><path d="M9 3v10.55A4 4 0 1 0 11 17V7h6V3H9z"/></svg>
         </span>
         <span id="brandName">SaiDeck</span>
       </span>
@@ -4451,6 +4456,14 @@
           Bright clip
           <span class="switch">
             <input type="checkbox" id="brightClipsToggle" checked>
+            <span class="track"></span>
+            <span class="knob"></span>
+          </span>
+        </label>
+        <label class="playhead-toggle tb-item" title="Contrast tracks: richer, deeper clips with a bright waveform in the track colour, so each track stands out (like BandLab). Off: the normal clip colours. Applies to the timeline and the video.">
+          Contrast Tracks
+          <span class="switch">
+            <input type="checkbox" id="contrastClipsToggle">
             <span class="track"></span>
             <span class="knob"></span>
           </span>
@@ -4738,6 +4751,7 @@
         <div class="rec-hint">The view always follows the playhead and keeps it centred.</div>
         <div class="rec-subhead">Show on screen</div>
         <div class="rec-chips">
+          <label class="rec-row rec-toggle rec-chip" style="--chip:#c56bff" data-hl="title" title="A band above the header with the SaiDeck logo"><span>Title</span><span class="switch"><input type="checkbox" data-rec="titleOn"><span class="track"></span><span class="knob"></span></span></label>
           <label class="rec-row rec-toggle rec-chip" style="--chip:#5aa9ff" data-hl="header" title="The header at the top: the singers and the clock"><span>Header</span><span class="switch"><input type="checkbox" data-rec="showHeader"><span class="track"></span><span class="knob"></span></span></label>
           <label class="rec-row rec-toggle rec-chip" style="--chip:#35d0b8" data-hl="ruler" title="The time ruler above the tracks. On: the left icon panel starts at the ruler. Off: the left icon panel runs the full height of the frame (through the top safe margin too). Either way it runs down through the bottom margin to the frame's edge."><span>Timeline ruler</span><span class="switch"><input type="checkbox" data-rec="showRuler"><span class="track"></span><span class="knob"></span></span></label>
           <label class="rec-row rec-toggle rec-chip" style="--chip:#ffb547" data-hl="column"><span>Track icons</span><span class="switch"><input type="checkbox" data-rec="showIcons"><span class="track"></span><span class="knob"></span></span></label>
@@ -4771,8 +4785,11 @@
         <div class="rec-row rs" data-rec-row="rulerOpacity" data-hl="ruler" title="How see-through the timeline ruler is"><span>Ruler opacity</span><input type="range" min="0" max="100" step="5" data-rec="rulerOpacity"><span class="rec-val" data-rec-val="rulerOpacity"></span></div>
         <div class="rec-row rs" data-rec-row="panelOpacity" data-hl="column" title="How see-through the left panel (the track icon strip) is"><span>Left panel opacity</span><input type="range" min="0" max="100" step="5" data-rec="panelOpacity"><span class="rec-val" data-rec-val="panelOpacity"></span></div>
         <div class="rec-row rs" data-rec-row="iconSize" data-hl="icons"><span>Icon size</span><input type="range" min="12" max="140" step="2" data-rec="iconSize"><span class="rec-val" data-rec-val="iconSize"></span></div>
+        <div class="rec-row rs" data-rec-row="titleSize" data-hl="title" title="How big the Title band (the SaiDeck logo) is"><span>Title size</span><input type="range" min="40" max="250" step="5" data-rec="titleSize"><span class="rec-val" data-rec-val="titleSize"></span></div>
+        <div class="rec-row rs" data-rec-row="titleOpacity" data-hl="title" title="How see-through the SaiDeck logo is"><span>Title opacity</span><input type="range" min="0" max="100" step="5" data-rec="titleOpacity"><span class="rec-val" data-rec-val="titleOpacity"></span></div>
         <div class="rec-row rs" data-rec-row="headerScale" data-hl="header"><span>Header size</span><input type="range" min="50" max="220" step="5" data-rec="headerScale"><span class="rec-val" data-rec-val="headerScale"></span></div>
         <div class="rec-row rs" data-rec-row="nameSize" data-hl="names" title="How big the track names are in the top-left corner of each track"><span>Track name size</span><input type="range" min="50" max="300" step="5" data-rec="nameSize"><span class="rec-val" data-rec-val="nameSize"></span></div>
+        <div class="rec-row rs" data-rec-row="clipRound" data-hl="lanes" title="How rounded the corners of the tracks are (0 = square)"><span>Track corners</span><input type="range" min="0" max="40" step="1" data-rec="clipRound"><span class="rec-val" data-rec-val="clipRound"></span></div>
         <div class="rec-row bg-pick" data-rec-row="bgGrad" data-hl="bg" title="A quiet gradient behind everything — dark enough that the tracks, panel and waveforms keep their colours"><span>Background</span><div class="seg bg-grid" data-rec="bgGrad"><button type="button" data-value="" title="Plain colour (below)" style="--g:var(--plain-bg,#08080a)"><i></i><span>Plain</span></button><button type="button" data-value="midnight" title="Midnight" style="--g:linear-gradient(155deg,#070a14,#0e1428,#18203a)"><i></i><span>Midnight</span></button><button type="button" data-value="dusk" title="Dusk" style="--g:linear-gradient(160deg,#0a0912,#171126,#2a1426)"><i></i><span>Dusk</span></button><button type="button" data-value="plum" title="Plum" style="--g:linear-gradient(135deg,#0b070f,#1a0f22,#2a1233)"><i></i><span>Plum</span></button><button type="button" data-value="ocean" title="Ocean" style="--g:linear-gradient(170deg,#050c12,#0a1b26,#0e2a36)"><i></i><span>Ocean</span></button><button type="button" data-value="aurora" title="Aurora" style="--g:linear-gradient(120deg,#06110f,#0b1a22,#141430,#1d1029)"><i></i><span>Aurora</span></button><button type="button" data-value="forest" title="Forest" style="--g:linear-gradient(165deg,#060b08,#0c1a12,#14281c)"><i></i><span>Forest</span></button><button type="button" data-value="ember" title="Ember" style="--g:linear-gradient(150deg,#0b0706,#1a0f0c,#2e1510)"><i></i><span>Ember</span></button><button type="button" data-value="rose" title="Rose" style="--g:linear-gradient(145deg,#0c070a,#1b0e17,#2e1423)"><i></i><span>Rose</span></button><button type="button" data-value="graphite" title="Graphite" style="--g:linear-gradient(170deg,#08080b,#121318,#1d1f27)"><i></i><span>Graphite</span></button></div></div>
         <div class="rec-row" data-rec-row="bgColor" data-hl="bg"><span>Background colour</span><input type="color" data-rec="bg"></div>
         <label class="rec-row rec-toggle" data-hl="lanes" title="In the video only (the timeline never changes): singing tracks move up past quiet ones. Pick below which mic tracks are Main, Backup or Fixed; instruments never move."><span>Singing tracks move up</span><span class="switch"><input type="checkbox" data-rec="vocalReorder"><span class="track"></span><span class="knob"></span></span></label>
@@ -5513,12 +5530,17 @@
   // of them, an end to the latest, so no sound is ever hidden.
   var takesView = false;
   try{ takesView = localStorage.getItem('saideck.takesView') === '1'; }catch(e){}
-  let takesCache = null;
+  let takesCache = null, takesDetCache = null;
   const TAKE_STEP = 0.05, TAKE_GAP = 0.7, TAKE_MIN = 0.25, TAKE_PAD = 0.12, TAKE_ALIGN = 0.4;
   function takesPlan(){
-    const key = tracks.map(t => t.id + ':' + (t._audioVer || 0) + ':' + (t.offset || 0) + ':' + (t.buffer ? t.buffer.duration : 0) + ':' + JSON.stringify(t.segs || null) + ':' + JSON.stringify(t.takesShow || null)).join(',');
+    const key = tracks.map(t => t.id + ':' + (t._audioVer || 0) + ':' + (t.offset || 0) + ':' + (t.buffer ? t.buffer.duration : 0) + ':' + JSON.stringify(t.segs || null) + ':' + JSON.stringify(t.takesShow || null) + ':' + JSON.stringify(t.takesHide || null)).join(',');
     if(takesCache && takesCache.key === key) return takesCache;
-    const raw = new Map();
+    const dkey = tracks.map(t => t.id + ':' + (t._audioVer || 0) + ':' + (t.offset || 0) + ':' + (t.buffer ? t.buffer.duration : 0) + ':' + JSON.stringify(t.segs || null)).join(',');
+    // (finding the takes in the sound is the slow part: kept while only the user's own show / hide ranges change)
+    let raw;
+    if(takesDetCache && takesDetCache.key === dkey) raw = new Map([...takesDetCache.raw].map(([t, sp]) => [t, sp ? sp.map(x => x.slice()) : sp]));
+    else {
+    raw = new Map();
     for(const t of tracks){
       if(!t.buffer || !t.peaks){ raw.set(t, null); continue; }
       const off = t.offset || 0, end = off + trackSpan(t);
@@ -5559,6 +5581,8 @@
       sp.sort((a, b) => a[0] - b[0]);
       for(let i = 1; i < sp.length; i++) if(sp[i][0] <= sp[i - 1][1]){ sp[i - 1][1] = Math.max(sp[i - 1][1], sp[i][1]); sp.splice(i, 1); i--; }
     }
+    takesDetCache = { key: dkey, raw: new Map([...raw].map(([t, sp]) => [t, sp ? sp.map(x => x.slice()) : sp])) };
+    }
     // parts the user clicked to show again (kept in the track's own time,
     // so they move with the clip), then what's left hidden: the gaps
     const hid = new Map();
@@ -5571,6 +5595,15 @@
       }
       sp.sort((a, b) => a[0] - b[0]);
       for(let i = 1; i < sp.length; i++) if(sp[i][0] <= sp[i - 1][1] + 0.03){ sp[i - 1][1] = Math.max(sp[i - 1][1], sp[i][1]); sp.splice(i, 1); i--; }
+      // …and the bits the user dragged a take's edge in over (hidden again)
+      for(const r of (t.takesHide || [])){
+        const a = off + r[0], b = off + r[1];
+        for(let i = 0; i < sp.length; i++){
+          const [x0, x1] = sp[i]; if(b <= x0 || a >= x1) continue;
+          const keep = []; if(a - x0 > 0.02) keep.push([x0, a]); if(x1 - b > 0.02) keep.push([b, x1]);
+          sp.splice(i, 1, ...keep); i += keep.length - 1;
+        }
+      }
       const gaps = []; let x = off;
       for(const [a, b] of sp){ if(a - x > 0.05) gaps.push([x, a]); x = Math.max(x, b); }
       if(end - x > 0.05) gaps.push([x, end]);
@@ -5670,8 +5703,55 @@
     P.ghost.set(t, v);
     return v;
   }
+  // ranges [a, b] in the track's own time: add one (merging), or cut one out
+  function rangeAdd(list, a, b){
+    const out = (list || []).map(r => r.slice()).concat([[a, b]]).sort((x, y) => x[0] - y[0]), m = [];
+    for(const r of out){ const l = m[m.length - 1]; if(l && r[0] <= l[1] + 0.001) l[1] = Math.max(l[1], r[1]); else m.push(r); }
+    return m.map(r => [Math.round(r[0] * 1000) / 1000, Math.round(r[1] * 1000) / 1000]).filter(r => r[1] - r[0] > 0.005);
+  }
+  function rangeSub(list, a, b){
+    const m = [];
+    for(const [x0, x1] of (list || [])){ if(b <= x0 || a >= x1){ m.push([x0, x1]); continue; } if(a > x0) m.push([x0, a]); if(b < x1) m.push([b, x1]); }
+    return m.map(r => [Math.round(r[0] * 1000) / 1000, Math.round(r[1] * 1000) / 1000]).filter(r => r[1] - r[0] > 0.005);
+  }
+  // dragging a take's edge (timeline, "Sung parts only"): out = show more of the track there, in = hide it
+  function takeEdgeDrag(e, el, side){
+    if(e.button !== 0 || !takesView) return;
+    const t = el._t, g = el._g; if(!t || !g) return;
+    e.stopPropagation(); e.preventDefault();
+    const A = g.s + g.d, B = g.e + g.d, span = trackSpan(t), x0 = e.clientX;
+    const show0 = (t.takesShow || []).map(r => r.slice()), hide0 = (t.takesHide || []).map(r => r.slice());
+    const edge0 = side === 'l' ? A : B;
+    let raf = 0, cur = edge0;
+    const apply = () => {
+      raf = 0;
+      let sh = show0, hd = hide0;
+      const lo = Math.min(edge0, cur), hi = Math.max(edge0, cur);
+      if(hi - lo > 0.005){
+        const grow = side === 'l' ? cur < edge0 : cur > edge0;
+        if(grow){ sh = rangeAdd(sh, lo, hi); hd = rangeSub(hd, lo, hi); }
+        else { hd = rangeAdd(hd, lo, hi); sh = rangeSub(sh, lo, hi); }
+      }
+      t.takesShow = sh; t.takesHide = hd;
+      layoutClip(t);
+    };
+    const move = (ev) => {
+      const dt = (ev.clientX - x0) / pxPerSecond;
+      cur = side === 'l' ? Math.max(0, Math.min(B - 0.1, edge0 + dt)) : Math.max(A + 0.1, Math.min(span, edge0 + dt));
+      if(!raf) raf = requestAnimationFrame(apply);
+    };
+    const up = () => {
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      document.body.classList.remove('key-dragging');
+      if(raf){ cancelAnimationFrame(raf); apply(); }
+      if(typeof scheduleHistoryCheck === 'function') scheduleHistoryCheck(0);
+    };
+    document.body.classList.add('key-dragging');
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  }
   function revealTakePart(t, g){
     const a = g.s + g.d, b = g.e + g.d;          // the track's own time
+    if(t.takesHide && t.takesHide.length) t.takesHide = rangeSub(t.takesHide, a, b);
     t.takesShow = (t.takesShow || []).concat([[Math.round(a * 1000) / 1000, Math.round(b * 1000) / 1000]]);
     layoutClip(t);
     if(typeof scheduleHistoryCheck === 'function') scheduleHistoryCheck(0);
@@ -5723,6 +5803,8 @@
     while(t.segEls.length < want){
       const el = document.createElement('div');
       el.className = 'clip-seg';
+      // ("Sung parts only": drag a take's edges to make it longer / shorter — just the look, the sound isn't touched)
+      for(const side of ['l', 'r']){ const gr = document.createElement('div'); gr.className = 'seg-grip ' + side; gr.title = 'Drag to make this take longer or shorter'; gr.addEventListener('pointerdown', (e) => takeEdgeDrag(e, el, side)); el.appendChild(gr); }
       t.clipEl.insertBefore(el, t.clipEl.firstChild);
       t.segEls.push(el);
     }
@@ -5781,6 +5863,7 @@
     if(!split){ t.selSeg = null; return; }
     vs.forEach((g, i) => {
       const el = t.segEls[i];
+      el._g = g; el._t = t; el.classList.toggle('takes', !!takesView);
       el.style.left = ((g.s + g.d) * pxPerSecond) + 'px';
       el.style.width = Math.max(2, (g.e - g.s) * pxPerSecond) + 'px';
       el.classList.toggle('sel', !!t.selSeg && (t.selSeg === g || t.selSeg === g.src));
@@ -5913,6 +5996,16 @@
         t._hwPaint = null;
       }
       drawWaveformPiece(t, ctx, h, dpr, Math.max(0, xs), xe);
+      // ("Sung parts only": fade the waveform out near the take's ends)
+      if(takesView){
+        const a0 = g.s * S, a1 = g.e * S, fw = Math.min(14 * dpr, (a1 - a0) * 0.3);
+        if(fw > 1){
+          ctx.globalCompositeOperation = 'destination-out';
+          let q = ctx.createLinearGradient(a0, 0, a0 + fw, 0); q.addColorStop(0, 'rgba(0,0,0,1)'); q.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = q; ctx.fillRect(a0, 0, fw, h);
+          q = ctx.createLinearGradient(a1 - fw, 0, a1, 0); q.addColorStop(0, 'rgba(0,0,0,0)'); q.addColorStop(1, 'rgba(0,0,0,1)'); ctx.fillStyle = q; ctx.fillRect(a1 - fw, 0, fw, h);
+          ctx.globalCompositeOperation = 'source-over';
+        }
+      }
       ctx.restore();
     }
     ctx.restore();
@@ -6355,9 +6448,18 @@
   var waveMirror = true;
   try{ waveMirror = localStorage.getItem('saideck.waveMirror') !== '0'; }catch(e){}
   document.body.classList.toggle('clips-bright', brightClips);
+  // Contrast Tracks (View): the BandLab-style bandColors() look; off = the normal clip colours
+  var contrastClips = false;
+  try{ contrastClips = localStorage.getItem('saideck.contrastClips') === '1'; }catch(e){}
   function waveInkOf(col){
     if(!brightClips || typeof col !== 'string' || !/^#[0-9a-f]{6}$/i.test(col)) return col;
-    return mixHex(col, '#ffffff', 0.1);
+    return contrastClips ? bandColors(col).ink : mixHex(col, '#ffffff', 0.1);
+  }
+  // the timeline clip takes the same BandLab-style colours as the render (body + edge; the waveform via waveInkOf)
+  function clipTone(el, col){
+    if(!el) return;
+    if(contrastClips && typeof col === 'string' && /^#[0-9a-f]{6}$/i.test(col)){ const c = bandColors(col); el.style.setProperty('--tc-body', c.body); el.style.setProperty('--tc-edge', c.edge); }
+    else { el.style.removeProperty('--tc-body'); el.style.removeProperty('--tc-edge'); }
   }
   function redrawAllWaveforms(){
     for(const t of tracks) drawWaveform(t, t.clipEl.clientWidth);
@@ -9396,6 +9498,7 @@
       segs: (isSplit(t) || segPartial(t)) ? t.segs.map(g => ({ s: g.s, e: g.e, d: g.d })) : undefined,
       cuts: (t.cuts && t.cuts.length) ? t.cuts.map(c => ({ s: c.s, e: c.e, d: c.d })) : undefined,
       takesShow: (t.takesShow && t.takesShow.length) ? t.takesShow.map(r => r.slice()) : undefined,
+      takesHide: (t.takesHide && t.takesHide.length) ? t.takesHide.map(r => r.slice()) : undefined,
       harmMarks: (t.harmMarks && t.harmMarks.length) ? t.harmMarks.map(m => ({ on: m.on, off: m.off })) : undefined,
       quest: (t.qLook || t.qHome || (t.qWaypoints && t.qWaypoints.length)) ? { look: t.qLook || null, home: t.qHome || null, waypoints: t.qWaypoints || [] } : undefined,
       linkIdx: isLinkedChild(t) ? tracks.indexOf(linkRoot(t)) : undefined,
@@ -9422,6 +9525,7 @@
       offset: typeof tdata.offset === 'number' && isFinite(tdata.offset) ? tdata.offset : 0,
       segs: Array.isArray(tdata.segs) ? tdata.segs : null,
       takesShow: Array.isArray(tdata.takesShow) ? tdata.takesShow : null,
+      takesHide: Array.isArray(tdata.takesHide) ? tdata.takesHide : null,
       cuts: Array.isArray(tdata.cuts) ? tdata.cuts : null,
       harmMarks: Array.isArray(tdata.harmMarks) ? tdata.harmMarks : null,
       ownPower: !!tdata.ownPower, trailPow: tdata.trailPow, resPow: tdata.resPow,
@@ -9505,6 +9609,7 @@
       segs: cleanSegs(opts.segs, buffer.duration),
       cuts: Array.isArray(opts.cuts) ? (opts.cuts.filter(c => c && isFinite(c.s) && isFinite(c.e) && isFinite(c.d) && c.e - c.s > 0.02).map(c => ({ s: Math.max(0, c.s), e: Math.min(buffer.duration, c.e), d: c.d })).filter(c => c.e - c.s > 0.02)) : null,
       takesShow: Array.isArray(opts.takesShow) ? opts.takesShow.filter(r => Array.isArray(r) && isFinite(r[0]) && isFinite(r[1]) && r[1] > r[0]).map(r => [r[0], r[1]]) : [],
+      takesHide: Array.isArray(opts.takesHide) ? opts.takesHide.filter(r => Array.isArray(r) && isFinite(r[0]) && isFinite(r[1]) && r[1] > r[0]).map(r => [r[0], r[1]]) : [],
       ownPower: !!opts.ownPower,
       trailPow: typeof opts.trailPow === 'number' ? opts.trailPow : 1,
       resPow: typeof opts.resPow === 'number' ? opts.resPow : 1,
@@ -9637,7 +9742,7 @@
     lane.style.height = 'var(--lane-h)';
     const clip = document.createElement('div');
     clip.className = 'clip';
-    clip.style.setProperty('--tc', t.color);
+    clip.style.setProperty('--tc', t.color); clipTone(clip, t.color);
     const label = document.createElement('div');
     label.className = 'clip-label';
     label.textContent = t.name;
@@ -10446,7 +10551,7 @@
     if(t.color === color) return;
     t.color = color;
     t.headerEl.style.setProperty('--tc', color);
-    t.clipEl.style.setProperty('--tc', color);
+    t.clipEl.style.setProperty('--tc', color); clipTone(t.clipEl, color);
     t.iconBtn.style.setProperty('--tc', color);
     drawWaveform(t, t.clipEl.clientWidth);
   }
@@ -10493,7 +10598,7 @@
       if(t.color !== color){
         t.color = color;
         t.headerEl.style.setProperty('--tc', color);
-        t.clipEl.style.setProperty('--tc', color);
+        t.clipEl.style.setProperty('--tc', color); clipTone(t.clipEl, color);
         t.iconBtn.style.setProperty('--tc', color);
         drawWaveform(t, t.clipEl.clientWidth);
       }
@@ -12882,6 +12987,7 @@
         offset: t.offset || 0,
         segs: segsOf(t).map(g => ({ s: g.s, e: g.e, d: g.d })),
         takesShow: (t.takesShow || []).map(r => r.slice()),
+        takesHide: (t.takesHide || []).map(r => r.slice()),
         cuts: (t.cuts || []).map(c => ({ s: c.s, e: c.e, d: c.d })),
         harmMarks: (t.harmMarks || []).map(m => ({ on: m.on, off: m.off })),
         linkTo: t.linkTo == null ? null : t.linkTo,
@@ -12897,7 +13003,7 @@
     // short id (so a big image isn't re-serialised on every check).
     snap.sig = JSON.stringify({
       tracks: snap.tracks.map(x => [x.ref.id, x.name, x.color, x.icon, x.volume, x.muted, x.solo, x.trailEffect,
-        historyAvatarId(x.avatarDataUrl), x.avatarShape, x.offset, x.segs, x.takesShow, x.cuts, x.harmMarks, x.power, x.keys, x.linkTo]),
+        historyAvatarId(x.avatarDataUrl), x.avatarShape, x.offset, x.segs, x.takesShow, x.takesHide, x.cuts, x.harmMarks, x.power, x.keys, x.linkTo]),
       trailEffect: snap.trailEffect, markIn: snap.markIn, markOut: snap.markOut,
       sessionName: snap.sessionName, rec: snap.rec, lyrics: snap.lyrics.map(x => [x.text, x.lines, x.cuts, x.looks])
     });
@@ -13001,6 +13107,7 @@
     t.offset = x.offset;
     if(x.segs) t.segs = x.segs.map(g => Object.assign({}, g));
     if(x.takesShow) t.takesShow = x.takesShow.map(r => r.slice());
+    t.takesHide = (x.takesHide || []).map(r => r.slice());
     t.cuts = x.cuts && x.cuts.length ? x.cuts.map(c => Object.assign({}, c)) : null;
     if(x.harmMarks) t.harmMarks = x.harmMarks.map(m => Object.assign({}, m));
     if(x.power){ t.ownPower = x.power[0]; t.trailPow = x.power[1]; t.resPow = x.power[2]; syncTrackPowerUI(t); }
@@ -13256,6 +13363,13 @@
     brightClips = e.target.checked;
     try{ localStorage.setItem('saideck.brightClips', brightClips ? '1' : '0'); }catch(err){}
     document.body.classList.toggle('clips-bright', brightClips);
+    redrawAllWaveforms();
+  });
+  $('contrastClipsToggle').checked = contrastClips;
+  $('contrastClipsToggle').addEventListener('change', (e) => {
+    contrastClips = e.target.checked;
+    try{ localStorage.setItem('saideck.contrastClips', contrastClips ? '1' : '0'); }catch(err){}
+    for(const t of tracks) clipTone(t.clipEl, t.color);
     redrawAllWaveforms();
   });
   $('returnToggle').checked = returnOnPause;
@@ -13742,6 +13856,9 @@
     bg: '#08080a',
     bgGrad: '',           // a gradient template instead of the plain colour ('' = plain)
     showHeader: true,
+    titleOn: false,       // Title band above the header: the SaiDeck logo
+    titleSize: 100,       // %
+    titleOpacity: 100,    // %
     clock: 'relative',    // 'relative' (counts from 0:00) or 'song' (song timestamps)
     showIcons: true,
     iconBox: false,       // the tinted rounded box behind each icon (fixed off)
@@ -13756,6 +13873,7 @@
     iconSize: 44,         // icon box size (px at 1080p)
     headerScale: 100,     // header size, %
     nameSize: 100,        // track name tab size, %
+    clipRound: 8,         // track (clip) corner roundness, px at 1080 wide
     lyricsOn: true,         // kinetic lyrics on the video (once lyrics are timed)
     lyricStyle: 'pop',      // 'pop' = a line at a time, words pop in / 'big' = one big word at a time
     lyricFont: 'Poppins',
@@ -14186,6 +14304,110 @@
   // Header: a row of small singer pictures (the track images, in track
   // order; tracks without an image are left out) that light up while that
   // track is sounding, and the clock on the right.
+  // ---------- SaiDeck logo (Title band in the render) ----------
+  const SD_EMBLEM_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+ <defs>
+  <linearGradient id="sdRim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd23a"/><stop offset=".45" stop-color="#ff3df2"/><stop offset="1" stop-color="#25e8ff"/></linearGradient>
+  <radialGradient id="sdCore" cx=".3" cy=".25" r=".95"><stop offset="0" stop-color="#3a1660"/><stop offset=".55" stop-color="#150930"/><stop offset="1" stop-color="#06030f"/></radialGradient>
+  <linearGradient id="sdTop" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#fff27a"/><stop offset=".55" stop-color="#ffb23a"/><stop offset="1" stop-color="#ff5ad8"/></linearGradient>
+  <linearGradient id="sdFront" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffcf3a"/><stop offset=".5" stop-color="#ff4fbe"/><stop offset="1" stop-color="#7a5cff"/></linearGradient>
+  <linearGradient id="sdSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3cf2ff"/><stop offset="1" stop-color="#6a4cff"/></linearGradient>
+  <radialGradient id="sdHole" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#2a0c40"/><stop offset="1" stop-color="#5a1a6e"/></radialGradient>
+  <filter id="sdGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="sdTile"><rect x="5" y="5" width="90" height="90" rx="26"/></clipPath>
+  <g id="sdSil"><path d="M23 50 L68 26 L78 41 L78 75 L23 79 Z"/></g>
+  <g id="sdCheese">
+   <path d="M23 50 L68 26 L78 41 Z" fill="url(#sdTop)"/>
+   <path d="M23 50 L78 41 L78 75 L23 79 Z" fill="url(#sdFront)"/>
+   
+   <ellipse cx="35" cy="63" rx="6" ry="5" fill="url(#sdHole)"/>
+   <ellipse cx="55" cy="55" rx="4.2" ry="3.6" fill="url(#sdHole)"/>
+   <ellipse cx="67" cy="66" rx="5" ry="4.4" fill="url(#sdHole)"/>
+   <ellipse cx="47" cy="72" rx="3" ry="2.4" fill="url(#sdHole)"/>
+   <ellipse cx="55" cy="39" rx="4" ry="2.2" fill="url(#sdHole)"/>
+   <ellipse cx="68" cy="35" rx="2.4" ry="1.4" fill="url(#sdHole)"/>
+   <path d="M23 50 L78 41" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" fill="none"/>
+   <path d="M23 50 L68 26 L78 41" stroke="#fff" stroke-opacity=".45" stroke-width="1.2" fill="none"/>
+  </g>
+  <mask id="sdCut"><rect x="0" y="0" width="100" height="100" fill="#fff"/><rect x="0" y="47" width="100" height="5" fill="#000"/><rect x="0" y="62" width="100" height="3" fill="#000"/></mask>
+  <clipPath id="sdB1"><rect x="0" y="47" width="100" height="5"/></clipPath>
+  <clipPath id="sdB2"><rect x="0" y="62" width="100" height="3"/></clipPath>
+ </defs>
+ <rect x="5" y="5" width="90" height="90" rx="26" fill="url(#sdCore)"/>
+ <g clip-path="url(#sdTile)">
+  <g fill="none" stroke="#ff9be8" stroke-opacity=".08"><circle cx="50" cy="56" r="40" stroke-width="1.2"/><circle cx="50" cy="56" r="31"/><circle cx="50" cy="56" r="22"/></g>
+  <g>
+  <use href="#sdSil" fill="#25e8ff" opacity=".75" transform="translate(-3.4 1.2)"/>
+  <use href="#sdSil" fill="#ff2bd6" opacity=".75" transform="translate(3.4 -1)"/>
+  <g mask="url(#sdCut)" filter="url(#sdGlow)"><use href="#sdCheese"/></g>
+  <g clip-path="url(#sdB1)"><use href="#sdCheese" transform="translate(5 0)"/></g>
+  <g clip-path="url(#sdB2)"><use href="#sdCheese" transform="translate(-4 0)"/></g>
+  <rect x="58" y="48" width="13" height="1.2" fill="#3cf2ff" opacity=".9"/>
+  <rect x="27" y="63" width="8" height="1" fill="#fff27a" opacity=".9"/>
+  </g>
+ </g>
+ <rect x="5" y="5" width="90" height="45" rx="26" fill="#fff" opacity=".05"/>
+ <rect x="5" y="5" width="90" height="90" rx="26" fill="none" stroke="url(#sdRim)" stroke-width="3.5"/>
+ <path d="M79 13 l2.3 6 6 2.3 -6 2.3 -2.3 6 -2.3 -6 -6 -2.3 6 -2.3z" fill="#fff" filter="url(#sdGlow)"/>
+</svg>`;
+  let _sdEmblem = null, _sdEmblemC = new Map();
+  function sdEmblemImg(){
+    if(!_sdEmblem){ _sdEmblem = new Image(); _sdEmblem.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SD_EMBLEM_SVG); }
+    return _sdEmblem.complete && _sdEmblem.naturalWidth ? _sdEmblem : null;
+  }
+  // the emblem rasterised once per size (crisp, and no SVG decode every frame)
+  function sdEmblemAt(px){
+    const im = sdEmblemImg(); if(!im) return null;
+    const k = Math.max(16, Math.ceil(px / 16) * 16);
+    let c = _sdEmblemC.get(k); if(c) return c;
+    c = document.createElement('canvas'); c.width = c.height = k; c.getContext('2d').drawImage(im, 0, 0, k, k);
+    if(_sdEmblemC.size > 8) _sdEmblemC.clear(); _sdEmblemC.set(k, c);
+    return c;
+  }
+  // The logo, centred on (cx, cy), h tall: emblem + "SaiDeck" wordmark (neon, chromatic edges)
+  function drawSaiDeckLogo(ctx, cx, cy, h, T){
+    const eh = h, fs = h * 0.62, gap = h * 0.22;
+    ctx.save();
+    ctx.font = `800 ${fs}px Manrope, Inter, sans-serif`;
+    const wSai = ctx.measureText('Sai').width, wDeck = ctx.measureText('Deck').width, tw = wSai + wDeck;
+    const total = eh + gap + tw, x0 = cx - total / 2, tx = x0 + eh + gap, by = cy + fs * 0.34;
+    // emblem (a gentle float)
+    const em = sdEmblemAt(eh * 1.5);
+    const bob = Math.sin(T * 1.6) * h * 0.025;
+    if(em){
+      ctx.save(); ctx.globalAlpha *= 0.55; ctx.shadowColor = 'rgba(255,90,200,.9)'; ctx.shadowBlur = h * 0.35;
+      ctx.drawImage(em, x0, cy - eh / 2 + bob, eh, eh); ctx.restore();
+      ctx.drawImage(em, x0, cy - eh / 2 + bob, eh, eh);
+    }
+    // wordmark: a slight forward lean
+    ctx.translate(tx, by); ctx.transform(1, 0, -0.14, 1, 0, 0);
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    const off = Math.max(1, h * 0.03);
+    ctx.globalAlpha *= 1;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = 'rgba(37,232,255,.55)'; ctx.fillText('SaiDeck', -off, 0);
+    ctx.fillStyle = 'rgba(255,61,242,.55)'; ctx.fillText('SaiDeck', off, 0);
+    ctx.restore();
+    // glow behind
+    ctx.save(); ctx.shadowColor = 'rgba(255,170,60,.8)'; ctx.shadowBlur = h * 0.28; ctx.fillStyle = '#fff'; ctx.fillText('Sai', 0, 0); ctx.restore();
+    ctx.fillStyle = '#ffffff'; ctx.fillText('Sai', 0, 0);
+    const g = ctx.createLinearGradient(wSai, -fs, wSai + wDeck, 0);
+    g.addColorStop(0, '#ffd23a'); g.addColorStop(0.5, '#ff4fbe'); g.addColorStop(1, '#3cf2ff');
+    ctx.save(); ctx.shadowColor = 'rgba(120,180,255,.8)'; ctx.shadowBlur = h * 0.28; ctx.fillStyle = g; ctx.fillText('Deck', wSai, 0); ctx.restore();
+    // a little waveform underline under "Deck"
+    ctx.beginPath(); const uy = fs * 0.16, n = 22;
+    for(let i = 0; i <= n; i++){ const x = wSai + wDeck * i / n, a = Math.sin(i * 1.7 + T * 6) * Math.sin(Math.PI * i / n) * fs * 0.07; i ? ctx.lineTo(x, uy + a) : ctx.moveTo(x, uy + a); }
+    ctx.strokeStyle = g; ctx.lineWidth = Math.max(1, fs * 0.045); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.restore();
+  }
+  // the toolbar's logo and the tab icon: the SaiDeck emblem
+  try{
+    const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SD_EMBLEM_SVG);
+    const bm = document.getElementById('brandMark'); if(bm){ const im = new Image(); im.src = src; im.alt = 'SaiDeck'; bm.appendChild(im); }
+    let li = document.querySelector('link[rel="icon"]'); if(!li){ li = document.createElement('link'); li.rel = 'icon'; document.head.appendChild(li); }
+    li.type = 'image/svg+xml'; li.href = src;
+    sdEmblemImg();
+  }catch(e){}
   function drawRenderHeader(ctx, y0, h, u, hs, pt, rs){
     const S = recSettings;
     ctx.save();
@@ -17123,14 +17345,34 @@
     try{ return drawRenderClip0(ctx, t, clipX, clipY, clipW, clipH, u, k, playheadX, now, tStart, spp, piece); }
     finally { ctx.restore(); rClipBaseAlpha = keep; }
   }
+  // BandLab-style clip colours from a track colour: a deep, saturated body and a bright, saturated waveform
+  // (pale / pastel track colours come out vivid; greys stay grey)
+  var _bandCols = null;
+  function bandColors(hex){
+    if(!_bandCols) _bandCols = new Map();
+    let c = _bandCols.get(hex); if(c) return c;
+    const [r, g, b] = hexToRgb(hex).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    let h = 0; if(d > 1e-6){ h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; }
+    const l = (mx + mn) / 2, sat = d < 1e-6 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    // (follows the picked colour: lighter picks give lighter clips, softer picks stay softer — just richer than the raw
+    //  colour, so they read like BandLab's. Greys stay grey.)
+    const grey = sat < 0.1, S = sat * 100, L = l * 100;
+    const lift = grey ? 0 : Math.max(0, 1 - Math.abs(h - 255) / 55) * 8;      // (blues and purples read darker: a little lighter)
+    const sB = grey ? S : Math.min(92, S * 0.55 + 40), sI = grey ? S : Math.min(100, S * 0.45 + 55);
+    const lB = 14 + L * 0.3 + lift * 0.4, lI = Math.min(88, 34 + L * 0.48 + lift);
+    c = { body: hslToHex(h, sB, lB), ink: hslToHex(h, sI, grey ? Math.min(92, 40 + L * 0.5) : lI), edge: hslToHex(h, sB, Math.max(6, lB - 12)) };
+    if(_bandCols.size > 200) _bandCols.clear(); _bandCols.set(hex, c);
+    return c;
+  }
+  const CLIP_RADIUS = 8;     // (× u) clip corners
   function drawRenderClip0(ctx, t, clipX, clipY, clipW, clipH, u, k, playheadX, now, tStart, spp, piece){
     const buckets = t.peaks.buckets;
     const tDur = Math.max(0.001, t.buffer.duration);
-    const radius = 5*u;
+    const cr = Number(recSettings.clipRound); const radius = Math.max(0, Math.min((isFinite(cr) ? cr : CLIP_RADIUS) * u, clipH / 2, clipW / 2));
     ctx.save();
     roundRectPath(ctx, clipX, clipY, clipW, clipH, radius);
-    const bandLab = brightClips && isHex6(t.color);
-    const clipFill = bandLab ? mixHex(rT.dark ? '#14171b' : rT.lane, t.color, 0.48) : rT.clipFill(t.color, rT.dark ? 0.2 : 0.24);
+    const bandLab = brightClips && isHex6(t.color), BC = bandLab && contrastClips ? bandColors(t.color) : null;
+    const clipFill = BC ? BC.body : bandLab ? mixHex(rT.dark ? '#14171b' : rT.lane, t.color, 0.48) : rT.clipFill(t.color, rT.dark ? 0.2 : 0.24);
     ctx.fillStyle = clipFill;
     const bare = FR.bare || 0, fa = (1 - 0.6 * (FR.glass || 0)) * (1 - bare);   // (Frieren: glassy, the land behind; bare in a fight)
     if(fa < 0.999){ if(fa > 0.001){ ctx.save(); ctx.globalAlpha *= fa; ctx.fill(); ctx.restore(); } }
@@ -17138,7 +17380,7 @@
     ctx.clip();
     // the waveform keeps the track colour unless it would vanish into the clip
     // (bright clips: a darker shade of it, like the timeline)
-    t._waveInk = bandLab ? mixHex(t.color, '#ffffff', 0.1)
+    t._waveInk = BC ? BC.ink : bandLab ? mixHex(t.color, '#ffffff', 0.1)
       : rT.dark ? null : inkOn(t.color, clipFill.charAt(0) === '#' ? clipFill : rT.lane, 1.9);
 
     // Waveform (live dispMaxs/dispMins, so aftermath scarring shows too).
@@ -17175,6 +17417,15 @@
     ctx.save(); waveOpacityIn(ctx);
     drawWaveTiles(ctx, t, clipX, clipY, clipW, clipH, u, tStart, spp);
     ctx.restore();
+    // "Sung parts only": the waveform fades out into the clip near each take's ends, instead of a hard cut
+    if(piece && takesView && typeof clipFill === 'string' && clipFill.charAt(0) === '#' && fa >= 0.999){
+      const xs = clipX + (piece.s - tStart) / spp, xe = clipX + (piece.e - tStart) / spp, fw = Math.min(26 * u, (xe - xs) * 0.3);
+      if(fw > 1){
+        const [fr, fg, fb] = hexToRgb(clipFill), on = `rgba(${fr},${fg},${fb},1)`, off = `rgba(${fr},${fg},${fb},0)`;
+        if(xs + fw > clipX){ const g = ctx.createLinearGradient(xs, 0, xs + fw, 0); g.addColorStop(0, on); g.addColorStop(1, off); ctx.fillStyle = g; ctx.fillRect(xs, clipY, fw, clipH); }
+        if(xe - fw < clipX + clipW){ const g = ctx.createLinearGradient(xe - fw, 0, xe, 0); g.addColorStop(0, off); g.addColorStop(1, on); ctx.fillStyle = g; ctx.fillRect(xe - fw, clipY, fw, clipH); }
+      }
+    }
     let _pts = null;
     const wavePts = () => {
       if(_pts) return _pts;
@@ -17337,20 +17588,26 @@
       }
       ctx.fillStyle = mixOverBlack(t.color, 0.75);
       ctx.save(); ctx.globalAlpha *= 1 - 0.85 * bare;
+      // (very round track corners: the tab moves in off the curve and becomes a little pill, so the name isn't cut off)
+      const tr = Math.min(radius, lh * 0.45), ins = radius > lh * 0.6 ? radius * 0.3 : 0, ty = clipY + ins;
+      lx += ins;
       ctx.beginPath();
-      ctx.moveTo(lx, clipY);
-      ctx.lineTo(lx + lw, clipY);
-      ctx.lineTo(lx + lw, clipY + lh - radius);
-      ctx.arcTo(lx + lw, clipY + lh, lx + lw - radius, clipY + lh, radius);
-      ctx.lineTo(lx, clipY + lh);
-      ctx.closePath();
+      if(ins > 0) roundRectPath(ctx, lx, ty, lw, lh, Math.min(lh / 2, tr * 2));
+      else {
+        ctx.moveTo(lx, ty);
+        ctx.lineTo(lx + lw, ty);
+        ctx.lineTo(lx + lw, ty + lh - tr);
+        ctx.arcTo(lx + lw, ty + lh, lx + lw - tr, ty + lh, tr);
+        ctx.lineTo(lx, ty + lh);
+        ctx.closePath();
+      }
       ctx.fill();
       ctx.restore();
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(t.name, lx + padX, clipY + lh/2 + 0.5*u, tw);
-      hlAdd('names', lx, clipY, lw, lh);
+      ctx.fillText(t.name, lx + padX, ty + lh/2 + 0.5*u, tw);
+      hlAdd('names', lx, ty, lw, lh);
     }
     ctx.restore();
 
@@ -17360,7 +17617,7 @@
     ctx.globalAlpha *= 1 - bare;
     roundRectPath(ctx, clipX + 0.5*u, clipY + 0.5*u, clipW - u, clipH - u, radius);
     ctx.lineWidth = Math.max(1, u);
-    ctx.strokeStyle = brightClips && isHex6(t.color) ? mixHex('#000000', t.color, 0.45) : rT.dark ? mixOverBlack(t.color, 0.55) : rT.clipFill(t._waveInk || t.color, 0.6);
+    ctx.strokeStyle = brightClips && isHex6(t.color) ? (contrastClips ? bandColors(t.color).edge : mixHex('#000000', t.color, 0.45)) : rT.dark ? mixOverBlack(t.color, 0.55) : rT.clipFill(t._waveInk || t.color, 0.6);
     ctx.stroke();
     ctx.restore();
   }
@@ -18152,6 +18409,8 @@
     const rulerH = S.showRuler ? 34 * u : 0;
     const hs = Math.max(0.3, (S.headerScale || 100) / 100);
     const headerH = S.showHeader ? 74 * u * hs : 0;
+    // Title band above the header (the SaiDeck logo)
+    const titleH = S.titleOn ? 120 * u * Math.max(0.4, Math.min(2.5, (Number(S.titleSize) || 100) / 100)) : 0;
     // Video space: a box of the chosen ratio at the top / bottom of the
     // frame or in a gap between two tracks. Width = videoSize % of the
     // frame, never taller than 85% of it.
@@ -18181,14 +18440,14 @@
         // (tracks that can shrink to fit squeeze first; with "Tracks can go off the frame" they keep their height)
         const offOK = !S.fillFrame && S.vocalOverflow;
         const g0 = S.gap * u, laneMin = offOK ? Math.max(6 * u, S.trackHeight * u) : 6 * u;
-        const fullTop = mT + headerH + rulerH;
+        const fullTop = mT + titleH + headerH + rulerH;
         const room = contentBottom - fullTop - g0 - vidSlot * (laneMin + g0);
         if(vidH > room){ vidH = Math.max(Math.round(24 * u), Math.floor(room)); vidW = Math.round(vidH * rw / rh); }
       }
       if(S.videoFit === 'fill'){
         // Fill: tracks keep their own height; the box takes whatever is left.
         const g0 = S.gap * u, n0 = Math.max(1, nT);
-        const baseTop = mT + (S.showHeader ? 74 * u * Math.max(0.3, (S.headerScale || 100) / 100) : 0) + (S.showRuler ? 34 * u : 0);
+        const baseTop = mT + titleH + (S.showHeader ? 74 * u * Math.max(0.3, (S.headerScale || 100) / 100) : 0) + (S.showRuler ? 34 * u : 0);
         const area0 = Math.max(8, contentBottom - baseTop - g0);
         const lane0 = Math.max(6*u, Math.min(S.trackHeight * u, (area0 - g0*(n0-1)) / n0));
         const spare = area0 - (n0*lane0 + (n0-1)*g0) - (typeof vidSlot === 'number' ? g0 : 0);
@@ -18202,9 +18461,10 @@
     if(vidGone > 0){ vidH = vidGone >= 1 ? 0 : vidH * (1 - vidGone); }
     const vidTop = vidSlot === 'frameTop' ? vidH : 0;
     const vidBottom = vidSlot === 'frameBottom' ? vidH : 0;
-    const headerY = mT + vidTop;
+    const titleY = mT + vidTop;
+    const headerY = mT + vidTop + titleH;
     const rulerY = headerY + headerH;   // the ruler always sits right under the header
-    const topH = mT + vidTop + headerH + rulerH;
+    const topH = mT + vidTop + titleH + headerH + rulerH;
 
     // Tracks: S.trackHeight tall, S.gap apart, placed at the top / middle /
     // bottom of the space under the header. If they don't all fit (or "fill
@@ -18359,6 +18619,8 @@
     const mBpaint = overflowOK ? 0 : mB;
     if(fdMarg) fdMarginGrab(ctx, M0, mT, contentBottom, mBpaint);
     if(S.showHeader && !topStick){ drawRenderHeader(ctx, headerY, headerH, u, hs, pt, rs); hlAdd('header', 0, headerY, RENDER_W, headerH); }
+    const drawTitle = () => { if(titleH > 0){ const ta = rOpac('titleOpacity'); if(ta > 0.001){ ctx.save(); ctx.globalAlpha *= ta; drawSaiDeckLogo(ctx, RENDER_W / 2, titleY + titleH / 2, titleH * 0.62, pt); ctx.restore(); } hlAdd('title', 0, titleY, RENDER_W, titleH); } };
+    if(!topStick) drawTitle();
 
     const dvHide0 = davidActive() ? dvClimaxEnv(pt) : 0;
     // the stretches the track-icon strip runs down (it can leave the video's band clear)
@@ -18366,7 +18628,7 @@
       // (the safe margins don't hold the panel back: it runs to the frame's
       // bottom edge, and — with the ruler off — from the very top too, unless
       // the header or a video sits up there)
-      const pTop = (!S.showRuler && !(S.showHeader && headerH > 0) && !vidTop) ? 0 : topH;
+      const pTop = (!S.showRuler && !(S.showHeader && headerH > 0) && !vidTop && !titleH) ? 0 : topH;
       const pBot = vidBottom ? contentBottom : RENDER_H;
       if(!(S.videoNoStrip && S.videoSpace && vidH > 0) || (davidActive() || saichizuActive() || !!(fdGen() && fdGen().lanes))) return [[pTop, pBot]];
       return [[pTop, Math.min(pBot, vidY)], [Math.max(pTop, vidY + vidH), pBot]];
@@ -18444,7 +18706,7 @@
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 36 * u * (sc - 1) / 0.22; ctx.shadowOffsetY = 14 * u * (sc - 1) / 0.22;
       { const pcS = panelClip();
-        if(!viewIsSplit(rows[idx])){ ctx.globalAlpha *= rOpac('trackOpacity'); ctx.fillStyle = rT.lane; ctx.fillRect(clipX0 - (RENDER_W / 2) * (sc - 1), cy - laneH * sc / 2, RENDER_W * sc, laneH * sc); }
+        if(!viewIsSplit(rows[idx]) && recSettings.laneBg === true){ ctx.globalAlpha *= rOpac('trackOpacity'); ctx.fillStyle = rT.lane; ctx.fillRect(clipX0 - (RENDER_W / 2) * (sc - 1), cy - laneH * sc / 2, RENDER_W * sc, laneH * sc); }
       if(pcS) ctx.restore(); }
       ctx.restore();
       ctx.translate(RENDER_W / 2, cy); ctx.scale(sc, sc); ctx.translate(-RENDER_W / 2, -cy);
@@ -18526,7 +18788,7 @@
       const kB = FR.bare, kG = FR.glass, kBl = FR.bloom, kH = SZ.imgHide, lm = t._lyrMap;
       FR.bare = Math.max(FR.bare || 0, m.w); FR.glass = 0; FR.bloom = null; SZ.imgHide = 1;
       try{
-        if(!viewIsSplit(t) && m.w < 0.999){ bc.globalAlpha = 1 - m.w; bc.fillStyle = rT.lane; bc.fillRect(x0, lt, x1 - x0, laneH); bc.globalAlpha = 1; }
+        if(!viewIsSplit(t) && m.w < 0.999 && recSettings.laneBg === true){ bc.globalAlpha = 1 - m.w; bc.fillStyle = rT.lane; bc.fillRect(x0, lt, x1 - x0, laneH); bc.globalAlpha = 1; }
         const o = t.offset || 0, split = viewIsSplit(t);
         for(const g of viewSegsOf(t)){
           const po = o + g.d, tA = Math.max(limitA, viewStart, po + g.s), tB = Math.min(limitB, viewEnd, po + g.e);
@@ -18568,7 +18830,7 @@
       // the gaps between tracks.
       // (a track shown in pieces gets no lane fill: the gaps between its
       // takes stay see-through, so lanes sliding past show the tracks behind)
-      if(!viewIsSplit(t)){
+      if(!viewIsSplit(t) && recSettings.laneBg === true){
         const pcF = panelClip();
         const sgF = sgClipLane(t, laneTop), szF = szClipLane(t, laneTop);
         ctx.fillStyle = rT.lane;
@@ -18769,7 +19031,7 @@
       // the cut strips falling away: two slivers each (between the blades),
       // drifting apart and tumbling, gone below the frame
       const body = (t, lt) => {
-        if(!viewIsSplit(t)){ ctx.fillStyle = rT.lane; withOpac(ctx, rOpac('trackOpacity'), () => ctx.fillRect(clipX0, lt, RENDER_W - clipX0, laneH)); }
+        if(!viewIsSplit(t) && recSettings.laneBg === true){ ctx.fillStyle = rT.lane; withOpac(ctx, rOpac('trackOpacity'), () => ctx.fillRect(clipX0, lt, RENDER_W - clipX0, laneH)); }
         const o = t.offset || 0, split = viewIsSplit(t), lm = t._lyrMap;
         for(const g of viewSegsOf(t)){
           const po = o + g.d, tA = Math.max(limitA, viewStart, po + g.s), tB = Math.min(limitB, viewEnd, po + g.e);
@@ -19090,6 +19352,7 @@
       if(!S.showRuler){ ctx.fillRect(0, mT, RENDER_W, headerY - mT); }
       drawRenderHeader(ctx, headerY, headerH, u, hs, pt, rs); hlAdd('header', 0, headerY, RENDER_W, headerH);
     }
+    if(topStick && titleH > 0){ ctx.fillStyle = bgPaint(); ctx.fillRect(0, titleY, RENDER_W, titleH); drawTitle(); }
     if(!orbitWithCam) drawImageOrbit(ctx, u, laneCamM);
     drawJunnyyMid(ctx, pt, u);               // Freedit · Junnyy: grade + lights (under the lyrics)
     drawJvkeMid(ctx, pt, u);                 // Freedit · JVKE: sunset light
@@ -20064,7 +20327,7 @@
       if(key.startsWith('jv')){ el.textContent = recSettings[key] + '%'; return; }
       if(key === 'introLen'){ el.textContent = Number(recSettings[key]).toFixed(1) + ' s'; return; }
       if(key === 'beatPulse'){ el.textContent = recSettings[key] ? recSettings[key] + '%' : 'off'; return; }
-      el.textContent = recSettings[key] + (key === 'zoom' ? ' px/s' : key === 'orbitSpin' ? '°/s' : key === 'orbitHop' ? '/s' : key === 'audioFileOffset' ? ' ms' : (key === 'headerScale' || key === 'nameSize' || key === 'videoSize' || key === 'videoFeather' || key === 'lyricBounce' || key === 'lyricOpacity' || key === 'trackOpacity' || key === 'waveOpacity' || key === 'rulerOpacity' || key === 'panelOpacity' || key === 'orbitX' || key === 'orbitY' || key === 'orbitTilt' || key === 'orbitLift') ? '%' : 'px');
+      el.textContent = recSettings[key] + (key === 'zoom' ? ' px/s' : key === 'orbitSpin' ? '°/s' : key === 'orbitHop' ? '/s' : key === 'audioFileOffset' ? ' ms' : (key === 'headerScale' || key === 'nameSize' || key === 'titleSize' || key === 'titleOpacity' || key === 'videoSize' || key === 'videoFeather' || key === 'lyricBounce' || key === 'lyricOpacity' || key === 'trackOpacity' || key === 'waveOpacity' || key === 'rulerOpacity' || key === 'panelOpacity' || key === 'orbitX' || key === 'orbitY' || key === 'orbitTilt' || key === 'orbitLift') ? '%' : 'px');
     });
     const videoFill = recSettings.videoSpace && recSettings.videoFit === 'fill';
     const heightRow = recPanel.querySelector('[data-rec-row="trackHeight"]');
@@ -20084,6 +20347,7 @@
     resetRecView();
     resetHarmonyCache();
     { const nsRow = recPanel.querySelector('[data-rec-row="nameSize"]'); if(nsRow) nsRow.classList.toggle('disabled', !recSettings.showNames); }
+    ['titleSize', 'titleOpacity'].forEach(key => { const row = recPanel.querySelector(`[data-rec-row="${key}"]`); if(row) row.classList.toggle('disabled', !recSettings.titleOn); });
     const hsRow = recPanel.querySelector('[data-rec-row="headerScale"]');
     if(hsRow) hsRow.classList.toggle('disabled', !recSettings.showHeader);
     ['panelWidth', 'iconSize'].forEach(key => {
@@ -22598,7 +22862,7 @@
   var recHL = null;            // { keys: [...], label } while hovering a setting
   const HL_LABELS = {
     frame: 'Whole video frame', ruler: 'Time ruler', clock: 'Clock', clips: 'Track clips', lanes: 'Track rows',
-    gaps: 'Space between tracks', column: 'Left panel (track icons)', icons: 'Track icons', header: 'Header',
+    gaps: 'Space between tracks', column: 'Left panel (track icons)', icons: 'Track icons', header: 'Header', title: 'Title (logo)',
     bg: 'Background', margins: 'Safe margins', video: 'Video box', names: 'Track names', images: 'Track images',
     unplayed: 'Unplayed part', playhead: 'Playhead line', lyrics: 'Lyrics', opening: 'Opening text'
   };
@@ -22737,7 +23001,7 @@
   // Built-in presets live in the app; everyone else's are saved into their
   // connected project folder (render-presets.saideck.json).
   const PRESET_KEYS = ['widthMode', 'zoom', 'trackHeight', 'fillFrame', 'gap', 'marginTop', 'marginBottom', 'bg', 'bgGrad',
-    'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale', 'nameSize',
+    'showHeader', 'clock', 'showIcons', 'showNames', 'showImages', 'panelWidth', 'iconSize', 'headerScale', 'nameSize', 'clipRound', 'titleOn', 'titleSize', 'titleOpacity',
     'persistImages', 'videoSpace', 'videoRatio', 'videoFit', 'videoScale', 'videoSlot', 'videoSize', 'videoFeather', 'videoFeatherT', 'videoFeatherB', 'videoFeatherL', 'videoFeatherR', 'videoRW', 'videoRH', 'videoTrim', 'videoZoom', 'videoPanX', 'videoPanY',
     'dimUnplayed', 'showPlayhead', 'fps', 'quality', 'audioKbps', 'rangeMode',
     'lyricsOn', 'lyricStyle', 'lyricFont', 'lyricSize', 'lyricBounce', 'lyricPos', 'lyricNudge', 'lyricNudgeX', 'lyricSnap', 'lyricSnapTo', 'lyricBySinger', 'lyricAllTracks', 'lyricCustomGrad', 'lyricGradColors', 'lyricColor', 'lyricUpper', 'lyricBlend', 'lyricOpacity', 'vocalReorder', 'orbitOn', 'orbitX', 'orbitY', 'orbitRadius', 'orbitGrow', 'orbitImg', 'orbitShrink', 'orbitSpin', 'orbitStyle', 'orbitHop', 'orbitHeight', 'orbitPerRow', 'orbitWhen', 'orbit3D', 'orbitTilt', 'orbitLift', 'orbitNames'];
@@ -22936,7 +23200,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 185;                 // ← goes up by one with every published version
+  const SD_BUILD = 194;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -34261,7 +34525,9 @@
           const Z = d * sn + zOff, sc2 = D / (D + Math.max(-D * 0.5, Z));
           return { x: cx + (edgeRel - side * d * cs) * sc2, sc: sc2, Z };
         };
-        ctx.save();
+        // (the slices go onto a layer edge to edge, then the fog and fade go on the layer as a whole — overlapping
+        //  see-through slices left thin vertical lines in the text)
+        const st = []; let yMin = Infinity, yMax = -Infinity;
         for(let i = 0; i < N; i++){
           const pa = proj(i / N), pb = proj((i + 1) / N);
           const x0 = Math.min(pa.x, pb.x), x1 = Math.max(pa.x, pb.x);
@@ -34269,13 +34535,45 @@
           const scm = (pa.sc + pb.sc) / 2, h = flatH * kFit * scm, Zm = (pa.Z + pb.Z) / 2;
           const fog = Math.max(0, Math.min(1, 1.3 - Zm / (D * 1.6)));
           if(fog <= 0.01) continue;
-          ctx.globalAlpha = al * fog;
-          ctx.drawImage(fc, i * srcStep, 0, srcStep, H, x0 - 0.35, cy + rowY * kFit * scm - h / 2, (x1 - x0) + 0.7, h);
+          const y = cy + rowY * kFit * scm - h / 2;
+          st.push({ i, x0, x1, y, h, fog }); yMin = Math.min(yMin, y); yMax = Math.max(yMax, y + h);
         }
+        if(!st.length) return;
+        const M = ctx.getTransform();
+        if(Math.abs(M.b) < 1e-6 && Math.abs(M.c) < 1e-6 && M.a > 0){
+          // (not rotated: snap each slice's edges to whole SCREEN pixels and draw straight on — neighbours meet exactly)
+          const toX = (x) => (Math.round(M.a * x + M.e) - M.e) / M.a;
+          ctx.save();
+          for(const q of st){ const xa = toX(q.x0), xb = toX(q.x1); if(xb - xa < 1e-6) continue; ctx.globalAlpha = al * q.fog; ctx.drawImage(fc, q.i * srcStep, 0, srcStep, H, xa, q.y, xb - xa, q.h); }
+          ctx.restore();
+          return;
+        }
+        const lx = Math.floor(Math.min(...st.map(q => q.x0)) - 2), lw = Math.ceil(Math.max(...st.map(q => q.x1)) + 2) - lx;
+        const ly = Math.floor(yMin - 2), lh = Math.ceil(yMax + 2) - ly;
+        if(lw < 1 || lh < 1) return;
+        const lay = sidesLayer(lw, lh), lc = lay.getContext('2d');
+        lc.setTransform(1, 0, 0, 1, 0, 0); lc.globalAlpha = 1; lc.globalCompositeOperation = 'source-over'; lc.clearRect(0, 0, lay.width, lay.height);
+        // (each slice snapped to whole pixels so neighbours meet exactly: no overlap to double up the see-through
+        //  shadow / outline, and no gap)
+        for(const q of st){ const xa = Math.round(q.x0 - lx), xb = Math.round(q.x1 - lx); if(xb > xa) lc.drawImage(fc, q.i * srcStep, 0, srcStep, H, xa, q.y - ly, xb - xa, q.h); }
+        if(st.some(q => q.fog < 0.995)){
+          const g = lc.createLinearGradient(0, 0, lw, 0);
+          for(const q of st.slice().sort((a, b) => a.x0 - b.x0)) g.addColorStop(Math.max(0, Math.min(1, ((q.x0 + q.x1) / 2 - lx) / lw)), `rgba(0,0,0,${q.fog.toFixed(3)})`);
+          lc.globalCompositeOperation = 'destination-in'; lc.fillStyle = g; lc.fillRect(0, 0, lw, lh); lc.globalCompositeOperation = 'source-over';
+        }
+        ctx.save(); ctx.globalAlpha = al;
+        ctx.drawImage(lay, 0, 0, lw, lh, lx, ly, lw, lh);
         ctx.restore();
       });
     }
     hlAdd('lyrics', 0, cy - flatH * 0.8, RENDER_W, flatH * 1.6);
+  }
+  // one scratch layer for the 3D Sides lyrics (grows as needed, never shrinks)
+  let _sidesLay = null;
+  function sidesLayer(w, h){
+    if(!_sidesLay) _sidesLay = document.createElement('canvas');
+    if(_sidesLay.width < w || _sidesLay.height < h){ _sidesLay.width = Math.max(_sidesLay.width, Math.ceil(w)); _sidesLay.height = Math.max(_sidesLay.height, Math.ceil(h)); }
+    return _sidesLay;
   }
   var lyrWorldM = null;     // frame -> canvas transform, for the frame-wide lyric gradient
   // ----- more lyric styles: the pop-in layout (the line wrapped, words in
