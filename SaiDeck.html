@@ -199,6 +199,10 @@
   .chat-setup p{margin:0;font-size:12.5px;line-height:1.5;color:var(--text-dim);}
   .chat-setup label{display:flex;flex-direction:column;gap:5px;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);}
   .chat-setup input{box-sizing:border-box;width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:13px 'Inter',sans-serif;outline:none;}
+  .acct-note{margin:0;padding:10px 12px;border-radius:10px;background:rgba(120,200,140,.12);border:1px solid rgba(120,200,140,.35);color:var(--text);font:12px/1.45 'Inter',sans-serif;}
+  .acct-warn{margin:0;padding:8px 11px;border-radius:9px;background:rgba(255,190,90,.12);border:1px solid rgba(255,190,90,.35);color:var(--text);font:12px/1.4 'Inter',sans-serif;}
+  .acct-err{color:#ff8a8a;font:600 12px 'Inter',sans-serif;}
+  .acct-alt{margin:0;font:12px 'Inter',sans-serif;color:var(--text-dim);text-align:center;} .acct-alt a{color:#b48cff;}
   .chat-setup input:focus{border-color:#b48cff;outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.25);}
   .chat-compose textarea:focus{outline:none;box-shadow:0 0 0 3px rgba(180,140,255,.2);}
   .chat-setmenu .switch input:checked ~ .track{background:rgba(180,140,255,.55);border-color:#b48cff;}
@@ -23201,7 +23205,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 195;                 // ← goes up by one with every published version
+  const SD_BUILD = 196;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23793,10 +23797,11 @@
         if(rt){
           const r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${CHAT_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(rt) });
           if(r.ok){ const j = await r.json(); d = { tok: j.id_token, rt: j.refresh_token, uid: j.user_id, exp: +j.expires_in }; }
-          else if(r.status === 400){ chatLS('rt', null); }                // (that chat ID is gone: make a new one)
+          else if(r.status === 400){ setTimeout(() => acctSignedOut(chatLS('acct') === '1' ? 'other' : 'gone'), 0); const e = new Error('logged out'); e.notIn = true; throw e; }   // (that sign-in has ended: log in again)
           else throw new Error('chat sign-in answered ' + r.status);
         }
-        if(!d){
+        if(!d){ const e = new Error('not logged in'); e.notIn = true; throw e; }       // (accounts are made on the login screen now)
+        if(false){
           const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${CHAT_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"returnSecureToken":true}' });
           if(!r.ok) throw new Error('chat sign-in answered ' + r.status);
           const j = await r.json(); d = { tok: j.idToken, rt: j.refreshToken, uid: j.localId, exp: +j.expiresIn };
@@ -23967,7 +23972,9 @@
   function chatRender(){
     const name = chatName(), room = chatRoom();
     if(chatInSetup()){ if(CHAT._setupAv) CHAT._setupAv(); return; }      // (don't wipe what's being typed)
-    if(!name){ chatRenderSetup(); return; }
+    if(!chatLS('rt')){ acctRender('login'); return; }
+    if(!name){ acctRender('create'); return; }
+    if(ACCT.need){ acctRender('setup'); return; }
     if(!chatPanel.querySelector('.chat-body')){
       chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>Chat</b><span class="chat-sub"></span></div>
           <button type="button" class="chat-online" aria-expanded="false" title="Who's using SaiDeck now — and everyone else who uses it"><span class="chat-dot on"></span><span class="chat-online-n">0</span> online</button>
@@ -24625,6 +24632,160 @@
     fxScan();
     for(const [row, bk, mine] of fxQ){ const b = row.querySelector('.chat-bub'); if(b){ b.style.opacity = '0'; requestAnimationFrame(() => { b.style.opacity = ''; chatBubbleFx(b, bk, mine); }); } }
   }
+  // ===================== Accounts: a username + password (build 196) =====================
+  // The login is Firebase's own email/password sign-in, put on the same account (chat ID) the chat already uses, so
+  // nothing moves. The username becomes a hidden address (u<hash>@users.saideck.app) — nobody needs a real email, and
+  // Firebase checks the password and refuses a username that's already taken. Setting or changing the password or the
+  // username ends the account's sign-ins on its other devices; logging in on another device logs this one out.
+  const ACCT_DOMAIN = 'users.saideck.app', ACCT_MIN = 6;
+  const acctNorm = (n) => String(n || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
+  async function acctEmail(n){
+    const h = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('saideck:' + acctNorm(n))));
+    return 'u' + [...h.slice(0, 20)].map(x => x.toString(16).padStart(2, '0')).join('') + '@' + ACCT_DOMAIN;
+  }
+  async function idtk(path, body){
+    const r = await fetch(`https://identitytoolkit.googleapis.com/v1/${path}?key=${CHAT_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok){ const m = String((j.error && j.error.message) || ('answered ' + r.status)); const e = new Error(m); e.code = m.split(/[ :]/)[0]; throw e; }
+    return j;
+  }
+  function acctMsg(e){
+    const c = (e && e.code) || '';
+    if(c === 'EMAIL_EXISTS') return 'That username is taken — pick another one.';
+    if(c === 'EMAIL_NOT_FOUND' || c === 'INVALID_PASSWORD' || c === 'INVALID_LOGIN_CREDENTIALS') return 'Wrong username or password.';
+    if(c === 'WEAK_PASSWORD') return `The password needs at least ${ACCT_MIN} characters.`;
+    if(c === 'TOO_MANY_ATTEMPTS_TRY_LATER') return 'Too many tries — wait a few minutes and try again.';
+    if(c === 'USER_DISABLED') return 'This account has been turned off.';
+    if(c === 'CREDENTIAL_TOO_OLD_LOGIN_AGAIN' || c === 'TOKEN_EXPIRED' || c === 'INVALID_ID_TOKEN') return 'Please type your password again.';
+    return "Couldn't reach the server — check your internet connection." + (c ? ` (${c})` : '');
+  }
+  // keep the sign-in Firebase just handed back (a new one comes after every password or username change)
+  function acctAdopt(j){
+    chatLS('rt', j.refreshToken); chatLS('auid', j.localId); chatLS('vaultK', null);
+    Object.assign(CHAT_AUTH, { tok: j.idToken, uid: j.localId, exp: Date.now() + (+j.expiresIn || 3600) * 1000, p: null });
+    setTimeout(() => { try{ vaultSync(); }catch(e){} }, 50);
+  }
+  // does this account have a username + password yet? (asks Firebase once, then remembers)
+  async function acctLogin(){
+    const tok = await chatAuth(), j = await idtk('accounts:lookup', { idToken: tok }), u = (j.users || [])[0] || {};
+    const has = !!(u.email && String(u.email).endsWith('@' + ACCT_DOMAIN) && (u.providerUserInfo || []).some(p => p.providerId === 'password'));
+    return has ? u.email : '';
+  }
+  async function acctHasLogin(){
+    if(chatLS('acct') === '1') return true;
+    const has = !!(await acctLogin());
+    if(has) chatLS('acct', '1');
+    return has;
+  }
+  var ACCT = { out: '', need: false };
+  // logged out on this device: another device logged in, the password / username changed elsewhere, or "Log out"
+  function acctSignedOut(why){
+    const nm = chatName();
+    if(nm) chatLS('lastUser', nm);
+    for(const k of ['rt', 'auid', 'acct', 'vaultK', 'name']) chatLS(k, null);
+    Object.assign(CHAT_AUTH, { tok: '', exp: 0, uid: '', p: null });
+    try{ SC.loaded = false; }catch(e){}
+    ACCT.out = why || 'out'; ACCT.need = false;
+    try{ chatDisconnect(); }catch(e){}
+    for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
+    try{ chatPanel.innerHTML = ''; if(CHAT.open) chatRender(); }catch(e){}
+    toast(why === 'other' ? `🔐 Logged out here — ${nm || 'your account'} is being used on another device.` : why === 'self' ? '👋 Logged out of this device.' : '🔐 Logged out — log in again to use the chat.', 4200);
+  }
+  // the login / new account / set-your-password screen (in the chat panel)
+  function acctRender(mode){
+    const hasId = !!chatLS('rt');
+    const pre = mode === 'login' ? (chatLS('lastUser') || '') : (chatName() || '');
+    const title = mode === 'login' ? 'Log in to SaiDeck' : mode === 'setup' ? 'Set up your login' : 'Make your SaiDeck account';
+    const sub = mode === 'login' ? 'Use your username and password' : mode === 'setup' ? 'So you can use your account on any device' : 'A username and password for the chat, games and points';
+    chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>${title}</b><span>${sub}</span></div>
+        <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
+      <div class="chat-setup acct-box">
+        ${mode === 'setup' ? `<p class="acct-note">🔒 SaiDeck now has logins! Keep your name (or change it) and choose a password — then you can log in on any device, like the SaiDeck website or your phone, and everything comes with you. Your points, items and chats stay exactly as they are, kept safely in SaiDeck's database (Firebase). Your password is checked by Firebase's sign-in service — nobody, not even the admin, can see it.</p>` : ''}
+        ${mode === 'login' && ACCT.out === 'other' ? `<p class="acct-warn">You were logged out here because your account was used on another device.</p>` : ''}
+        ${mode === 'login' && hasId ? `<p class="acct-warn">Logging in switches this device to that account.</p>` : ''}
+        <label>Username<input type="text" class="acct-u" maxlength="${CHAT_NAME_MAX}" autocomplete="username" placeholder="e.g. Sai"></label>
+        <label>Password<input type="password" class="acct-p" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}" placeholder="${mode === 'login' ? '' : 'at least ' + ACCT_MIN + ' characters'}"></label>
+        ${mode !== 'login' ? `<label>Confirm password<input type="password" class="acct-p2" autocomplete="new-password"></label>` : ''}
+        <div class="acct-err" hidden></div>
+        <button type="button" class="chat-pbtn acct-go">${mode === 'login' ? 'Log in' : mode === 'setup' ? 'Save my login' : 'Make my account'}</button>
+        <p class="acct-alt">${mode === 'login' ? `New to SaiDeck? <a href="#" class="acct-sw" data-m="create">Make an account</a>` : `Already have an account? <a href="#" class="acct-sw" data-m="login">Log in</a>`}</p>
+        <p style="font-size:11px;color:var(--text-faint)">${mode === 'login' ? "Forgot your password? Ask Saichizu — he can join a new account to your old one so nothing's lost." : `Your username is your name in the chat. You can change it later in the chat settings. Keep it friendly — names that break the rules aren't allowed.`}</p>
+      </div>`;
+    const ui = chatPanel.querySelector('.acct-u'), pi = chatPanel.querySelector('.acct-p'), p2i = chatPanel.querySelector('.acct-p2'), btn = chatPanel.querySelector('.acct-go'), er = chatPanel.querySelector('.acct-err');
+    const label = btn.textContent;
+    ui.value = pre;
+    const err = (m) => { er.textContent = m; er.hidden = !m; };
+    for(const i of [ui, pi, p2i].filter(Boolean)){
+      i.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter'){ e.preventDefault(); go(); } else if(e.key === 'Escape'){ e.preventDefault(); chatToggle(false); } });
+      i.addEventListener('keyup', (e) => e.stopPropagation());
+      i.addEventListener('input', () => err(''));
+    }
+    chatPanel.querySelector('.chat-x').addEventListener('click', () => chatToggle(false));
+    chatPanel.querySelector('.acct-sw').addEventListener('click', (e) => { e.preventDefault(); acctRender(e.target.dataset.m === 'login' ? 'login' : (ACCT.need ? 'setup' : 'create')); });
+    async function go(){
+      const u = ui.value.trim().replace(/\s+/g, ' ').slice(0, CHAT_NAME_MAX), p = pi.value, p2 = p2i ? p2i.value : p;
+      if(!u){ ui.focus(); return err('Type your username.'); }
+      if(mode !== 'login'){
+        if(chatBadName(u)){ ui.focus(); return err("That name isn't allowed — please pick a friendly one."); }
+        if(p.length < ACCT_MIN){ pi.focus(); return err(`The password needs at least ${ACCT_MIN} characters.`); }
+        if(p !== p2){ p2i.focus(); return err("The two passwords don't match."); }
+      } else if(!p){ pi.focus(); return err('Type your password.'); }
+      btn.disabled = true; btn.textContent = '…';
+      try{
+        const email = await acctEmail(u);
+        if(mode === 'login'){
+          const j = await idtk('accounts:signInWithPassword', { email, password: p, returnSecureToken: true });
+          acctAdopt(j); chatLS('acct', '1'); chatLS('justin', '1');
+          // the account's own name comes from its points record
+          let nm = u;
+          try{ const r = await fetch(`${CHAT_DB}/scores/${encodeURIComponent(j.localId)}/n.json`, { cache: 'no-store' }); const v = r.ok ? await r.json() : null; if(typeof v === 'string' && v.trim()) nm = v.trim(); }catch(e){}
+          chatLS('name', nm.slice(0, CHAT_NAME_MAX)); chatLS('lastUser', null);
+          btn.textContent = '✓';
+          toast(`👋 Welcome back, ${nm}! Loading your account…`, 2500);
+          setTimeout(() => location.reload(), 1100);
+          return;
+        }
+        let j;
+        if(hasId){ const tok = await chatAuth(); j = await idtk('accounts:update', { idToken: tok, email, password: p, returnSecureToken: true }); }
+        else j = await idtk('accounts:signUp', { email, password: p, returnSecureToken: true });
+        acctAdopt(j); chatLS('acct', '1'); chatLS('name', u); chatLS('lastUser', null); chatLS('justin', '1');
+        ACCT.out = ''; ACCT.need = false;
+        try{ await chatRegister(); }catch(e){}
+        try{ presStart(); presBeat(); chatPollInbox(); }catch(e){}
+        toast(mode === 'setup' ? '🔐 Login saved! Use your username and password to log in on any device.' : `🎉 Welcome to SaiDeck, ${u}!`, 3800);
+        chatPanel.innerHTML = '';
+        if(!CHAT.es) chatConnect();
+        CHAT._scrollDown = true; chatRender();
+      }catch(e){ err(acctMsg(e)); if(e.code === 'EMAIL_EXISTS' && mode === 'setup') err('That username is taken. If it\'s yours (set up on another device), tap "Log in" below instead — or pick another name.'); }
+      finally{ btn.disabled = false; btn.textContent = label; }
+    }
+    btn.addEventListener('click', go);
+    setTimeout(() => (ui.value ? pi : ui).focus(), 0);
+  }
+  // existing chat users (from before logins) are asked once to set a password
+  async function acctCheck(){
+    if(!chatName() || !chatLS('rt') || chatLS('acct') === '1' || ACCT.need) return;
+    try{
+      if(await acctHasLogin()) return;
+      ACCT.need = true;
+      chatToggle(true); chatPanel.innerHTML = ''; acctRender('setup');
+    }catch(e){}
+  }
+  setTimeout(acctCheck, 3500);
+  // change the username (needs the password: Firebase wants a fresh sign-in for it)
+  async function acctRename(newName, pw){
+    const cur = await acctLogin(); if(!cur) return;              // (no login on this account: nothing to move)
+    if(cur === await acctEmail(newName)) return;
+    const s = await idtk('accounts:signInWithPassword', { email: cur, password: pw, returnSecureToken: true });
+    const j = await idtk('accounts:update', { idToken: s.idToken, email: await acctEmail(newName), returnSecureToken: true });
+    acctAdopt(j); chatLS('justin', '1');
+  }
+  async function acctChangePassword(cur, nw){
+    const em = await acctLogin(); if(!em) throw Object.assign(new Error('no login'), { code: 'NO_LOGIN' });
+    const s = await idtk('accounts:signInWithPassword', { email: em, password: cur, returnSecureToken: true });
+    const j = await idtk('accounts:update', { idToken: s.idToken, password: nw, returnSecureToken: true });
+    acctAdopt(j); chatLS('justin', '1');
+  }
   function chatRenderSetup(fromSettings){
     const name = chatName();
     chatPanel.innerHTML = `<div class="chat-head"><div class="chat-head-t"><b>${fromSettings ? 'Your chat profile' : 'Join the SaiDeck chat'}</b><span>One chat for everyone who uses SaiDeck, plus group chats</span></div>
@@ -24636,6 +24797,18 @@
           <input type="file" class="cs-file" accept="image/*" hidden></div></div>
         <label>Your name<input type="text" class="cs-name" maxlength="${CHAT_NAME_MAX}" placeholder="e.g. Sai" autocomplete="nickname"></label>
         <p>This is what others see next to your messages (up to ${CHAT_NAME_MAX} characters). Your picture is optional — you can zoom and crop it after picking one.</p>
+        ${fromSettings ? `<label class="cs-pwrow" hidden>Your password (to change your username)<input type="password" class="cs-pw" autocomplete="current-password"></label>
+        <div class="cs-acct" hidden>
+          <div style="font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);margin-top:4px">Your login</div>
+          <p style="margin:2px 0 6px">Your username is the name above — use it with your password to log in on any device. Logging in somewhere else logs this device out.</p>
+          <div class="chat-row"><button type="button" class="chat-sbtn cs-chpw">Change password…</button><button type="button" class="chat-sbtn cs-out">Log out</button></div>
+          <div class="cs-pwbox" hidden>
+            <label>Current password<input type="password" class="cs-p0" autocomplete="current-password"></label>
+            <label>New password<input type="password" class="cs-p1" autocomplete="new-password" placeholder="at least ${ACCT_MIN} characters"></label>
+            <label>Confirm new password<input type="password" class="cs-p2" autocomplete="new-password"></label>
+            <button type="button" class="chat-sbtn cs-pwgo">Save new password</button>
+          </div>
+        </div>` : ''}
         <button type="button" class="chat-pbtn cs-go">${fromSettings ? 'Save' : 'Start chatting'}</button>
         <p style="font-size:11px;color:var(--text-faint)">Keep it friendly: explicit words and pictures aren't allowed, and messages are up to ${chatMaxLen()} characters. The admin can remove messages and pictures. Messages stay online so people can read what they missed.</p>
       </div>`;
@@ -24664,10 +24837,43 @@
       catch(err){ toast(err.message === 'too big' ? "Couldn't make that picture small enough — try another one." : err.message, 3000); }
     });
     noPic.addEventListener('click', () => { pending = null; showAv(); });
+    // the login bits (settings only, for accounts with a username + password)
+    const pwRow = chatPanel.querySelector('.cs-pwrow'), pwIn = chatPanel.querySelector('.cs-pw'), acBox = chatPanel.querySelector('.cs-acct');
+    let hasLogin = false;
+    const nameMoved = () => hasLogin && acctNorm(ni.value) !== acctNorm(name);
+    if(fromSettings && acBox){
+      acctHasLogin().then(h => { hasLogin = h; acBox.hidden = !h; pwRow.hidden = !nameMoved(); }).catch(() => {});
+      ni.addEventListener('input', () => { pwRow.hidden = !nameMoved(); });
+      for(const i of chatPanel.querySelectorAll('.cs-acct input, .cs-pw')){ i.addEventListener('keydown', (e) => e.stopPropagation()); i.addEventListener('keyup', (e) => e.stopPropagation()); }
+      pwIn.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); go(); } });
+      chatPanel.querySelector('.cs-chpw').addEventListener('click', () => { const b = chatPanel.querySelector('.cs-pwbox'); b.hidden = !b.hidden; if(!b.hidden) chatPanel.querySelector('.cs-p0').focus(); });
+      chatPanel.querySelector('.cs-out').addEventListener('click', () => {
+        const ok = chatPanel.querySelector('.cs-out');
+        if(ok.dataset.sure !== '1'){ ok.dataset.sure = '1'; ok.textContent = 'Tap again to log out'; setTimeout(() => { ok.dataset.sure = ''; ok.textContent = 'Log out'; }, 3500); return; }
+        acctSignedOut('self');
+      });
+      chatPanel.querySelector('.cs-pwgo').addEventListener('click', async () => {
+        const b = chatPanel.querySelector('.cs-pwgo'), p0 = chatPanel.querySelector('.cs-p0').value, p1 = chatPanel.querySelector('.cs-p1').value, p2 = chatPanel.querySelector('.cs-p2').value;
+        if(!p0) return toast('Type your current password.', 2000);
+        if(p1.length < ACCT_MIN) return toast(`The new password needs at least ${ACCT_MIN} characters.`, 2400);
+        if(p1 !== p2) return toast("The two new passwords don't match.", 2400);
+        b.disabled = true;
+        try{ await acctChangePassword(p0, p1); toast('🔐 Password changed. Other devices will need to log in again.', 3200); chatPanel.querySelector('.cs-pwbox').hidden = true; for(const c of ['.cs-p0', '.cs-p1', '.cs-p2']) chatPanel.querySelector(c).value = ''; }
+        catch(e){ toast(acctMsg(e), 3000); }
+        finally{ b.disabled = false; }
+      });
+    }
     async function go(){
       const n = ni.value.trim().replace(/\s+/g, ' ').slice(0, CHAT_NAME_MAX);
       if(!n){ ni.focus(); toast('Type your name first.', 1600); return; }
       if(chatBadName(n)){ ni.focus(); ni.select(); toast("That name isn't allowed — please pick a friendly one.", 2600); return; }
+      if(fromSettings && nameMoved()){
+        if(!pwIn.value){ pwRow.hidden = false; pwIn.focus(); toast('Type your password to change your username.', 2400); return; }
+        const gb = chatPanel.querySelector('.cs-go'); gb.disabled = true;
+        try{ await acctRename(n, pwIn.value); }
+        catch(e){ gb.disabled = false; toast(e.code === 'EMAIL_EXISTS' ? 'That username is taken — pick another one.' : acctMsg(e), 3000); pwIn.value = ''; return; }
+        gb.disabled = false;
+      }
       chatLS('name', n);
       if(pending !== undefined){
         try{ await chatSetPicture(pending); toast(pending ? 'Profile picture saved.' : 'Profile picture removed.', 2000); }
@@ -30453,8 +30659,9 @@
       await chatAuth();
       const s = await vaultGet(`vault/${encodeURIComponent(chatUid())}/s`), now = Date.now() + (PRES.offset || 0);
       const mine = s && s.id === SESS.id, live = s && typeof s.t === 'number' && now - s.t < 75000;
-      if(!s || mine || !live){ if(!mine || Date.now() - SESS.at > 25000) await sessClaim(); return; }
+      if(!s || mine || !live){ chatLS('justin', null); if(!mine || Date.now() - SESS.at > 25000) await sessClaim(); return; }
       // another device has the account
+      if(chatLS('justin')){ chatLS('justin', null); await sessClaim(); return; }      // (just logged in here: this device takes it)
       if(SESS.own){ sessKill(); return; }
       if(SESS.asked) return; SESS.asked = true;
       if(await lyrConfirm('📲 Move the session here?', `${chatName()} is still open on another device.\n\nUse it on this device instead? The other device freezes until you move it back.`, 'Move it here')){ await sessClaim(); }
@@ -30463,6 +30670,7 @@
   }
   // frozen: nothing goes out from this device. Touch it again and it asks to move the session back here.
   function sessKill(){
+    if(chatLS('acct') === '1'){ SESS.own = false; acctSignedOut('other'); return; }
     if(SESS.dead) return; SESS.dead = true; SESS.own = false; SESS.wasOpen = !!CHAT.open;
     try{ chatToggle(false); }catch(e){} try{ chatDisconnect(); }catch(e){}
     for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
@@ -30505,7 +30713,7 @@
       const k = await vaultGet(`vault/${encodeURIComponent(go.u)}/k`);
       if(typeof k !== 'string' || k.length < 20) return;          // (the main account hasn't opened this version yet — next time)
       // become the main account
-      chatLS('rt', k); chatLS('auid', go.u); chatLS('name', String(go.n || chatName()).slice(0, CHAT_NAME_MAX)); chatLS('vaultK', null);
+      chatLS('rt', k); chatLS('auid', go.u); chatLS('name', String(go.n || chatName()).slice(0, CHAT_NAME_MAX)); chatLS('vaultK', null); chatLS('acct', null);
       Object.assign(CHAT_AUTH, { tok: '', exp: 0, uid: go.u, p: null });
       SC.loaded = false;
       try{ chatToggle(false); }catch(e){}
@@ -30525,7 +30733,7 @@
     if(LK.code){ lkDrop(LK.code); LK.code = ''; clearInterval(LK.watch); chatLS('lkcode', null); }      // (this device's own code isn't needed any more)
     lkFromAdd(me);
     // become the main account
-    chatLS('rt', mainRt); chatLS('auid', mainUid); if(mainName) chatLS('name', String(mainName).slice(0, CHAT_NAME_MAX));
+    chatLS('rt', mainRt); chatLS('auid', mainUid); chatLS('acct', null); if(mainName) chatLS('name', String(mainName).slice(0, CHAT_NAME_MAX));
     Object.assign(CHAT_AUTH, { tok: '', exp: 0, uid: mainUid, p: null });
     SC.loaded = false;
     try{ chatToggle(false); }catch(e){}
