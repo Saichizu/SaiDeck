@@ -178,6 +178,13 @@
   .chat-meta span{color:var(--text-faint);}
   .chat-msg.me .chat-meta b{display:none;}
   .chat-foot{border-top:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:8px;}
+  .chat-typing{display:flex;align-items:center;gap:8px;font:500 11.5px 'Inter',sans-serif;color:var(--text-dim);margin:-2px 0 -2px 2px;animation:chatTypIn .2s ease-out;}
+  .chat-typing[hidden]{display:none;}
+  @keyframes chatTypIn{from{opacity:0;transform:translateY(4px);}}
+  .chat-tdots{display:inline-flex;align-items:center;gap:3px;padding:7px 10px;border-radius:14px 14px 14px 4px;background:var(--bg-control);border:1px solid var(--border);}
+  .chat-tdots i{width:6px;height:6px;border-radius:50%;background:#b48cff;animation:chatTyp 1.2s ease-in-out infinite;}
+  .chat-tdots i:nth-child(2){animation-delay:.15s;} .chat-tdots i:nth-child(3){animation-delay:.3s;}
+  @keyframes chatTyp{0%,60%,100%{transform:translateY(0);opacity:.45;} 30%{transform:translateY(-4px);opacity:1;}}
   .chat-compose{display:flex;gap:8px;align-items:flex-end;}
   .chat-compose textarea{flex:1;min-width:0;resize:none;max-height:120px;min-height:38px;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--bg-control);color:var(--text);font:13px/1.35 'Inter',sans-serif;outline:none;}
   .chat-compose textarea:focus{border-color:#b48cff;}
@@ -311,6 +318,27 @@
   body.sd-online .on-slot.own + .on-slot, body.sd-online .on-slot + .on-slot{margin-top:0;}
   body.sd-online .td-win.on-host .td-box.on-card{border-radius:16px !important;}
   body.sd-online .chat-modal-back, body.sd-online .chat-modal-x{display:none !important;}
+  /* ----- the Lounge ----- */
+  .lg-box{width:min(980px, calc(100vw - 40px));max-height:none;}
+  .lg-win .td-head{gap:10px;} .lg-who{font:600 11.5px 'Inter',sans-serif;color:#9ff3cf;} .lg-song{flex:1;font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  .lg-mute{all:unset;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px;} .lg-mute:hover{background:rgba(255,255,255,.08);}
+  .lg-stage{position:relative;}
+  .lg-cv{display:block;width:100%;aspect-ratio:1000/560;border-radius:10px;cursor:pointer;outline:none;background:#2b1f4a;touch-action:manipulation;}
+  .lg-tip{position:absolute;left:10px;bottom:8px;font:500 10.5px 'Inter',sans-serif;color:rgba(255,255,255,.6);pointer-events:none;text-shadow:0 1px 3px #000;}
+  .lg-pop{position:absolute;top:12px;right:12px;width:min(380px, calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:14px;border-radius:14px;background:rgba(20,16,36,.96);border:1px solid rgba(180,140,255,.4);box-shadow:0 16px 40px rgba(0,0,0,.5);color:#f1ecff;font-family:'Inter',sans-serif;}
+  .lg-pop h4{margin:0 0 6px;font:800 15px 'Inter',sans-serif;} .lg-pop p{margin:4px 0 10px;font-size:12px;color:rgba(241,236,255,.75);} .lg-small{font-size:11px !important;}
+  .lg-px{all:unset;position:absolute;top:8px;right:10px;cursor:pointer;font-size:13px;opacity:.7;} .lg-px:hover{opacity:1;}
+  .lg-vend{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
+  .lg-can{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.05);text-align:center;}
+  .lg-can i{width:22px;height:36px;border-radius:5px;background:linear-gradient(90deg,var(--c2),var(--c) 40%,var(--c) 70%,var(--c2));box-shadow:inset 0 3px 0 #ddd;}
+  .lg-can b{font-size:11.5px;} .lg-can span{font-size:11px;color:#f5d04a;}
+  .lg-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-top:10px;}
+  .lg-emos{display:flex;gap:2px;} .lg-emos button{all:unset;cursor:pointer;font-size:19px;padding:3px 4px;border-radius:8px;transition:transform .1s;} .lg-emos button:hover{background:rgba(255,255,255,.08);transform:scale(1.15);}
+  .lg-b{all:unset;cursor:pointer;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;font:600 12px 'Inter',sans-serif;white-space:nowrap;}
+  .lg-b:hover{border-color:#b48cff;} .lg-b.on{background:rgba(180,140,255,.3);border-color:#b48cff;} .lg-b.alt{background:rgba(62,211,154,.15);border-color:rgba(62,211,154,.5);}
+  .lg-say{display:flex;gap:4px;flex:1;min-width:160px;} .lg-say input{flex:1;min-width:0;padding:6px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#fff;font:12px 'Inter',sans-serif;outline:none;} .lg-say input:focus{border-color:#b48cff;}
+  .lg-songs,.lg-hats{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .lg-cols{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:6px 0 4px;} .lg-cols button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:50%;border:2px solid transparent;} .lg-cols button.on{border-color:#fff;box-shadow:0 0 0 2px #b48cff;}
   .acct-note{margin:0;padding:10px 12px;border-radius:10px;background:rgba(120,200,140,.12);border:1px solid rgba(120,200,140,.35);color:var(--text);font:12px/1.45 'Inter',sans-serif;}
   .acct-warn{margin:0;padding:8px 11px;border-radius:9px;background:rgba(255,190,90,.12);border:1px solid rgba(255,190,90,.35);color:var(--text);font:12px/1.4 'Inter',sans-serif;}
   .acct-err{color:#ff8a8a;font:600 12px 'Inter',sans-serif;}
@@ -23319,7 +23347,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 199;                 // ← goes up by one with every published version
+  const SD_BUILD = 200;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24116,6 +24144,7 @@
         <div class="chat-body" role="log" aria-live="polite"></div>
         <div class="chat-casbar" hidden></div>
         <div class="chat-foot">
+          <div class="chat-typing" hidden></div>
           <div class="chat-note" hidden></div>
           <div class="chat-replying" hidden></div>
           <div class="chat-compose"><button type="button" class="chat-emo-btn" title="Emojis" aria-label="Emojis">😊</button><textarea rows="1" maxlength="${CHAT_MAX}" placeholder="Message everyone…  (Enter to send)" aria-label="Message"></textarea>
@@ -24159,6 +24188,8 @@
       const grow = () => { const mx = chatMaxLen(); ta.maxLength = mx; ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; send.disabled = !ta.value.trim() || !chatCanSend(); cnt.textContent = `${ta.value.length} / ${mx}`; cnt.classList.toggle('full', ta.value.length >= mx); try{ sndBtnSync(); }catch(e){} };
       CHAT._grow = grow;
       ta.addEventListener('input', grow);
+      ta.addEventListener('input', () => typingPing(ta));
+      ta.addEventListener('blur', () => { if(!ta.value.trim()) typingStop(); });
       try{ emoAcAttach(ta); }catch(e){}
       ta.addEventListener('keydown', (e) => { e.stopPropagation(); if(e.key === 'Enter' && !e.isComposing){ e.preventDefault(); if(!e.shiftKey) chatSend(ta, grow); } else if(e.key === 'Escape'){ e.preventDefault(); if(CHAT.reply) chatStopReply(); else chatToggle(false); } });
       ta.addEventListener('keyup', (e) => e.stopPropagation());
@@ -25038,6 +25069,7 @@
     onlineRender(); onStackLoop(); clearInterval(DASH.onT); DASH.onT = setInterval(() => { if(dashIsOnline()) onlineRender(); else clearInterval(DASH.onT); }, 5000);
   }
   const ONLINE_GAMES = [
+    { g: 'lounge', e: '🛋️', t: 'Lounge', d: 'Hang out, walk around, grab a soda', c: ['rgba(255,95,210,.26)', '#ff5fd2'] },
     { g: 'slots', e: '🎰', t: 'Slots', d: 'Spin for jackpots with everyone watching', c: ['rgba(255,201,74,.28)', '#ffc94a'] },
     { g: 'bj', e: '🃏', t: 'Blackjack', d: 'Beat the dealer, 3 to 2 on blackjack', c: ['rgba(62,211,154,.26)', '#3ed39a'] },
     { g: 'td', e: '🏰', t: 'Tower Defense', d: 'Solo or team up against the waves', c: ['rgba(127,156,255,.28)', '#7f9cff'] },
@@ -25054,10 +25086,11 @@
     { k: 'bj', t: '🃏 Blackjack', el: () => { const e = chatPanel.querySelector('.chat-bj'); return e && !e.hidden ? e : null; }, close: () => gameClose('bj') },
     { own: true, k: 'td', t: '🏰 Tower Defense', el: () => TDG.win && TDG.win.querySelector('.td-box'), close: () => tdClose() },
     { own: true, k: 'trade', t: '📈 Trading', el: () => TRD.win && TRD.win.querySelector('.td-box'), close: () => trdClose() },
+    { own: true, k: 'lounge', t: '🛋️ Lounge', el: () => LG.on && LG.win && LG.win.querySelector('.td-box'), close: () => lgClose() },
     { own: true, k: 'cf', t: '🪙 Coin Flip', el: () => CF.win && CF.win.querySelector('.td-box'), close: () => cfClose() },
     { k: 'arcade', t: '🛍️ Shop & quests', el: () => { const e = chatPanel.querySelector('.chat-arcade'); return e && !e.hidden ? e : null; }, close: () => { if(CHAT.side === 'arcade') chatSideTo('arcade'); } },
   ];
-  const ON_TILE_CARD = { slots: 'slots', bj: 'bj', td: 'td', trade: 'trade', cf: 'cf', shop: 'arcade', quests: 'arcade' };
+  const ON_TILE_CARD = { lounge: 'lounge', slots: 'slots', bj: 'bj', td: 'td', trade: 'trade', cf: 'cf', shop: 'arcade', quests: 'arcade' };
   const ONS = { order: [], raf: 0, sig: '' };
   function onStackLoop(){
     cancelAnimationFrame(ONS.raf);
@@ -25131,6 +25164,7 @@
     else if(g === 'td') tdOpen();
     else if(g === 'trade') trdOpen();
     else if(g === 'cf') cfOpen();
+    else if(g === 'lounge') lgOpen();
     else { SC.tab = g; if(CHAT.side !== 'arcade') chatSideTo('arcade'); else chatRenderArcade(); try{ dockSeen(g); }catch(e){} scLoad(); }
   }
   function onlineRender(){
@@ -27828,6 +27862,7 @@
       <button type="button" role="menuitem" data-g="td"><span>🏰</span><b>Tower Defense</b><i>solo or team</i></button>
       <button type="button" role="menuitem" data-g="cf"><span>🪙</span><b>Coin Flip</b><i>heads or tails?</i></button>
       <button type="button" role="menuitem" data-g="trade"><span>📈</span><b>Trading</b><i>${TRD.r ? TRD_SYM + ' ' + TRD.r.P.toLocaleString() : 'Cardiastra Inc.'}</i></button>
+      <button type="button" role="menuitem" data-g="lounge"><span>🛋️</span><b>Lounge</b><i>hang out with everyone</i></button>
       <button type="button" role="menuitem" data-g="arc"><span>🏆</span><b>Shop &amp; leaderboard</b><i></i></button>`;
     btn.parentElement.appendChild(m); btn.setAttribute('aria-expanded', 'true');
     m.animate([{ opacity: 0, transform: 'translateY(6px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 160, easing: 'ease-out' });
@@ -27841,6 +27876,7 @@
       else if(b.dataset.g === 'td') tdOpen();
       else if(b.dataset.g === 'trade') trdOpen();
       else if(b.dataset.g === 'cf') cfOpen();
+      else if(b.dataset.g === 'lounge') lgOpen();
       else { SC.tab = 'shop'; if(CHAT.side !== 'arcade') chatSideTo('arcade'); scLoad(); }
     });
   }
@@ -32139,7 +32175,7 @@
         if(SCW.n === 0 && SCW.seq === seq) break;     // (a points write overlapped this read: read again)
       }
       SC.p = Math.floor(+(a && a.p) || 0); SC.s = Math.floor(+(a && a.s) || 0); SC.rec = !!(a && typeof a.s === 'number');
-      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.pw = (b && b.pw) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.snd = (b && b.snd) || {};
+      SC.fx = (b && b.fx) || {}; SC.art = (b && b.art) || {}; SC.pw = (b && b.pw) || {}; SC.bub = (b && b.bub) || {}; SC.tot = (b && b.tot) | 0; SC.rx = (b && b.rx) || {}; SC.soda = (b && b.soda) || {}; SC.snd = (b && b.snd) || {};
       SC.loaded = true;
     }catch(e){}
     chatRenderArcade(); artUI(); try{ dockRender(); }catch(e){}
@@ -32934,8 +32970,510 @@
     [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => { sfxTone(ac, t + i * 0.08, 'triangle', f, f, 0.22, 0.12); sfxTone(ac, t + i * 0.08 + 0.02, 'sine', f * 2, f * 2, 0.12, 0.04); });
     for(let i = 0; i < 10; i++) sfxTone(ac, t + 0.6 + Math.random() * 0.8, 'sine', 2500 + Math.random() * 2500, 3000 + Math.random() * 2000, 0.09, 0.04);
   }
+  // ===================== The Lounge (build 200) =====================
+  // A little room where everyone's character hangs out: click the floor to walk, sit on the couch, buy a soda from the
+  // vending machine (points), pick the jukebox song everyone hears, play the arcade cabinet, pet Mochi the cat, dance,
+  // wave and say things. Each person's spot lives at lounge/<uid> = { x,y → tx,ty from time t, look, action… }; others
+  // walk smoothly from that alone (one write per click). The room is 1000 × 560 "room units".
+  const LG_CS = 1.35, LG_W = 1000, LG_H = 560, LG_FLOOR = [40, 300, 960, 535];
+  const LG_COLORS = ['#ff8fb1', '#ffb86b', '#ffe066', '#9be37a', '#5fd3c6', '#6fb6ff', '#9d8cff', '#e08cff', '#ff6b6b', '#c7a27c', '#f2f2f2', '#7a7f8c', '#ff9ee6', '#a3f0ff', '#d4ff6b', '#ffc4a3'];
+  const LG_HATS = ['none', 'cap', 'beanie', 'party hat', 'crown', 'headphones', 'bow', 'cat ears', 'halo', 'cowboy hat'];
+  const LG_SODAS = [
+    { k: 'cola', name: 'Cherry Cola', c: '#c0263b', c2: '#5a0d16', em: '🥤' },
+    { k: 'lemon', name: 'Zesty Lemon', c: '#ffe14d', c2: '#a88f00', em: '🍋' },
+    { k: 'grape', name: 'Grape Fizz', c: '#8b4dff', c2: '#3b1580', em: '🍇' },
+    { k: 'berry', name: 'Berry Pop', c: '#ff5fa8', c2: '#8a1550', em: '🍓' },
+    { k: 'mango', name: 'Mango Rush', c: '#ff9a2e', c2: '#8a4300', em: '🥭' },
+  ];
+  const LG_SONGS = [
+    { k: 'chill', name: 'Chill Night', em: '🌙', bpm: 84 },
+    { k: 'hype', name: 'Hype Mode', em: '🔥', bpm: 124 },
+    { k: 'lofi', name: 'Lo-fi Study', em: '📚', bpm: 72 },
+    { k: 'retro', name: 'Retro Arcade', em: '👾', bpm: 140 },
+  ];
+  const LG_EMOTES = ['👋', '😂', '❤️', '🔥', '😎', '🎉', '😭', '🤔'];
+  const LG_SEATS = [{ x: 380, y: 318, k: 'couch' }, { x: 452, y: 318, k: 'couch' }, { x: 524, y: 318, k: 'couch' }, { x: 205, y: 478, k: 'bean' }, { x: 805, y: 488, k: 'bean' }];
+  const LG_SPOTS = { juke: { x: 112, y: 330 }, vend: { x: 900, y: 330 }, arcade: { x: 768, y: 330 } };
+  var LG = { on: false };
+  const lgPrice = (k) => { const p = CHAT.cfg && CHAT.cfg.prices && CHAT.cfg.prices.soda && CHAT.cfg.prices.soda[k]; return Number.isFinite(+p) && p != null ? +p : 50; };
+  const lgHash = (s) => { let h = 2166136261; for(const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
+  // where someone is right now (they walk from x,y to tx,ty starting at time t)
+  function lgPos(d, now){
+    const fast = (d.f || 0) > now, v = fast ? 430 : 240;
+    const dx = (d.tx ?? d.x) - d.x, dy = (d.ty ?? d.y) - d.y, dist = Math.hypot(dx, dy), dur = dist / v * 1000;
+    const p = dur > 0 ? Math.max(0, Math.min(1, (now - (d.t || 0)) / dur)) : 1;
+    return { x: d.x + dx * p, y: d.y + dy * p, moving: p < 1 && dist > 1, face: dx < -1 ? -1 : dx > 1 ? 1 : 0, fast };
+  }
+  async function lgWrite(obj, method){
+    const me = chatUid(); if(!me) return;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/lounge/${me}.json?auth=${encodeURIComponent(tok)}`, { method: method || 'PATCH', body: method === 'DELETE' ? undefined : JSON.stringify(obj) });
+      if(!r.ok && method !== 'DELETE') console.warn('lounge write refused', r.status);
+    }catch(e){}
+  }
+  function lgOpen(){
+    if(!chatName() || !chatLS('rt')){ toast('Log in to the chat first to join the Lounge.', 2400); try{ if(!CHAT.open) chatToggle(true); }catch(e){} return; }
+    if(LG.on){ try{ LG.win.querySelector('canvas').focus(); }catch(e){} return; }
+    const look = (() => { try{ return JSON.parse(chatLS('lgLook') || 'null') || {}; }catch(e){ return {}; } })();
+    const sp = LG_FLOOR;
+    Object.assign(LG, { on: true, pend: null, panel: '', snap: null, jb: null, fx: [], hearts: [], lastFace: 1, song: '', vol: +(chatLS('lgVol') ?? 0.35),
+      me: { x: 470 + Math.random() * 80, y: 430 + Math.random() * 60, c: Number.isInteger(look.c) ? look.c : lgHash(chatUid()) % 16, hat: Number.isInteger(look.hat) ? look.hat : 0, a: '', s: '', f: 0, e: '', et: 0, m: '', mt: 0 } });
+    LG.me.tx = LG.me.x; LG.me.ty = LG.me.y; LG.me.t = trdNow();
+    const w = document.createElement('div'); w.className = 'td-win lg-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Lounge');
+    w.innerHTML = `<div class="td-back"></div><div class="td-box lg-box">
+      <div class="td-head"><b>🛋️ The Lounge</b><span class="lg-who"></span><span class="lg-song"></span><button type="button" class="lg-mute" title="Music volume">🔊</button><button type="button" class="td-x" aria-label="Close">✕</button></div>
+      <div class="lg-stage"><canvas class="lg-cv" tabindex="0" aria-label="The Lounge — click the floor to walk"></canvas><div class="lg-pop" hidden></div><div class="lg-tip">Click the floor to walk · click the couch, vending machine, jukebox, arcade or Mochi 🐱</div></div>
+      <div class="lg-bar">
+        <div class="lg-emos">${LG_EMOTES.map(e => `<button type="button" data-emo="${e}" title="Show ${e}">${e}</button>`).join('')}</div>
+        <button type="button" class="lg-b" data-act="dance" title="Dance">💃 Dance</button>
+        <form class="lg-say"><input maxlength="60" placeholder="Say something…" aria-label="Say something"><button type="submit" class="lg-b">💬</button></form>
+        <button type="button" class="lg-b" data-act="look" title="Change your look">🎨 Look</button>
+        <button type="button" class="lg-b lg-mysoda" data-act="soda" title="Your sodas">🥤 <span>0</span></button>
+      </div></div>`;
+    document.body.appendChild(w); LG.win = w;
+    const fit = () => { if(!LG.win) return; const rc = !chatPanel.hidden && chatPanel.getBoundingClientRect(); const right = rc && rc.width > 0 ? Math.max(0, window.innerWidth - rc.left + 8) : 0; const v = right ? right + 'px' : ''; if(w.style.right !== v) w.style.right = v; };
+    fit(); LG.fit = setInterval(fit, 400); window.addEventListener('resize', fit); LG.fitOff = () => { clearInterval(LG.fit); window.removeEventListener('resize', fit); };
+    w.querySelector('.td-x').addEventListener('click', lgClose); w.querySelector('.td-back').addEventListener('click', lgClose); floatWin(w, 'lg');
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); if(LG.panel) lgPanel(''); else lgClose(); } });
+    w.addEventListener('keydown', (e) => e.stopPropagation()); w.addEventListener('keyup', (e) => e.stopPropagation());
+    const cv = w.querySelector('.lg-cv'); LG.cv = cv;
+    cv.addEventListener('pointerdown', lgClick);
+    w.querySelectorAll('[data-emo]').forEach(b => b.addEventListener('click', () => lgEmote(b.dataset.emo)));
+    w.querySelector('[data-act="dance"]').addEventListener('click', () => lgAct(LG.me.a === 'dance' ? '' : 'dance'));
+    w.querySelector('[data-act="look"]').addEventListener('click', () => lgPanel(LG.panel === 'look' ? '' : 'look'));
+    w.querySelector('[data-act="soda"]').addEventListener('click', () => lgPanel(LG.panel === 'mysoda' ? '' : 'mysoda'));
+    w.querySelector('.lg-mute').addEventListener('click', () => { LG.vol = LG.vol > 0 ? 0 : 0.35; chatLS('lgVol', String(LG.vol)); lgAudioVol(); lgHud(); });
+    w.querySelector('.lg-say').addEventListener('submit', (e) => { e.preventDefault(); const i = e.target.querySelector('input'); lgSay(i.value); i.value = ''; });
+    // join: write my spot, then keep it fresh
+    lgWrite(Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }), 'PUT');
+    LG.beat = setInterval(() => { if(document.visibilityState === 'visible') lgWrite({ h: { '.sv': 'timestamp' } }); }, 20000);
+    LG.poll = setInterval(lgPoll, 1000); lgPoll();
+    if(!SC.loaded) scLoad().then(lgHud).catch(() => {});
+    lgHud(); lgLoop();
+    try{ questEv && questEv('lounge'); }catch(e){}
+  }
+  function lgRec(){ const m = LG.me; return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), n: chatName().slice(0, CHAT_NAME_MAX), c: m.c, hat: m.hat, a: m.a, s: m.s }; }
+  function lgClose(){
+    if(!LG.on) return; LG.on = false;
+    clearInterval(LG.beat); clearInterval(LG.poll); cancelAnimationFrame(LG.raf); if(LG.fitOff) LG.fitOff();
+    liveClose('lounge'); liveClose('loungejb'); lgAudioStop();
+    lgWrite(null, 'DELETE');
+    if(LG.win){ LG.win.remove(); LG.win = null; }
+  }
+  async function lgPoll(){
+    if(!LG.on) return;
+    await Promise.all([
+      liveGet('lounge').then(d => { LG.snap = d; lgHud(); }).catch(() => {}),
+      liveGet('loungejb').then(d => { LG.jb = d; lgMusic(); lgHud(); }).catch(() => {}),
+    ]);
+  }
+  function lgPeople(){
+    const now = trdNow(), me = chatUid(), d = LG.snap || {};
+    return Object.entries(d).filter(([u, v]) => u !== me && v && typeof v.x === 'number' && now - (v.h || 0) < 70000 && !chatBadName(v.n || '')).map(([u, v]) => Object.assign({ u }, v));
+  }
+  function lgHud(){
+    const W = LG.win; if(!W) return;
+    const n = lgPeople().length + 1;
+    W.querySelector('.lg-who').textContent = `${n} here`;
+    const s = LG_SONGS.find(x => x.k === (LG.jb && LG.jb.k));
+    W.querySelector('.lg-song').textContent = s ? `🎵 ${s.name}${LG.jb.n ? ' · picked by ' + LG.jb.n : ''}` : '';
+    W.querySelector('.lg-mute').textContent = LG.vol > 0 ? '🔊' : '🔇';
+    const tot = Object.values(SC.soda || {}).reduce((a, b) => a + (b | 0), 0);
+    W.querySelector('.lg-mysoda span').textContent = tot;
+    W.querySelector('[data-act="dance"]').classList.toggle('on', LG.me.a === 'dance');
+  }
+  // ----- clicking in the room -----
+  function lgPt(e){ const r = LG.cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * LG_W, y: (e.clientY - r.top) / r.height * LG_H }; }
+  function lgCatPos(now){
+    const seg = Math.floor(now / 7000), k = (now % 7000) / 3000;
+    const wp = (s) => { const h = lgHash('mochi' + s); return { x: 140 + (h % 720), y: 345 + ((h >>> 10) % 170) }; };
+    const a = wp(seg), b = wp(seg + 1), p = Math.min(1, k), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, moving: p < 1, face: b.x < a.x ? -1 : 1 };
+  }
+  function lgClick(e){
+    if(e.button !== 0) return;
+    LG.cv.focus(); const p = lgPt(e), now = trdNow();
+    if(LG.panel) lgPanel('');
+    const cat = lgCatPos(now);
+    if(Math.hypot(p.x - cat.x, p.y - (cat.y - 14)) < 34){ lgWalk(cat.x + (LG.me.x < cat.x ? -40 : 40), cat.y + 4, 'pet'); return; }
+    if(p.x > 850 && p.x < 955 && p.y > 110 && p.y < 320){ lgWalk(LG_SPOTS.vend.x, LG_SPOTS.vend.y, 'vend'); return; }
+    if(p.x > 55 && p.x < 165 && p.y > 140 && p.y < 320){ lgWalk(LG_SPOTS.juke.x, LG_SPOTS.juke.y, 'juke'); return; }
+    if(p.x > 728 && p.x < 808 && p.y > 160 && p.y < 320){ lgWalk(LG_SPOTS.arcade.x, LG_SPOTS.arcade.y, 'arcade'); return; }
+    for(const s of LG_SEATS){
+      if(s.k === 'couch' ? (p.x > s.x - 36 && p.x < s.x + 36 && p.y > 255 && p.y < 345) : Math.hypot(p.x - s.x, p.y - s.y) < 42){
+        const taken = lgPeople().some(o => o.a === 'sit' && Math.hypot(o.tx - s.x, o.ty - s.y) < 6);
+        if(taken){ toast('Someone is sitting there.', 1400); return; }
+        lgWalk(s.x, s.y, 'sit'); return;
+      }
+    }
+    // somebody? wave at them
+    for(const o of lgPeople()){ const q = lgPos(o, now); if(Math.abs(p.x - q.x) < 28 && p.y > q.y - 80 && p.y < q.y + 8){ lgEmote('👋'); return; } }
+    lgWalk(p.x, p.y, null);
+  }
+  function lgWalk(x, y, then){
+    const m = LG.me, now = trdNow(), cur = lgPos(m, now);
+    const isSeat = then === 'sit';
+    x = Math.max(LG_FLOOR[0], Math.min(LG_FLOOR[2], x)); y = isSeat ? y : Math.max(LG_FLOOR[1] + 12, Math.min(LG_FLOOR[3], y));
+    Object.assign(m, { x: cur.x, y: cur.y, tx: x, ty: y, t: now, a: m.a === 'dance' && !then ? 'dance' : '' });
+    if(Math.abs(x - cur.x) > 1) LG.lastFace = x < cur.x ? -1 : 1;
+    LG.pend = then;
+    lgWrite(Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }));
+    lgHud();
+  }
+  function lgArrived(){
+    const k = LG.pend; LG.pend = null;
+    if(k === 'sit') lgAct('sit');
+    else if(k === 'vend') lgPanel('vend');
+    else if(k === 'juke') lgPanel('juke');
+    else if(k === 'arcade'){ try{ if(dashIsOnline()) onlinePlay('slots'); else if(!CAS.on) casJoin(); }catch(e){} }
+    else if(k === 'pet'){ const c = lgCatPos(trdNow()); for(let i = 0; i < 5; i++) LG.hearts.push({ x: c.x + (Math.random() - .5) * 30, y: c.y - 30, t: performance.now() + i * 120 }); lgSfx('purr'); lgEmote('😻'); }
+  }
+  function lgAct(a){ LG.me.a = a; lgWrite({ a, h: { '.sv': 'timestamp' } }); lgHud(); }
+  function lgEmote(e){ Object.assign(LG.me, { e, et: trdNow() }); lgWrite({ e, et: { '.sv': 'timestamp' } }); }
+  function lgSay(t){
+    t = String(t || '').trim().replace(/\s+/g, ' ').slice(0, 60); if(!t) return;
+    if(chatBad(t)){ toast("That has a word that isn't allowed — keep it friendly.", 2400); return; }
+    Object.assign(LG.me, { m: t, mt: trdNow() }); lgWrite({ m: t, mt: { '.sv': 'timestamp' } });
+  }
+  // ----- little panels: vending machine, jukebox, your look, your sodas -----
+  function lgPanel(which){
+    LG.panel = which; const P = LG.win && LG.win.querySelector('.lg-pop'); if(!P) return;
+    if(!which){ P.hidden = true; P.innerHTML = ''; return; }
+    const bal = SC.loaded ? Math.max(0, scBal()) : null, own = SC.soda || {};
+    let h = '';
+    if(which === 'vend') h = `<h4>🥤 Soda machine</h4><p>${bal != null ? `You have 🪙 ${lbNum(bal)}` : ''}</p><div class="lg-vend">${LG_SODAS.map(s => `<div class="lg-can" style="--c:${s.c};--c2:${s.c2}"><i></i><b>${s.name}</b><span>🪙 ${lgPrice(s.k).toLocaleString()}</span><button type="button" class="lg-b" data-buy="${s.k}">Buy</button>${own[s.k] ? `<button type="button" class="lg-b alt" data-drink="${s.k}">Drink (${own[s.k]})</button>` : ''}</div>`).join('')}</div><p class="lg-small">Drinking one gives you a sugar rush — you zoom around for 20 seconds.</p>`;
+    else if(which === 'mysoda'){ const mine = LG_SODAS.filter(s => own[s.k]); h = `<h4>🥤 Your sodas</h4>` + (mine.length ? `<div class="lg-vend">${mine.map(s => `<div class="lg-can" style="--c:${s.c};--c2:${s.c2}"><i></i><b>${s.name}</b><span>× ${own[s.k]}</span><button type="button" class="lg-b alt" data-drink="${s.k}">Drink</button></div>`).join('')}</div>` : `<p>None yet — walk to the vending machine (right side) to buy one.</p>`); }
+    else if(which === 'juke') h = `<h4>🎵 Jukebox</h4><p>Everyone in the Lounge hears the song you pick.</p><div class="lg-songs">${LG_SONGS.map(s => `<button type="button" class="lg-b${LG.jb && LG.jb.k === s.k ? ' on' : ''}" data-song="${s.k}">${s.em} ${s.name}</button>`).join('')}<button type="button" class="lg-b${!LG.jb || LG.jb.k === 'off' ? ' on' : ''}" data-song="off">⏹ Stop the music</button></div>`;
+    else if(which === 'look') h = `<h4>🎨 Your look</h4><div class="lg-cols">${LG_COLORS.map((c, i) => `<button type="button" data-col="${i}" class="${LG.me.c === i ? 'on' : ''}" style="background:${c}" aria-label="Colour ${i + 1}"></button>`).join('')}</div><div class="lg-hats">${LG_HATS.map((n, i) => `<button type="button" class="lg-b${LG.me.hat === i ? ' on' : ''}" data-hat="${i}">${n}</button>`).join('')}</div>`;
+    P.innerHTML = `<button type="button" class="lg-px" aria-label="Close">✕</button>` + h; P.hidden = false;
+    P.querySelector('.lg-px').addEventListener('click', () => lgPanel(''));
+    P.querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', () => lgBuy(b.dataset.buy)));
+    P.querySelectorAll('[data-drink]').forEach(b => b.addEventListener('click', () => lgDrink(b.dataset.drink)));
+    P.querySelectorAll('[data-song]').forEach(b => b.addEventListener('click', () => lgPick(b.dataset.song)));
+    P.querySelectorAll('[data-col]').forEach(b => b.addEventListener('click', () => { LG.me.c = +b.dataset.col; lgSaveLook(); lgPanel('look'); }));
+    P.querySelectorAll('[data-hat]').forEach(b => b.addEventListener('click', () => { LG.me.hat = +b.dataset.hat; lgSaveLook(); lgPanel('look'); }));
+  }
+  function lgSaveLook(){ chatLS('lgLook', JSON.stringify({ c: LG.me.c, hat: LG.me.hat })); lgWrite({ c: LG.me.c, hat: LG.me.hat }); }
+  async function lgBuy(k){
+    const s = LG_SODAS.find(x => x.k === k); if(!s || SC.busy) return;
+    if(!SC.loaded) await scLoad();
+    try{ if(CHAT.pollCfg) await CHAT.pollCfg(); }catch(e){}
+    const price = lgPrice(k);
+    if(scBal() < price){ toast(`${s.name} costs ${price.toLocaleString()} points — you have ${scBal().toLocaleString()}.`, 2400); return; }
+    SC.busy = true;
+    try{
+      const tok = await chatAuth(), me = chatUid(), have = (SC.soda || {})[k] | 0, body = {};
+      body[`scores/${me}/s`] = SC.s + price; body[`scores/${me}/t`] = { '.sv': 'timestamp' }; body[`scores/${me}/n`] = chatName().slice(0, CHAT_NAME_MAX) || 'Someone';
+      body[`inv/${me}/soda/${k}`] = have + 1;
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      if(!r.ok) throw new Error('no');
+      SC.s += price; SC.soda = SC.soda || {}; SC.soda[k] = have + 1;
+      lgSfx('clunk'); toast(`${s.em} ${s.name} — *clunk* — it drops out of the machine!`, 2200);
+      try{ questEv('buy'); }catch(e){}
+    }catch(e){ toast("The machine ate your coins — check your connection and try again.", 2600); try{ await scLoad(); }catch(_){} }
+    SC.busy = false; lgHud(); if(LG.panel) lgPanel(LG.panel);
+  }
+  async function lgDrink(k){
+    const s = LG_SODAS.find(x => x.k === k), have = (SC.soda || {})[k] | 0; if(!s || have < 1 || LG.drinking) return;
+    LG.drinking = true;
+    try{
+      const tok = await chatAuth(), me = chatUid(), body = {};
+      body[`inv/${me}/soda/${k}`] = have - 1;
+      const r = await fetch(`${CHAT_DB}/.json?auth=${encodeURIComponent(tok)}`, { method: 'PATCH', body: JSON.stringify(body) });
+      if(!r.ok) throw new Error('no');
+      SC.soda[k] = have - 1; lgPanel('');
+      const f = trdNow() + 20000;
+      Object.assign(LG.me, { s: k, a: 'drink', f });
+      lgWrite({ s: k, a: 'drink', f: Math.round(f - 500), h: { '.sv': 'timestamp' } });
+      lgSfx('fizz');
+      setTimeout(() => { if(!LG.on) return; if(LG.me.a === 'drink') lgAct(''); lgSfx('burp'); lgEmote(k === 'lemon' ? '😖' : '😋'); }, 2600);
+      setTimeout(() => { if(LG.on && LG.me.s === k){ LG.me.s = ''; lgWrite({ s: '' }); } }, 30000);
+    }catch(e){ toast("Couldn't open it — check your connection.", 2000); }
+    LG.drinking = false; lgHud();
+  }
+  async function lgPick(k){
+    lgPanel('');
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/loungejb.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ k, n: chatName().slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) }); }catch(e){}
+    LG.jb = { k, n: chatName(), t: trdNow() }; lgMusic(); lgHud();
+    if(k !== 'off') lgEmote('🎵');
+  }
+  // ----- sound: a tiny synth (the jukebox songs are made right here, in time with everyone else) -----
+  function lgCtx(){ if(!LG.ac){ try{ LG.ac = new (window.AudioContext || window.webkitAudioContext)(); LG.gain = LG.ac.createGain(); LG.gain.connect(LG.ac.destination); lgAudioVol(); }catch(e){ return null; } } if(LG.ac.state === 'suspended') LG.ac.resume().catch(() => {}); return LG.ac; }
+  function lgAudioVol(){ if(LG.gain) LG.gain.gain.value = LG.vol; }
+  function lgAudioStop(){ clearInterval(LG.seqT); LG.seqT = 0; LG.song = ''; if(LG.ac){ try{ LG.ac.close(); }catch(e){} LG.ac = null; LG.gain = null; } }
+  function lgTone(type, f, t0, dur, vol, f2){
+    const ac = LG.ac; if(!ac) return; const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t0); if(f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(LG.gain); o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  function lgNoise(t0, dur, vol, hp){
+    const ac = LG.ac; if(!ac) return;
+    if(!LG.nb){ const b = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate), d = b.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; LG.nb = b; }
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = LG.nb; f.type = 'highpass'; f.frequency.value = hp || 6000;
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(g); g.connect(LG.gain); s.start(t0); s.stop(t0 + dur + 0.02);
+  }
+  function lgSfx(k){
+    const ac = lgCtx(); if(!ac || LG.vol <= 0) return; const t = ac.currentTime + 0.01;
+    if(k === 'clunk'){ lgTone('square', 140, t, 0.12, 0.25, 60); lgTone('square', 110, t + 0.16, 0.14, 0.2, 50); }
+    else if(k === 'fizz'){ lgNoise(t, 0.9, 0.18, 3000); lgTone('sine', 900, t, 0.08, 0.1, 1400); }
+    else if(k === 'burp'){ lgTone('sawtooth', 120, t, 0.35, 0.22, 70); lgTone('sawtooth', 95, t + 0.05, 0.3, 0.15, 60); }
+    else if(k === 'purr'){ for(let i = 0; i < 6; i++) lgTone('sine', 46, t + i * 0.09, 0.08, 0.25, 40); lgTone('sine', 880, t + 0.1, 0.25, 0.06, 1200); }
+  }
+  const LG_SCALE = [0, 2, 3, 5, 7, 8, 10];
+  const lgNote = (root, deg, oct) => root * Math.pow(2, (LG_SCALE[((deg % 7) + 7) % 7] + 12 * (oct + Math.floor(deg / 7))) / 12);
+  function lgMusic(){
+    const want = LG.on && LG.jb && LG.jb.k && LG.jb.k !== 'off' ? LG.jb.k : '';
+    if(want === LG.song) return;
+    LG.song = want; clearInterval(LG.seqT); LG.seqT = 0;
+    if(!want) return;
+    const ac = lgCtx(); if(!ac) return;
+    const S = LG_SONGS.find(x => x.k === want), step = 60 / S.bpm / 4, t0 = (LG.jb.t || trdNow());
+    const prog = { chill: [0, 5, 3, 4], hype: [0, 0, 5, 6], lofi: [0, 3, 5, 4], retro: [0, 4, 5, 3] }[want];
+    const root = { chill: 220, hype: 110 * 1.335, lofi: 196, retro: 261.6 }[want];
+    let next = Math.floor((trdNow() - t0) / 1000 / step) + 1, at = 0;
+    const sched = () => {
+      if(!LG.ac || LG.song !== want) return;
+      const songSec = (trdNow() - t0) / 1000, ahead = 0.25;
+      if(!at){ at = 1; }
+      while(next * step < songSec + ahead){
+        const n = next, when = ac.currentTime + (n * step - songSec);
+        if(when >= ac.currentTime - 0.01){
+          const bar = Math.floor(n / 16) % 4, s16 = n % 16, ch = prog[bar];
+          if(want === 'hype'){ if(s16 % 4 === 0) lgTone('sine', 150, when, 0.22, 0.6, 45); if(s16 % 4 === 2) lgNoise(when, 0.05, 0.12); if(s16 % 8 === 4) lgNoise(when, 0.14, 0.22, 1500); if(s16 % 2 === 1) lgTone('sawtooth', lgNote(root / 2, ch, 0), when, step * 0.9, 0.09); if(s16 % 8 === 0) [0, 2, 4].forEach(d => lgTone('square', lgNote(root * 2, ch + d, 0), when, step * 3, 0.03)); }
+          else if(want === 'retro'){ if(s16 % 4 === 0) lgTone('square', 120, when, 0.1, 0.25, 50); if(s16 % 4 === 2) lgNoise(when, 0.04, 0.08); lgTone('square', lgNote(root, ch + [0, 2, 4, 7, 4, 2, 0, 2][s16 % 8], 0), when, step * 0.8, 0.045); if(s16 % 4 === 0) lgTone('triangle', lgNote(root / 4, ch, 0), when, step * 3.5, 0.2); }
+          else if(want === 'lofi'){ if(s16 === 0 || s16 === 10) lgTone('sine', 110, when, 0.3, 0.45, 50); if(s16 === 4 || s16 === 12) lgNoise(when, 0.12, 0.1, 2500); if(s16 % 2 === 0) lgNoise(when, 0.03, 0.04); if(s16 === 0) [0, 2, 4, 6].forEach(d => lgTone('triangle', lgNote(root, ch + d, 0), when, step * 14, 0.035)); if(s16 % 8 === 6) lgTone('sine', lgNote(root * 2, ch + 4, 0), when, step * 2, 0.04); }
+          else { if(s16 === 0) [0, 2, 4].forEach(d => lgTone('sine', lgNote(root, ch + d, 0), when, step * 15, 0.05)); if(s16 % 4 === 0) lgTone('triangle', lgNote(root / 2, ch, 0), when, step * 3, 0.12); if(s16 % 3 === 0) lgTone('sine', lgNote(root * 2, ch + [0, 4, 2, 6, 4][n % 5], 0), when, step * 2, 0.03); if(s16 % 8 === 4) lgNoise(when, 0.2, 0.03, 4000); }
+        }
+        next++;
+      }
+    };
+    sched(); LG.seqT = setInterval(sched, 90);
+  }
+  // ----- drawing -----
+  function lgBg(W, H){
+    const k = W + 'x' + H; if(LG.bgK === k) return LG.bg;
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), s = W / LG_W;
+    g.scale(s, s);
+    // back wall
+    const wall = g.createLinearGradient(0, 0, 0, 300); wall.addColorStop(0, '#2b1f4a'); wall.addColorStop(1, '#3d2b5e'); g.fillStyle = wall; g.fillRect(0, 0, LG_W, 300);
+    g.fillStyle = 'rgba(255,255,255,.035)'; for(let x = 0; x < LG_W; x += 40) g.fillRect(x, 0, 2, 280);
+    // window with the night city
+    g.fillStyle = '#0c0a24'; roundRectPath(g, 300, 40, 380, 150, 10); g.fill();
+    const sky = g.createLinearGradient(0, 40, 0, 190); sky.addColorStop(0, '#120f3a'); sky.addColorStop(1, '#4a2a6b'); g.fillStyle = sky; roundRectPath(g, 306, 46, 368, 138, 7); g.fill();
+    g.fillStyle = '#fff6c9'; g.beginPath(); g.arc(620, 78, 14, 0, 7); g.fill();
+    for(let i = 0; i < 40; i++){ const h = lgHash('st' + i); g.fillStyle = `rgba(255,255,255,${.3 + (h % 50) / 100})`; g.fillRect(310 + h % 360, 50 + (h >>> 9) % 60, 2, 2); }
+    for(let i = 0; i < 14; i++){ const h = lgHash('b' + i), bw = 20 + h % 26, bh = 40 + (h >>> 8) % 80, bx = 306 + i * 27; g.fillStyle = i % 2 ? '#1c1640' : '#231b4d'; g.fillRect(bx, 184 - bh, bw, bh);
+      for(let wy = 184 - bh + 6; wy < 178; wy += 10) for(let wx = bx + 4; wx < bx + bw - 4; wx += 7) if(lgHash(i + ':' + wx + ':' + wy) % 3 === 0){ g.fillStyle = 'rgba(255,214,120,.8)'; g.fillRect(wx, wy, 3, 4); } }
+    g.strokeStyle = '#5b4386'; g.lineWidth = 8; roundRectPath(g, 300, 40, 380, 150, 10); g.stroke(); g.lineWidth = 4; g.beginPath(); g.moveTo(490, 44); g.lineTo(490, 186); g.stroke();
+    // neon sign
+    g.save(); g.font = "800 34px 'Inter', sans-serif"; g.textAlign = 'center'; g.shadowColor = '#ff5fd2'; g.shadowBlur = 18; g.fillStyle = '#ffd1f4'; g.fillText('LOUNGE', 830, 92); g.shadowColor = '#57e1ff'; g.font = "700 15px 'Inter', sans-serif"; g.fillStyle = '#c8f6ff'; g.fillText('S A I D E C K', 830, 60); g.restore();
+    // shelf with records
+    g.fillStyle = '#5a3d2b'; g.fillRect(170, 150, 100, 8); ['#ff6b6b', '#ffd166', '#6fb6ff', '#9be37a'].forEach((c, i) => { g.fillStyle = c; g.fillRect(178 + i * 22, 118, 16, 32); });
+    // floor
+    g.fillStyle = '#2a1c14'; g.fillRect(0, 280, LG_W, 280);
+    const fl = g.createLinearGradient(0, 280, 0, 560); fl.addColorStop(0, '#6b4632'); fl.addColorStop(1, '#8a5a3e'); g.fillStyle = fl; g.fillRect(0, 284, LG_W, 276);
+    g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 2; for(let y = 300; y < 560; y += 26){ g.beginPath(); g.moveTo(0, y); g.lineTo(LG_W, y); g.stroke(); for(let x = (y / 26 % 2) * 60; x < LG_W; x += 120){ g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 26); g.stroke(); } }
+    g.fillStyle = '#1d1430'; g.fillRect(0, 276, LG_W, 10);
+    // rug
+    g.save(); g.translate(500, 440); g.scale(1, .42); g.fillStyle = '#3f2b74'; g.beginPath(); g.arc(0, 0, 210, 0, 7); g.fill(); g.strokeStyle = '#f5d04a'; g.lineWidth = 8; g.beginPath(); g.arc(0, 0, 186, 0, 7); g.stroke(); g.strokeStyle = 'rgba(255,255,255,.15)'; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, 120, 0, 7); g.stroke(); g.restore();
+    LG.bg = c; LG.bgK = k; return c;
+  }
+  function lgDrawProps(g, now, list){
+    // the furniture joins the characters in one list, drawn back to front
+    list.push({ y: 300, d: () => {   // jukebox
+      const glow = LG.song ? .5 + .5 * Math.sin(now / 160) : 0;
+      g.fillStyle = '#4a2a1e'; roundRectPath(g, 62, 150, 100, 150, 40); g.fill();
+      const jg = g.createLinearGradient(62, 150, 162, 300); jg.addColorStop(0, '#ff8a5c'); jg.addColorStop(.5, '#ffd166'); jg.addColorStop(1, '#ff5fa8'); g.fillStyle = jg; roundRectPath(g, 70, 160, 84, 130, 34); g.fill();
+      g.fillStyle = `rgba(255,255,255,${.25 + glow * .4})`; roundRectPath(g, 82, 176, 60, 48, 22); g.fill();
+      g.fillStyle = '#2a1a14'; g.fillRect(84, 236, 56, 40); g.fillStyle = '#ffd166'; for(let i = 0; i < 4; i++) g.fillRect(90 + i * 13, 242, 6, 28);
+      if(LG.song){ g.font = "700 18px 'Inter',sans-serif"; g.fillStyle = '#fff'; g.fillText('♪', 150 + Math.sin(now / 300) * 6, 150 - (now / 20 % 30)); g.fillText('♫', 70 + Math.cos(now / 340) * 6, 140 - ((now / 24 + 15) % 30)); }
+    } });
+    list.push({ y: 304, d: () => {   // vending machine
+      g.fillStyle = '#1a2b5c'; roundRectPath(g, 856, 112, 98, 192, 10); g.fill();
+      g.fillStyle = '#2f4fa8'; roundRectPath(g, 862, 118, 86, 180, 8); g.fill();
+      g.fillStyle = 'rgba(170,220,255,.25)'; roundRectPath(g, 868, 126, 56, 118, 5); g.fill();
+      LG_SODAS.forEach((s, i) => { for(let r = 0; r < 3; r++){ g.fillStyle = s.c; g.fillRect(872 + (i % 5) * 10, 132 + r * 38 + (i > 4 ? 10 : 0), 8, 26); g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(873 + (i % 5) * 10, 134 + r * 38, 2, 20); } });
+      g.fillStyle = '#0d1430'; g.fillRect(930, 130, 12, 40); g.fillStyle = '#57e1ff'; g.fillRect(932, 134, 8, 6);
+      g.fillStyle = '#0a0f22'; g.fillRect(872, 256, 66, 22);
+      g.font = "800 11px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.textAlign = 'center'; g.fillText('SODA', 905, 292); g.textAlign = 'left';
+    } });
+    list.push({ y: 304, d: () => {   // arcade cabinet (slots)
+      g.fillStyle = '#3a1150'; g.beginPath(); g.moveTo(732, 300); g.lineTo(732, 190); g.lineTo(742, 162); g.lineTo(798, 162); g.lineTo(806, 190); g.lineTo(806, 300); g.closePath(); g.fill();
+      const sc = g.createLinearGradient(740, 176, 798, 226); sc.addColorStop(0, '#ff5fd2'); sc.addColorStop(1, '#57e1ff'); g.fillStyle = sc; g.fillRect(742, 176, 56, 46);
+      g.font = "16px sans-serif"; g.fillText(['🍒', '7️⃣', '💎'][Math.floor(now / 400) % 3], 746, 206); g.fillText(['💎', '🍒', '7️⃣'][Math.floor(now / 330) % 3], 770, 206);
+      g.fillStyle = '#ffd166'; g.fillRect(744, 236, 52, 10); g.fillStyle = '#ff6b6b'; g.beginPath(); g.arc(758, 241, 5, 0, 7); g.fill();
+      g.font = "800 9px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.textAlign = 'center'; g.fillText('SLOTS', 769, 172); g.textAlign = 'left';
+    } });
+    list.push({ y: 300, d: () => {   // couch
+      g.fillStyle = '#7a2f5c'; roundRectPath(g, 334, 252, 236, 56, 18); g.fill();
+      g.fillStyle = '#9b3d74'; roundRectPath(g, 340, 286, 224, 40, 12); g.fill();
+      g.fillStyle = '#8a3568'; roundRectPath(g, 322, 272, 30, 60, 12); g.fill(); roundRectPath(g, 552, 272, 30, 60, 12); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.08)'; for(let i = 0; i < 3; i++) g.fillRect(360 + i * 72, 292, 52, 4);
+    } });
+    list.push({ y: 262, d: () => { g.fillStyle = '#3b2a20'; g.fillRect(232, 226, 36, 36); g.fillStyle = '#3fae6a'; for(let i = 0; i < 7; i++){ g.beginPath(); g.ellipse(250 + Math.cos(i) * 16, 210 - i * 6, 10, 20, i - 3, 0, 7); g.fill(); } } });   // plant
+    for(const s of LG_SEATS.filter(x => x.k === 'bean')) list.push({ y: s.y - 6, d: () => { g.fillStyle = s.x < 500 ? '#4a7bd1' : '#d16a4a'; g.beginPath(); g.ellipse(s.x, s.y - 6, 40, 22, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(s.x - 10, s.y - 14, 16, 7, -.3, 0, 7); g.fill(); } });
+    // Mochi the cat
+    const c = lgCatPos(now);
+    list.push({ y: c.y, d: () => {
+      g.save(); g.translate(c.x, c.y); g.scale(c.face, 1);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(0, 0, 20, 5, 0, 0, 7); g.fill();
+      const b = c.moving ? Math.sin(now / 70) * 2 : 0;
+      g.fillStyle = '#f2b35e'; g.beginPath(); g.ellipse(-2, -12 + b * .3, 18, 11, 0, 0, 7); g.fill();
+      g.strokeStyle = '#f2b35e'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(-18, -14); g.quadraticCurveTo(-30, -30 + Math.sin(now / 300) * 6, -22, -36); g.stroke();
+      g.beginPath(); g.arc(14, -22 + b * .3, 11, 0, 7); g.fill();
+      g.beginPath(); g.moveTo(6, -30); g.lineTo(9, -40); g.lineTo(14, -32); g.fill(); g.beginPath(); g.moveTo(16, -32); g.lineTo(22, -40); g.lineTo(24, -28); g.fill();
+      g.fillStyle = '#2a1a14'; g.fillRect(15, -25, 2.5, 3.5); g.fillRect(20, -25, 2.5, 3.5);
+      g.fillStyle = '#e09a46'; for(let i = 0; i < 3; i++) g.fillRect(-10 + i * 7, -21, 3, 8);
+      g.restore();
+      g.font = "600 10px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.65)'; g.fillText('Mochi', c.x, c.y + 14); g.textAlign = 'left';
+    } });
+  }
+  function lgDrawChar(g, d, p, now, isMe){
+    const col = LG_COLORS[d.c | 0] || LG_COLORS[0], sit = d.a === 'sit' && !p.moving, dance = d.a === 'dance' && !p.moving, drink = d.a === 'drink';
+    const ph = (lgHash(d.u || 'me') % 1000);
+    let bob = p.moving ? Math.abs(Math.sin((now + ph) / (p.fast ? 55 : 85))) * -5 : Math.sin((now + ph) / 600) * 1.2;
+    let sway = 0;
+    if(dance){ bob = Math.abs(Math.sin((now + ph) / 140)) * -9; sway = Math.sin((now + ph) / 280) * .22; }
+    const face = p.face || d._face || 1;
+    g.save(); g.translate(p.x, p.y); g.scale(LG_CS, LG_CS);
+    g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(0, 0, 17, 5, 0, 0, 7); g.fill();
+    if(p.fast){ for(let i = 1; i < 4; i++){ g.fillStyle = `rgba(255,230,120,${.25 - i * .06})`; g.beginPath(); g.arc(-face * i * 9, -18, 10 - i * 2, 0, 7); g.fill(); } }
+    g.translate(0, sit ? -6 : 0); g.rotate(sway); g.translate(0, bob);
+    // feet
+    if(!sit){ const st = p.moving ? Math.sin((now + ph) / (p.fast ? 55 : 85)) * 4 : 0; g.fillStyle = '#2a2140'; g.beginPath(); g.ellipse(-6 + st, -2, 6, 4, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(6 - st, -2, 6, 4, 0, 0, 7); g.fill(); }
+    // body
+    const bg = g.createLinearGradient(-16, -44, 16, 0); bg.addColorStop(0, col); bg.addColorStop(1, lgShade(col, -.25));
+    g.fillStyle = bg; g.beginPath(); g.ellipse(0, -22, 16, 21, 0, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.ellipse(-6, -32, 5, 7, -.4, 0, 7); g.fill();
+    // face
+    const blink = ((now + ph * 7) % 3800) < 120;
+    g.fillStyle = '#1d1530';
+    const ex = face * 3;
+    if(d.a === 'sleep' || blink){ g.fillRect(-7 + ex, -27, 5, 1.6); g.fillRect(3 + ex, -27, 5, 1.6); }
+    else { g.beginPath(); g.ellipse(-5 + ex, -27, 2.4, 3.2, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(5 + ex, -27, 2.4, 3.2, 0, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillRect(-5.6 + ex, -29, 1.2, 1.2); g.fillRect(4.4 + ex, -29, 1.2, 1.2); }
+    g.fillStyle = 'rgba(255,110,150,.45)'; g.beginPath(); g.ellipse(-10 + ex, -21, 3.5, 2, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(10 + ex, -21, 3.5, 2, 0, 0, 7); g.fill();
+    g.strokeStyle = '#1d1530'; g.lineWidth = 1.4; g.beginPath(); if(dance || (d.e && now - (d.et || 0) < 2500)) g.arc(ex, -21, 3, 0.1, Math.PI - 0.1); else g.arc(ex, -22, 2.2, 0.3, Math.PI - 0.3); g.stroke();
+    // arms (+ soda can / waving)
+    const waving = d.e === '👋' && now - (d.et || 0) < 2200;
+    g.strokeStyle = lgShade(col, -.15); g.lineWidth = 4; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(-14, -20); g.lineTo(-19, dance ? -32 + Math.sin(now / 140) * 6 : -11); g.stroke();
+    const ay = waving ? -40 + Math.sin(now / 90) * 4 : drink ? -28 : dance ? -32 - Math.sin(now / 140) * 6 : -12;
+    g.beginPath(); g.moveTo(14, -20); g.lineTo(20, ay); g.stroke();
+    const soda = LG_SODAS.find(s => s.k === d.s);
+    if(soda){ const cy = ay - 4; g.fillStyle = soda.c; roundRectPath(g, 17, cy - 6, 8, 13, 2); g.fill(); g.fillStyle = '#ddd'; g.fillRect(17, cy - 7, 8, 2); g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(18, cy - 4, 2, 8);
+      if(drink && Math.floor(now / 200) % 2) { g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(24 + Math.random() * 4, cy - 12 - Math.random() * 6, 1.6, 0, 7); g.fill(); } }
+    lgHat(g, d.hat | 0, now);
+    g.restore();
+    // name, emote, words
+    g.textAlign = 'center';
+    g.font = "700 11px 'Inter',sans-serif"; const nm = String(d.n || '');
+    const tw = g.measureText(nm).width + 10; g.fillStyle = isMe ? 'rgba(180,140,255,.85)' : 'rgba(10,8,20,.6)'; roundRectPath(g, p.x - tw / 2, p.y + 6, tw, 15, 7); g.fill();
+    g.fillStyle = '#fff'; g.fillText(nm, p.x, p.y + 17);
+    const top = p.y + (-(sit ? 58 : 64) + bob) * LG_CS;
+    if(d.e && now - (d.et || 0) < 3000){ const k = (now - d.et) / 3000; g.globalAlpha = k > .8 ? (1 - k) * 5 : 1; g.font = "24px sans-serif"; g.fillText(d.e, p.x, top - 6 - Math.min(1, k * 4) * 8); g.globalAlpha = 1; }
+    else if(dance){ g.font = "700 14px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.fillText('♪', p.x + 18, top + 4 - (now / 25 % 20)); }
+    if(d.m && now - (d.mt || 0) < 6500){
+      g.font = "600 12px 'Inter',sans-serif"; const lines = lgWrap(g, d.m, 150), lh = 15, bw = Math.max(...lines.map(l => g.measureText(l).width)) + 16, bh = lines.length * lh + 10, by = top - 18 - bh;
+      g.fillStyle = 'rgba(255,255,255,.95)'; roundRectPath(g, p.x - bw / 2, by, bw, bh, 9); g.fill(); g.beginPath(); g.moveTo(p.x - 6, by + bh); g.lineTo(p.x, by + bh + 7); g.lineTo(p.x + 6, by + bh); g.fill();
+      g.fillStyle = '#1d1530'; lines.forEach((l, i) => g.fillText(l, p.x, by + 18 + i * lh));
+    }
+    g.textAlign = 'left';
+  }
+  function lgWrap(g, t, max){ const out = []; let cur = ''; for(const w of t.split(' ')){ const n = cur ? cur + ' ' + w : w; if(g.measureText(n).width > max && cur){ out.push(cur); cur = w; } else cur = n; } if(cur) out.push(cur); return out.slice(0, 4); }
+  function lgShade(hex, k){ const n = parseInt(hex.slice(1), 16); let r = n >> 16, gg = n >> 8 & 255, b = n & 255; const f = (v) => Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k))); return `rgb(${f(r)},${f(gg)},${f(b)})`; }
+  function lgHat(g, h, now){
+    if(!h) return;
+    g.save(); g.translate(0, -41);
+    if(h === 1){ g.fillStyle = '#ff5f5f'; g.beginPath(); g.ellipse(0, 0, 14, 8, 0, Math.PI, 0); g.fill(); g.fillRect(0, -2, 18, 4); }
+    else if(h === 2){ g.fillStyle = '#6fb6ff'; g.beginPath(); g.ellipse(0, 1, 15, 10, 0, Math.PI, 0); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(0, -10, 4, 0, 7); g.fill(); g.fillStyle = '#4a8ad8'; g.fillRect(-15, -1, 30, 4); }
+    else if(h === 3){ g.fillStyle = '#ffd166'; g.beginPath(); g.moveTo(-9, 2); g.lineTo(0, -22); g.lineTo(9, 2); g.fill(); g.fillStyle = '#ff5fa8'; g.beginPath(); g.arc(0, -22, 3.5, 0, 7); g.fill(); g.fillRect(-6, -8, 12, 3); }
+    else if(h === 4){ g.fillStyle = '#ffd34d'; g.beginPath(); g.moveTo(-12, 2); g.lineTo(-12, -10); g.lineTo(-6, -4); g.lineTo(0, -13); g.lineTo(6, -4); g.lineTo(12, -10); g.lineTo(12, 2); g.fill(); g.fillStyle = '#ff5f5f'; g.beginPath(); g.arc(0, -3, 2.2, 0, 7); g.fill(); }
+    else if(h === 5){ g.strokeStyle = '#2a2140'; g.lineWidth = 3; g.beginPath(); g.arc(0, 12, 17, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); g.fillStyle = '#ff5fd2'; roundRectPath(g, -20, 6, 7, 12, 3); g.fill(); roundRectPath(g, 13, 6, 7, 12, 3); g.fill(); }
+    else if(h === 6){ g.fillStyle = '#ff5fa8'; g.beginPath(); g.moveTo(0, 2); g.lineTo(-11, -6); g.lineTo(-11, 8); g.fill(); g.beginPath(); g.moveTo(0, 2); g.lineTo(11, -6); g.lineTo(11, 8); g.fill(); g.beginPath(); g.arc(0, 2, 3, 0, 7); g.fill(); }
+    else if(h === 7){ g.fillStyle = '#2a2140'; g.beginPath(); g.moveTo(-13, 6); g.lineTo(-10, -9); g.lineTo(-3, 3); g.fill(); g.beginPath(); g.moveTo(13, 6); g.lineTo(10, -9); g.lineTo(3, 3); g.fill(); g.fillStyle = '#ff9ec7'; g.beginPath(); g.moveTo(-10, 3); g.lineTo(-9, -4); g.lineTo(-6, 2); g.fill(); g.beginPath(); g.moveTo(10, 3); g.lineTo(9, -4); g.lineTo(6, 2); g.fill(); }
+    else if(h === 8){ g.strokeStyle = `rgba(255,230,120,${.75 + .25 * Math.sin(now / 300)})`; g.lineWidth = 3; g.beginPath(); g.ellipse(0, -10 + Math.sin(now / 400) * 1.5, 12, 4, 0, 0, 7); g.stroke(); }
+    else if(h === 9){ g.fillStyle = '#a0683a'; g.beginPath(); g.ellipse(0, 2, 22, 5, 0, 0, 7); g.fill(); roundRectPath(g, -10, -12, 20, 14, 5); g.fill(); g.fillStyle = '#5a3a1e'; g.fillRect(-10, -2, 20, 3); }
+    g.restore();
+  }
+  function lgLoop(){
+    cancelAnimationFrame(LG.raf); if(!LG.on) return;
+    LG.raf = requestAnimationFrame(lgLoop);
+    const cv = LG.cv; if(!cv || document.visibilityState !== 'visible') return;
+    const r = cv.getBoundingClientRect(); if(r.width < 10) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(W * LG_H / LG_W);
+    if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+    const g = cv.getContext('2d'), now = trdNow(), s = W / LG_W;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(lgBg(W, H), 0, 0);
+    g.setTransform(s, 0, 0, s, 0, 0);
+    // dance-floor lights when the music is hype / retro
+    if(LG.song === 'hype' || LG.song === 'retro'){
+      g.save(); g.globalCompositeOperation = 'lighter';
+      for(let i = 0; i < 3; i++){ const a = now / 900 + i * 2.1; g.fillStyle = ['rgba(255,80,200,.16)', 'rgba(80,220,255,.16)', 'rgba(255,220,80,.14)'][i]; g.beginPath(); g.ellipse(500 + Math.cos(a) * 160, 440 + Math.sin(a * 1.3) * 40, 90, 34, 0, 0, 7); g.fill(); }
+      g.restore();
+      g.fillStyle = '#ccd'; g.beginPath(); g.arc(500, 26, 14, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.moveTo(500, 0); g.lineTo(500, 12); g.stroke();
+      for(let i = 0; i < 6; i++){ g.fillStyle = `hsla(${(now / 8 + i * 60) % 360},90%,70%,.8)`; g.fillRect(492 + (i % 3) * 6, 18 + Math.floor(i / 3) * 7, 4, 4); }
+    }
+    // me: did I just arrive?
+    const m = LG.me, mp = lgPos(m, now);
+    if(!mp.moving && LG.pend) lgArrived();
+    if(mp.face) LG.lastFace = mp.face;
+    const list = [];
+    lgDrawProps(g, now, list);
+    for(const o of lgPeople()){ const p = lgPos(o, now); if(!p.face) p.face = o.tx < o.x ? -1 : 1; list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
+    mp.face = mp.face || LG.lastFace;
+    list.push({ y: mp.y + .1, d: () => lgDrawChar(g, Object.assign({ n: chatName(), u: chatUid() }, m), mp, now, true) });
+    list.sort((a, b) => a.y - b.y).forEach(x => x.d());
+    // hearts from petting Mochi
+    const pn = performance.now();
+    LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
+    g.font = "16px sans-serif"; g.textAlign = 'center';
+    for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText('❤️', h.x + Math.sin(k * 8) * 6, h.y - k * 50); }
+    g.globalAlpha = 1; g.textAlign = 'left';
+    // the walk target marker
+    if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 2; g.beginPath(); g.ellipse(m.tx, m.ty, 10 + Math.sin(now / 120) * 2, 4, 0, 0, 7); g.stroke(); }
+  }
+  // ----- "… is typing" bubbles (build 200) -----
+  // While you type, SaiDeck puts a small note at typing/<room>/<you> (refreshed every few seconds, removed when you
+  // send, empty the box or leave). Everyone in that room sees bouncing dots with the typers' names above the box.
+  const TYP = { at: 0, room: '', poll: 0, path: '' };
+  async function typingPing(ta){
+    const room = CHAT.room, me = chatUid();
+    if(!room || !me || !chatName()) return;
+    if(!ta.value.trim()){ typingStop(); return; }
+    if(TYP.room === room && Date.now() - TYP.at < 3000) return;
+    TYP.at = Date.now(); TYP.room = room;
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/typing/${encodeURIComponent(room)}/${me}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ n: chatName().slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }) }); }catch(e){}
+  }
+  async function typingStop(){
+    if(!TYP.room) return;
+    const room = TYP.room, me = chatUid(); TYP.room = ''; TYP.at = 0;
+    try{ const tok = await chatAuth(); await fetch(`${CHAT_DB}/typing/${encodeURIComponent(room)}/${me}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); }catch(e){}
+  }
+  // watch the room (while the chat is open)
+  function typingWatch(){
+    clearInterval(TYP.poll);
+    TYP.poll = setInterval(async () => {
+      const el = chatPanel.querySelector('.chat-typing');
+      const want = CHAT.open && CHAT.room && el && document.visibilityState === 'visible' ? 'typing/' + encodeURIComponent(CHAT.room) : '';
+      if(TYP.path && TYP.path !== want){ liveClose(TYP.path); TYP.path = ''; }
+      if(!want){ if(el) el.hidden = true; return; }
+      TYP.path = want;
+      let d = null; try{ d = await liveGet(want); }catch(e){ return; }
+      const me = chatUid(), now = trdNow();
+      const who = Object.entries(d || {}).filter(([u, v]) => u !== me && v && typeof v.t === 'number' && now - v.t < 7000 && typeof v.n === 'string' && !chatBadName(v.n) && !(CHAT.blocked && CHAT.blocked[u])).map(([u, v]) => v.n);
+      const txt = !who.length ? '' : who.length === 1 ? `${who[0]} is typing` : who.length === 2 ? `${who[0]} and ${who[1]} are typing` : `${who.length} people are typing`;
+      if(el.dataset.t === txt) return;
+      el.dataset.t = txt; el.hidden = !txt;
+      if(txt) el.innerHTML = `<span class="chat-tdots"><i></i><i></i><i></i></span><span>${escapeHtml(txt)}…</span>`;
+    }, 1200);
+  }
+  typingWatch();
+  window.addEventListener('pagehide', () => { if(TYP.room) typingStop(); });
   async function chatSend(ta, grow){
     const text = ta.value.trim().replace(/\s+/g, ' '); if(!text) return;
+    typingStop();
     const why = chatBlock(); if(why){ toast(why, 2800); return; }
     const mx = chatMaxLen();
     if(text.length > mx){ toast(`Messages can be up to ${mx} characters.`, 2000); return; }
