@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#150930"><link rel="apple-touch-icon" href="icon-192.png">
 <title>SaiDeck</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=M+PLUS+1+Code:wght@400;500;700&family=Pixelify+Sans:wght@400;600&family=VT323&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@800;900&family=Fredoka:wght@700&family=Anton&family=Bangers&family=Bebas+Neue&family=Montserrat:wght@900&family=Playfair+Display:wght@900&family=Pacifico&family=Lobster&family=Permanent+Marker&family=Righteous&family=Orbitron:wght@900&family=Caveat:wght@700&family=Press+Start+2P&family=Luckiest+Guy&family=Dancing+Script:wght@700&display=swap">
@@ -23200,7 +23201,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 194;                 // ← goes up by one with every published version
+  const SD_BUILD = 195;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -23292,7 +23293,15 @@
   async function sdUpdate(v, opts){
     opts = opts || {};
     const here = location.protocol === 'file:' ? decodeURIComponent(location.pathname.split('/').pop() || '') : '';
-    if(!here){ sdReloading = true; location.reload(); return; }   // (not a file on this computer: a reload gets the new one)
+    if(!here){
+      // (the website version: a reload gets the new one — once the site has it. GitHub Pages can take a minute or two after a
+      //  publish, and the browser may hold the old copy for a few minutes, so fetch it fresh first and check)
+      try{
+        const r = await fetch(location.href.split('#')[0], { cache: 'reload' }), got = sdBuildOf(await r.text());
+        if(got && got < (v.build | 0)){ toast('The website is still getting the new version ready — try again in a minute or two.', 4000); return; }
+      }catch(e){}
+      sdReloading = true; location.reload(); return;
+    }
     sdBusy = true; sdBtn.classList.add('busy');
     try{
       const want = v.build | 0;
