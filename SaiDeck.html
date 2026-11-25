@@ -244,7 +244,8 @@
   body.sd-online{background:radial-gradient(90% 80% at 30% 20%, #2a1d4a 0%, #120d22 55%, #07060d 100%);}
   .sd-obar{display:none;}
   body.sd-online .sd-obar{display:flex;position:fixed;left:0;right:0;top:0;height:56px;z-index:350;align-items:center;gap:10px;padding:0 16px;box-sizing:border-box;background:rgba(18,13,34,.85);border-bottom:1px solid rgba(180,140,255,.25);color:#f1ecff;font:16px 'Inter',sans-serif;}
-  .sd-obar .dash-logo{width:32px;height:32px;} .sd-obar em{font-style:normal;background:linear-gradient(90deg,#ff9ad5,#b48cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sd-obar .dash-logo{width:32px;height:32px;} .sd-obar b, .sd-ohome, .sd-opts{white-space:nowrap;}
+  @media (max-width:520px){.sd-obar b{font-size:14px;} .sd-ohome .t{display:none;} .sd-opts{font-size:13px;padding:6px 10px;}} .sd-obar em{font-style:normal;background:linear-gradient(90deg,#ff9ad5,#b48cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
   .sd-ohome{padding:8px 13px;border-radius:10px;border:1px solid rgba(180,140,255,.4);background:rgba(180,140,255,.12);color:#fff;font:600 13px 'Inter',sans-serif;cursor:pointer;}
   body.sd-online .chat-panel{top:68px;bottom:12px;}
   body.sd-online .chat-panel .chat-x{display:none;}
@@ -271,6 +272,10 @@
   }
   @media (max-width:700px){
     body.sd-online .on-games{top:62px;bottom:auto;right:0;left:0;height:118px;overflow-x:auto;overflow-y:hidden;padding:0 10px;}
+    body.sd-online .on-games.has-cards{bottom:12px;height:auto;overflow-y:auto;overflow-x:hidden;z-index:355;}
+    body.sd-online.on-cards:not(.on-chatpeek) .chat-panel{visibility:hidden;} body.sd-online.on-cards .chat-panel .on-card{visibility:visible;}
+    body.sd-online.on-cards .on-peek{display:flex;}
+    body.sd-online .on-games.has-cards .on-grid{display:grid;grid-template-columns:repeat(2,1fr);}
     body.sd-online .on-hi{display:none;}
     body.sd-online .on-grid{display:flex;gap:10px;}
     body.sd-online .on-g{min-height:0;min-width:120px;height:104px;padding:12px;border-radius:14px;}
@@ -279,6 +284,33 @@
     body.sd-online .chat-grip{display:none !important;}
   }
   body.sd-online .acct-box{width:100%;max-width:440px;margin:0 auto;box-sizing:border-box;}
+  /* the open games, as cards in the middle (Online) */
+  .sd-opts{padding:7px 12px;border-radius:999px;background:rgba(245,208,74,.12);border:1px solid rgba(245,208,74,.4);color:#f5d04a;font:800 14px 'Inter',sans-serif;}
+  .sd-opts[hidden]{display:none;}
+  .on-stack{display:flex;flex-direction:column;gap:18px;margin-top:18px;padding-bottom:24px;}
+  .on-slot{border-radius:16px;background:rgba(23,20,40,.55);border:1px solid rgba(180,140,255,.25);overflow:hidden;}
+  .on-slot-h{display:flex;align-items:center;gap:10px;height:38px;padding:0 8px 0 14px;font:700 14px 'Inter',sans-serif;}
+  .on-slot-h b{flex:1;}
+  .on-slot-x{width:28px;height:28px;border-radius:8px;border:0;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:13px;}
+  .on-slot-x:hover{background:rgba(255,90,110,.35);}
+  .on-slot-b{min-height:40px;}
+  .on-games.has-cards .on-hi{display:none;}
+  .on-games.has-cards .on-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .on-games.has-cards .on-g{min-height:0;height:58px;flex-direction:row;align-items:center;padding:10px 14px;gap:10px;border-radius:14px;}
+  .on-games.has-cards .on-g .on-e{font-size:26px;margin:0;} .on-games.has-cards .on-g i{display:none;} .on-games.has-cards .on-g b{font-size:14px;}
+  .on-games.has-cards .on-g .on-live{top:-6px;right:6px;}
+  .on-g[hidden]{display:none !important;}
+  .on-peek{display:none;position:fixed;z-index:370;right:14px;bottom:16px;padding:12px 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#b48cff,#8f6bff);color:#fff;font:700 14px 'Inter',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5);cursor:pointer;}
+  body.sd-online .on-card{position:fixed !important;left:var(--ox) !important;top:var(--oy) !important;width:var(--ow) !important;right:auto !important;bottom:auto !important;
+    transform:none !important;max-height:none !important;height:auto !important;margin:0 !important;z-index:335 !important;animation:none !important;
+    clip-path:inset(var(--ct) 0 var(--cb) 0);border-radius:0 0 16px 16px !important;box-shadow:none !important;filter:none !important;}
+  body.sd-online .td-win.on-host{z-index:335 !important;pointer-events:none;inset:0 !important;}
+  body.sd-online .td-win.on-host .td-back{display:none !important;}
+  body.sd-online .td-win.on-host .td-box{pointer-events:auto;}
+  .on-slot.own{border:0;background:none;}
+  body.sd-online .on-slot.own + .on-slot, body.sd-online .on-slot + .on-slot{margin-top:0;}
+  body.sd-online .td-win.on-host .td-box.on-card{border-radius:16px !important;}
+  body.sd-online .chat-modal-back, body.sd-online .chat-modal-x{display:none !important;}
   .acct-note{margin:0;padding:10px 12px;border-radius:10px;background:rgba(120,200,140,.12);border:1px solid rgba(120,200,140,.35);color:var(--text);font:12px/1.45 'Inter',sans-serif;}
   .acct-warn{margin:0;padding:8px 11px;border-radius:9px;background:rgba(255,190,90,.12);border:1px solid rgba(255,190,90,.35);color:var(--text);font:12px/1.4 'Inter',sans-serif;}
   .acct-err{color:#ff8a8a;font:600 12px 'Inter',sans-serif;}
@@ -23287,7 +23319,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 198;                 // ← goes up by one with every published version
+  const SD_BUILD = 199;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24990,7 +25022,7 @@
     let bar = document.querySelector('.sd-obar');
     if(!bar){
       bar = document.createElement('div'); bar.className = 'sd-obar';
-      bar.innerHTML = `<span class="dash-logo"></span><b>SaiDeck <em>Online</em></b><span class="dash-sp"></span><button type="button" class="sd-ohome">🎬 Make videos</button>`;
+      bar.innerHTML = `<span class="dash-logo"></span><b>SaiDeck <em>Online</em></b><span class="dash-sp"></span><span class="sd-opts" title="Your points — what you can spend in every game"></span><button type="button" class="sd-ohome" title="Make videos">🎬<span class="t"> Make videos</span></button>`;
       try{ bar.querySelector('.dash-logo').appendChild(Object.assign(new Image(), { src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SD_EMBLEM_SVG), alt: '' })); }catch(e){}
       bar.querySelector('.sd-ohome').addEventListener('click', () => dashOpen());
       document.body.appendChild(bar);
@@ -24998,10 +25030,12 @@
     if(!document.querySelector('.on-board')){
       const B = document.createElement('div'); B.className = 'on-board'; document.body.appendChild(B);
       const G = document.createElement('div'); G.className = 'on-games'; document.body.appendChild(G);
+      const pk = document.createElement('button'); pk.type = 'button'; pk.className = 'on-peek'; pk.textContent = '💬 Chat'; document.body.appendChild(pk);
+      pk.addEventListener('click', () => { const on = document.body.classList.toggle('on-chatpeek'); pk.textContent = on ? '🎮 Games' : '💬 Chat'; });
       G.addEventListener('click', (e) => { const b = e.target.closest('[data-g]'); if(b) onlinePlay(b.dataset.g); });
     }
     if(!CHAT.open) chatToggle(true); else chatRender();
-    onlineRender(); clearInterval(DASH.onT); DASH.onT = setInterval(() => { if(dashIsOnline()) onlineRender(); else clearInterval(DASH.onT); }, 5000);
+    onlineRender(); onStackLoop(); clearInterval(DASH.onT); DASH.onT = setInterval(() => { if(dashIsOnline()) onlineRender(); else clearInterval(DASH.onT); }, 5000);
   }
   const ONLINE_GAMES = [
     { g: 'slots', e: '🎰', t: 'Slots', d: 'Spin for jackpots with everyone watching', c: ['rgba(255,201,74,.28)', '#ffc94a'] },
@@ -25012,6 +25046,84 @@
     { g: 'shop', e: '🛍️', t: 'Shop', d: 'Bubbles, ammo and artillery', c: ['rgba(255,111,174,.26)', '#ff6fae'] },
     { g: 'quests', e: '🎯', t: 'Daily quests', d: 'Free points every day', c: ['rgba(180,140,255,.3)', '#b48cff'] },
   ];
+  // ----- SaiDeck Online: open games sit in the middle as full-width cards, one under another (build 199) -----
+  // The games keep their own windows (so nothing inside them changes); in Online each open one is pinned over a
+  // "slot" in the scrolling middle column, so it looks and scrolls like a card there.
+  const ON_CARDS = [
+    { k: 'slots', t: '🎰 Slots', el: () => { const e = chatPanel.querySelector('.chat-casino:not(.chat-bj)'); return e && !e.hidden ? e : null; }, close: () => gameClose('casino') },
+    { k: 'bj', t: '🃏 Blackjack', el: () => { const e = chatPanel.querySelector('.chat-bj'); return e && !e.hidden ? e : null; }, close: () => gameClose('bj') },
+    { own: true, k: 'td', t: '🏰 Tower Defense', el: () => TDG.win && TDG.win.querySelector('.td-box'), close: () => tdClose() },
+    { own: true, k: 'trade', t: '📈 Trading', el: () => TRD.win && TRD.win.querySelector('.td-box'), close: () => trdClose() },
+    { own: true, k: 'cf', t: '🪙 Coin Flip', el: () => CF.win && CF.win.querySelector('.td-box'), close: () => cfClose() },
+    { k: 'arcade', t: '🛍️ Shop & quests', el: () => { const e = chatPanel.querySelector('.chat-arcade'); return e && !e.hidden ? e : null; }, close: () => { if(CHAT.side === 'arcade') chatSideTo('arcade'); } },
+  ];
+  const ON_TILE_CARD = { slots: 'slots', bj: 'bj', td: 'td', trade: 'trade', cf: 'cf', shop: 'arcade', quests: 'arcade' };
+  const ONS = { order: [], raf: 0, sig: '' };
+  function onStackLoop(){
+    cancelAnimationFrame(ONS.raf);
+    if(!dashIsOnline()){ onStackClear(); return; }
+    ONS.raf = requestAnimationFrame(onStackLoop);
+    const G = document.querySelector('.on-games'), S = G && G.querySelector('.on-stack'); if(!S) return;
+    const open = new Map();
+    for(const c of ON_CARDS){ let e = null; try{ e = c.el(); }catch(err){} if(e) open.set(c.k, e); }
+    ONS.order = ONS.order.filter(k => open.has(k));
+    for(const k of open.keys()) if(!ONS.order.includes(k)) ONS.order.push(k);
+    // which tiles to hide (open games lose their button until closed); the stack's slots
+    const sig = ONS.order.join(',');
+    if(sig !== ONS.sig){
+      ONS.sig = sig;
+      G.classList.toggle('has-cards', ONS.order.length > 0); document.body.classList.toggle('on-cards', ONS.order.length > 0);
+      G.querySelectorAll('.on-g').forEach(b => { b.hidden = open.has(ON_TILE_CARD[b.dataset.g]); });
+      for(const sl of [...S.children]) if(!open.has(sl.dataset.k)) sl.remove();
+      ONS.order.forEach((k, i) => {
+        let sl = S.querySelector(`.on-slot[data-k="${k}"]`);
+        if(!sl){
+          const c = ON_CARDS.find(x => x.k === k);
+          sl = document.createElement('div'); sl.className = 'on-slot' + (c.own ? ' own' : ''); sl.dataset.k = k;      // (Tower Defense, Trading and Coin Flip bring their own title bar and ✕)
+          sl.innerHTML = (c.own ? '' : `<div class="on-slot-h"><b>${c.t}</b><button type="button" class="on-slot-x" title="Close" aria-label="Close ${c.t}">✕</button></div>`) + `<div class="on-slot-b"></div>`;
+          const x = sl.querySelector('.on-slot-x'); if(x) x.addEventListener('click', () => { try{ c.close(); }catch(e){ console.error(e); } });
+          sl.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' });
+        }
+        if(S.children[i] !== sl) S.insertBefore(sl, S.children[i] || null);
+      });
+    }
+    // pin each game over its slot
+    const gr = G.getBoundingClientRect();
+    for(const c of ON_CARDS){
+      const e = open.get(c.k);
+      if(!e) continue;
+      const sl = S.querySelector(`.on-slot[data-k="${c.k}"]`), b = sl && sl.querySelector('.on-slot-b'); if(!b) continue;
+      if(!e.classList.contains('on-card')){ e.classList.add('on-card'); const host = e.closest('.td-win'); if(host) host.classList.add('on-host'); }
+      const h = Math.ceil(e.offsetHeight);
+      if(Math.abs(b.offsetHeight - h) > 1) b.style.height = h + 'px';
+      const r = b.getBoundingClientRect();
+      const ct = Math.max(0, gr.top - r.top), cb = Math.max(0, r.top + h - gr.bottom);
+      e.style.setProperty('--ox', r.left + 'px'); e.style.setProperty('--oy', r.top + 'px'); e.style.setProperty('--ow', r.width + 'px');
+      e.style.setProperty('--ct', ct + 'px'); e.style.setProperty('--cb', cb + 'px');
+      e.style.visibility = ct + cb >= h ? 'hidden' : '';
+    }
+  }
+  function onStackClear(){
+    for(const e of document.querySelectorAll('.on-card')){ e.classList.remove('on-card'); e.style.visibility = ''; for(const v of ['--ox', '--oy', '--ow', '--ct', '--cb']) e.style.removeProperty(v); }
+    for(const h of document.querySelectorAll('.on-host')) h.classList.remove('on-host');
+    ONS.sig = ''; document.body.classList.remove('on-cards', 'on-chatpeek');
+  }
+  // the mouse wheel over a pinned game scrolls the middle column (unless it's over something inside that scrolls itself)
+  document.addEventListener('wheel', (e) => {
+    if(!dashIsOnline()) return;
+    const card = e.target.closest && e.target.closest('.on-card'); if(!card) return;
+    for(let n = e.target; n && n !== card.parentElement; n = n.parentElement){
+      if(n.scrollHeight > n.clientHeight + 2){ const oy = getComputedStyle(n).overflowY; if((oy === 'auto' || oy === 'scroll') && (e.deltaY < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return; }
+    }
+    const G = document.querySelector('.on-games'); if(!G) return;
+    G.scrollTop += e.deltaY; e.preventDefault();
+  }, { passive: false, capture: true });
+  function lbNum(v){
+    v = Math.floor(+v || 0); const a = Math.abs(v);
+    if(a < 1e9) return v.toLocaleString();
+    const [d, u] = a >= 1e15 ? [1e15, 'Qa'] : a >= 1e12 ? [1e12, 'T'] : [1e9, 'B'];
+    return (v / d).toFixed(v / d >= 100 ? 0 : v / d >= 10 ? 1 : 2).replace(/\.?0+$/, '') + u;
+  }
   function onlinePlay(g){
     if(!chatName() || !chatLS('rt')){ if(!CHAT.open) chatToggle(true); toast('Log in first (on the right) to play.', 2400); return; }
     if(g === 'slots'){ if(!CAS.on) casJoin(); }
@@ -25028,16 +25140,20 @@
     if(logged && (!SC.board || Date.now() - SC.boardAt > 20000) && Date.now() - (DASH.bTry || 0) > 15000){ DASH.bTry = Date.now(); scBoard().then(() => onlineRender()).catch(() => {}); }
     const L = SC.board;
     const bh = `<h3>🏆 Leaderboard <small>all-time</small></h3>` + (!logged ? `<p class="on-note">Log in to see the leaderboard.</p>` : !L ? `<p class="on-note">Loading…</p>` : !L.length ? `<p class="on-note">Nobody's on the board yet.</p>` :
-      `<ol class="arc-board">` + L.slice(0, 100).map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><span title="Earned all-time">${x.p.toLocaleString()}</span></li>`).join('') + `</ol>`) +
+      `<ol class="arc-board">` + L.slice(0, 100).map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><span title="Earned all-time: ${x.p.toLocaleString()}">${lbNum(x.p)}</span></li>`).join('') + `</ol>`) +
       `<p class="on-note">Ranked by points earned all-time.</p>`;
     if(B._h !== bh){ const sc = B.querySelector('.arc-board'), top = sc ? sc.scrollTop : 0; B.innerHTML = bh; B._h = bh; const n = B.querySelector('.arc-board'); if(n) n.scrollTop = top; }
     // the games (middle)
     let nS = 0, nB = 0; try{ nS = Object.entries(CAS.seats || {}).filter(([u, st]) => casSeatLive(st)).length; nB = Object.entries(BJ.peek || BJ.p || {}).filter(([u, st]) => bjLive(st)).length; }catch(e){}
     const live = { slots: nS ? nS + ' playing' : '', bj: nB ? nB + ' at the table' : '' };
     const bal = logged && SC.loaded ? Math.max(0, scBal()) : null;
-    const gh = `<div class="on-hi"><h2>${logged ? 'Hey ' + escapeHtml(chatName()) + '! What are we playing?' : 'Pick a game'}</h2>${bal != null ? `<span>🪙 ${bal.toLocaleString()} points</span>` : ''}</div>
-      <div class="on-grid">${ONLINE_GAMES.map(x => `<button type="button" class="on-g" data-g="${x.g}" style="--g1:${x.c[0]};--g2:${x.c[1]}"><span class="on-e">${x.e}</span><b>${x.t}</b><i>${x.d}</i><span class="on-live">${live[x.g] || ''}</span></button>`).join('')}</div>`;
-    if(G._h !== gh){ G.innerHTML = gh; G._h = gh; }
+    const pc = document.querySelector('.sd-opts'); if(pc){ pc.textContent = bal != null ? '🪙 ' + bal.toLocaleString() : ''; pc.hidden = bal == null; }
+    if(!G.querySelector('.on-grid')){
+      G.innerHTML = `<div class="on-hi"><h2></h2></div><div class="on-grid">${ONLINE_GAMES.map(x => `<button type="button" class="on-g" data-g="${x.g}" style="--g1:${x.c[0]};--g2:${x.c[1]}"><span class="on-e">${x.e}</span><b>${x.t}</b><i>${x.d}</i><span class="on-live"></span></button>`).join('')}</div><div class="on-stack"></div>`;
+      ONS.sig = '';
+    }
+    G.querySelector('.on-hi h2').textContent = logged ? `Hey ${chatName()}! What are we playing?` : 'Pick a game';
+    G.querySelectorAll('.on-g').forEach(b => { const l = b.querySelector('.on-live'), v = live[b.dataset.g] || ''; if(l.textContent !== v) l.textContent = v; });
     if(logged && !SC.loaded && Date.now() - (DASH.sTry || 0) > 15000){ DASH.sTry = Date.now(); scLoad().then(() => onlineRender()).catch(() => {}); }
   }
   // a new, empty project without asking again (the dashboard already asked)
@@ -32156,7 +32272,7 @@
       const B = SC.board;
       if(!B){ h += `<p class="chat-side-p">Loading…</p>`; scBoard(); }
       else if(!B.length) h += `<p class="chat-side-p">Nobody has swatted anyone yet. Be the first!</p>`;
-      else { h += `<ol class="arc-board">` + B.map((x, i) => `<li class="${x.u === chatUid() ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><small class="arc-now" title="Points they have right now">${scOf(x.u) != null ? '🪙 ' + scOf(x.u).toLocaleString() : ''}</small><span title="Earned all-time">${x.p.toLocaleString()}</span></li>`).join('') + `</ol>`;
+      else { h += `<ol class="arc-board">` + B.map((x, i) => `<li class="${x.u === chatUid() ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><small class="arc-now" title="Points they have right now${scOf(x.u) != null ? ': ' + scOf(x.u).toLocaleString() : ''}">${scOf(x.u) != null ? '🪙 ' + lbNum(scOf(x.u)) : ''}</small><span title="Earned all-time: ${x.p.toLocaleString()}">${lbNum(x.p)}</span></li>`).join('') + `</ol>`;
         if(Date.now() - SCALL.at > 30000) scAllLoad();
         if(Date.now() - SC.boardAt > 20000) scBoard(); }
       h += `<p class="chat-side-p">Ranked by points earned all-time; 🪙 is what each person has to spend right now. Points come from swatting infiltrators, games, daily quests and rendering videos.</p>`;
