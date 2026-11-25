@@ -23347,7 +23347,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 200;                 // ← goes up by one with every published version
+  const SD_BUILD = 201;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25069,7 +25069,7 @@
     onlineRender(); onStackLoop(); clearInterval(DASH.onT); DASH.onT = setInterval(() => { if(dashIsOnline()) onlineRender(); else clearInterval(DASH.onT); }, 5000);
   }
   const ONLINE_GAMES = [
-    { g: 'lounge', e: '🛋️', t: 'Lounge', d: 'Hang out, walk around, grab a soda', c: ['rgba(255,95,210,.26)', '#ff5fd2'] },
+    { g: 'lounge', e: '🏰', t: 'Palace Lounge', d: 'Hang out and explore the palace', c: ['rgba(255,95,210,.26)', '#ff5fd2'] },
     { g: 'slots', e: '🎰', t: 'Slots', d: 'Spin for jackpots with everyone watching', c: ['rgba(255,201,74,.28)', '#ffc94a'] },
     { g: 'bj', e: '🃏', t: 'Blackjack', d: 'Beat the dealer, 3 to 2 on blackjack', c: ['rgba(62,211,154,.26)', '#3ed39a'] },
     { g: 'td', e: '🏰', t: 'Tower Defense', d: 'Solo or team up against the waves', c: ['rgba(127,156,255,.28)', '#7f9cff'] },
@@ -32970,12 +32970,48 @@
     [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => { sfxTone(ac, t + i * 0.08, 'triangle', f, f, 0.22, 0.12); sfxTone(ac, t + i * 0.08 + 0.02, 'sine', f * 2, f * 2, 0.12, 0.04); });
     for(let i = 0; i < 10; i++) sfxTone(ac, t + 0.6 + Math.random() * 0.8, 'sine', 2500 + Math.random() * 2500, 3000 + Math.random() * 2000, 0.09, 0.04);
   }
-  // ===================== The Lounge (build 200) =====================
-  // A little room where everyone's character hangs out: click the floor to walk, sit on the couch, buy a soda from the
-  // vending machine (points), pick the jukebox song everyone hears, play the arcade cabinet, pet Mochi the cat, dance,
-  // wave and say things. Each person's spot lives at lounge/<uid> = { x,y → tx,ty from time t, look, action… }; others
-  // walk smoothly from that alone (one write per click). The room is 1000 × 560 "room units".
-  const LG_CS = 1.35, LG_W = 1000, LG_H = 560, LG_FLOOR = [40, 300, 960, 535];
+  // ===================== The Lounge: the Palace (build 201) =====================
+  // An RPG-style palace seen from above at an angle: the Grand Hall (where everyone starts), the Music Room, the Arcade &
+  // Refreshments wing, the Royal Garden — and the Golden Treasury behind the throne, only for people who have more
+  // than 1 billion points right now. Rooms stay dark until you walk into them; the camera follows you.
+  // Each person's spot lives at lounge/<uid>: the path they're walking (p = "x,y;x,y;…" in palace units, from time t),
+  // their look and what they're doing. Others walk that same path, so nobody needs updates while walking.
+  const LG_T = 40, LG_MW = 60, LG_MH = 48, LG_VW = 1000, LG_VH = 560, LG_CS = 1.35, LG_VIP = 1e9;
+  const LG_ROOMS = [
+    { id: 'hall', name: 'Grand Hall', x: 18, y: 14, w: 24, h: 22, floor: 'marble', wall: '#5b2238', trim: '#e8c35a' },
+    { id: 'music', name: 'Music Room', x: 3, y: 16, w: 14, h: 13, floor: 'wood', wall: '#23436b', trim: '#9fd1ff' },
+    { id: 'arcade', name: 'Arcade & Refreshments', x: 43, y: 16, w: 14, h: 13, floor: 'carpet', wall: '#3a1f5c', trim: '#ff8ae2' },
+    { id: 'garden', name: 'Royal Garden', x: 12, y: 38, w: 36, h: 9, floor: 'grass', open: true },
+    { id: 'vault', name: 'Golden Treasury', x: 24, y: 2, w: 12, h: 12, floor: 'gold', wall: '#6b4a12', trim: '#ffe27a', vip: true },
+  ];
+  const LG_DOORS = [[17, 24], [17, 25], [42, 24], [42, 25], [29, 36], [30, 36], [29, 37], [30, 37], [25, 14], [26, 14], [25, 15], [26, 15]];   // (the last four: the treasury gate)
+  // solid furniture (tiles) — drawn by lgProps
+  const LG_SOLID = [
+    [28, 16, 4, 2],                                   // throne dais
+    [21, 19, 1, 1], [25, 19, 1, 1], [34, 19, 1, 1], [38, 19, 1, 1], [21, 25, 1, 1], [25, 25, 1, 1], [34, 25, 1, 1], [38, 25, 1, 1], [21, 31, 1, 1], [38, 31, 1, 1],   // pillars
+    [5, 19, 3, 2], [14, 18, 2, 1],                    // piano, jukebox
+    [54, 18, 2, 1], [45, 18, 1, 1], [47, 18, 1, 1], [49, 18, 1, 1],   // vending, cabinets
+    [28, 41, 4, 3],                                   // fountain
+    [12, 38, 2, 2], [46, 38, 2, 2], [12, 45, 2, 2], [46, 45, 2, 2],   // trees
+    [28, 5, 4, 2], [25, 9, 2, 1], [33, 9, 2, 1],      // golden throne, treasure chests
+  ];
+  // seats: x,y in palace units (where you sit)
+  const LG_SEATS = [
+    { x: 30 * 40, y: 17.6 * 40, k: 'throne', name: 'the throne' },
+    { x: 19.5 * 40, y: 21.5 * 40, k: 'bench' }, { x: 19.5 * 40, y: 27.5 * 40, k: 'bench' }, { x: 40.5 * 40, y: 21.5 * 40, k: 'bench' }, { x: 40.5 * 40, y: 27.5 * 40, k: 'bench' },
+    { x: 6 * 40, y: 26.5 * 40, k: 'sofa' }, { x: 7.5 * 40, y: 26.5 * 40, k: 'sofa' }, { x: 9 * 40, y: 26.5 * 40, k: 'sofa' },
+    { x: 47 * 40, y: 26.5 * 40, k: 'bean' }, { x: 52 * 40, y: 26.5 * 40, k: 'bean' },
+    { x: 18.5 * 40, y: 45.5 * 40, k: 'gbench' }, { x: 41.5 * 40, y: 45.5 * 40, k: 'gbench' },
+    { x: 30 * 40, y: 6.6 * 40, k: 'gthrone', name: 'the golden throne', vip: true },
+  ];
+  const LG_THINGS = [   // things you can click: hit box (units) and where you walk to
+    { k: 'vend', x: 54 * 40, y: 17 * 40, w: 80, h: 80, go: [55 * 40, 19.6 * 40] },
+    { k: 'juke', x: 14 * 40, y: 16.6 * 40, w: 80, h: 70, go: [15 * 40, 19.6 * 40] },
+    { k: 'arcade', x: 45 * 40, y: 16.4 * 40, w: 200, h: 80, go: [47.5 * 40, 19.6 * 40] },
+    { k: 'piano', x: 5 * 40, y: 18.4 * 40, w: 120, h: 100, go: [6.5 * 40, 21.6 * 40] },
+    { k: 'fountain', x: 28 * 40, y: 40 * 40, w: 160, h: 160, go: [30 * 40, 44.6 * 40] },
+  ];
+  const LG_SPAWN = [30 * 40, 33 * 40];
   const LG_COLORS = ['#ff8fb1', '#ffb86b', '#ffe066', '#9be37a', '#5fd3c6', '#6fb6ff', '#9d8cff', '#e08cff', '#ff6b6b', '#c7a27c', '#f2f2f2', '#7a7f8c', '#ff9ee6', '#a3f0ff', '#d4ff6b', '#ffc4a3'];
   const LG_HATS = ['none', 'cap', 'beanie', 'party hat', 'crown', 'headphones', 'bow', 'cat ears', 'halo', 'cowboy hat'];
   const LG_SODAS = [
@@ -32992,38 +33028,112 @@
     { k: 'retro', name: 'Retro Arcade', em: '👾', bpm: 140 },
   ];
   const LG_EMOTES = ['👋', '😂', '❤️', '🔥', '😎', '🎉', '😭', '🤔'];
-  const LG_SEATS = [{ x: 380, y: 318, k: 'couch' }, { x: 452, y: 318, k: 'couch' }, { x: 524, y: 318, k: 'couch' }, { x: 205, y: 478, k: 'bean' }, { x: 805, y: 488, k: 'bean' }];
-  const LG_SPOTS = { juke: { x: 112, y: 330 }, vend: { x: 900, y: 330 }, arcade: { x: 768, y: 330 } };
   var LG = { on: false };
   const lgPrice = (k) => { const p = CHAT.cfg && CHAT.cfg.prices && CHAT.cfg.prices.soda && CHAT.cfg.prices.soda[k]; return Number.isFinite(+p) && p != null ? +p : 50; };
   const lgHash = (s) => { let h = 2166136261; for(const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
-  // where someone is right now (they walk from x,y to tx,ty starting at time t)
+  const lgRich = () => SC.loaded && scBal() > LG_VIP;
+  // ----- the map grid -----
+  function lgRoomAt(tx, ty){ for(const r of LG_ROOMS) if(tx >= r.x && tx < r.x + r.w && ty >= r.y && ty < r.y + r.h) return r; return null; }
+  function lgGrid(){
+    if(LG.grid) return LG.grid;
+    const G = new Uint8Array(LG_MW * LG_MH);     // 0 wall, 1 floor, 2 VIP floor
+    for(const r of LG_ROOMS) for(let y = r.y + (r.open ? 0 : 2); y < r.y + r.h; y++) for(let x = r.x; x < r.x + r.w; x++) G[y * LG_MW + x] = r.vip ? 2 : 1;
+    for(const [x, y] of LG_DOORS) G[y * LG_MW + x] = 1;
+    for(const [x, y, w, h] of LG_SOLID) for(let j = y; j < y + h; j++) for(let i = x; i < x + w; i++) G[j * LG_MW + i] = 0;
+    for(const s of LG_SEATS){ const i = Math.floor(s.x / LG_T), j = Math.floor(s.y / LG_T); G[j * LG_MW + i] = s.vip ? 2 : 1; }
+    LG.grid = G; return G;
+  }
+  const lgOk = (x, y, vip) => { if(x < 0 || y < 0 || x >= LG_MW || y >= LG_MH) return false; const v = lgGrid()[y * LG_MW + x]; return v === 1 || (v === 2 && vip); };
+  // A* on the tiles (8 directions, no corner cutting), then straightened where there's a clear line
+  function lgPath(ax, ay, bx, by, vip){
+    const sx = Math.floor(ax / LG_T), sy = Math.floor(ay / LG_T); let ex = Math.floor(bx / LG_T), ey = Math.floor(by / LG_T);
+    if(!lgOk(ex, ey, vip)){
+      let best = null, bd = 1e9;
+      for(let r = 1; r < 6 && !best; r++) for(let j = ey - r; j <= ey + r; j++) for(let i = ex - r; i <= ex + r; i++) if(lgOk(i, j, vip)){ const d = Math.hypot(i - ex, j - ey); if(d < bd){ bd = d; best = [i, j]; } }
+      if(!best) return null; [ex, ey] = best; bx = (ex + .5) * LG_T; by = (ey + .5) * LG_T;
+    }
+    const N = LG_MW * LG_MH, gS = new Float32Array(N).fill(1e9), from = new Int32Array(N).fill(-1), closed = new Uint8Array(N);
+    const start = sy * LG_MW + sx, goal = ey * LG_MW + ex; gS[start] = 0;
+    const open = [[Math.hypot(ex - sx, ey - sy), start]];
+    let found = false, iter = 0;
+    while(open.length && iter++ < 6000){
+      let bi = 0; for(let i = 1; i < open.length; i++) if(open[i][0] < open[bi][0]) bi = i;
+      const [, cur] = open.splice(bi, 1)[0]; if(closed[cur]) continue; closed[cur] = 1;
+      if(cur === goal){ found = true; break; }
+      const cx = cur % LG_MW, cy = (cur / LG_MW) | 0;
+      for(let dy = -1; dy <= 1; dy++) for(let dx = -1; dx <= 1; dx++){
+        if(!dx && !dy) continue; const nx = cx + dx, ny = cy + dy;
+        if(!lgOk(nx, ny, vip)) continue;
+        if(dx && dy && (!lgOk(cx + dx, cy, vip) || !lgOk(cx, cy + dy, vip))) continue;
+        const ni = ny * LG_MW + nx, ng = gS[cur] + (dx && dy ? 1.414 : 1);
+        if(ng < gS[ni]){ gS[ni] = ng; from[ni] = cur; open.push([ng + Math.hypot(ex - nx, ey - ny), ni]); }
+      }
+    }
+    if(!found && start !== goal) return null;
+    const tiles = []; for(let c = goal; c !== -1 && c !== start; c = from[c]) tiles.push(c); tiles.reverse();
+    const pts = [[ax, ay]].concat(tiles.map(c => [(c % LG_MW + .5) * LG_T, (((c / LG_MW) | 0) + .5) * LG_T]));
+    pts[pts.length - 1] = [bx, by];
+    if(pts.length === 1) pts.push([bx, by]);
+    // straighten
+    const clear = (a, b) => { const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 10); for(let i = 1; i < n; i++){ const x = a[0] + (b[0] - a[0]) * i / n, y = a[1] + (b[1] - a[1]) * i / n; for(const [ox, oy] of [[-9, -6], [9, -6], [-9, 6], [9, 6]]) if(!lgOk(Math.floor((x + ox) / LG_T), Math.floor((y + oy) / LG_T), vip)) return false; } return true; };
+    const out = [pts[0]]; let i = 0;
+    while(i < pts.length - 1){ let j = pts.length - 1; while(j > i + 1 && !clear(pts[i], pts[j])) j--; out.push(pts[j]); i = j; }
+    return out.map(([x, y]) => [Math.round(x), Math.round(y)]);
+  }
+  // where someone is right now: along their path p from time t (or the old straight x,y → tx,ty)
+  function lgPathOf(d){
+    if(typeof d.p === 'string' && d.p){
+      let c = LG.pc && LG.pc.get(d.p);
+      if(!c){
+        const pts = d.p.split(';').map(s => s.split(',').map(Number)).filter(a => a.length === 2 && a.every(Number.isFinite));
+        const cum = [0]; for(let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+        c = { pts, cum }; LG.pc = LG.pc || new Map(); if(LG.pc.size > 300) LG.pc.clear(); LG.pc.set(d.p, c);
+      }
+      if(c.pts.length) return c;
+    }
+    const pts = [[d.x || 0, d.y || 0], [d.tx ?? d.x ?? 0, d.ty ?? d.y ?? 0]];
+    return { pts, cum: [0, Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])] };
+  }
   function lgPos(d, now){
-    const fast = (d.f || 0) > now, v = fast ? 430 : 240;
-    const dx = (d.tx ?? d.x) - d.x, dy = (d.ty ?? d.y) - d.y, dist = Math.hypot(dx, dy), dur = dist / v * 1000;
-    const p = dur > 0 ? Math.max(0, Math.min(1, (now - (d.t || 0)) / dur)) : 1;
-    return { x: d.x + dx * p, y: d.y + dy * p, moving: p < 1 && dist > 1, face: dx < -1 ? -1 : dx > 1 ? 1 : 0, fast };
+    const c = lgPathOf(d), fast = (d.f || 0) > now, v = fast ? 430 : 250, len = c.cum[c.cum.length - 1];
+    const s = Math.max(0, (now - (d.t || 0)) / 1000 * v);
+    if(s >= len || c.pts.length < 2){ const l = c.pts[c.pts.length - 1]; const pr = c.pts[Math.max(0, c.pts.length - 2)]; return { x: l[0], y: l[1], moving: false, face: l[0] < pr[0] - 1 ? -1 : l[0] > pr[0] + 1 ? 1 : 0, fast }; }
+    let i = 1; while(i < c.cum.length - 1 && c.cum[i] < s) i++;
+    const a = c.pts[i - 1], b = c.pts[i], seg = c.cum[i] - c.cum[i - 1], k = seg > 0 ? (s - c.cum[i - 1]) / seg : 1;
+    return { x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k, moving: true, face: b[0] < a[0] - 1 ? -1 : b[0] > a[0] + 1 ? 1 : 0, fast };
   }
   async function lgWrite(obj, method){
-    const me = chatUid(); if(!me) return;
+    const me = chatUid(); if(!me) return false;
     try{
       const tok = await chatAuth();
       const r = await fetch(`${CHAT_DB}/lounge/${me}.json?auth=${encodeURIComponent(tok)}`, { method: method || 'PATCH', body: method === 'DELETE' ? undefined : JSON.stringify(obj) });
-      if(!r.ok && method !== 'DELETE') console.warn('lounge write refused', r.status);
-    }catch(e){}
+      if(!r.ok && method !== 'DELETE'){
+        console.warn('lounge write refused', r.status, obj);
+        if(!LG.warned){ LG.warned = true; toast(r.status === 401 || r.status === 403 ? "😕 The palace didn't let your character in — tell Saichizu to publish the newest Firebase rules." : "😕 Couldn't reach the palace — check your connection.", 4200); }
+        return false;
+      }
+      LG.warned = false; return true;
+    }catch(e){ return false; }
+  }
+  // what goes to the database about me (empty things are left out — the database removes them)
+  function lgRec(){
+    const m = LG.me;
+    const o = { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), p: m.p || null, n: chatName().slice(0, CHAT_NAME_MAX), c: m.c, hat: m.hat, a: m.a || null, s: m.s || null };
+    return o;
   }
   function lgOpen(){
     if(!chatName() || !chatLS('rt')){ toast('Log in to the chat first to join the Lounge.', 2400); try{ if(!CHAT.open) chatToggle(true); }catch(e){} return; }
-    if(LG.on){ try{ LG.win.querySelector('canvas').focus(); }catch(e){} return; }
+    if(LG.on){ try{ LG.cv.focus(); }catch(e){} return; }
     const look = (() => { try{ return JSON.parse(chatLS('lgLook') || 'null') || {}; }catch(e){ return {}; } })();
-    const sp = LG_FLOOR;
-    Object.assign(LG, { on: true, pend: null, panel: '', snap: null, jb: null, fx: [], hearts: [], lastFace: 1, song: '', vol: +(chatLS('lgVol') ?? 0.35),
-      me: { x: 470 + Math.random() * 80, y: 430 + Math.random() * 60, c: Number.isInteger(look.c) ? look.c : lgHash(chatUid()) % 16, hat: Number.isInteger(look.hat) ? look.hat : 0, a: '', s: '', f: 0, e: '', et: 0, m: '', mt: 0 } });
+    let seen = []; try{ seen = JSON.parse(chatLS('lgSeen') || '[]'); }catch(e){}
+    Object.assign(LG, { on: true, pend: null, panel: '', snap: null, jb: null, hearts: [], lastFace: 1, song: '', vol: +(chatLS('lgVol') ?? 0.35), warned: false,
+      seen: new Set(['hall', ...seen]), room: 'hall', banner: null, cam: null, chunks: new Map(), chunkS: 0,
+      me: { x: LG_SPAWN[0] + (Math.random() - .5) * 120, y: LG_SPAWN[1] + (Math.random() - .5) * 40, c: Number.isInteger(look.c) ? look.c : lgHash(chatUid()) % 16, hat: Number.isInteger(look.hat) ? look.hat : 0, a: '', s: '', f: 0, e: '', et: 0, m: '', mt: 0, p: '' } });
     LG.me.tx = LG.me.x; LG.me.ty = LG.me.y; LG.me.t = trdNow();
     const w = document.createElement('div'); w.className = 'td-win lg-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Lounge');
     w.innerHTML = `<div class="td-back"></div><div class="td-box lg-box">
-      <div class="td-head"><b>🛋️ The Lounge</b><span class="lg-who"></span><span class="lg-song"></span><button type="button" class="lg-mute" title="Music volume">🔊</button><button type="button" class="td-x" aria-label="Close">✕</button></div>
-      <div class="lg-stage"><canvas class="lg-cv" tabindex="0" aria-label="The Lounge — click the floor to walk"></canvas><div class="lg-pop" hidden></div><div class="lg-tip">Click the floor to walk · click the couch, vending machine, jukebox, arcade or Mochi 🐱</div></div>
+      <div class="td-head"><b>🏰 The Palace Lounge</b><span class="lg-who"></span><span class="lg-song"></span><button type="button" class="lg-mute" title="Music volume">🔊</button><button type="button" class="td-x" aria-label="Close">✕</button></div>
+      <div class="lg-stage"><canvas class="lg-cv" tabindex="0" aria-label="The palace — click to walk"></canvas><div class="lg-pop" hidden></div><div class="lg-tip">Click to walk · explore the palace · click benches, the throne, the jukebox, the soda machine, the arcade, the fountain or Mochi 🐱</div></div>
       <div class="lg-bar">
         <div class="lg-emos">${LG_EMOTES.map(e => `<button type="button" data-emo="${e}" title="Show ${e}">${e}</button>`).join('')}</div>
         <button type="button" class="lg-b" data-act="dance" title="Dance">💃 Dance</button>
@@ -33045,21 +33155,20 @@
     w.querySelector('[data-act="soda"]').addEventListener('click', () => lgPanel(LG.panel === 'mysoda' ? '' : 'mysoda'));
     w.querySelector('.lg-mute').addEventListener('click', () => { LG.vol = LG.vol > 0 ? 0 : 0.35; chatLS('lgVol', String(LG.vol)); lgAudioVol(); lgHud(); });
     w.querySelector('.lg-say').addEventListener('submit', (e) => { e.preventDefault(); const i = e.target.querySelector('input'); lgSay(i.value); i.value = ''; });
-    // join: write my spot, then keep it fresh
     lgWrite(Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }), 'PUT');
     LG.beat = setInterval(() => { if(document.visibilityState === 'visible') lgWrite({ h: { '.sv': 'timestamp' } }); }, 20000);
     LG.poll = setInterval(lgPoll, 1000); lgPoll();
     if(!SC.loaded) scLoad().then(lgHud).catch(() => {});
     lgHud(); lgLoop();
-    try{ questEv && questEv('lounge'); }catch(e){}
+    lgBanner('Grand Hall');
   }
-  function lgRec(){ const m = LG.me; return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), n: chatName().slice(0, CHAT_NAME_MAX), c: m.c, hat: m.hat, a: m.a, s: m.s }; }
   function lgClose(){
     if(!LG.on) return; LG.on = false;
     clearInterval(LG.beat); clearInterval(LG.poll); cancelAnimationFrame(LG.raf); if(LG.fitOff) LG.fitOff();
     liveClose('lounge'); liveClose('loungejb'); lgAudioStop();
     lgWrite(null, 'DELETE');
     if(LG.win){ LG.win.remove(); LG.win = null; }
+    LG.chunks = new Map();
   }
   async function lgPoll(){
     if(!LG.on) return;
@@ -33070,24 +33179,29 @@
   }
   function lgPeople(){
     const now = trdNow(), me = chatUid(), d = LG.snap || {};
-    return Object.entries(d).filter(([u, v]) => u !== me && v && typeof v.x === 'number' && now - (v.h || 0) < 70000 && !chatBadName(v.n || '')).map(([u, v]) => Object.assign({ u }, v));
+    return Object.entries(d).filter(([u, v]) => u !== me && v && typeof v.x === 'number' && now - (v.h || v.t || 0) < 75000 && !chatBadName(v.n || '')).map(([u, v]) => Object.assign({ u }, v));
   }
   function lgHud(){
     const W = LG.win; if(!W) return;
-    const n = lgPeople().length + 1;
-    W.querySelector('.lg-who').textContent = `${n} here`;
+    W.querySelector('.lg-who').textContent = `${lgPeople().length + 1} here`;
     const s = LG_SONGS.find(x => x.k === (LG.jb && LG.jb.k));
     W.querySelector('.lg-song').textContent = s ? `🎵 ${s.name}${LG.jb.n ? ' · picked by ' + LG.jb.n : ''}` : '';
     W.querySelector('.lg-mute').textContent = LG.vol > 0 ? '🔊' : '🔇';
-    const tot = Object.values(SC.soda || {}).reduce((a, b) => a + (b | 0), 0);
-    W.querySelector('.lg-mysoda span').textContent = tot;
+    W.querySelector('.lg-mysoda span').textContent = Object.values(SC.soda || {}).reduce((a, b) => a + (b | 0), 0);
     W.querySelector('[data-act="dance"]').classList.toggle('on', LG.me.a === 'dance');
   }
-  // ----- clicking in the room -----
-  function lgPt(e){ const r = LG.cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * LG_W, y: (e.clientY - r.top) / r.height * LG_H }; }
+  function lgBanner(t){ LG.banner = { t, at: performance.now() }; }
+  // ----- the camera and clicking -----
+  function lgView(){
+    const r = LG.cv.getBoundingClientRect(), vw = LG_VW, vh = LG_VH;
+    const cam = LG.cam || { x: LG.me.x, y: LG.me.y };
+    const cx = Math.max(vw / 2, Math.min(LG_MW * LG_T - vw / 2, cam.x)), cy = Math.max(vh / 2 - 20, Math.min(LG_MH * LG_T - vh / 2, cam.y));
+    return { x0: cx - vw / 2, y0: cy - vh / 2, sc: r.width / vw, r };
+  }
+  function lgPt(e){ const v = lgView(); return { x: v.x0 + (e.clientX - v.r.left) / v.sc, y: v.y0 + (e.clientY - v.r.top) / v.sc }; }
   function lgCatPos(now){
     const seg = Math.floor(now / 7000), k = (now % 7000) / 3000;
-    const wp = (s) => { const h = lgHash('mochi' + s); return { x: 140 + (h % 720), y: 345 + ((h >>> 10) % 170) }; };
+    const wp = (s) => { const h = lgHash('mochi' + s); let x = 14.5 + (h % 31), y = 39.5 + ((h >>> 10) % 7); if(x > 26.5 && x < 33.5 && y < 44.5) y = 45.2; return { x: x * LG_T, y: y * LG_T }; };
     const a = wp(seg), b = wp(seg + 1), p = Math.min(1, k), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, moving: p < 1, face: b.x < a.x ? -1 : 1 };
   }
@@ -33096,27 +33210,35 @@
     LG.cv.focus(); const p = lgPt(e), now = trdNow();
     if(LG.panel) lgPanel('');
     const cat = lgCatPos(now);
-    if(Math.hypot(p.x - cat.x, p.y - (cat.y - 14)) < 34){ lgWalk(cat.x + (LG.me.x < cat.x ? -40 : 40), cat.y + 4, 'pet'); return; }
-    if(p.x > 850 && p.x < 955 && p.y > 110 && p.y < 320){ lgWalk(LG_SPOTS.vend.x, LG_SPOTS.vend.y, 'vend'); return; }
-    if(p.x > 55 && p.x < 165 && p.y > 140 && p.y < 320){ lgWalk(LG_SPOTS.juke.x, LG_SPOTS.juke.y, 'juke'); return; }
-    if(p.x > 728 && p.x < 808 && p.y > 160 && p.y < 320){ lgWalk(LG_SPOTS.arcade.x, LG_SPOTS.arcade.y, 'arcade'); return; }
+    if(lgSeenAt(cat.x, cat.y) && Math.hypot(p.x - cat.x, p.y - (cat.y - 14)) < 36){ lgWalk(cat.x + (LG.me.x < cat.x ? -44 : 44), cat.y + 4, 'pet'); return; }
+    for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.y + t.h / 2)){ lgWalk(t.go[0], t.go[1], t.k); return; }
     for(const s of LG_SEATS){
-      if(s.k === 'couch' ? (p.x > s.x - 36 && p.x < s.x + 36 && p.y > 255 && p.y < 345) : Math.hypot(p.x - s.x, p.y - s.y) < 42){
-        const taken = lgPeople().some(o => o.a === 'sit' && Math.hypot(o.tx - s.x, o.ty - s.y) < 6);
+      if(Math.abs(p.x - s.x) < 30 && p.y > s.y - 60 && p.y < s.y + 18){
+        if(s.vip && !lgRich()){ lgVipNo(); return; }
+        const taken = lgPeople().some(o => o.a === 'sit' && Math.hypot(lgPos(o, now).x - s.x, lgPos(o, now).y - s.y) < 8);
         if(taken){ toast('Someone is sitting there.', 1400); return; }
         lgWalk(s.x, s.y, 'sit'); return;
       }
     }
-    // somebody? wave at them
     for(const o of lgPeople()){ const q = lgPos(o, now); if(Math.abs(p.x - q.x) < 28 && p.y > q.y - 80 && p.y < q.y + 8){ lgEmote('👋'); return; } }
+    // the treasury gate
+    const tx = Math.floor(p.x / LG_T), ty = Math.floor(p.y / LG_T), r = lgRoomAt(tx, ty);
+    if(r && r.vip && !lgRich()){ lgVipNo(); return; }
     lgWalk(p.x, p.y, null);
+  }
+  function lgVipNo(){
+    const b = SC.loaded ? scBal() : 0;
+    toast(`🔒 The Golden Treasury is only for people with more than 1B points right now — you have ${lbNum(Math.max(0, b))}.`, 3200);
   }
   function lgWalk(x, y, then){
     const m = LG.me, now = trdNow(), cur = lgPos(m, now);
-    const isSeat = then === 'sit';
-    x = Math.max(LG_FLOOR[0], Math.min(LG_FLOOR[2], x)); y = isSeat ? y : Math.max(LG_FLOOR[1] + 12, Math.min(LG_FLOOR[3], y));
-    Object.assign(m, { x: cur.x, y: cur.y, tx: x, ty: y, t: now, a: m.a === 'dance' && !then ? 'dance' : '' });
-    if(Math.abs(x - cur.x) > 1) LG.lastFace = x < cur.x ? -1 : 1;
+    const path = lgPath(cur.x, cur.y, x, y, lgRich());
+    if(!path){ toast("You can't get there from here.", 1400); return; }
+    const last = path[path.length - 1];
+    if(then === 'sit'){ path[path.length - 1] = [Math.round(x), Math.round(y)]; }
+    let ps = path.map(q => q.join(',')).join(';'); if(ps.length > 600) ps = [path[0], path[path.length - 1]].map(q => q.join(',')).join(';');
+    Object.assign(m, { x: cur.x, y: cur.y, tx: path[path.length - 1][0], ty: path[path.length - 1][1], p: ps, t: now, a: m.a === 'dance' && !then ? 'dance' : '' });
+    if(Math.abs(last[0] - cur.x) > 1) LG.lastFace = last[0] < cur.x ? -1 : 1;
     LG.pend = then;
     lgWrite(Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }));
     lgHud();
@@ -33127,15 +33249,19 @@
     else if(k === 'vend') lgPanel('vend');
     else if(k === 'juke') lgPanel('juke');
     else if(k === 'arcade'){ try{ if(dashIsOnline()) onlinePlay('slots'); else if(!CAS.on) casJoin(); }catch(e){} }
+    else if(k === 'piano'){ lgSfx('piano'); lgEmote('🎹'); }
+    else if(k === 'fountain'){ lgSfx('coin'); lgEmote('🌟'); toast('🪙 You toss a wish into the fountain…', 1800); }
     else if(k === 'pet'){ const c = lgCatPos(trdNow()); for(let i = 0; i < 5; i++) LG.hearts.push({ x: c.x + (Math.random() - .5) * 30, y: c.y - 30, t: performance.now() + i * 120 }); lgSfx('purr'); lgEmote('😻'); }
   }
-  function lgAct(a){ LG.me.a = a; lgWrite({ a, h: { '.sv': 'timestamp' } }); lgHud(); }
+  function lgAct(a){ LG.me.a = a; lgWrite({ a: a || null, h: { '.sv': 'timestamp' } }); lgHud(); }
   function lgEmote(e){ Object.assign(LG.me, { e, et: trdNow() }); lgWrite({ e, et: { '.sv': 'timestamp' } }); }
   function lgSay(t){
     t = String(t || '').trim().replace(/\s+/g, ' ').slice(0, 60); if(!t) return;
     if(chatBad(t)){ toast("That has a word that isn't allowed — keep it friendly.", 2400); return; }
     Object.assign(LG.me, { m: t, mt: trdNow() }); lgWrite({ m: t, mt: { '.sv': 'timestamp' } });
   }
+  // rooms you haven't walked into stay dark
+  function lgSeenAt(x, y){ const r = lgRoomAt(Math.floor(x / LG_T), Math.floor(y / LG_T)); return !r || LG.seen.has(r.id); }
   // ----- little panels: vending machine, jukebox, your look, your sodas -----
   function lgPanel(which){
     LG.panel = which; const P = LG.win && LG.win.querySelector('.lg-pop'); if(!P) return;
@@ -33188,7 +33314,7 @@
       lgWrite({ s: k, a: 'drink', f: Math.round(f - 500), h: { '.sv': 'timestamp' } });
       lgSfx('fizz');
       setTimeout(() => { if(!LG.on) return; if(LG.me.a === 'drink') lgAct(''); lgSfx('burp'); lgEmote(k === 'lemon' ? '😖' : '😋'); }, 2600);
-      setTimeout(() => { if(LG.on && LG.me.s === k){ LG.me.s = ''; lgWrite({ s: '' }); } }, 30000);
+      setTimeout(() => { if(LG.on && LG.me.s === k){ LG.me.s = ''; lgWrite({ s: null }); } }, 30000);
     }catch(e){ toast("Couldn't open it — check your connection.", 2000); }
     LG.drinking = false; lgHud();
   }
@@ -33219,6 +33345,9 @@
     if(k === 'clunk'){ lgTone('square', 140, t, 0.12, 0.25, 60); lgTone('square', 110, t + 0.16, 0.14, 0.2, 50); }
     else if(k === 'fizz'){ lgNoise(t, 0.9, 0.18, 3000); lgTone('sine', 900, t, 0.08, 0.1, 1400); }
     else if(k === 'burp'){ lgTone('sawtooth', 120, t, 0.35, 0.22, 70); lgTone('sawtooth', 95, t + 0.05, 0.3, 0.15, 60); }
+    else if(k === 'piano'){ [0, 4, 7, 12, 7, 4].forEach((d, i) => lgTone('triangle', 261.6 * Math.pow(2, d / 12), t + i * 0.12, 0.5, 0.12)); }
+    else if(k === 'coin'){ lgTone('square', 988, t, 0.08, 0.08); lgTone('square', 1319, t + 0.08, 0.3, 0.08); lgNoise(t + 0.35, 0.3, 0.06, 2000); }
+    else if(k === 'reveal'){ [0, 4, 7, 11, 14].forEach((d, i) => lgTone('sine', 523 * Math.pow(2, d / 12), t + i * 0.07, 0.4, 0.06)); }
     else if(k === 'purr'){ for(let i = 0; i < 6; i++) lgTone('sine', 46, t + i * 0.09, 0.08, 0.25, 40); lgTone('sine', 880, t + 0.1, 0.25, 0.06, 1200); }
   }
   const LG_SCALE = [0, 2, 3, 5, 7, 8, 10];
@@ -33250,85 +33379,6 @@
       }
     };
     sched(); LG.seqT = setInterval(sched, 90);
-  }
-  // ----- drawing -----
-  function lgBg(W, H){
-    const k = W + 'x' + H; if(LG.bgK === k) return LG.bg;
-    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), s = W / LG_W;
-    g.scale(s, s);
-    // back wall
-    const wall = g.createLinearGradient(0, 0, 0, 300); wall.addColorStop(0, '#2b1f4a'); wall.addColorStop(1, '#3d2b5e'); g.fillStyle = wall; g.fillRect(0, 0, LG_W, 300);
-    g.fillStyle = 'rgba(255,255,255,.035)'; for(let x = 0; x < LG_W; x += 40) g.fillRect(x, 0, 2, 280);
-    // window with the night city
-    g.fillStyle = '#0c0a24'; roundRectPath(g, 300, 40, 380, 150, 10); g.fill();
-    const sky = g.createLinearGradient(0, 40, 0, 190); sky.addColorStop(0, '#120f3a'); sky.addColorStop(1, '#4a2a6b'); g.fillStyle = sky; roundRectPath(g, 306, 46, 368, 138, 7); g.fill();
-    g.fillStyle = '#fff6c9'; g.beginPath(); g.arc(620, 78, 14, 0, 7); g.fill();
-    for(let i = 0; i < 40; i++){ const h = lgHash('st' + i); g.fillStyle = `rgba(255,255,255,${.3 + (h % 50) / 100})`; g.fillRect(310 + h % 360, 50 + (h >>> 9) % 60, 2, 2); }
-    for(let i = 0; i < 14; i++){ const h = lgHash('b' + i), bw = 20 + h % 26, bh = 40 + (h >>> 8) % 80, bx = 306 + i * 27; g.fillStyle = i % 2 ? '#1c1640' : '#231b4d'; g.fillRect(bx, 184 - bh, bw, bh);
-      for(let wy = 184 - bh + 6; wy < 178; wy += 10) for(let wx = bx + 4; wx < bx + bw - 4; wx += 7) if(lgHash(i + ':' + wx + ':' + wy) % 3 === 0){ g.fillStyle = 'rgba(255,214,120,.8)'; g.fillRect(wx, wy, 3, 4); } }
-    g.strokeStyle = '#5b4386'; g.lineWidth = 8; roundRectPath(g, 300, 40, 380, 150, 10); g.stroke(); g.lineWidth = 4; g.beginPath(); g.moveTo(490, 44); g.lineTo(490, 186); g.stroke();
-    // neon sign
-    g.save(); g.font = "800 34px 'Inter', sans-serif"; g.textAlign = 'center'; g.shadowColor = '#ff5fd2'; g.shadowBlur = 18; g.fillStyle = '#ffd1f4'; g.fillText('LOUNGE', 830, 92); g.shadowColor = '#57e1ff'; g.font = "700 15px 'Inter', sans-serif"; g.fillStyle = '#c8f6ff'; g.fillText('S A I D E C K', 830, 60); g.restore();
-    // shelf with records
-    g.fillStyle = '#5a3d2b'; g.fillRect(170, 150, 100, 8); ['#ff6b6b', '#ffd166', '#6fb6ff', '#9be37a'].forEach((c, i) => { g.fillStyle = c; g.fillRect(178 + i * 22, 118, 16, 32); });
-    // floor
-    g.fillStyle = '#2a1c14'; g.fillRect(0, 280, LG_W, 280);
-    const fl = g.createLinearGradient(0, 280, 0, 560); fl.addColorStop(0, '#6b4632'); fl.addColorStop(1, '#8a5a3e'); g.fillStyle = fl; g.fillRect(0, 284, LG_W, 276);
-    g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 2; for(let y = 300; y < 560; y += 26){ g.beginPath(); g.moveTo(0, y); g.lineTo(LG_W, y); g.stroke(); for(let x = (y / 26 % 2) * 60; x < LG_W; x += 120){ g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 26); g.stroke(); } }
-    g.fillStyle = '#1d1430'; g.fillRect(0, 276, LG_W, 10);
-    // rug
-    g.save(); g.translate(500, 440); g.scale(1, .42); g.fillStyle = '#3f2b74'; g.beginPath(); g.arc(0, 0, 210, 0, 7); g.fill(); g.strokeStyle = '#f5d04a'; g.lineWidth = 8; g.beginPath(); g.arc(0, 0, 186, 0, 7); g.stroke(); g.strokeStyle = 'rgba(255,255,255,.15)'; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, 120, 0, 7); g.stroke(); g.restore();
-    LG.bg = c; LG.bgK = k; return c;
-  }
-  function lgDrawProps(g, now, list){
-    // the furniture joins the characters in one list, drawn back to front
-    list.push({ y: 300, d: () => {   // jukebox
-      const glow = LG.song ? .5 + .5 * Math.sin(now / 160) : 0;
-      g.fillStyle = '#4a2a1e'; roundRectPath(g, 62, 150, 100, 150, 40); g.fill();
-      const jg = g.createLinearGradient(62, 150, 162, 300); jg.addColorStop(0, '#ff8a5c'); jg.addColorStop(.5, '#ffd166'); jg.addColorStop(1, '#ff5fa8'); g.fillStyle = jg; roundRectPath(g, 70, 160, 84, 130, 34); g.fill();
-      g.fillStyle = `rgba(255,255,255,${.25 + glow * .4})`; roundRectPath(g, 82, 176, 60, 48, 22); g.fill();
-      g.fillStyle = '#2a1a14'; g.fillRect(84, 236, 56, 40); g.fillStyle = '#ffd166'; for(let i = 0; i < 4; i++) g.fillRect(90 + i * 13, 242, 6, 28);
-      if(LG.song){ g.font = "700 18px 'Inter',sans-serif"; g.fillStyle = '#fff'; g.fillText('♪', 150 + Math.sin(now / 300) * 6, 150 - (now / 20 % 30)); g.fillText('♫', 70 + Math.cos(now / 340) * 6, 140 - ((now / 24 + 15) % 30)); }
-    } });
-    list.push({ y: 304, d: () => {   // vending machine
-      g.fillStyle = '#1a2b5c'; roundRectPath(g, 856, 112, 98, 192, 10); g.fill();
-      g.fillStyle = '#2f4fa8'; roundRectPath(g, 862, 118, 86, 180, 8); g.fill();
-      g.fillStyle = 'rgba(170,220,255,.25)'; roundRectPath(g, 868, 126, 56, 118, 5); g.fill();
-      LG_SODAS.forEach((s, i) => { for(let r = 0; r < 3; r++){ g.fillStyle = s.c; g.fillRect(872 + (i % 5) * 10, 132 + r * 38 + (i > 4 ? 10 : 0), 8, 26); g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(873 + (i % 5) * 10, 134 + r * 38, 2, 20); } });
-      g.fillStyle = '#0d1430'; g.fillRect(930, 130, 12, 40); g.fillStyle = '#57e1ff'; g.fillRect(932, 134, 8, 6);
-      g.fillStyle = '#0a0f22'; g.fillRect(872, 256, 66, 22);
-      g.font = "800 11px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.textAlign = 'center'; g.fillText('SODA', 905, 292); g.textAlign = 'left';
-    } });
-    list.push({ y: 304, d: () => {   // arcade cabinet (slots)
-      g.fillStyle = '#3a1150'; g.beginPath(); g.moveTo(732, 300); g.lineTo(732, 190); g.lineTo(742, 162); g.lineTo(798, 162); g.lineTo(806, 190); g.lineTo(806, 300); g.closePath(); g.fill();
-      const sc = g.createLinearGradient(740, 176, 798, 226); sc.addColorStop(0, '#ff5fd2'); sc.addColorStop(1, '#57e1ff'); g.fillStyle = sc; g.fillRect(742, 176, 56, 46);
-      g.font = "16px sans-serif"; g.fillText(['🍒', '7️⃣', '💎'][Math.floor(now / 400) % 3], 746, 206); g.fillText(['💎', '🍒', '7️⃣'][Math.floor(now / 330) % 3], 770, 206);
-      g.fillStyle = '#ffd166'; g.fillRect(744, 236, 52, 10); g.fillStyle = '#ff6b6b'; g.beginPath(); g.arc(758, 241, 5, 0, 7); g.fill();
-      g.font = "800 9px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.textAlign = 'center'; g.fillText('SLOTS', 769, 172); g.textAlign = 'left';
-    } });
-    list.push({ y: 300, d: () => {   // couch
-      g.fillStyle = '#7a2f5c'; roundRectPath(g, 334, 252, 236, 56, 18); g.fill();
-      g.fillStyle = '#9b3d74'; roundRectPath(g, 340, 286, 224, 40, 12); g.fill();
-      g.fillStyle = '#8a3568'; roundRectPath(g, 322, 272, 30, 60, 12); g.fill(); roundRectPath(g, 552, 272, 30, 60, 12); g.fill();
-      g.fillStyle = 'rgba(255,255,255,.08)'; for(let i = 0; i < 3; i++) g.fillRect(360 + i * 72, 292, 52, 4);
-    } });
-    list.push({ y: 262, d: () => { g.fillStyle = '#3b2a20'; g.fillRect(232, 226, 36, 36); g.fillStyle = '#3fae6a'; for(let i = 0; i < 7; i++){ g.beginPath(); g.ellipse(250 + Math.cos(i) * 16, 210 - i * 6, 10, 20, i - 3, 0, 7); g.fill(); } } });   // plant
-    for(const s of LG_SEATS.filter(x => x.k === 'bean')) list.push({ y: s.y - 6, d: () => { g.fillStyle = s.x < 500 ? '#4a7bd1' : '#d16a4a'; g.beginPath(); g.ellipse(s.x, s.y - 6, 40, 22, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(s.x - 10, s.y - 14, 16, 7, -.3, 0, 7); g.fill(); } });
-    // Mochi the cat
-    const c = lgCatPos(now);
-    list.push({ y: c.y, d: () => {
-      g.save(); g.translate(c.x, c.y); g.scale(c.face, 1);
-      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(0, 0, 20, 5, 0, 0, 7); g.fill();
-      const b = c.moving ? Math.sin(now / 70) * 2 : 0;
-      g.fillStyle = '#f2b35e'; g.beginPath(); g.ellipse(-2, -12 + b * .3, 18, 11, 0, 0, 7); g.fill();
-      g.strokeStyle = '#f2b35e'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(-18, -14); g.quadraticCurveTo(-30, -30 + Math.sin(now / 300) * 6, -22, -36); g.stroke();
-      g.beginPath(); g.arc(14, -22 + b * .3, 11, 0, 7); g.fill();
-      g.beginPath(); g.moveTo(6, -30); g.lineTo(9, -40); g.lineTo(14, -32); g.fill(); g.beginPath(); g.moveTo(16, -32); g.lineTo(22, -40); g.lineTo(24, -28); g.fill();
-      g.fillStyle = '#2a1a14'; g.fillRect(15, -25, 2.5, 3.5); g.fillRect(20, -25, 2.5, 3.5);
-      g.fillStyle = '#e09a46'; for(let i = 0; i < 3; i++) g.fillRect(-10 + i * 7, -21, 3, 8);
-      g.restore();
-      g.font = "600 10px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.65)'; g.fillText('Mochi', c.x, c.y + 14); g.textAlign = 'left';
-    } });
   }
   function lgDrawChar(g, d, p, now, isMe){
     const col = LG_COLORS[d.c | 0] || LG_COLORS[0], sit = d.a === 'sit' && !p.moving, dance = d.a === 'dance' && !p.moving, drink = d.a === 'drink';
@@ -33397,42 +33447,274 @@
     else if(h === 9){ g.fillStyle = '#a0683a'; g.beginPath(); g.ellipse(0, 2, 22, 5, 0, 0, 7); g.fill(); roundRectPath(g, -10, -12, 20, 14, 5); g.fill(); g.fillStyle = '#5a3a1e'; g.fillRect(-10, -2, 20, 3); }
     g.restore();
   }
+  // ----- drawing the palace -----
+  // The floors, walls and rugs are drawn once into 400-unit tiles (only the ones on screen); furniture, people and
+  // lights are drawn every frame, back to front.
+  function lgGlow(){
+    if(LG_GLOW.c) return LG_GLOW.c;
+    const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.35, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return (LG_GLOW.c = c);
+  }
+  const LG_GLOW = {};
+  function lgFloor(g, r){
+    const X = r.x * LG_T, Y = r.y * LG_T, W = r.w * LG_T, H = r.h * LG_T;
+    if(r.floor === 'marble'){
+      for(let y = r.y; y < r.y + r.h; y++) for(let x = r.x; x < r.x + r.w; x++){ g.fillStyle = (x + y) % 2 ? '#e9e2f2' : '#d6cbe4'; g.fillRect(x * LG_T, y * LG_T, LG_T, LG_T); }
+      g.strokeStyle = 'rgba(150,130,180,.25)'; g.lineWidth = 1.5; for(let i = 0; i < 26; i++){ const h = lgHash('v' + i); g.beginPath(); const sx = X + h % W, sy = Y + (h >>> 8) % H; g.moveTo(sx, sy); g.bezierCurveTo(sx + 30, sy + 10, sx + 20, sy + 40, sx + 60, sy + 50); g.stroke(); }
+      // the red carpet to the throne
+      g.fillStyle = '#9e1b32'; g.fillRect(28 * LG_T, 17 * LG_T, 4 * LG_T, 21 * LG_T); g.fillStyle = '#c42a45'; g.fillRect(28.3 * LG_T, 17 * LG_T, 3.4 * LG_T, 21 * LG_T);
+      g.fillStyle = '#e8c35a'; g.fillRect(28.15 * LG_T, 17 * LG_T, 6, 21 * LG_T); g.fillRect(31.85 * LG_T - 6, 17 * LG_T, 6, 21 * LG_T);
+      for(let y = 19; y < 37; y += 3){ g.fillStyle = 'rgba(232,195,90,.5)'; g.beginPath(); g.moveTo(30 * LG_T, y * LG_T); g.lineTo(30 * LG_T + 14, y * LG_T + 14); g.lineTo(30 * LG_T, y * LG_T + 28); g.lineTo(30 * LG_T - 14, y * LG_T + 14); g.fill(); }
+    } else if(r.floor === 'wood'){
+      g.fillStyle = '#7a4a2e'; g.fillRect(X, Y, W, H); g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 2;
+      for(let y = Y; y < Y + H; y += 20){ g.beginPath(); g.moveTo(X, y); g.lineTo(X + W, y); g.stroke(); for(let x = X + ((y / 20) % 2) * 50; x < X + W; x += 100){ g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 20); g.stroke(); } }
+      g.save(); g.translate(8.5 * LG_T, 24 * LG_T); g.scale(1, .5); g.fillStyle = '#2b5f8a'; g.beginPath(); g.arc(0, 0, 150, 0, 7); g.fill(); g.strokeStyle = '#9fd1ff'; g.lineWidth = 8; g.beginPath(); g.arc(0, 0, 130, 0, 7); g.stroke(); g.restore();
+    } else if(r.floor === 'carpet'){
+      g.fillStyle = '#2c1648'; g.fillRect(X, Y, W, H);
+      for(let y = r.y; y < r.y + r.h; y++) for(let x = r.x; x < r.x + r.w; x++){ const h = lgHash('c' + x + ':' + y); g.fillStyle = ['rgba(255,95,210,.35)', 'rgba(87,225,255,.35)', 'rgba(255,214,102,.35)'][h % 3]; if(h % 4 === 0){ g.beginPath(); g.arc(x * LG_T + 20, y * LG_T + 20, 4, 0, 7); g.fill(); } else if(h % 4 === 1){ g.fillRect(x * LG_T + 14, y * LG_T + 18, 12, 3); g.fillRect(x * LG_T + 18, y * LG_T + 14, 3, 12); } }
+    } else if(r.floor === 'grass'){
+      g.fillStyle = '#4f9a4a'; g.fillRect(X, Y, W, H);
+      for(let i = 0; i < 500; i++){ const h = lgHash('g' + i); g.fillStyle = h % 2 ? 'rgba(120,200,100,.5)' : 'rgba(40,110,50,.45)'; g.fillRect(X + h % W, Y + (h >>> 9) % H, 3, 6); }
+      g.fillStyle = '#d8c9a6'; g.fillRect(28.8 * LG_T, Y, 2.4 * LG_T, 3 * LG_T); g.beginPath(); g.ellipse(30 * LG_T, 42.5 * LG_T, 3.2 * LG_T, 2.6 * LG_T, 0, 0, 7); g.fill();
+      g.fillRect(15 * LG_T, 45 * LG_T, 30 * LG_T, 1.2 * LG_T);
+      for(const [fx, fy] of [[17, 40], [21, 42], [38, 40], [42, 42], [24, 46], [36, 46]]){ for(let i = 0; i < 9; i++){ const h = lgHash('f' + fx + i); g.fillStyle = ['#ff6b9a', '#ffd166', '#ffffff', '#c084fc'][h % 4]; g.beginPath(); g.arc(fx * LG_T + (h % 70) - 10, fy * LG_T + ((h >>> 7) % 40), 5, 0, 7); g.fill(); } }
+    } else if(r.floor === 'gold'){
+      for(let y = r.y; y < r.y + r.h; y++) for(let x = r.x; x < r.x + r.w; x++){ g.fillStyle = (x + y) % 2 ? '#e2b84a' : '#c99a2e'; g.fillRect(x * LG_T, y * LG_T, LG_T, LG_T); }
+      g.fillStyle = '#7a1230'; g.fillRect(28.5 * LG_T, 7 * LG_T, 3 * LG_T, 7 * LG_T); g.fillStyle = '#ffe27a'; g.fillRect(28.5 * LG_T, 7 * LG_T, 4, 7 * LG_T); g.fillRect(31.5 * LG_T - 4, 7 * LG_T, 4, 7 * LG_T);
+    }
+  }
+  function lgWall(g, r){
+    if(r.open){   // the garden: a hedge along the top
+      g.fillStyle = '#2f6b35'; g.fillRect(r.x * LG_T, r.y * LG_T - 30, r.w * LG_T, 30); g.fillStyle = '#3f8a45'; for(let x = r.x * LG_T; x < (r.x + r.w) * LG_T; x += 24){ g.beginPath(); g.arc(x + 12, r.y * LG_T - 28, 14, 0, 7); g.fill(); }
+      return;
+    }
+    const X = r.x * LG_T, Y = r.y * LG_T, W = r.w * LG_T, H2 = 2 * LG_T;
+    const wg = g.createLinearGradient(0, Y, 0, Y + H2); wg.addColorStop(0, lgShade(r.wall, -.35)); wg.addColorStop(1, r.wall); g.fillStyle = wg; g.fillRect(X, Y, W, H2);
+    g.fillStyle = lgShade(r.wall, -.5); g.fillRect(X, Y - 14, W, 14);
+    g.fillStyle = r.trim; g.fillRect(X, Y + H2 - 8, W, 4); g.fillRect(X, Y + 6, W, 2);
+    // decorations
+    if(r.id === 'hall'){
+      for(const wx of [20.5, 24.5, 35.5, 39.5]){ const x = wx * LG_T; g.fillStyle = '#121033'; g.beginPath(); g.moveTo(x - 22, Y + 70); g.lineTo(x - 22, Y + 30); g.arc(x, Y + 30, 22, Math.PI, 0); g.lineTo(x + 22, Y + 70); g.fill(); g.fillStyle = 'rgba(255,255,255,.75)'; for(let i = 0; i < 5; i++){ const h = lgHash('hw' + wx + i); g.fillRect(x - 18 + h % 36, Y + 14 + (h >>> 6) % 50, 2, 2); } g.strokeStyle = r.trim; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 22, Y + 70); g.lineTo(x - 22, Y + 30); g.arc(x, Y + 30, 22, Math.PI, 0); g.lineTo(x + 22, Y + 70); g.stroke(); }
+      for(const bx of [22.5, 37.5]){ const x = bx * LG_T; g.fillStyle = '#9e1b32'; g.beginPath(); g.moveTo(x - 16, Y + 8); g.lineTo(x + 16, Y + 8); g.lineTo(x + 16, Y + 66); g.lineTo(x, Y + 56); g.lineTo(x - 16, Y + 66); g.fill(); g.font = '18px sans-serif'; g.textAlign = 'center'; g.fillText('👑', x, Y + 40); g.textAlign = 'left'; }
+    } else if(r.id === 'music'){
+      for(let i = 0; i < 4; i++){ const x = (r.x + 2 + i * 3) * LG_T; g.fillStyle = ['#ffd166', '#ff6b9a', '#9fd1ff', '#9be37a'][i]; g.fillRect(x, Y + 22, 34, 34); g.fillStyle = '#1d1530'; g.beginPath(); g.arc(x + 17, Y + 39, 11, 0, 7); g.fill(); g.fillStyle = '#ddd'; g.beginPath(); g.arc(x + 17, Y + 39, 3, 0, 7); g.fill(); }
+    } else if(r.id === 'arcade'){
+      g.save(); g.font = "800 30px 'Inter',sans-serif"; g.textAlign = 'center'; g.shadowColor = '#ff5fd2'; g.shadowBlur = 14; g.fillStyle = '#ffd1f4'; g.fillText('ARCADE', (r.x + r.w / 2) * LG_T, Y + 52); g.restore();
+    } else if(r.id === 'vault'){
+      g.save(); g.font = "800 26px 'Inter',sans-serif"; g.textAlign = 'center'; g.shadowColor = '#ffe27a'; g.shadowBlur = 16; g.fillStyle = '#fff4c2'; g.fillText('💎 TREASURY 💎', (r.x + r.w / 2) * LG_T, Y + 50); g.restore();
+    }
+    // archways where the doors are
+    for(const [dx, dy] of LG_DOORS) if(dy >= r.y && dy < r.y + 2 && dx >= r.x && dx < r.x + r.w && !LG_DOORS.some(([a, b]) => a === dx - 1 && b === dy)){ g.fillStyle = '#1a1026'; g.beginPath(); g.moveTo(dx * LG_T, Y + H2); g.lineTo(dx * LG_T, Y + 26); g.arc((dx + 1) * LG_T, Y + 26, LG_T, Math.PI, 0); g.lineTo((dx + 2) * LG_T, Y + H2); g.fill(); g.strokeStyle = r.trim; g.lineWidth = 3; g.stroke(); }
+  }
+  function lgStatic(g){
+    g.fillStyle = '#0d0918'; g.fillRect(0, 0, LG_MW * LG_T, LG_MH * LG_T);
+    // the stars outside
+    for(let i = 0; i < 260; i++){ const h = lgHash('s' + i); g.fillStyle = `rgba(255,255,255,${.15 + (h % 40) / 100})`; g.fillRect(h % (LG_MW * LG_T), (h >>> 11) % (LG_MH * LG_T), 2, 2); }
+    // door floors
+    for(const [x, y] of LG_DOORS){ g.fillStyle = '#d6cbe4'; g.fillRect(x * LG_T, y * LG_T, LG_T, LG_T); }
+    for(const r of LG_ROOMS){
+      g.save(); g.beginPath(); g.rect(r.x * LG_T, r.y * LG_T, r.w * LG_T, r.h * LG_T); g.clip(); lgFloor(g, r); g.restore();
+      // a soft shadow along the edges
+      g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 10; g.strokeRect(r.x * LG_T + 5, r.y * LG_T + 5, r.w * LG_T - 10, r.h * LG_T - 10);
+      lgWall(g, r);
+    }
+  }
+  const LG_CH = 400;
+  function lgChunk(cx, cy, s){
+    if(LG.chunkS !== s){ LG.chunks = new Map(); LG.chunkS = s; }
+    const k = cx + ',' + cy; let c = LG.chunks.get(k); if(c) return c;
+    c = document.createElement('canvas'); c.width = Math.ceil(LG_CH * s); c.height = Math.ceil(LG_CH * s);
+    const g = c.getContext('2d'); g.scale(s, s); g.translate(-cx * LG_CH, -cy * LG_CH); lgStatic(g);
+    LG.chunks.set(k, c); return c;
+  }
+  // furniture, drawn in the y-sorted list with people
+  function lgProps(g, now, list, vis){
+    const T = LG_T, add = (y, x, f) => { if(x > vis.x0 - 200 && x < vis.x1 + 200 && y > vis.y0 - 80 && y < vis.y1 + 300) list.push({ y, d: f }); };
+    // pillars
+    for(const [x, y] of [[21, 19], [25, 19], [34, 19], [38, 19], [21, 25], [25, 25], [34, 25], [38, 25], [21, 31], [38, 31]]) add((y + 1) * T, x * T, () => {
+      const X = x * T, Y = (y + 1) * T;
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(X + 20, Y - 4, 24, 8, 0, 0, 7); g.fill();
+      g.fillStyle = '#e8c35a'; g.fillRect(X - 2, Y - 14, 44, 12);
+      const pg = g.createLinearGradient(X + 4, 0, X + 36, 0); pg.addColorStop(0, '#cfc4dc'); pg.addColorStop(.45, '#fbf8ff'); pg.addColorStop(1, '#b6a8c9'); g.fillStyle = pg; g.fillRect(X + 4, Y - 124, 32, 112);
+      g.strokeStyle = 'rgba(120,100,150,.35)'; g.lineWidth = 2; for(let i = 1; i < 4; i++){ g.beginPath(); g.moveTo(X + 4 + i * 8, Y - 122); g.lineTo(X + 4 + i * 8, Y - 14); g.stroke(); }
+      g.fillStyle = '#e8c35a'; g.fillRect(X - 2, Y - 134, 44, 12);
+    });
+    // the throne
+    add(17.2 * T, 30 * T, () => {
+      const X = 28 * T, Y = 16 * T;
+      g.fillStyle = '#8a1630'; g.fillRect(X, Y + 30, 4 * T, 2 * T - 30); g.fillStyle = '#e8c35a'; g.fillRect(X, Y + 30, 4 * T, 6); g.fillRect(X + 10, Y + 52, 4 * T - 20, 4);
+      g.fillStyle = '#d4a52e'; g.beginPath(); g.moveTo(X + 52, Y + 48); g.lineTo(X + 52, Y - 40); g.lineTo(X + 64, Y - 56); g.lineTo(X + 80, Y - 44); g.lineTo(X + 96, Y - 56); g.lineTo(X + 108, Y - 40); g.lineTo(X + 108, Y + 48); g.fill();
+      g.fillStyle = '#b01e3c'; roundRectPath(g, X + 60, Y - 30, 40, 66, 8); g.fill();
+      g.fillStyle = '#ff4d6d'; g.beginPath(); g.arc(X + 80, Y - 44, 5, 0, 7); g.fill();
+      g.fillStyle = '#d4a52e'; roundRectPath(g, X + 46, Y + 36, 68, 18, 5); g.fill();
+    });
+    // benches (hall), sofa (music), beanbags (arcade), garden benches
+    for(const s of LG_SEATS) add(s.y - 2, s.x, () => {
+      const X = s.x, Y = s.y;
+      if(s.k === 'bench' || s.k === 'gbench'){ g.fillStyle = s.k === 'bench' ? '#6b2a3a' : '#7a5a3a'; roundRectPath(g, X - 30, Y - 30, 60, 14, 4); g.fill(); g.fillStyle = s.k === 'bench' ? '#9e3a52' : '#a07a52'; roundRectPath(g, X - 32, Y - 12, 64, 12, 4); g.fill(); g.fillStyle = '#3a2a20'; g.fillRect(X - 28, Y, 5, 8); g.fillRect(X + 23, Y, 5, 8); }
+      else if(s.k === 'sofa'){ g.fillStyle = '#2b5f8a'; roundRectPath(g, X - 30, Y - 34, 60, 22, 8); g.fill(); g.fillStyle = '#3d7bb0'; roundRectPath(g, X - 30, Y - 14, 60, 16, 6); g.fill(); }
+      else if(s.k === 'bean'){ g.fillStyle = s.x < 50 * T ? '#4a7bd1' : '#d16a4a'; g.beginPath(); g.ellipse(X, Y - 6, 34, 18, 0, 0, 7); g.fill(); }
+    });
+    // music room: grand piano + jukebox
+    add(21 * T, 6.5 * T, () => {
+      const X = 5 * T, Y = 19 * T;
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(X + 60, Y + 76, 64, 12, 0, 0, 7); g.fill();
+      g.fillStyle = '#111'; g.beginPath(); g.moveTo(X, Y + 10); g.lineTo(X + 120, Y + 10); g.quadraticCurveTo(X + 120, Y + 70, X + 70, Y + 70); g.lineTo(X, Y + 70); g.fill();
+      g.fillStyle = '#222'; g.beginPath(); g.moveTo(X + 8, Y - 30); g.lineTo(X + 100, Y - 4); g.lineTo(X + 100, Y + 10); g.lineTo(X + 8, Y + 10); g.fill();
+      g.fillStyle = '#fff'; g.fillRect(X + 4, Y + 58, 70, 10); g.fillStyle = '#111'; for(let i = 0; i < 9; i++) g.fillRect(X + 8 + i * 7.5, Y + 58, 3, 6);
+    });
+    add(19 * T, 15 * T, () => {
+      const X = 14 * T, Y = 16.6 * T, glow = LG.song ? .5 + .5 * Math.sin(now / 160) : 0;
+      g.fillStyle = '#4a2a1e'; roundRectPath(g, X, Y, 80, 100, 30); g.fill();
+      const jg = g.createLinearGradient(X, Y, X + 80, Y + 100); jg.addColorStop(0, '#ff8a5c'); jg.addColorStop(.5, '#ffd166'); jg.addColorStop(1, '#ff5fa8'); g.fillStyle = jg; roundRectPath(g, X + 6, Y + 6, 68, 88, 26); g.fill();
+      g.fillStyle = `rgba(255,255,255,${.25 + glow * .45})`; roundRectPath(g, X + 16, Y + 16, 48, 30, 15); g.fill();
+      g.fillStyle = '#2a1a14'; g.fillRect(X + 16, Y + 54, 48, 30); g.fillStyle = '#ffd166'; for(let i = 0; i < 4; i++) g.fillRect(X + 21 + i * 11, Y + 58, 5, 22);
+      if(LG.song){ g.font = "700 18px 'Inter',sans-serif"; g.fillStyle = '#fff'; g.fillText('♪', X + 80 + Math.sin(now / 300) * 6, Y - (now / 20 % 30)); g.fillText('♫', X - 8 + Math.cos(now / 340) * 6, Y - 10 - ((now / 24 + 15) % 30)); }
+    });
+    // arcade wing: cabinets + soda machine
+    for(const cx of [45, 47, 49]) add(19 * T, cx * T, () => {
+      const X = cx * T, Y = 16.4 * T, hue = cx * 40;
+      g.fillStyle = '#3a1150'; g.beginPath(); g.moveTo(X + 2, Y + 104); g.lineTo(X + 2, Y + 30); g.lineTo(X + 8, Y + 8); g.lineTo(X + 38, Y + 8); g.lineTo(X + 40, Y + 30); g.lineTo(X + 40, Y + 104); g.fill();
+      g.fillStyle = `hsl(${(hue + now / 20) % 360},80%,62%)`; g.fillRect(X + 8, Y + 18, 26, 24);
+      g.font = '14px sans-serif'; g.fillText(['🍒', '7️⃣', '💎'][Math.floor(now / 400 + cx) % 3], X + 12, Y + 36);
+      g.fillStyle = '#ffd166'; g.fillRect(X + 8, Y + 52, 26, 6);
+    });
+    add(19 * T, 55 * T, () => {
+      const X = 54 * T, Y = 16.2 * T;
+      g.fillStyle = '#1a2b5c'; roundRectPath(g, X, Y, 80, 112, 8); g.fill(); g.fillStyle = '#2f4fa8'; roundRectPath(g, X + 4, Y + 4, 72, 104, 6); g.fill();
+      g.fillStyle = 'rgba(170,220,255,.25)'; roundRectPath(g, X + 8, Y + 10, 48, 66, 4); g.fill();
+      LG_SODAS.forEach((s, i) => { for(let rr = 0; rr < 3; rr++){ g.fillStyle = s.c; g.fillRect(X + 11 + i * 9, Y + 14 + rr * 20, 7, 15); } });
+      g.fillStyle = '#57e1ff'; g.fillRect(X + 62, Y + 16, 8, 5); g.fillStyle = '#0a0f22'; g.fillRect(X + 10, Y + 82, 50, 16);
+      g.font = "800 10px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.textAlign = 'center'; g.fillText('SODA', X + 40, Y + 106); g.textAlign = 'left';
+    });
+    // garden: fountain + trees
+    add(44 * T, 30 * T, () => {
+      const X = 30 * T, Y = 42.5 * T;
+      g.fillStyle = '#9aa6b8'; g.beginPath(); g.ellipse(X, Y, 78, 44, 0, 0, 7); g.fill(); g.fillStyle = '#4aa8e0'; g.beginPath(); g.ellipse(X, Y, 66, 35, 0, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.35)'; for(let i = 0; i < 3; i++){ const k = ((now / 1400) + i / 3) % 1; g.strokeStyle = `rgba(255,255,255,${.5 * (1 - k)})`; g.lineWidth = 2; g.beginPath(); g.ellipse(X, Y, 20 + k * 44, 10 + k * 22, 0, 0, 7); g.stroke(); }
+      g.fillStyle = '#b8c2d1'; g.fillRect(X - 8, Y - 56, 16, 56); g.beginPath(); g.ellipse(X, Y - 56, 26, 9, 0, 0, 7); g.fill();
+      g.fillStyle = 'rgba(160,215,255,.85)'; for(let i = 0; i < 10; i++){ const k = ((now / 700) + i / 10) % 1, a = i / 10 * 6.28; g.beginPath(); g.arc(X + Math.cos(a) * 30 * k, Y - 62 - Math.sin(k * 3.14) * 26 + k * 40, 2.4, 0, 7); g.fill(); }
+    });
+    for(const [tx, ty] of [[12, 38], [46, 38], [12, 45], [46, 45]]) add((ty + 2) * T, (tx + 1) * T, () => {
+      const X = (tx + 1) * T, Y = (ty + 2) * T;
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(X, Y - 4, 34, 10, 0, 0, 7); g.fill();
+      g.fillStyle = '#6b4226'; g.fillRect(X - 7, Y - 40, 14, 38);
+      g.fillStyle = '#2f7a3a'; g.beginPath(); g.arc(X, Y - 70, 40, 0, 7); g.fill(); g.fillStyle = '#3f9a4a'; g.beginPath(); g.arc(X - 12, Y - 82, 26, 0, 7); g.fill(); g.fillStyle = '#ff8fb1'; for(let i = 0; i < 6; i++){ const h = lgHash('t' + tx + ty + i); g.beginPath(); g.arc(X - 30 + h % 60, Y - 100 + (h >>> 8) % 50, 4, 0, 7); g.fill(); }
+    });
+    // the treasury: golden throne, treasure, gold piles
+    add(6.2 * T, 30 * T, () => {
+      const X = 28 * T, Y = 5 * T;
+      g.fillStyle = '#ffe27a'; g.fillRect(X, Y + 40, 4 * T, 2 * T - 40);
+      const gg = g.createLinearGradient(X + 50, Y - 60, X + 110, Y + 40); gg.addColorStop(0, '#fff4c2'); gg.addColorStop(.5, '#f0c23a'); gg.addColorStop(1, '#b8861a'); g.fillStyle = gg;
+      g.beginPath(); g.moveTo(X + 48, Y + 56); g.lineTo(X + 48, Y - 50); g.lineTo(X + 64, Y - 72); g.lineTo(X + 80, Y - 56); g.lineTo(X + 96, Y - 72); g.lineTo(X + 112, Y - 50); g.lineTo(X + 112, Y + 56); g.fill();
+      g.fillStyle = '#5a1fb0'; roundRectPath(g, X + 60, Y - 36, 40, 70, 8); g.fill();
+      for(const [dx, c] of [[64, '#57e1ff'], [80, '#ff4d6d'], [96, '#9be37a']]){ g.fillStyle = c; g.beginPath(); g.arc(X + dx, Y - 60, 5, 0, 7); g.fill(); }
+    });
+    for(const [cx, cy] of [[25, 9], [33, 9]]) add((cy + 1) * T, cx * T, () => {
+      const X = cx * T, Y = cy * T;
+      g.fillStyle = '#7a4a1e'; roundRectPath(g, X + 2, Y - 6, 76, 46, 6); g.fill(); g.fillStyle = '#e8c35a'; g.fillRect(X + 2, Y + 8, 76, 6); g.fillRect(X + 34, Y - 6, 12, 46);
+      g.fillStyle = '#ffe27a'; for(let i = 0; i < 8; i++){ const h = lgHash('gc' + cx + i); g.beginPath(); g.arc(X + 10 + h % 60, Y - 8 - (h >>> 5) % 10, 6, 0, 7); g.fill(); }
+      g.fillStyle = '#57e1ff'; g.beginPath(); g.moveTo(X + 40, Y - 26); g.lineTo(X + 48, Y - 16); g.lineTo(X + 40, Y - 6); g.lineTo(X + 32, Y - 16); g.fill();
+    });
+    for(const [px, py] of [[32.5, 11.5], [34.5, 12.5], [26, 5.5], [34, 5.5]]) add(py * T, px * T, () => { const X = px * T, Y = py * T; g.fillStyle = '#f0c23a'; for(let i = 0; i < 14; i++){ const h = lgHash('gp' + px + i); g.beginPath(); g.arc(X - 24 + h % 48, Y - (h >>> 6) % 20, 7, 0, 7); g.fill(); } g.fillStyle = '#fff4c2'; g.beginPath(); g.arc(X - 6, Y - 18, 3, 0, 7); g.fill(); });
+    // the treasury gate
+    add(15.2 * T, 26 * T, () => {
+      const X = 25 * T, Y = 14 * T, open = lgRich();
+      g.fillStyle = '#e8c35a'; g.fillRect(X - 10, Y - 90, 10, 100); g.fillRect(X + 2 * T, Y - 90, 10, 100); g.fillRect(X - 10, Y - 96, 2 * T + 20, 10);
+      if(!open){ g.strokeStyle = '#e8c35a'; g.lineWidth = 4; for(let i = 1; i < 6; i++){ g.beginPath(); g.moveTo(X + i * 13.3, Y - 86); g.lineTo(X + i * 13.3, Y + 6); g.stroke(); } g.font = '22px sans-serif'; g.textAlign = 'center'; g.fillText('🔒', X + T, Y - 30); g.textAlign = 'left'; }
+      g.font = "800 11px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = '#ffe27a'; g.fillText('1B+ ONLY', X + T, Y - 102); g.textAlign = 'left';
+    });
+    // Mochi
+    const c = lgCatPos(now);
+    if(lgSeenAt(c.x, c.y)) add(c.y, c.x, () => {
+      g.save(); g.translate(c.x, c.y); g.scale(c.face * 1.2, 1.2);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(0, 0, 20, 5, 0, 0, 7); g.fill();
+      const b = c.moving ? Math.sin(now / 70) * 2 : 0;
+      g.fillStyle = '#f2b35e'; g.beginPath(); g.ellipse(-2, -12 + b * .3, 18, 11, 0, 0, 7); g.fill();
+      g.strokeStyle = '#f2b35e'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(-18, -14); g.quadraticCurveTo(-30, -30 + Math.sin(now / 300) * 6, -22, -36); g.stroke();
+      g.beginPath(); g.arc(14, -22 + b * .3, 11, 0, 7); g.fill();
+      g.beginPath(); g.moveTo(6, -30); g.lineTo(9, -40); g.lineTo(14, -32); g.fill(); g.beginPath(); g.moveTo(16, -32); g.lineTo(22, -40); g.lineTo(24, -28); g.fill();
+      g.fillStyle = '#2a1a14'; g.fillRect(15, -25, 2.5, 3.5); g.fillRect(20, -25, 2.5, 3.5);
+      g.fillStyle = '#e09a46'; for(let i = 0; i < 3; i++) g.fillRect(-10 + i * 7, -21, 3, 8);
+      g.restore();
+      g.font = "600 11px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.75)'; g.fillText('Mochi', c.x, c.y + 16); g.textAlign = 'left';
+    });
+  }
+  // lights on top: chandeliers, disco, treasury sparkle — and the dark over rooms you haven't found yet
+  function lgLights(g, now, vis){
+    const glow = lgGlow();
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for(const [x, y] of [[24, 22], [30, 22], [36, 22], [24, 30], [36, 30]]){ const f = .55 + .08 * Math.sin(now / 230 + x); g.globalAlpha = f * .45; g.drawImage(glow, x * LG_T - 120, y * LG_T - 120, 240, 240); }
+    if(LG.song === 'hype' || LG.song === 'retro') for(let i = 0; i < 4; i++){ const a = now / 800 + i * 1.6; g.globalAlpha = .35; g.drawImage(glow, (10 + Math.cos(a) * 4) * LG_T - 70, (23 + Math.sin(a * 1.3) * 3) * LG_T - 70, 140, 140); }
+    if(LG.seen.has('vault')) for(let i = 0; i < 14; i++){ const h = lgHash('sp' + i), k = ((now / 1800) + (h % 100) / 100) % 1; g.globalAlpha = Math.sin(k * Math.PI) * .9; g.drawImage(glow, (24.5 + (h % 11)) * LG_T - 8, (4 + ((h >>> 7) % 9)) * LG_T - 8 - k * 20, 16, 16); }
+    g.restore();
+    // chandeliers (drawn above people)
+    for(const [x, y] of [[24, 22], [30, 22], [36, 22], [24, 30], [36, 30]]){ const X = x * LG_T, Y = y * LG_T - 150; g.strokeStyle = 'rgba(232,195,90,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(X, Y - 60); g.lineTo(X, Y); g.stroke(); g.fillStyle = '#e8c35a'; g.beginPath(); g.ellipse(X, Y, 26, 7, 0, 0, 7); g.fill(); g.fillStyle = '#fff6c9'; for(let i = 0; i < 5; i++){ g.beginPath(); g.arc(X - 20 + i * 10, Y - 6, 3, 0, 7); g.fill(); } }
+    // disco ball in the music room
+    if(LG.song === 'hype' || LG.song === 'retro'){ const X = 10 * LG_T, Y = 19 * LG_T; g.fillStyle = '#ccd'; g.beginPath(); g.arc(X, Y, 16, 0, 7); g.fill(); for(let i = 0; i < 8; i++){ g.fillStyle = `hsla(${(now / 8 + i * 45) % 360},90%,70%,.85)`; g.fillRect(X - 10 + (i % 4) * 5, Y - 8 + Math.floor(i / 4) * 8, 4, 4); } }
+    // the dark over undiscovered rooms
+    for(const r of LG_ROOMS){
+      if(LG.seen.has(r.id)) continue;
+      const X = r.x * LG_T, Y = r.y * LG_T - (r.open ? 34 : 16), W = r.w * LG_T, H = r.h * LG_T + (r.open ? 34 : 16);
+      if(X > vis.x1 || X + W < vis.x0 || Y > vis.y1 || Y + H < vis.y0) continue;
+      g.fillStyle = 'rgba(8,6,16,.94)'; g.fillRect(X, Y, W, H);
+      g.font = "800 22px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.35)'; g.fillText(r.vip ? '🔒 ???' : '???', X + W / 2, Y + H / 2); g.font = "600 13px 'Inter',sans-serif"; g.fillText(r.vip ? 'only for 1B+ points' : 'walk in to explore', X + W / 2, Y + H / 2 + 22); g.textAlign = 'left';
+    }
+  }
+  function lgMinimap(g, W, H, now, people){
+    const s = Math.min(150 / (LG_MW * LG_T), 1) , mw = LG_MW * LG_T * s, mh = LG_MH * LG_T * s, x0 = W - mw - 10, y0 = 10;
+    g.fillStyle = 'rgba(10,8,20,.7)'; roundRectPath(g, x0 - 6, y0 - 6, mw + 12, mh + 12, 8); g.fill();
+    for(const r of LG_ROOMS){ g.fillStyle = !LG.seen.has(r.id) ? 'rgba(255,255,255,.08)' : r.vip ? '#e8c35a' : r.open ? '#4f9a4a' : 'rgba(214,203,228,.75)'; g.fillRect(x0 + r.x * LG_T * s, y0 + r.y * LG_T * s, r.w * LG_T * s, r.h * LG_T * s); }
+    for(const o of people){ g.fillStyle = '#57e1ff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + o.p.y * s, 2.4, 0, 7); g.fill(); }
+    const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mp.y * s, 3.2, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 1; g.stroke();
+  }
   function lgLoop(){
     cancelAnimationFrame(LG.raf); if(!LG.on) return;
     LG.raf = requestAnimationFrame(lgLoop);
     const cv = LG.cv; if(!cv || document.visibilityState !== 'visible') return;
     const r = cv.getBoundingClientRect(); if(r.width < 10) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(W * LG_H / LG_W);
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(W * LG_VH / LG_VW);
     if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
-    const g = cv.getContext('2d'), now = trdNow(), s = W / LG_W;
-    g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(lgBg(W, H), 0, 0);
-    g.setTransform(s, 0, 0, s, 0, 0);
-    // dance-floor lights when the music is hype / retro
-    if(LG.song === 'hype' || LG.song === 'retro'){
-      g.save(); g.globalCompositeOperation = 'lighter';
-      for(let i = 0; i < 3; i++){ const a = now / 900 + i * 2.1; g.fillStyle = ['rgba(255,80,200,.16)', 'rgba(80,220,255,.16)', 'rgba(255,220,80,.14)'][i]; g.beginPath(); g.ellipse(500 + Math.cos(a) * 160, 440 + Math.sin(a * 1.3) * 40, 90, 34, 0, 0, 7); g.fill(); }
-      g.restore();
-      g.fillStyle = '#ccd'; g.beginPath(); g.arc(500, 26, 14, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.moveTo(500, 0); g.lineTo(500, 12); g.stroke();
-      for(let i = 0; i < 6; i++){ g.fillStyle = `hsla(${(now / 8 + i * 60) % 360},90%,70%,.8)`; g.fillRect(492 + (i % 3) * 6, 18 + Math.floor(i / 3) * 7, 4, 4); }
-    }
-    // me: did I just arrive?
+    const g = cv.getContext('2d'), now = trdNow(), s = W / LG_VW;
     const m = LG.me, mp = lgPos(m, now);
     if(!mp.moving && LG.pend) lgArrived();
     if(mp.face) LG.lastFace = mp.face;
+    // which room am I in? (the first visit reveals it)
+    const room = lgRoomAt(Math.floor(mp.x / LG_T), Math.floor(mp.y / LG_T));
+    if(room && room.id !== LG.room){ LG.room = room.id; if(!LG.seen.has(room.id)){ LG.seen.add(room.id); chatLS('lgSeen', JSON.stringify([...LG.seen])); lgBanner('✨ You found the ' + room.name + '!'); lgSfx('reveal'); } else lgBanner(room.name); }
+    // the camera glides after me
+    LG.cam = LG.cam || { x: mp.x, y: mp.y };
+    LG.cam.x += (mp.x - LG.cam.x) * 0.12; LG.cam.y += (mp.y - 40 - LG.cam.y) * 0.12;
+    const v = lgView(), sc = s; const x0 = v.x0, y0 = v.y0;
+    const vis = { x0, y0, x1: x0 + LG_VW, y1: y0 + LG_VH };
+    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#0d0918'; g.fillRect(0, 0, W, H);
+    // floors and walls (cached tiles)
+    const cs = Math.round(sc * 100) / 100;
+    for(let cy = Math.floor(y0 / LG_CH); cy <= Math.floor((y0 + LG_VH) / LG_CH); cy++) for(let cx = Math.floor(x0 / LG_CH); cx <= Math.floor((x0 + LG_VW) / LG_CH); cx++){
+      if(cx < 0 || cy < 0 || cx * LG_CH >= LG_MW * LG_T || cy * LG_CH >= LG_MH * LG_T) continue;
+      g.drawImage(lgChunk(cx, cy, cs), Math.round((cx * LG_CH - x0) * sc), Math.round((cy * LG_CH - y0) * sc), Math.ceil(LG_CH * sc) + 1, Math.ceil(LG_CH * sc) + 1);
+    }
+    g.setTransform(sc, 0, 0, sc, -x0 * sc, -y0 * sc);
     const list = [];
-    lgDrawProps(g, now, list);
-    for(const o of lgPeople()){ const p = lgPos(o, now); if(!p.face) p.face = o.tx < o.x ? -1 : 1; list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
+    lgProps(g, now, list, vis);
+    const people = [];
+    for(const o of lgPeople()){ const p = lgPos(o, now); if(!lgSeenAt(p.x, p.y)) continue; if(!p.face) p.face = (o._f = o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 100 && p.x < vis.x1 + 100 && p.y > vis.y0 - 50 && p.y < vis.y1 + 150) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
     mp.face = mp.face || LG.lastFace;
     list.push({ y: mp.y + .1, d: () => lgDrawChar(g, Object.assign({ n: chatName(), u: chatUid() }, m), mp, now, true) });
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
-    // hearts from petting Mochi
     const pn = performance.now();
     LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
     g.font = "16px sans-serif"; g.textAlign = 'center';
     for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText('❤️', h.x + Math.sin(k * 8) * 6, h.y - k * 50); }
     g.globalAlpha = 1; g.textAlign = 'left';
-    // the walk target marker
-    if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 2; g.beginPath(); g.ellipse(m.tx, m.ty, 10 + Math.sin(now / 120) * 2, 4, 0, 0, 7); g.stroke(); }
+    if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; g.beginPath(); g.ellipse(m.tx, m.ty, 12 + Math.sin(now / 120) * 2, 5, 0, 0, 7); g.stroke(); }
+    lgLights(g, now, vis);
+    // screen-space: minimap + room banner
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const Wc = W / dpr, Hc = H / dpr;
+    lgMinimap(g, Wc, Hc, now, people);
+    if(LG.banner){ const k = (pn - LG.banner.at) / 2600; if(k > 1) LG.banner = null; else { g.globalAlpha = k < .15 ? k / .15 : k > .8 ? (1 - k) / .2 : 1; g.font = "800 20px 'Inter',sans-serif"; g.textAlign = 'center'; const tw = g.measureText(LG.banner.t).width + 36; g.fillStyle = 'rgba(10,8,20,.75)'; roundRectPath(g, Wc / 2 - tw / 2, 14, tw, 38, 19); g.fill(); g.fillStyle = '#ffe27a'; g.fillText(LG.banner.t, Wc / 2, 40); g.textAlign = 'left'; g.globalAlpha = 1; } }
   }
   // ----- "… is typing" bubbles (build 200) -----
   // While you type, SaiDeck puts a small note at typing/<room>/<you> (refreshed every few seconds, removed when you
