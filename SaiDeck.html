@@ -246,12 +246,38 @@
   body.sd-online .sd-obar{display:flex;position:fixed;left:0;right:0;top:0;height:56px;z-index:350;align-items:center;gap:10px;padding:0 16px;box-sizing:border-box;background:rgba(18,13,34,.85);border-bottom:1px solid rgba(180,140,255,.25);color:#f1ecff;font:16px 'Inter',sans-serif;}
   .sd-obar .dash-logo{width:32px;height:32px;} .sd-obar em{font-style:normal;background:linear-gradient(90deg,#ff9ad5,#b48cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
   .sd-ohome{padding:8px 13px;border-radius:10px;border:1px solid rgba(180,140,255,.4);background:rgba(180,140,255,.12);color:#fff;font:600 13px 'Inter',sans-serif;cursor:pointer;}
-  body.sd-online .chat-panel{top:68px;left:max(12px, calc(50% - 560px));right:max(12px, calc(50% - 560px));width:auto;bottom:12px;}
+  body.sd-online .chat-panel{top:68px;bottom:12px;}
   body.sd-online .chat-panel .chat-x{display:none;}
-  body.sd-online .chat-grip{display:none !important;}
-  body.sd-online .arc-dock{top:80px;right:auto;left:max(12px, calc(50% - 616px));}
-  @media (min-width:1000px){body.sd-online .chat-panel{left:max(72px, calc(50% - 560px));}}
-  @media (max-width:999px){body.sd-online .arc-dock{top:64px;left:12px;right:auto;flex-direction:row;} body.sd-online .chat-panel{top:120px;}}
+  body.sd-online .arc-dock{display:none !important;}
+  .on-board,.on-games{display:none;}
+  body.sd-online .on-board{display:flex;flex-direction:column;position:fixed;z-index:340;top:68px;bottom:12px;left:12px;width:280px;box-sizing:border-box;padding:16px;gap:10px;
+    background:rgba(23,20,40,.82);border:1px solid rgba(245,208,74,.3);border-radius:14px;color:#f1ecff;font-family:'Inter',sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+  .on-board h3{margin:0;font:800 16px 'Inter',sans-serif;display:flex;align-items:center;gap:8px;} .on-board h3 small{margin-left:auto;font:500 11px 'Inter',sans-serif;color:rgba(241,236,255,.5);}
+  .on-board .arc-board{overflow:auto;flex:1;min-height:0;padding-right:2px;} .on-board .arc-board li{font-size:13px;padding:7px 9px;}
+  .on-board .on-note{font-size:11px;color:rgba(241,236,255,.5);margin:0;}
+  body.sd-online .on-games{display:block;position:fixed;z-index:330;top:68px;bottom:12px;left:304px;right:calc(var(--chat-w) + 28px);overflow:auto;color:#f1ecff;font-family:'Inter',sans-serif;}
+  .on-hi{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 4px 16px;} .on-hi h2{margin:0;font:800 24px 'Inter',sans-serif;} .on-hi span{font:600 14px 'Inter',sans-serif;color:#f5d04a;}
+  .on-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+  .on-g{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:150px;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.1);
+    background:linear-gradient(160deg,var(--g1),rgba(23,20,40,.85) 70%);color:#fff;font:inherit;text-align:left;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.35);transition:transform .15s,border-color .15s;}
+  .on-g:hover{transform:translateY(-3px);border-color:var(--g2);} .on-g:active{transform:scale(.98);}
+  .on-g .on-e{font-size:40px;line-height:1;margin-bottom:auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.4));}
+  .on-g b{font:800 17px 'Inter',sans-serif;} .on-g i{font-style:normal;font-size:12px;color:rgba(255,255,255,.7);}
+  .on-g .on-live{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:999px;background:rgba(62,211,154,.18);border:1px solid rgba(62,211,154,.5);font:700 10.5px 'Inter',sans-serif;color:#9ff3cf;}
+  .on-g .on-live:empty{display:none;}
+  @media (max-width:1000px){
+    body.sd-online .on-board{display:none;}
+    body.sd-online .on-games{left:12px;}
+  }
+  @media (max-width:700px){
+    body.sd-online .on-games{top:62px;bottom:auto;right:0;left:0;height:118px;overflow-x:auto;overflow-y:hidden;padding:0 10px;}
+    body.sd-online .on-hi{display:none;}
+    body.sd-online .on-grid{display:flex;gap:10px;}
+    body.sd-online .on-g{min-height:0;min-width:120px;height:104px;padding:12px;border-radius:14px;}
+    body.sd-online .on-g .on-e{font-size:28px;} body.sd-online .on-g i{display:none;} body.sd-online .on-g b{font-size:14px;}
+    body.sd-online .chat-panel{top:186px;}
+    body.sd-online .chat-grip{display:none !important;}
+  }
   body.sd-online .acct-box{width:100%;max-width:440px;margin:0 auto;box-sizing:border-box;}
   .acct-note{margin:0;padding:10px 12px;border-radius:10px;background:rgba(120,200,140,.12);border:1px solid rgba(120,200,140,.35);color:var(--text);font:12px/1.45 'Inter',sans-serif;}
   .acct-warn{margin:0;padding:8px 11px;border-radius:9px;background:rgba(255,190,90,.12);border:1px solid rgba(255,190,90,.35);color:var(--text);font:12px/1.4 'Inter',sans-serif;}
@@ -23261,7 +23287,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 197;                 // ← goes up by one with every published version
+  const SD_BUILD = 198;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24969,7 +24995,50 @@
       bar.querySelector('.sd-ohome').addEventListener('click', () => dashOpen());
       document.body.appendChild(bar);
     }
+    if(!document.querySelector('.on-board')){
+      const B = document.createElement('div'); B.className = 'on-board'; document.body.appendChild(B);
+      const G = document.createElement('div'); G.className = 'on-games'; document.body.appendChild(G);
+      G.addEventListener('click', (e) => { const b = e.target.closest('[data-g]'); if(b) onlinePlay(b.dataset.g); });
+    }
     if(!CHAT.open) chatToggle(true); else chatRender();
+    onlineRender(); clearInterval(DASH.onT); DASH.onT = setInterval(() => { if(dashIsOnline()) onlineRender(); else clearInterval(DASH.onT); }, 5000);
+  }
+  const ONLINE_GAMES = [
+    { g: 'slots', e: '🎰', t: 'Slots', d: 'Spin for jackpots with everyone watching', c: ['rgba(255,201,74,.28)', '#ffc94a'] },
+    { g: 'bj', e: '🃏', t: 'Blackjack', d: 'Beat the dealer, 3 to 2 on blackjack', c: ['rgba(62,211,154,.26)', '#3ed39a'] },
+    { g: 'td', e: '🏰', t: 'Tower Defense', d: 'Solo or team up against the waves', c: ['rgba(127,156,255,.28)', '#7f9cff'] },
+    { g: 'cf', e: '🪙', t: 'Coin Flip', d: 'Heads or tails — double or nothing', c: ['rgba(255,138,92,.26)', '#ff8a5c'] },
+    { g: 'trade', e: '📈', t: 'Trading', d: 'Buy and sell Cardiastra and NVIDIA', c: ['rgba(63,200,224,.26)', '#3fc8e0'] },
+    { g: 'shop', e: '🛍️', t: 'Shop', d: 'Bubbles, ammo and artillery', c: ['rgba(255,111,174,.26)', '#ff6fae'] },
+    { g: 'quests', e: '🎯', t: 'Daily quests', d: 'Free points every day', c: ['rgba(180,140,255,.3)', '#b48cff'] },
+  ];
+  function onlinePlay(g){
+    if(!chatName() || !chatLS('rt')){ if(!CHAT.open) chatToggle(true); toast('Log in first (on the right) to play.', 2400); return; }
+    if(g === 'slots'){ if(!CAS.on) casJoin(); }
+    else if(g === 'bj'){ if(!BJ.on) bjJoin(); }
+    else if(g === 'td') tdOpen();
+    else if(g === 'trade') trdOpen();
+    else if(g === 'cf') cfOpen();
+    else { SC.tab = g; if(CHAT.side !== 'arcade') chatSideTo('arcade'); else chatRenderArcade(); try{ dockSeen(g); }catch(e){} scLoad(); }
+  }
+  function onlineRender(){
+    const B = document.querySelector('.on-board'), G = document.querySelector('.on-games'); if(!B || !G) return;
+    const me = chatUid(), logged = !!(chatName() && chatLS('rt'));
+    // the leaderboard (left)
+    if(logged && (!SC.board || Date.now() - SC.boardAt > 20000) && Date.now() - (DASH.bTry || 0) > 15000){ DASH.bTry = Date.now(); scBoard().then(() => onlineRender()).catch(() => {}); }
+    const L = SC.board;
+    const bh = `<h3>🏆 Leaderboard <small>all-time</small></h3>` + (!logged ? `<p class="on-note">Log in to see the leaderboard.</p>` : !L ? `<p class="on-note">Loading…</p>` : !L.length ? `<p class="on-note">Nobody's on the board yet.</p>` :
+      `<ol class="arc-board">` + L.slice(0, 100).map((x, i) => `<li class="${x.u === me ? 'me' : ''}"><span class="arc-rank">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><b style="color:${chatColor(x.n)}">${escapeHtml(chatBadName(x.n) ? 'someone' : x.n)}</b><span title="Earned all-time">${x.p.toLocaleString()}</span></li>`).join('') + `</ol>`) +
+      `<p class="on-note">Ranked by points earned all-time.</p>`;
+    if(B._h !== bh){ const sc = B.querySelector('.arc-board'), top = sc ? sc.scrollTop : 0; B.innerHTML = bh; B._h = bh; const n = B.querySelector('.arc-board'); if(n) n.scrollTop = top; }
+    // the games (middle)
+    let nS = 0, nB = 0; try{ nS = Object.entries(CAS.seats || {}).filter(([u, st]) => casSeatLive(st)).length; nB = Object.entries(BJ.peek || BJ.p || {}).filter(([u, st]) => bjLive(st)).length; }catch(e){}
+    const live = { slots: nS ? nS + ' playing' : '', bj: nB ? nB + ' at the table' : '' };
+    const bal = logged && SC.loaded ? Math.max(0, scBal()) : null;
+    const gh = `<div class="on-hi"><h2>${logged ? 'Hey ' + escapeHtml(chatName()) + '! What are we playing?' : 'Pick a game'}</h2>${bal != null ? `<span>🪙 ${bal.toLocaleString()} points</span>` : ''}</div>
+      <div class="on-grid">${ONLINE_GAMES.map(x => `<button type="button" class="on-g" data-g="${x.g}" style="--g1:${x.c[0]};--g2:${x.c[1]}"><span class="on-e">${x.e}</span><b>${x.t}</b><i>${x.d}</i><span class="on-live">${live[x.g] || ''}</span></button>`).join('')}</div>`;
+    if(G._h !== gh){ G.innerHTML = gh; G._h = gh; }
+    if(logged && !SC.loaded && Date.now() - (DASH.sTry || 0) > 15000){ DASH.sTry = Date.now(); scLoad().then(() => onlineRender()).catch(() => {}); }
   }
   // a new, empty project without asking again (the dashboard already asked)
   async function newSessionQuiet(){
