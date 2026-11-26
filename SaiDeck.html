@@ -336,6 +336,7 @@
   .lg-pp-x{all:unset;position:absolute;top:8px;right:10px;cursor:pointer;opacity:.6;font-size:13px;} .lg-pp-x:hover{opacity:1;}
   .lg-rps{position:absolute;z-index:6;left:50%;top:58px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px);padding:8px 12px;border-radius:14px;background:rgba(20,16,36,.94);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 28px rgba(0,0,0,.45);color:#f1ecff;font:600 13px 'Inter',sans-serif;}
   .lg-rps .lg-hand{font-size:22px;padding:4px 10px;} .lg-rps i{font-style:normal;opacity:.7;font-size:12px;} .lg-rres{color:#ffd166;}
+  .lg-home:not(.guest) .lg-say{display:none;}
   .lg-pop{position:absolute;top:12px;right:12px;width:min(380px, calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:14px;border-radius:14px;background:rgba(20,16,36,.96);border:1px solid rgba(180,140,255,.4);box-shadow:0 16px 40px rgba(0,0,0,.5);color:#f1ecff;font-family:'Inter',sans-serif;}
   .lg-pop h4{margin:0 0 6px;font:800 15px 'Inter',sans-serif;} .lg-pop p{margin:4px 0 10px;font-size:12px;color:rgba(241,236,255,.75);} .lg-small{font-size:11px !important;}
   .lg-px{all:unset;position:absolute;top:8px;right:10px;cursor:pointer;font-size:13px;opacity:.7;} .lg-px:hover{opacity:1;}
@@ -1279,7 +1280,7 @@
   .infil .infil-arrow{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .2s;transform:rotate(var(--ang,0rad)) translateX(31px);}
   .infil .infil-arrow::after{content:'';position:absolute;left:-2px;top:-8px;border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
   .infil.moving .infil-arrow{opacity:1;}
-  .chat-event.inf{border-color:rgba(53,208,184,.45);}
+  .chat-event.inf{border-color:rgba(53,208,184,.45);} .chat-event.lights{border-color:rgba(255,209,102,.5);background:rgba(20,10,30,.6);}
   .chat-join{all:unset;margin-left:6px;padding:2px 9px;border-radius:999px;cursor:pointer;font:800 10.5px 'Inter',sans-serif;color:#0e2a26;background:#35d0b8;}
   .chat-join:hover:not(:disabled){filter:brightness(1.1);}
   .chat-join:disabled{opacity:.4;cursor:default;}
@@ -23386,7 +23387,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 211;                 // ← goes up by one with every published version
+  const SD_BUILD = 212;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24714,6 +24715,14 @@
           jb.addEventListener('click', () => { jb.blur(); if(td) tdJoinFromChat(v.slice(5)); else if(cf) cfOpen(); else trdOpen(); });
           ev.appendChild(jb);
         }
+        body.appendChild(ev); continue;
+      }
+      if(m.e === 'lights'){
+        const ev = document.createElement('div'); ev.className = 'chat-event lights';
+        ev.innerHTML = `<span aria-hidden="true">${/on/.test(String(m.m || '')) && !/off/.test(String(m.m || '')) ? '💡' : '🔌'}</span><b></b> <span class="ev-t"></span>`;
+        ev.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('b').style.color = chatColor(m.n);
+        ev.querySelector('.ev-t').textContent = chatMask(m.m) + ' · ' + chatFmtTime(m.t);
+        if(fresh(m._k)) ev.classList.add('in');
         body.appendChild(ev); continue;
       }
       if(m.e === 'swat' || m.e === 'inf'){
@@ -33080,32 +33089,66 @@
   // Studio desk and the lounge stops using the connection (a tiny "still here" note every 4 minutes).
   // lounge/<uid>: walk path p = "x,y;x,y" from time t, look c, action a (sit/dance/drink/play/edit), game gm, orb o,
   // attack at/ak/af. The world is 11 rooms of 1000 units; the view is as wide as the screen allows.
-  const LG_VH = 560, LG_WW = 11000, LG_FY0 = 398, LG_FY1 = 532, LG_VIP = 1e9, LG_GATE = 10000;
-  const LG_OLD = (x) => x < 3000 ? x + 1000 : x + 3000;      // (the build-202 school moved right to make room)
+  // ===================== build 212: the lounge is a top-down map (like Among Us): rooms joined by hallways =====================
+  // 1 world unit = 1 art pixel. Rooms keep their furniture from the side-view days: it's drawn at half size on each room's north wall (lgOldT).
+  const LG_VH = 560, LG_FY0 = 398, LG_FY1 = 532;                       // (the old side-view units the furniture code still uses)
+  const LG_WW = 4320, LG_WH = 2560, LG_VIEW = 720, LG_VIP = 1e9, LG_CS = 0.9, LG_FACEH = 192, LG_HW = 112, LG_C = 16, LG_M = 8;
+  const LG_VIPX = 3400, LG_VIPY = 800, LG_GATE = 3396;               // the Golden Council Room: x ≥ 3400 while y < 800 (1B+ only)
+  // rooms: (x, y) is the left end of the straight back wall (w long); p is the floor's shape under it
   const LG_ROOMS = [
-    { id: 'control', x: 0, name: 'Control Room', sch: 'c' },
-    { id: 'lobby', x: 1000, name: 'School Lobby', sch: 'n' },
-    { id: 'class', x: 2000, name: 'Classroom 1-A', sch: 'n' },
-    { id: 'cafe', x: 3000, name: 'Cafeteria', sch: 'n' },
-    { id: 'arcade', x: 4000, name: 'Game Hall', sch: 'a' },
-    { id: 'market', x: 5000, name: 'Trading Floor & Shop', sch: 'a' },
-    { id: 'vhall', x: 6000, name: 'Vampire Academy · Great Hall', sch: 'v' },
-    { id: 'vball', x: 7000, name: 'Vampire Academy · Ballroom', sch: 'v' },
-    { id: 'mclass', x: 8000, name: 'Magic Academy · Potions Class', sch: 'm' },
-    { id: 'mobs', x: 9000, name: 'Magic Academy · Observatory', sch: 'm' },
-    { id: 'vip', x: 10000, name: 'Golden Council Room', sch: 'g', vip: true },
+    { id: 'control', name: 'Control Room', sch: 'c', x: 1650, y: 1120, w: 640, p: [[0, 0], [640, 0], [640, 280], [560, 400], [80, 400], [0, 280]], ox: 0 },
+    { id: 'lobby', name: 'School Lobby', sch: 'n', x: 700, y: 1200, w: 576, p: [[0, 0], [576, 0], [576, 380], [200, 380], [120, 300], [0, 300]], ox: 1000 },
+    { id: 'class', name: 'Classroom 1-A', sch: 'n', x: 300, y: 400, w: 576, p: [[0, 0], [576, 0], [576, 360], [80, 360], [0, 280]], ox: 2000 },
+    { id: 'cafe', name: 'Cafeteria', sch: 'n', x: 400, y: 2000, w: 600, p: [[0, 0], [600, 0], [660, 180], [600, 380], [0, 380], [-60, 180]], ox: 3000 },
+    { id: 'arcade', name: 'Game Hall', sch: 'a', x: 2650, y: 1200, w: 600, p: [[0, 0], [600, 0], [680, 140], [680, 300], [600, 400], [0, 400], [-40, 200]], ox: 4000 },
+    { id: 'market', name: 'Trading Floor & Shop', sch: 'a', x: 3550, y: 1150, w: 560, p: [[0, 0], [560, 0], [560, 360], [120, 360], [0, 240]], ox: 5000 },
+    { id: 'vhall', name: 'Vampire Academy · Great Hall', sch: 'v', x: 1400, y: 330, w: 640, p: [[0, 0], [640, 0], [700, 120], [700, 300], [640, 400], [0, 400], [-60, 300], [-60, 120]], ox: 6000 },
+    { id: 'vball', name: 'Vampire Academy · Ballroom', sch: 'v', x: 2450, y: 420, w: 576, p: [[0, 0], [576, 0], [680, 120], [680, 300], [576, 420], [0, 420], [-100, 300], [-100, 120]], ox: 7000 },
+    { id: 'mclass', name: 'Magic Academy · Potions Class', sch: 'm', x: 1550, y: 2050, w: 600, p: [[0, 0], [600, 0], [600, 380], [300, 440], [0, 380]], ox: 8000 },
+    { id: 'mobs', name: 'Magic Academy · Observatory', sch: 'm', x: 2550, y: 2080, w: 576, p: [[0, 0], [576, 0], [576, 200], [500, 330], [288, 400], [76, 330], [0, 200]], ox: 9000 },
+    { id: 'vip', name: 'Golden Council Room', sch: 'g', x: 3500, y: 360, w: 560, p: [[0, 0], [560, 0], [620, 190], [560, 380], [0, 380]], ox: 10000, vip: true },
+    { id: 'elec', name: 'Electrical', sch: 'e', x: 3550, y: 2100, w: 520, p: [[0, 0], [520, 0], [520, 200], [420, 320], [0, 320]], ox: 11000 },
+  ].map(r => { const P = r.p.map(([a, b]) => [r.x + a, r.y + b]), xs = P.map(q => q[0]), ys = P.map(q => q[1]); return Object.assign(r, { P, h: Math.max(...r.p.map(q => q[1])), bb: { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) } }); });
+  // hallways: bendy paths between rooms (they run into the rooms' sides, never through a back wall)
+  const LG_HALLS = [
+    [[1240, 1420], [1450, 1380], [1690, 1300]],                    // lobby → control
+    [[2250, 1330], [2450, 1400], [2670, 1360]],                    // control → game hall
+    [[3300, 1420], [3420, 1330], [3590, 1300]],                    // game hall → trading floor
+    [[600, 720], [560, 950], [620, 1250], [740, 1320]],            // classroom → lobby
+    [[1050, 1560], [1150, 1800], [1010, 2150]],                    // lobby → cafeteria
+    [[850, 560], [1100, 600], [1380, 560]],                        // classroom → great hall
+    [[1450, 700], [1500, 950], [1690, 1180]],                      // great hall → control
+    [[1800, 1490], [1600, 1750], [1500, 1950], [1600, 2150]],      // control → potions
+    [[980, 2300], [1250, 2330], [1590, 2300]],                     // cafeteria → potions
+    [[2110, 2200], [2330, 2150], [2590, 2180]],                    // potions → observatory
+    [[3100, 2200], [3330, 2260], [3590, 2240]],                    // observatory → electrical
+    [[2950, 1580], [3200, 1800], [3200, 2000], [3090, 2180]],      // game hall → observatory
+    [[3900, 1490], [4150, 1800], [4150, 2050], [4040, 2200]],      // trading floor → electrical
+    [[3100, 600], [3540, 600]],                                    // ballroom → golden council (the gate)
+    [[2070, 540], [2220, 620], [2380, 600]],                       // great hall → ballroom
   ];
+  const lgRoomById = (id) => LG_ROOMS.find(r => r.id === id);
+  const lgInPoly = (P, x, y) => { let c = false; for(let i = 0, j = P.length - 1; i < P.length; j = i++){ const [xi, yi] = P[i], [xj, yj] = P[j]; if((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  // old side-view spot (x in 0..12000, y around the old floor line 392) → the new map (on that room's back wall)
+  const lgOldRoom = (ox) => LG_ROOMS.find(r => r.ox === Math.floor(ox / 1000) * 1000) || LG_ROOMS[0];
+  const lgO2N = (ox, oy) => { const r = lgOldRoom(ox); return { x: r.x + (r.w - 500) / 2 + (ox - r.ox) * .5, y: r.y + (oy - 392) * .5 }; };
+  function lgOldT(g, r){ g.translate(r.x + (r.w - 500) / 2, r.y - 196); g.scale(.5, .5); g.translate(-r.ox, 0); }
+  function lgOldAt(g, x, y, f){ g.save(); g.translate(x, y); g.scale(.5, .5); try{ f(); } finally { g.restore(); } }
+  const lgIn = (id, dx, dy) => { const r = lgRoomById(id); return { x: r.x + dx, y: r.y + dy }; };
   const LG_SEATS = [
-    { x: 620, y: 470, k: 'bench' }, { x: 700, y: 470, k: 'bench' },
-    { x: 1250, y: 440, k: 'desk' }, { x: 1450, y: 440, k: 'desk' }, { x: 1650, y: 440, k: 'desk' }, { x: 1350, y: 505, k: 'desk' }, { x: 1550, y: 505, k: 'desk' }, { x: 1750, y: 505, k: 'desk' },
-    { x: 2330, y: 488, k: 'cbench' }, { x: 2420, y: 488, k: 'cbench' }, { x: 2600, y: 488, k: 'cbench' }, { x: 2690, y: 488, k: 'cbench' },
-    { x: 3330, y: 470, k: 'coffin' }, { x: 3670, y: 470, k: 'coffin' },
-    { x: 4250, y: 500, k: 'velvet' }, { x: 4750, y: 500, k: 'velvet' },
-    { x: 5330, y: 505, k: 'cushion' }, { x: 5670, y: 505, k: 'cushion' },
-    { x: 6300, y: 495, k: 'armchair' },
-    { x: 7500, y: 450, k: 'gthrone', vip: true },
-  ].map(s => Object.assign(s, { x: LG_OLD(s.x) })).concat([{ x: 120, y: 500, k: 'sofa2' }, { x: 210, y: 500, k: 'sofa2' }]);
-  // the game machines (k 'g:<game>'), the Studio desk and the other things you can click: box in world units + where you walk to
+    ...[['lobby', 300, 230], ['lobby', 346, 230]].map(([id, x, y]) => Object.assign(lgIn(id, x, y), { k: 'bench' })),
+    ...[[150, 150], [260, 150], [370, 150], [205, 250], [315, 250], [425, 250]].map(([x, y]) => Object.assign(lgIn('class', x, y), { k: 'desk' })),
+    ...[[158, 202], [202, 202], [378, 202], [422, 202], [268, 312], [312, 312]].map(([x, y]) => Object.assign(lgIn('cafe', x, y), { k: 'cbench' })),
+    ...[[190, 250], [450, 250]].map(([x, y]) => Object.assign(lgIn('vhall', x, y), { k: 'coffin' })),
+    ...[[170, 320], [406, 320]].map(([x, y]) => Object.assign(lgIn('vball', x, y), { k: 'velvet' })),
+    ...[[150, 320], [450, 320]].map(([x, y]) => Object.assign(lgIn('mclass', x, y), { k: 'cushion' })),
+    Object.assign(lgIn('mobs', 150, 250), { k: 'armchair' }),
+    Object.assign(lgIn('vip', 300, 250), { k: 'gthrone', vip: true }),
+    Object.assign(lgIn('control', 140, 300), { k: 'sofa2' }), Object.assign(lgIn('control', 186, 300), { k: 'sofa2' }),
+  ];
+  const LG_CTABLES = [lgIn('cafe', 180, 200), lgIn('cafe', 400, 200), lgIn('cafe', 290, 310)];
+  const LG_CAUL = lgIn('mclass', 300, 220);
+  // the game machines (k 'g:<game>'), the Studio desk and the other things you can click: box + where you walk to
   const LG_GAMES = {
     slots: { t: 'Slots', em: '🎰' }, bj: { t: 'Blackjack', em: '🃏' }, td: { t: 'Tower Defense', em: '🏰' }, cf: { t: 'Coin Flip', em: '🪙' },
     trade: { t: 'Trading', em: '📈' }, shop: { t: 'Shop', em: '🛍️' }, quests: { t: 'Daily quests', em: '🎯' }, board: { t: 'Leaderboard', em: '🏆' },
@@ -33113,22 +33156,73 @@
   const LG_THINGS = [
     { k: 'studio', x: 300, y: 130, w: 400, h: 280, go: [500, 440] },
     { k: 'g:board', x: 760, y: 80, w: 210, h: 230, go: [860, 430] },
-    { k: 'g:slots', x: 4060, y: 200, w: 120, h: 205, go: [4120, 432] },
+    { k: 'g:slots', x: 4060, y: 190, w: 140, h: 205, go: [4120, 432] },
     { k: 'g:bj', x: 4240, y: 300, w: 240, h: 130, go: [4360, 470] },
-    { k: 'g:td', x: 4560, y: 190, w: 130, h: 215, go: [4625, 432] },
-    { k: 'g:cf', x: 4780, y: 220, w: 130, h: 185, go: [4845, 432] },
+    { k: 'g:td', x: 4560, y: 180, w: 130, h: 215, go: [4625, 432] },
+    { k: 'g:cf', x: 4780, y: 210, w: 130, h: 185, go: [4845, 432] },
     { k: 'g:trade', x: 5040, y: 80, w: 420, h: 330, go: [5250, 440] },
-    { k: 'g:shop', x: 5540, y: 210, w: 260, h: 195, go: [5670, 440] },
+    { k: 'g:shop', x: 5540, y: 140, w: 260, h: 260, go: [5670, 440] },
     { k: 'g:quests', x: 5840, y: 110, w: 130, h: 200, go: [5905, 432] },
-    { k: 'vend', x: 2160, y: 215, w: 110, h: 190, go: [2215, 420] },
-    { k: 'juke', x: 2860, y: 255, w: 90, h: 150, go: [2905, 420] },
-    { k: 'organ', x: 4744, y: 130, w: 192, h: 262, go: [4840, 420] },
-    { k: 'cauldron', x: 5440, y: 380, w: 120, h: 110, go: [5500, 500] },
-    { k: 'telescope', x: 6520, y: 190, w: 240, h: 210, go: [6590, 440] },
-    { k: 'trophy', x: 300, y: 215, w: 150, h: 185, go: [375, 420] },
-  ].map((t, i) => i < 9 ? t : Object.assign(t, { x: LG_OLD(t.x), go: [LG_OLD(t.go[0]), t.go[1]] }));
-  const LG_STUDIO = [500, 440];
-  const LG_SPAWN = [560, 480];
+    { k: 'vend', x: 3160, y: 200, w: 110, h: 195, go: [3215, 420] },
+    { k: 'juke', x: 3860, y: 255, w: 90, h: 140, go: [3905, 420] },
+    { k: 'organ', x: 7744, y: 130, w: 192, h: 262, go: [7840, 420] },
+    { k: 'telescope', x: 9520, y: 190, w: 240, h: 210, go: [9590, 440] },
+    { k: 'trophy', x: 1280, y: 196, w: 172, h: 200, go: [1366, 420] },
+    { k: 'lights', x: 11370, y: 110, w: 260, h: 230, go: [11500, 430] },
+  ].map(t => { const a = lgO2N(t.x, t.y), b = lgO2N(t.go[0], t.go[1]); return Object.assign(t, { x: a.x, y: a.y, w: t.w * .5, h: t.h * .5, go: [b.x, Math.max(b.y, a.y + t.h * .5 + 14)] }); })
+    .concat([{ k: 'cauldron', x: LG_CAUL.x - 32, y: LG_CAUL.y - 60, w: 64, h: 64, go: [LG_CAUL.x, LG_CAUL.y + 34] }]);
+  const LG_STUDIO = LG_THINGS[0].go.slice();
+  const LG_SPAWN = [lgRoomById('control').x + 320, lgRoomById('control').y + 280];
+  // ----- the floor: an 8-unit mask (what's floor, which room) and a 16-unit walking grid -----
+  const LG_MX = LG_WW / LG_M, LG_MY = LG_WH / LG_M, LG_GX = LG_WW / LG_C, LG_GY = LG_WH / LG_C;
+  function lgTrace(x, sc){ x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = LG_HW * sc; for(const h of LG_HALLS){ x.beginPath(); h.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.stroke(); } for(const r of LG_ROOMS){ x.beginPath(); r.P.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.closePath(); x.fill(); } }
+  const LG_GRID = (() => {
+    const c = document.createElement('canvas'); c.width = LG_MX; c.height = LG_MY; const x = c.getContext('2d', { willReadFrequently: true });
+    x.fillStyle = x.strokeStyle = '#fff'; lgTrace(x, 1 / LG_M);
+    const d = x.getImageData(0, 0, LG_MX, LG_MY).data, G = new Uint8Array(LG_MX * LG_MY), RID = new Uint8Array(LG_MX * LG_MY);
+    for(let i = 0; i < G.length; i++) if(d[i * 4 + 3] >= 128){ G[i] = 1; const px = (i % LG_MX + .5) * LG_M, py = (Math.floor(i / LG_MX) + .5) * LG_M; for(let k = 0; k < LG_ROOMS.length; k++){ const r = LG_ROOMS[k]; if(px >= r.bb.x0 && px <= r.bb.x1 && py >= r.bb.y0 && py <= r.bb.y1 && lgInPoly(r.P, px, py)){ RID[i] = k + 1; break; } } }
+    const W = new Uint8Array(LG_GX * LG_GY);
+    for(let j = 0; j < LG_GY; j++) for(let i = 0; i < LG_GX; i++){ const a = (2 * j) * LG_MX + 2 * i; W[j * LG_GX + i] = G[a] && G[a + 1] && G[a + LG_MX] && G[a + LG_MX + 1] ? 1 : 0; }
+    const block = (x0, y0, rx, ry) => { for(let j = Math.floor((y0 - ry) / LG_C); j <= Math.floor((y0 + ry) / LG_C); j++) for(let i = Math.floor((x0 - rx) / LG_C); i <= Math.floor((x0 + rx) / LG_C); i++) if(i >= 0 && j >= 0 && i < LG_GX && j < LG_GY) W[j * LG_GX + i] = 0; };
+    LG_CTABLES.forEach(t => block(t.x, t.y - 18, 34, 6)); block(LG_CAUL.x, LG_CAUL.y - 8, 26, 8);
+    return { G, RID, W };
+  })();
+  const lgTile = (x, y) => { const i = Math.floor(x / LG_C), j = Math.floor(y / LG_C); return i < 0 || j < 0 || i >= LG_GX || j >= LG_GY ? -1 : j * LG_GX + i; };
+  const lgVipTile = (i) => (i % LG_GX + .5) * LG_C >= LG_VIPX && (Math.floor(i / LG_GX) + .5) * LG_C < LG_VIPY;
+  const lgOk = (i, rich) => i >= 0 && LG_GRID.W[i] && (rich || !lgVipTile(i));
+  const lgFloorAt = (x, y) => { const i = Math.floor(x / LG_M), j = Math.floor(y / LG_M); return i >= 0 && j >= 0 && i < LG_MX && j < LG_MY && LG_GRID.G[j * LG_MX + i] === 1; };
+  function lgNearest(x, y, rich){
+    if(lgOk(lgTile(x, y), rich)) return [x, y];
+    let best = null, bd = 1e18; const ti = Math.floor(x / LG_C), tj = Math.floor(y / LG_C);
+    for(let r = 1; r < 60 && !best; r++) for(let dy = -r; dy <= r; dy++) for(let dx = -r; dx <= r; dx++){ if(Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const X = ti + dx, Y = tj + dy; if(X < 0 || Y < 0 || X >= LG_GX || Y >= LG_GY) continue; const i = Y * LG_GX + X; if(!lgOk(i, rich)) continue; const cx = (X + .5) * LG_C, cy = (Y + .5) * LG_C, d = (cx - x) ** 2 + (cy - y) ** 2; if(d < bd){ bd = d; best = [cx, cy]; } }
+    return best || LG_SPAWN.slice();
+  }
+  function lgSight(a, b, rich){ const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 6); for(let i = 0; i <= n; i++){ const k = n ? i / n : 0; if(!lgOk(lgTile(a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k), rich)) return false; } return true; }
+  // A* on the 16-unit grid (with a heap), then pull the path tight
+  function lgRoute(a, b, rich){
+    b = lgNearest(b[0], b[1], rich); if(!lgOk(lgTile(a[0], a[1]), rich)) a = lgNearest(a[0], a[1], rich);
+    if(lgSight(a, b, rich)) return [a, b];
+    const N = LG_GX * LG_GY, s = lgTile(a[0], a[1]), e = lgTile(b[0], b[1]), ex = e % LG_GX, ey = Math.floor(e / LG_GX);
+    const gS = new Float32Array(N).fill(1e9), from = new Int32Array(N).fill(-1), done = new Uint8Array(N);
+    const hp = [], hf = []; const push = (n, f) => { hp.push(n); hf.push(f); let i = hp.length - 1; while(i > 0){ const p = (i - 1) >> 1; if(hf[p] <= hf[i]) break; [hp[p], hp[i]] = [hp[i], hp[p]]; [hf[p], hf[i]] = [hf[i], hf[p]]; i = p; } };
+    const pop = () => { const top = hp[0], ln = hp.pop(), lf = hf.pop(); if(hp.length){ hp[0] = ln; hf[0] = lf; let i = 0; for(;;){ const l = 2 * i + 1, r = l + 1; let m = i; if(l < hp.length && hf[l] < hf[m]) m = l; if(r < hp.length && hf[r] < hf[m]) m = r; if(m === i) break; [hp[m], hp[i]] = [hp[i], hp[m]]; [hf[m], hf[i]] = [hf[i], hf[m]]; i = m; } } return top; };
+    const H = (i) => { const dx = Math.abs(i % LG_GX - ex), dy = Math.abs(Math.floor(i / LG_GX) - ey); return Math.max(dx, dy) + .414 * Math.min(dx, dy); };
+    gS[s] = 0; push(s, H(s)); let found = false;
+    while(hp.length){
+      const c = pop(); if(done[c]) continue; done[c] = 1; if(c === e){ found = true; break; }
+      const cx = c % LG_GX, cy = Math.floor(c / LG_GX);
+      for(let dy = -1; dy <= 1; dy++) for(let dx = -1; dx <= 1; dx++){
+        if(!dx && !dy) continue; const nx = cx + dx, ny = cy + dy; if(nx < 0 || ny < 0 || nx >= LG_GX || ny >= LG_GY) continue; const n = ny * LG_GX + nx;
+        if(done[n] || !lgOk(n, rich)) continue; if(dx && dy && (!lgOk(cy * LG_GX + nx, rich) || !lgOk(ny * LG_GX + cx, rich))) continue;
+        const ng = gS[c] + (dx && dy ? 1.414 : 1); if(ng < gS[n]){ gS[n] = ng; from[n] = c; push(n, ng + H(n)); }
+      }
+    }
+    if(!found) return [a, a];
+    const tiles = []; for(let i = e; i !== -1 && i !== s; i = from[i]) tiles.push([(i % LG_GX + .5) * LG_C, (Math.floor(i / LG_GX) + .5) * LG_C]);
+    const pts = [a, ...tiles.reverse().slice(0, -1), b], out = [pts[0]];
+    let i = 0; while(i < pts.length - 1){ let j = pts.length - 1; while(j > i + 1 && !lgSight(pts[i], pts[j], rich)) j--; out.push(pts[j]); i = j; }
+    return out;
+  }
   const LG_SODAS = [
     { k: 'cola', name: 'Cherry Cola', c: '#c0263b', c2: '#5a0d16', em: '🥤' },
     { k: 'lemon', name: 'Zesty Lemon', c: '#ffe14d', c2: '#a88f00', em: '🍋' },
@@ -33147,7 +33241,6 @@
   const lgPrice = (k) => { const p = CHAT.cfg && CHAT.cfg.prices && CHAT.cfg.prices.soda && CHAT.cfg.prices.soda[k]; return Number.isFinite(+p) && p != null ? +p : 50; };
   const lgHash = (s) => { let h = 2166136261; for(const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
   const lgRich = () => lgIsUser() && SC.loaded && scBal() > LG_VIP;
-  const lgRoomAt = (x) => LG_ROOMS[Math.max(0, Math.min(LG_ROOMS.length - 1, Math.floor(x / 1000)))];
   // ----- who am I in the lounge: your account, or a guest orb -----
   const lgIsUser = () => !!(chatName() && chatLS('rt'));
   const GU = { tok: '', exp: 0, uid: '' };
@@ -33190,9 +33283,9 @@
     return { pts, cum: [0, Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])] };
   }
   function lgPos(d, now){
-    const c = lgPathOf(d), fast = (d.f || 0) > now, v = fast ? 480 : 260, len = c.cum[c.cum.length - 1];
+    const c = lgPathOf(d), fast = (d.f || 0) > now, v = fast ? 280 : 150, len = c.cum[c.cum.length - 1];
     const s = Math.max(0, (now - (d.t || 0)) / 1000 * v);
-    const fix = (p) => { p.y = Math.max(LG_FY0, Math.min(LG_FY1, p.y)); p.x = Math.max(20, Math.min(LG_WW - 20, p.x)); return p; };
+    const fix = (p) => { p.y = Math.max(0, Math.min(LG_WH, p.y)); p.x = Math.max(0, Math.min(LG_WW, p.x)); return p; };
     if(s >= len || c.pts.length < 2){ const l = c.pts[c.pts.length - 1], pr = c.pts[Math.max(0, c.pts.length - 2)]; return fix({ x: l[0], y: l[1], moving: false, face: l[0] < pr[0] - 1 ? -1 : l[0] > pr[0] + 1 ? 1 : 0, fast }); }
     let i = 1; while(i < c.cum.length - 1 && c.cum[i] < s) i++;
     const a = c.pts[i - 1], b = c.pts[i], seg = c.cum[i] - c.cum[i - 1], k = seg > 0 ? (s - c.cum[i - 1]) / seg : 1;
@@ -33230,7 +33323,7 @@
     lgSprites();
     Object.assign(LG, { on: true, paused: false, pend: null, panel: '', snap: null, jb: null, hearts: [], shots: [], lastFace: 1, song: '', vol: +(chatLS('lgVol') ?? 0.35), warned: false, ident: '',
       seen: new Set(['control', 'lobby', ...seen]), room: 'control', banner: null, cam: null, chunks: new Map(), chunkS: 0, vw: 1000,
-      me: { x: LG_SPAWN[0] + (Math.random() - .5) * 240, y: LG_SPAWN[1] + (Math.random() - .5) * 40, c: Number.isInteger(look.ch) ? look.ch : lgHash(chatUid() || 'x') % LG_SPRITES.length, a: '', s: '', f: 0, e: '', et: 0, m: '', mt: 0, p: '', gm: '' } });
+      me: { x: LG_SPAWN[0] + (Math.random() - .5) * 160, y: LG_SPAWN[1] + (Math.random() - .5) * 60, c: Number.isInteger(look.ch) ? look.ch : lgHash(chatUid() || 'x') % LG_SPRITES.length, a: '', s: '', f: 0, e: '', et: 0, m: '', mt: 0, p: '', gm: '' } });
     LG.me.tx = LG.me.x; LG.me.ty = LG.me.y; LG.me.t = trdNow();
     let w = document.querySelector('.lg-home');
     if(!w){ w = document.createElement('div'); w.className = 'lg-home'; document.body.appendChild(w); }
@@ -33255,7 +33348,7 @@
     cv.addEventListener('pointerleave', () => { LG.mmHover = null; cv.style.cursor = ''; });
     cv.addEventListener('keydown', (e) => {
       if(e.key === 'f' || e.key === 'F' || e.key === ' '){ e.preventDefault(); lgAttack(); return; }
-      const d = { ArrowLeft: [-220, 0], ArrowRight: [220, 0], ArrowUp: [0, -60], ArrowDown: [0, 60], a: [-220, 0], d: [220, 0], w: [0, -60], s: [0, 60] }[e.key];
+      const d = { ArrowLeft: [-110, 0], ArrowRight: [110, 0], ArrowUp: [0, -110], ArrowDown: [0, 110], a: [-110, 0], d: [110, 0], w: [0, -110], s: [0, 110] }[e.key];
       if(!d) return; e.preventDefault(); const p = lgPos(LG.me, trdNow()); lgWalk(p.x + d[0], p.y + d[1], null);
     });
     w.querySelectorAll('[data-emo]').forEach(b => b.addEventListener('click', () => lgEmote(b.dataset.emo)));
@@ -33293,8 +33386,8 @@
     if(!LG.on || LG.paused) return;
     LG.paused = true;
     clearInterval(LG.beat); clearInterval(LG.poll); cancelAnimationFrame(LG.raf);
-    liveClose('lounge'); liveClose('loungejb'); lgAudioStop(); lgPanel('');
-    Object.assign(LG.me, { x: LG_STUDIO[0] + (Math.random() - .5) * 120, y: LG_STUDIO[1] + (Math.random() - .5) * 30, a: 'edit', gm: '', p: '' });
+    liveClose('lounge'); liveClose('loungejb'); liveClose('loungelt'); lgAudioStop(); lgPanel('');
+    Object.assign(LG.me, { x: LG_STUDIO[0] + (Math.random() - .5) * 80, y: LG_STUDIO[1] + Math.random() * 20, a: 'edit', gm: '', p: '' });
     LG.me.tx = LG.me.x; LG.me.ty = LG.me.y; LG.me.t = trdNow(); LG.pend = null;
     lgWrite(lgFull(), 'PUT');
     clearInterval(LG.editBeat); LG.editBeat = setInterval(() => lgWrite({ h: { '.sv': 'timestamp' } }), 240000);
@@ -33307,7 +33400,7 @@
   function lgClose(){
     if(!LG.on) return; LG.on = false;
     clearInterval(LG.beat); clearInterval(LG.poll); clearInterval(LG.editBeat); clearInterval(LG.fit); cancelAnimationFrame(LG.raf);
-    liveClose('lounge'); liveClose('loungejb'); lgAudioStop();
+    liveClose('lounge'); liveClose('loungejb'); liveClose('loungelt'); lgAudioStop();
     lgWrite(null, 'DELETE');
   }
   window.addEventListener('pagehide', () => { try{ if(LG.on && LG.ident){ const me = LG.ident; lgAuth().then(t => fetch(`${CHAT_DB}/lounge/${me}.json?auth=${encodeURIComponent(t)}`, { method: 'DELETE', keepalive: true })).catch(() => {}); } }catch(e){} });
@@ -33318,19 +33411,20 @@
       await Promise.all([
         liveGet('lounge').then(d => { LG.snap = d; lgHud(); }).catch(() => {}),
         liveGet('loungejb').then(d => { LG.jb = d; lgMusic(); lgHud(); }).catch(() => {}),
+        liveGet('loungelt').then(d => { LG.lt = d; }).catch(() => {}),
       ]);
     } else {
       try{
         const t = await lgGuestAuth();
-        const [a, b] = await Promise.all([`lounge`, `loungejb`].map(p => fetch(`${CHAT_DB}/${p}.json?auth=${encodeURIComponent(t)}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)));
-        LG.snap = a; LG.jb = b; lgMusic(); lgHud();
+        const [a, b, lt] = await Promise.all([`lounge`, `loungejb`, `loungelt`].map(p => fetch(`${CHAT_DB}/${p}.json?auth=${encodeURIComponent(t)}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)));
+        LG.snap = a; LG.jb = b; LG.lt = lt; lgMusic(); lgHud();
       }catch(e){}
     }
     lgPlayWatch();
   }
   function lgPeople(){
     const now = trdNow(), me = lgUid(), d = LG.snap || {};
-    return Object.entries(d).filter(([u, v]) => u !== me && v && typeof v.x === 'number' && now - (v.h || v.t || 0) < (v.a === 'edit' ? 300000 : 75000) && !chatBadName(v.n || '')).map(([u, v]) => Object.assign({ u }, v));
+    return Object.entries(d).filter(([u, v]) => u !== me && v && typeof v.x === 'number' && lgFloorAt(v.tx ?? v.x, v.ty ?? v.y) && now - (v.h || v.t || 0) < (v.a === 'edit' ? 300000 : 75000) && !chatBadName(v.n || '')).map(([u, v]) => Object.assign({ u }, v));
   }
   function lgHud(){
     const W = LG.win; if(!W) return;
@@ -33342,19 +33436,73 @@
     W.querySelector('[data-act="dance"]').classList.toggle('on', LG.me.a === 'dance');
   }
   function lgBanner(t){ LG.banner = { t, at: performance.now() }; }
+  function lgFog(g, vis){
+    for(const r of LG_ROOMS){
+      if(LG.seen.has(r.id) || r.bb.x0 > vis.x1 || r.bb.x1 < vis.x0 || r.y - 200 > vis.y1 || r.bb.y1 < vis.y0) continue;
+      g.fillStyle = 'rgba(8,6,16,.96)'; g.beginPath(); g.moveTo(r.P[0][0], r.P[0][1] - LG_FACEH - 8); for(const [a, b] of r.P) g.lineTo(a, b + 8); g.closePath(); g.fill(); lgPolyPath(g, r.P.map(([a, b]) => [a + (a < r.x + r.w / 2 ? -10 : 10), b + 10])); g.fill(); g.fillRect(r.bb.x0 - 10, r.y - LG_FACEH - 10, r.bb.x1 - r.bb.x0 + 20, LG_FACEH + 20);
+      const ic = { n: '🏫', v: '🧛', m: '🪄', g: '💎', a: '🎮', c: '🎛️', e: '⚡' }[r.sch];
+      g.font = "800 26px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.4)'; g.fillText(ic + ' ???', r.x + r.w / 2, r.y + r.h / 2 - 20); g.font = "600 13px 'Inter',sans-serif"; g.fillText(r.vip ? 'only for 1B+ points' : 'walk in to explore', r.x + r.w / 2, r.y + r.h / 2 + 6); g.textAlign = 'left';
+    }
+  }
+  // the map (top right): the real layout; click a room you've found to teleport there
+  const LG_MMIC = { control: '🎛️', lobby: '🏫', class: '📚', cafe: '🥤', arcade: '🎰', market: '📈', vhall: '🦇', vball: '🎹', mclass: '🧪', mobs: '🔭', vip: '💎', elec: '⚡' };
+  function lgMinimap(g, W, now, people){
+    const mw = Math.max(150, Math.min(240, W * .22)), s = mw / LG_WW, mh = LG_WH * s, x0 = W - mw - 14, y0 = 14;
+    LG.mm = { x0, y0, w: mw, h: mh, s };
+    g.fillStyle = 'rgba(10,8,20,.8)'; roundRectPath(g, x0 - 8, y0 - 8, mw + 16, mh + 16, 10); g.fill();
+    g.save(); g.translate(x0, y0); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = LG_HW * s; g.lineCap = g.lineJoin = 'round'; for(const h of LG_HALLS){ g.beginPath(); h.forEach(([a, b], i) => i ? g.lineTo(a * s, b * s) : g.moveTo(a * s, b * s)); g.stroke(); } g.restore();
+    LG_ROOMS.forEach((r, i) => {
+      const seen = LG.seen.has(r.id), hov = LG.mmHover === i, here = LG.room === r.id, rx = x0 + r.bb.x0 * s, ry = y0 + r.y * s, rw = (r.bb.x1 - r.bb.x0) * s, rh = r.h * s, mpath = () => lgPolyPath(g, r.P.map(([a, b]) => [x0 + a * s, y0 + b * s]));
+      g.fillStyle = !seen ? 'rgba(255,255,255,.08)' : { n: '#9fd1ff', v: '#c4102a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2', e: '#ffd166' }[r.sch];
+      g.globalAlpha = seen ? (hov ? 1 : .55) : 1; mpath(); g.fill(); g.globalAlpha = 1;
+      if(here || hov){ g.strokeStyle = '#fff'; g.lineWidth = here ? 2 : 1; mpath(); g.stroke(); }
+      g.font = `${Math.round(Math.min(rw, rh) * .55)}px sans-serif`; g.textAlign = 'center'; g.globalAlpha = seen ? 1 : .35; g.fillText(seen ? LG_MMIC[r.id] : (r.vip ? '🔒' : '?'), rx + rw / 2, ry + rh / 2 + Math.min(rw, rh) * .2); g.globalAlpha = 1;
+    });
+    for(const o of people){ g.fillStyle = '#fff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + o.p.y * s, 2, 0, 7); g.fill(); }
+    const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mp.y * s, 3.4, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 1; g.stroke();
+    if(LG.mmHover != null){ const r = LG_ROOMS[LG.mmHover]; if(r){ const t = LG.seen.has(r.id) ? (LG.room === r.id ? `📍 ${r.name}` : `✨ Teleport to ${r.name}`) : r.vip ? '🔒 Golden Council Room · 1B+ points' : '❓ Not found yet — walk there first'; g.font = "700 12px 'Inter',sans-serif"; const tw = g.measureText(t).width + 16; g.fillStyle = 'rgba(10,8,20,.9)'; roundRectPath(g, Math.min(W - tw - 8, x0 + mw - tw), y0 + mh + 12, tw, 22, 8); g.fill(); g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(t, Math.min(W - tw - 8, x0 + mw - tw) + 8, y0 + mh + 27); } }
+    g.textAlign = 'left';
+  }
+  function lgMmIndex(e){
+    const m = LG.mm; if(!m) return null; const r = LG.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if(x < m.x0 - 8 || x > m.x0 + m.w + 8 || y < m.y0 - 8 || y > m.y0 + m.h + 8) return null;
+    const wx = (x - m.x0) / m.s, wy = (y - m.y0) / m.s; let best = -1, bd = 1e18;
+    LG_ROOMS.forEach((r, i) => { const dx = Math.max(r.bb.x0 - wx, 0, wx - r.bb.x1), dy = Math.max(r.bb.y0 - wy, 0, wy - r.bb.y1), d = dx * dx + dy * dy; if(d < bd){ bd = d; best = i; } });
+    return bd < 200 * 200 ? best : -1;
+  }
+  function lgTeleport(r){
+    if(!r) return;
+    if(!LG.seen.has(r.id)){ toast(r.vip ? '🔒 That room is only for people with more than 1B points.' : `❓ You haven't found that room yet — walk there first, then you can teleport.`, 2600); return; }
+    if(r.vip && !lgRich()){ lgVipNo(); return; }
+    if(LG.room === r.id){ return; }
+    const now = trdNow(); if(now - (LG.tpAt || 0) < 1200) return; LG.tpAt = now;
+    const from = lgPos(LG.me, now), [x, y] = lgNearest(r.x + r.w / 2 + (Math.random() - .5) * 120, r.y + Math.min(260, r.h * .6) + (Math.random() - .5) * 60, lgRich());
+    LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]);
+    Object.assign(LG.me, { x, y, tx: x, ty: y, p: '', t: now, a: '', gm: '' }); LG.pend = null; LG.cam = { x, y };
+    lgWrite(lgFull()); lgSfx('teleport'); lgHud();
+  }
+  function lgDrawTps(g){
+    const pn = performance.now(); LG.tps = (LG.tps || []).filter(t => pn - t.at < 900);
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for(const t of LG.tps){ const k = (pn - t.at) / 900; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillStyle = '#b48cff'; g.fillRect(t.x - 14 * (1 - k), t.y - 260, 28 * (1 - k), 260); for(let i = 0; i < 10; i++){ const a = i / 10 * 6.28; g.fillStyle = '#ffe27a'; g.beginPath(); g.arc(t.x + Math.cos(a) * 30 * k, t.y - 30 + Math.sin(a) * 18 * k, 2.5, 0, 7); g.fill(); } }
+    g.restore();
+  }
+  // where am I: a room (or null in a hallway)
+  const lgRoomAt = (x, y) => LG_ROOMS.find(r => (y >= r.y - 40 && y < r.y + 4 && x >= r.x && x < r.x + r.w) || (x >= r.bb.x0 && x <= r.bb.x1 && y >= r.bb.y0 && y <= r.bb.y1 && lgInPoly(r.P, x, y))) || null;
+  function lgSeenAt(x, y){ const r = lgRoomAt(x, y); return !r || LG.seen.has(r.id); }
   function lgView(){
-    const r = LG.cv.getBoundingClientRect(), vw = LG.vw || 1000;
-    const cx = Math.max(vw / 2, Math.min(LG_WW - vw / 2, LG.cam ? LG.cam.x : LG.me.x));
-    return { x0: cx - vw / 2, y0: 0, sc: r.height / LG_VH, r };
+    const r = LG.cv.getBoundingClientRect(), sc = r.height / LG_VIEW, vw = r.width / sc, vh = LG_VIEW;
+    const c = LG.cam || { x: LG.me.x, y: LG.me.y };
+    const cx = Math.max(vw / 2 - 100, Math.min(LG_WW - vw / 2 + 100, c.x)), cy = Math.max(vh / 2 - 40, Math.min(LG_WH - vh / 2 + 40, c.y - 80));
+    return { x0: cx - vw / 2, y0: cy - vh / 2, sc, r, vw, vh };
   }
   function lgPt(e){ const v = lgView(); return { x: v.x0 + (e.clientX - v.r.left) / v.sc, y: v.y0 + (e.clientY - v.r.top) / v.sc }; }
   function lgCatPos(now){
-    const seg = Math.floor(now / 7000), k = (now % 7000) / 3500;
-    const wp = (s) => { const h = lgHash('mochi' + s); return { x: 1120 + (h % 1760), y: LG_FY0 + 20 + ((h >>> 10) % 100) }; };
+    const L = lgRoomById('lobby'), seg = Math.floor(now / 7000), k = (now % 7000) / 3500;
+    const wp = (s) => { const h = lgHash('mochi' + s); return { x: L.x + 260 + (h % 280), y: L.y + 40 + ((h >>> 10) % 220) }; };
     const a = wp(seg), b = wp(seg + 1), p = Math.min(1, k), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, moving: p < 1, face: b.x < a.x ? -1 : 1 };
   }
-  function lgSeenAt(x){ const r = lgRoomAt(x); return LG.seen.has(r.id); }
   function lgNeedLogin(){
     toast('✨ Make a free account (in the chat) to get a character, play the games and buy sodas.', 3200);
     try{ if(!CHAT.open) chatToggle(true); else chatRender(); }catch(e){}
@@ -33363,44 +33511,146 @@
     if(e.button !== 0) return;
     LG.cv.focus({ preventScroll: true }); const p = lgPt(e), now = trdNow();
     const tip = LG.win.querySelector('.lg-tip'); if(tip) tip.classList.add('gone');
-    const mi = lgMmIndex(e); if(mi != null){ lgTeleport(LG_ROOMS[mi]); return; }
+    const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
-    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 34 && p.y > q.y - 150 && p.y < q.y + 8 && lgSeenAt(q.x)){ lgPersonPop(o); return; } }
+    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ lgPersonPop(o); return; } }
     const cat = lgCatPos(now);
-    if(lgSeenAt(cat.x) && Math.abs(p.x - cat.x) < 40 && p.y > cat.y - 50 && p.y < cat.y + 10){ lgWalk(cat.x + (LG.me.x < cat.x ? -60 : 60), cat.y, 'pet'); return; }
+    if(lgSeenAt(cat.x, cat.y) && Math.abs(p.x - cat.x) < 24 && p.y > cat.y - 30 && p.y < cat.y + 6){ lgWalk(cat.x + (LG.me.x < cat.x ? -34 : 34), cat.y, 'pet'); return; }
     for(const s of LG_SEATS){
-      if(Math.abs(p.x - s.x) < 44 && p.y > s.y - 110 && p.y < s.y + 30 && lgSeenAt(s.x)){
+      if(Math.abs(p.x - s.x) < 26 && p.y > s.y - 56 && p.y < s.y + 12 && lgSeenAt(s.x, s.y)){
         if(s.vip && !lgRich()){ lgVipNo(); return; }
-        const taken = lgPeople().some(o => o.a === 'sit' && Math.hypot(lgPos(o, now).x - s.x, lgPos(o, now).y - s.y) < 8);
+        const taken = lgPeople().some(o => o.a === 'sit' && Math.hypot(lgPos(o, now).x - s.x, lgPos(o, now).y - s.y) < 6);
         if(taken){ toast('Someone is sitting there.', 1400); return; }
         lgWalk(s.x, s.y, 'sit'); return;
       }
     }
-    for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2)){ lgWalk(t.go[0] + (Math.random() - .5) * 30, t.go[1], t.k); return; }
-    lgWalk(p.x, p.y < LG_FY0 ? lgPos(LG.me, now).y : p.y, null);
+    for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.go[1])){ lgWalk(t.go[0] + (Math.random() - .5) * 16, t.go[1], t.k); return; }
+    lgWalk(p.x, p.y, null);
   }
   function lgVipNo(){
     const b = lgIsUser() && SC.loaded ? scBal() : 0;
     toast(`🔒 The Golden Council Room is only for people with more than 1B points right now — you have ${lbNum(Math.max(0, b))}.`, 3200);
   }
   function lgWalk(x, y, then){
-    const m = LG.me, now = trdNow(), cur = lgPos(m, now);
-    x = Math.max(30, Math.min(LG_WW - 30, x)); y = Math.max(LG_FY0, Math.min(LG_FY1, y));
-    if(x > LG_GATE - 30 && !lgRich()){ if(cur.x < LG_GATE - 40) lgVipNo(); x = LG_GATE - 40; }
-    const ps = [[cur.x, cur.y], [x, y]].map(q => q.map(Math.round).join(',')).join(';');
-    Object.assign(m, { x: cur.x, y: cur.y, tx: Math.round(x), ty: Math.round(y), p: ps, t: now, a: m.a === 'dance' && !then ? 'dance' : '', gm: '' });
-    if(Math.abs(x - cur.x) > 1) LG.lastFace = x < cur.x ? -1 : 1;
+    const m = LG.me, now = trdNow(), cur = lgPos(m, now), rich = lgRich();
+    if(!rich && x >= LG_VIPX - 20 && y < LG_VIPY){ if(cur.x < LG_GATE - 30) lgVipNo(); x = LG_GATE - 24; y = Math.max(560, Math.min(640, y)); }
+    const route = lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
+    while(route.length > 2 && route.join(';').length > 580) route.splice(1, 1);
+    const end = route[route.length - 1];
+    const ps = route.map(q => q.join(',')).join(';');
+    Object.assign(m, { x: Math.round(cur.x), y: Math.round(cur.y), tx: end[0], ty: end[1], p: ps, t: now, a: m.a === 'dance' && !then ? 'dance' : '', gm: '' });
+    if(Math.abs(end[0] - cur.x) > 1) LG.lastFace = end[0] < cur.x ? -1 : 1;
     LG.pend = then;
     lgWrite(lgFull());
     lgHud();
+  }
+  // the people who work here: the dealer, the shopkeeper and the broker (side-view spots → the map)
+  const LG_NPCS = [{ i: 2, x: 4360, y: 372, S: 2.0, name: 'Dealer', near: 'bj' }, { i: 0, x: 5670, y: 404, S: 2.3, name: 'Shopkeeper', near: 'shop' }, { i: 1, x: 5470, y: 470, S: 2.0, name: 'Broker', near: 'trade' }].map(n => { const q = lgO2N(n.x, n.y); return Object.assign(n, { X: q.x, Y: q.y }); });
+  function lgLoop(){
+    cancelAnimationFrame(LG.raf); if(!LG.on || LG.paused) return;
+    LG.raf = requestAnimationFrame(lgLoop);
+    const cv = LG.cv; if(!cv || document.visibilityState !== 'visible') return;
+    const r = cv.getBoundingClientRect(); if(r.width < 10 || r.height < 10) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+    if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+    const g = cv.getContext('2d'), now = trdNow(), sc = H / LG_VIEW; LG.vw = W / sc;
+    const m = LG.me, mp = lgPos(m, now);
+    if(!mp.moving && LG.pend) lgArrived();
+    if(mp.face) LG.lastFace = mp.face;
+    const room = lgRoomAt(mp.x, mp.y);
+    if(room && room.id !== LG.room){ LG.room = room.id; if(!LG.seen.has(room.id)){ LG.seen.add(room.id); chatLS('lgSeen3', JSON.stringify([...LG.seen])); lgBanner('✨ You found the ' + room.name + '!'); lgSfx('reveal'); } else lgBanner(room.name); }
+    LG.cam = LG.cam || { x: mp.x, y: mp.y }; LG.cam.x += (mp.x - LG.cam.x) * 0.12; LG.cam.y += (mp.y - LG.cam.y) * 0.12;
+    const v = lgView(), x0 = v.x0, y0 = v.y0, vis = { x0, y0, x1: x0 + v.vw, y1: y0 + v.vh };
+    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#0d0918'; g.fillRect(0, 0, W, H);
+    const cs = Math.round(sc * dpr * 100) / 100;
+    for(let cj = Math.floor(y0 / LG_CH); cj <= Math.floor(vis.y1 / LG_CH); cj++) for(let ci = Math.floor(x0 / LG_CH); ci <= Math.floor(vis.x1 / LG_CH); ci++){
+      if(ci < 0 || cj < 0 || ci * LG_CH >= LG_WW || cj * LG_CH >= LG_WH) continue;
+      g.drawImage(lgChunk(ci, cj, cs), Math.round((ci * LG_CH - x0) * sc * dpr), Math.round((cj * LG_CH - y0) * sc * dpr), Math.ceil(LG_CH * sc * dpr) + 1, Math.ceil(LG_CH * sc * dpr) + 1);
+    }
+    // build one nearby map tile per frame ahead of time, so walking into a new area doesn't stutter
+    if(!LG.warmAt || performance.now() - LG.warmAt > 120){ LG.warmAt = performance.now(); outer: for(let cj = Math.floor((y0 - 400) / LG_CH); cj <= Math.floor((vis.y1 + 400) / LG_CH); cj++) for(let ci = Math.floor((x0 - 500) / LG_CH); ci <= Math.floor((vis.x1 + 500) / LG_CH); ci++){ if(ci < 0 || cj < 0 || ci * LG_CH >= LG_WW || cj * LG_CH >= LG_WH || LG.chunks.has(ci + ',' + cj)) continue; lgChunk(ci, cj, cs); break outer; } }
+    g.setTransform(sc * dpr, 0, 0, sc * dpr, -x0 * sc * dpr, -y0 * sc * dpr);
+    // the moving things on the walls, room by room (the side-view decor code, at half size)
+    for(const R of LG_ROOMS){ if(R.bb.x0 > vis.x1 + 50 || R.bb.x1 < vis.x0 - 50 || R.y - 200 > vis.y1 || R.bb.y1 < vis.y0) continue; g.save(); g.beginPath(); g.rect(R.x, R.y - LG_FACEH, R.w, LG_FACEH); lgPolyPath(g, R.P, true); g.clip(); lgOldT(g, R); lgDecor(g, now, { x0: R.ox + 70, x1: R.ox + 930 }); g.restore(); }
+    lgGate(g, now);
+    const list = []; lgProps(g, now, list, vis);
+    const people = [];
+    const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
+    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x, p.y)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 80 && p.x < vis.x1 + 80 && p.y > vis.y0 - 20 && p.y < vis.y1 + 120) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
+    mp.face = mp.face || LG.lastFace;
+    list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
+    LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
+    lgHits(all, now);
+    list.sort((a, b) => a.y - b.y).forEach(x => x.d());
+    lgDrawShots(g, all, now); lgDrawTps(g);
+    const pn = performance.now();
+    LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
+    g.font = "12px sans-serif"; g.textAlign = 'center';
+    for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText('❤️', h.x + Math.sin(k * 8) * 4, h.y - k * 30); }
+    g.globalAlpha = 1; g.textAlign = 'left';
+    if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(m.tx, m.ty, 9 + Math.sin(now / 120), 3.5, 0, 0, 7); g.stroke(); }
+    if(LG.song === 'hype' || LG.song === 'retro'){ g.save(); g.globalCompositeOperation = 'lighter'; for(let i = 0; i < 3; i++){ const a = now / 800 + i * 2.1; g.globalAlpha = .2; g.drawImage(lgGlow(), LG.cam.x + Math.cos(a) * 260 - 80, LG.cam.y + Math.sin(a * 1.3) * 120 - 60, 160, 90); } g.restore(); }
+    lgFog(g, vis);
+    if(lgDark()) lgDrawDark(g, W, H, v, mp, now); else LG.light = null;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const Wc = W / dpr;
+    lgMinimap(g, Wc, now, lgDark() ? [] : people);
+    if(lgDark()){ g.font = "800 13px 'Inter',sans-serif"; g.textAlign = 'center'; const t = `🔦 ${chatBadName(LG.lt.n || '') ? 'Someone' : (LG.lt.n || 'Someone')} turned off the lights — flip the switch in ⚡ Electrical`; const tw = g.measureText(t).width + 24; g.fillStyle = 'rgba(120,10,20,.85)'; roundRectPath(g, Wc / 2 - tw / 2, H / dpr - 44, tw, 28, 14); g.fill(); g.fillStyle = '#fff'; g.fillText(t, Wc / 2, H / dpr - 25); g.textAlign = 'left'; }
+    if(LG.banner){ const k = (pn - LG.banner.at) / 2600; if(k > 1) LG.banner = null; else { g.globalAlpha = k < .15 ? k / .15 : k > .8 ? (1 - k) / .2 : 1; g.font = "800 20px 'Inter',sans-serif"; g.textAlign = 'center'; const tw = g.measureText(LG.banner.t).width + 36; g.fillStyle = 'rgba(10,8,20,.78)'; roundRectPath(g, Wc / 2 - tw / 2, 14, tw, 38, 19); g.fill(); g.fillStyle = '#ffe27a'; g.fillText(LG.banner.t, Wc / 2, 40); g.textAlign = 'left'; g.globalAlpha = 1; } }
+  }
+
+  // ----- the lights (build 212): a logged-in user flips the switch in Electrical; everyone only sees a flashlight cone -----
+  const LG_DARK_MS = 120000;     // (the lights come back on by themselves after 2 minutes)
+  const lgDark = () => !!(LG.lt && LG.lt.off && trdNow() - (LG.lt.t || 0) < LG_DARK_MS);
+  async function lgLights(){
+    if(!lgIsUser()){ lgNeedLogin(); return; }
+    const why = chatBlock(); if(why){ toast(why, 2400); return; }
+    const off = !lgDark(), me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const body = { loungelt: { off, u: me, n: nm, t: { '.sv': 'timestamp' } }, [`rooms/${chatRoom()}/messages/${id}`]: { n: nm, m: off ? 'turned off the lights! 🔦' : 'turned the lights back on 💡', t: { '.sv': 'timestamp' }, u: me, e: 'lights' } };
+    const ok = await bjPatch(body).catch(() => null) || await bjPatch({ loungelt: body.loungelt }).catch(() => null);
+    if(!ok){ toast("😕 The switch is stuck — tell Saichizu to publish the newest Firebase rules.", 3200); return; }
+    LG.lt = { off, u: me, n: nm, t: trdNow() }; lgSfx(off ? 'zap' : 'reveal'); lgEmote(off ? '😈' : '💡');
+    toast(off ? '🔦 Lights out! Everyone only sees what their flashlight shows.' : '💡 The lights are back on.', 2400);
+  }
+  // is a spot inside my flashlight?
+  function lgInLight(x, y){
+    const L = LG.light; if(!L) return true;
+    const dx = x - L.x, dy = (y - 20) - (L.y - 20), d = Math.hypot(dx, dy); if(d < 70) return true;
+    if(d > 340) return false; let a = Math.atan2(dy, dx) - L.a; a = Math.atan2(Math.sin(a), Math.cos(a)); return Math.abs(a) < .62;
+  }
+  function lgDrawDark(g, W, H, v, mp, now){
+    const pn = performance.now();
+    if(mp.moving && LG.lastP){ const dx = mp.x - LG.lastP.x, dy = mp.y - LG.lastP.y; if(Math.hypot(dx, dy) > .4) LG.dirA = Math.atan2(dy, dx); }
+    LG.lastP = { x: mp.x, y: mp.y }; if(LG.dirA == null || (!mp.moving && LG.faceWas !== LG.lastFace)) LG.dirA = (LG.lastFace || 1) < 0 ? Math.PI : 0; LG.faceWas = LG.lastFace;
+    LG.light = { x: mp.x, y: mp.y, a: LG.dirA };
+    const c = LG.darkCv || (LG.darkCv = document.createElement('canvas')); if(c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+    const x = c.getContext('2d'), k = W / v.vw, sx = (mp.x - v.x0) * k, sy = (mp.y - 24 - v.y0) * k, R = 340 * k, a = LG.dirA;
+    x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, W, H); x.fillStyle = 'rgba(2,2,8,.965)'; x.fillRect(0, 0, W, H);
+    x.globalCompositeOperation = 'destination-out';
+    const gr = x.createRadialGradient(sx, sy, 0, sx, sy, R); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(.75, 'rgba(0,0,0,.92)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = gr; x.beginPath(); x.moveTo(sx, sy); x.arc(sx, sy, R, a - .62, a + .62); x.closePath(); x.fill();
+    const g2 = x.createRadialGradient(sx, sy, 0, sx, sy, 70 * k); g2.addColorStop(0, 'rgba(0,0,0,.95)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g2; x.beginPath(); x.arc(sx, sy, 70 * k, 0, 7); x.fill();
+    // the emergency light in Electrical, so you can find the switch
+    const E = LG_THINGS.find(t => t.k === 'lights'); if(E){ const ex = (E.x + E.w / 2 - v.x0) * k, ey = (E.y + E.h - v.y0) * k, er = 110 * k, f = .55 + .15 * Math.sin(pn / 300); const g3 = x.createRadialGradient(ex, ey, 0, ex, ey, er); g3.addColorStop(0, `rgba(0,0,0,${f})`); g3.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g3; x.beginPath(); x.arc(ex, ey, er, 0, 7); x.fill(); }
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(c, 0, 0);
+    if(E){ const ex = (E.x + E.w / 2 - v.x0) * k, ey = (E.y + E.h - v.y0) * k; g.globalCompositeOperation = 'lighter'; g.globalAlpha = .18 + .08 * Math.sin(pn / 300); g.drawImage(lgGlow(), ex - 120 * k, ey - 120 * k, 240 * k, 240 * k); }
+    g.restore();
+  }
+  // the gate to the Golden Council Room (across the hallway)
+  function lgGate(g, now){
+    const X = LG_GATE, y0 = 600 - LG_HW / 2, y1 = 600 + LG_HW / 2, open = lgRich();
+    lgPx(g, 'gate2' + (open ? 1 : 0), X - 8, y0 - 70, 16, y1 - y0 + 74, (c) => { lgBev(c, 4, 0, 8, y1 - y0 + 70, '#e8c35a'); lgR(c, 6, 0, 2, y1 - y0 + 70, '#fff4c2'); if(!open) for(let y = 10; y < y1 - y0 + 70; y += 14){ lgR(c, 0, y, 16, 4, '#b8861a'); lgR(c, 0, y, 16, 1, '#ffe27a'); } }, { P: 1 });
+    if(!open){ g.font = '18px sans-serif'; g.textAlign = 'center'; g.fillText('🔒', X, y0 + 70); }
+    g.font = "800 10px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = '#ffd166'; g.fillText('1B+ ONLY', X, y0 - 76); g.textAlign = 'left';
   }
   function lgArrived(){
     const k = LG.pend; LG.pend = null;
     if(k && k.startsWith('g:')){ lgPlay(k.slice(2)); return; }
     if(k === 'studio'){ dashOpen(); return; }
     if(!lgIsUser() && (k === 'vend' || k === 'juke')){ lgNeedLogin(); return; }
-    if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir) lgWalk(cur.x + dir * 4, cur.y, null); LG.lastFace = dir; } return; }
+    if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); } LG.lastFace = dir; } return; }
+    if(k === 'lights'){ lgLights(); return; }
     if(k === 'sit') lgAct('sit');
     else if(k === 'vend') lgPanel('vend');
     else if(k === 'juke') lgPanel('juke');
@@ -33450,11 +33700,11 @@
     if(!s || pn - s.at > 3000){ LG.disp.set(o.u, { x: t.x, y: t.y, at: pn, p: t }); return t; }
     const dt = Math.min(.1, (pn - s.at) / 1000); s.at = pn;
     const dx = t.x - s.x, dy = t.y - s.y, dist = Math.hypot(dx, dy);
-    if(dist > 2600){ LG.tps = (LG.tps || []).concat([{ x: s.x, y: s.y, at: pn }, { x: t.x, y: t.y, at: pn + 120 }]); s.x = t.x; s.y = t.y; s.p = t; return t; }   // (a map teleport: beams at both ends)
+    if(dist > 1500){ LG.tps = (LG.tps || []).concat([{ x: s.x, y: s.y, at: pn }, { x: t.x, y: t.y, at: pn + 120 }]); s.x = t.x; s.y = t.y; s.p = t; return t; }   // (a map teleport: beams at both ends)
     if(dist < 3){ s.x = t.x; s.y = t.y; s.p = t; return t; }
-    const base = t.moving ? (t.fast ? 480 : 260) : 0, sp = Math.min(2400, base + Math.max(260, dist * 3)), step = Math.min(dist, sp * dt);
+    const base = t.moving ? (t.fast ? 280 : 150) : 0, sp = Math.min(1400, base + Math.max(150, dist * 3)), step = Math.min(dist, sp * dt);
     s.x += dx / dist * step; s.y += dy / dist * step;
-    s.p = { x: s.x, y: s.y, moving: true, fast: sp > 420, face: Math.abs(dx) > 2 ? (dx < 0 ? -1 : 1) : (t.face || 0) };
+    s.p = { x: s.x, y: s.y, moving: true, fast: sp > 250, face: Math.abs(dx) > 2 ? (dx < 0 ? -1 : 1) : (t.face || 0) };
     return s.p;
   }
   const lgShown = (o, now) => { const s = LG.disp && LG.disp.get(o.u); return s && s.p ? s.p : lgPos(o, now); };
@@ -33506,12 +33756,12 @@
     const iWalk = (m.rt || 0) > (q.rt || 0) || ((m.rt || 0) === (q.rt || 0) && me > q.u);
     const qx = q.tx ?? q.x, qy = q.ty ?? q.y;
     if(iWalk){
-      let side = cur.x < qx ? -1 : 1; if(qx + side * 70 < 40 || qx + side * 70 > LG_WW - 40 || (side > 0 && qx + 70 > LG_GATE - 30 && qx < LG_GATE && !lgRich())) side = -side;
-      if(Math.hypot(cur.x - (qx + side * 70), cur.y - qy) > 6) lgWalk(qx + side * 70, qy, 'rpsface');
+      let side = cur.x < qx ? -1 : 1; if(!lgOk(lgTile(qx + side * 40, qy), lgRich())) side = -side;
+      if(Math.hypot(cur.x - (qx + side * 40), cur.y - qy) > 6) lgWalk(qx + side * 40, qy, 'rpsface');
       LG.rpsFace = q.u;
     } else {
       const qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1;
-      if(!cur.moving) lgWalk(cur.x + dir * 4, cur.y, null);
+      if(!cur.moving){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); }
       LG.lastFace = dir;
     }
   }
@@ -33710,8 +33960,8 @@
   function lgShotAt(d, now){
     const spr = lgChar(d.c), kind = LG_RANGED[spr.k]; if(!kind || !d.at) return null;
     const rel = d.at + lgAtkLen(spr) * 0.45, t = (now - rel) / 1000; if(t < 0 || t > 0.9) return null;
-    const S = LG_SHOT[kind], o = lgPos(d, d.at), dist = t * S.v; if(dist > 760) return null;
-    return { kind, x: o.x + (d.af || 1) * (40 + dist), y: o.y - 72, gy: o.y, S, t };
+    const S = LG_SHOT[kind], o = lgPos(d, d.at), dist = t * S.v * .55; if(dist > 420) return null;
+    return { kind, x: o.x + (d.af || 1) * (22 + dist), y: o.y - 36, gy: o.y, S, t };
   }
   // who got hit (worked out the same way on every screen): melee in front, or a shot passing by
   function lgHits(all, now){
@@ -33721,11 +33971,11 @@
       const spr = lgChar(d.c), kind = LG_RANGED[spr.k], key = a.u + ':' + d.at;
       if(kind){
         const s = lgShotAt(d, now); if(!s) continue;
-        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.abs(b.p.x - s.x) < 28 && Math.abs(b.p.y - s.gy) < 46 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
+        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.abs(b.p.x - s.x) < 16 && Math.abs(b.p.y - s.gy) < 26 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
       } else {
         const rel = d.at + lgAtkLen(spr) * 0.5; if(now < rel || now > rel + 250) continue;
         const o = lgPos(d, d.at), f = d.af || 1;
-        for(const b of all){ if(b.u === a.u || b.d.o) continue; const dx = (b.p.x - o.x) * f; if(dx > 0 && dx < 115 && Math.abs(b.p.y - o.y) < 50 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
+        for(const b of all){ if(b.u === a.u || b.d.o) continue; const dx = (b.p.x - o.x) * f; if(dx > 0 && dx < 62 && Math.abs(b.p.y - o.y) < 28 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
       }
     }
     if(LG.hurt.size > 300) for(const [k, t] of LG.hurt) if(now - t > 5000) LG.hurt.delete(k);
@@ -33734,17 +33984,20 @@
     g.save(); g.globalCompositeOperation = 'lighter';
     for(const a of all){
       const s = lgShotAt(a.d, now); if(!s) continue;
+      g.save(); g.translate(s.x, s.y); g.scale(.55, .55); g.translate(-s.x, -s.y); try {
       const fade = s.t > .75 ? (0.9 - s.t) / .15 : 1, f = a.d.af || 1;
       if(s.kind === 'book'){ g.globalCompositeOperation = 'source-over'; g.globalAlpha = fade; g.save(); g.translate(s.x, s.y); g.rotate(now / 60); g.fillStyle = '#8a5a3a'; g.fillRect(-11, -8, 22, 16); g.fillStyle = '#f5ecd8'; g.fillRect(-9, -6, 18, 12); g.restore(); g.globalCompositeOperation = 'lighter'; continue; }
       if(s.kind === 'bullet'){ g.globalAlpha = fade; g.strokeStyle = s.S.c; g.lineWidth = 3; g.beginPath(); g.moveTo(s.x - f * 26, s.y + 8); g.lineTo(s.x, s.y + 8); g.stroke(); continue; }
       for(let i = 4; i >= 0; i--){ g.globalAlpha = fade * (i ? .22 : .55); g.fillStyle = s.S.c; g.beginPath(); g.arc(s.x - f * i * 12, s.y, s.S.r * (i ? 1.6 - i * .2 : 2.2), 0, 7); g.fill(); }
       g.globalAlpha = fade; g.fillStyle = s.S.c2; g.beginPath(); g.arc(s.x, s.y, s.S.r * .5, 0, 7); g.fill();
       if(s.kind === 'bolt'){ g.strokeStyle = s.S.c; g.lineWidth = 2; g.beginPath(); for(let i = 0; i < 5; i++) g.lineTo(s.x - f * i * 9, s.y + (i % 2 ? 7 : -7)); g.stroke(); }
+      } finally { g.restore(); }
     }
     g.restore();
   }
   // a guest: a glowing orb
-  function lgDrawOrb(g, d, p, now){
+  function lgDrawOrb(g, d, p, now){ const K = .55; g.save(); g.translate(p.x, p.y); g.scale(K, K); g.translate(-p.x, -p.y); let t; try{ t = lgDrawOrb0(g, d, p, now); } finally { g.restore(); } return p.y + (t - p.y) * K; }
+  function lgDrawOrb0(g, d, p, now){
     const hue = lgHash(d.u || 'g') % 360, bob = Math.sin(now / 420 + (lgHash(d.u || 'g') % 9)) * 8, y = p.y - 70 + bob;
     g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(p.x, p.y - 2, 18, 5, 0, 0, 7); g.fill();
     g.save(); g.globalCompositeOperation = 'lighter';
@@ -33790,27 +34043,28 @@
     x.putImageData(im, 0, 0);
   }
   // draw fn (local coords 0..bw, 0..bh) into a cached low-res canvas, pixelate it, and put it at bx,by. Words (anything with letters) stay sharp.
+  const lgFontK = (f, k) => Math.abs(k - 1) < .01 ? f : f.replace(/(\d+(?:\.\d+)?)px/, (a, n) => (n * k).toFixed(1) + 'px');
   function lgPx(g, key, bx, by, bw, bh, fn, o){
-    o = o || {}; const M = LG_SPR.px || (LG_SPR.px = new Map());
+    o = o || {}; const M = LG_SPR.px || (LG_SPR.px = new Map()), P = o.P || LG_P;
     const v = String(o.v == null ? '' : o.v) + '|' + (o.fps ? Math.floor((o.now || 0) * o.fps / 1000) : '');
     let e = M.get(key);
     if(!e || e.v !== v){
-      const w = Math.ceil(bw / LG_P) + 4, h = Math.ceil(bh / LG_P) + 4;
+      const w = Math.ceil(bw / P) + 4, h = Math.ceil(bh / P) + 4;
       const c = e ? e.c : document.createElement('canvas');
       if(c.width !== w || c.height !== h){ c.width = w; c.height = h; }
       const x = c.getContext('2d', { willReadFrequently: true }); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, w, h);
-      x.setTransform(1 / LG_P, 0, 0, 1 / LG_P, 2, 2); x.textAlign = 'left'; x.globalAlpha = 1;
+      x.setTransform(1 / P, 0, 0, 1 / P, 2, 2); x.textAlign = 'left'; x.globalAlpha = 1;
       const T = [];
-      x.fillText = function(t, a, b){ if(/[A-Za-z0-9]/.test(t)){ const m = this.getTransform(); T.push({ t, x: (m.a * a + m.c * b + m.e - 2) * LG_P, y: (m.b * a + m.d * b + m.f - 2) * LG_P, f: this.font, c: this.fillStyle, al: this.textAlign, ga: this.globalAlpha, sc: this.shadowColor, sb: this.shadowBlur }); } else lgFT.call(this, t, a, b); };
+      x.fillText = function(t, a, b){ if(/[A-Za-z0-9]/.test(t)){ const m = this.getTransform(); T.push({ t, x: (m.a * a + m.c * b + m.e - 2) * P, y: (m.b * a + m.d * b + m.f - 2) * P, f: lgFontK(this.font, Math.hypot(m.a, m.b) * P), c: this.fillStyle, al: this.textAlign, ga: this.globalAlpha, sc: this.shadowColor, sb: this.shadowBlur * Math.hypot(m.a, m.b) * P }); } else lgFT.call(this, t, a, b); };
       x.save(); try { fn(x); } catch(err){ console.warn('lgPx', key, err); } x.restore(); x.setTransform(1, 0, 0, 1, 0, 0);
       lgPxPost(c, o.outline !== false);
       if(!e && M.size > 300) M.delete(M.keys().next().value);
       e = { c, v, T }; M.set(key, e);
     }
-    bx = Math.round(bx / LG_P) * LG_P; by = Math.round(by / LG_P) * LG_P;
+    bx = Math.round(bx / P) * P; by = Math.round(by / P) * P;
     g.save(); g.imageSmoothingEnabled = false; if(o.alpha != null) g.globalAlpha = o.alpha;
     if(o.flip){ const cx = bx + bw / 2; g.translate(cx, 0); g.scale(-1, 1); g.translate(-cx, 0); }
-    g.drawImage(e.c, bx - 2 * LG_P, by - 2 * LG_P, e.c.width * LG_P, e.c.height * LG_P); g.restore();
+    g.drawImage(e.c, bx - 2 * P, by - 2 * P, e.c.width * P, e.c.height * P); g.restore();
     if(e.T.length && o.text !== false){ g.save(); for(const t of e.T){ g.font = t.f; g.textAlign = t.al; g.globalAlpha = t.ga; g.shadowColor = t.sc; g.shadowBlur = t.sb; g.fillStyle = t.c; lgFT.call(g, t.t, bx + t.x, by + t.y); } g.restore(); }
   }
   const lgR = (c, x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
@@ -33841,12 +34095,6 @@
     const sh = Math.min(im.height, Math.round(h / w * im.width * 0.55)), sw = Math.round(sh * w / h);
     g.save(); g.imageSmoothingEnabled = false; g.drawImage(im, Math.round((im.width - sw) * (sx || 0)), Math.round((im.height - sh) * 0.55), sw, sh, x, y, w, h); g.restore();
   }
-  function lgRoomBg(g, r){
-    const art = ({ vhall: 1, vball: 1, mclass: 1, vip: 1 })[r.id] ? lgArt(r.id) : null;
-    if(art){ g.save(); g.imageSmoothingEnabled = false; g.drawImage(art, r.x, LG_FY0 + 26 - 562, 1000, 562); g.restore(); }
-    const nArt = Object.values(LG_SPR.art || {}).filter(im => im.complete && im.naturalWidth).length;
-    lgPx(g, 'room:' + r.id, r.x, 0, 1000, LG_VH, (c) => { c.translate(-r.x, 0); lgRoomPaint(c, r, art); }, { outline: false, v: nArt + (art ? 'a' : '') });
-  }
   // the school wall: wallpaper, crown moulding, ceiling lamps, green wainscot with panels, chair rail, skirting
   function lgWallSchool(c, X){
     lgR(c, X, 0, 1000, LG_FY0, '#efe3c8'); for(let x = X; x < X + 1000; x += 40) lgR(c, x, 38, 2, 250, '#e4d6b6');
@@ -33874,10 +34122,10 @@
     lgBev(c, x - 25, 256, 50, 5, '#d8b25a'); for(const dx of [-21, 0, 21]){ lgBev(c, x + dx - 5, 250, 10, 5, '#e8c35a'); lgBev(c, x + dx - 3, 236, 6, 14, '#f0e6d0'); }
   }
   const LG_CANDS = { vhall: [70, 230, 770, 930], vball: [60, 250, 680] };
-  function lgRoomPaint(c, r, art){
+  function lgRoomPaint(c, r, art, mode){
     const X = r.x, B = LG_FY0 - 6;
     // ---- the wall
-    if(!art){
+    if(!art && mode !== 'things'){
       if(r.sch === 'c'){
         const wg = c.createLinearGradient(0, 0, 0, LG_FY0); wg.addColorStop(0, '#0b1224'); wg.addColorStop(1, '#16223f'); c.fillStyle = wg; c.fillRect(X, 0, 1000, LG_FY0);
         for(let x = X; x < X + 1000; x += 100){ lgR(c, x, 36, 2, 290, '#0a0f1e'); lgR(c, x + 2, 36, 2, 290, '#1e2c52'); }
@@ -33893,6 +34141,11 @@
       else if(r.id === 'mobs'){
         lgR(c, X, 0, 1000, LG_FY0, '#2a2346');
         for(let y = 0, row = 0; y < LG_FY0; y += 24, row++){ lgR(c, X, y, 1000, 2, '#1f1a36'); for(let x = X + (row % 2) * 30; x < X + 1000; x += 60){ lgR(c, x, y, 2, 24, '#1f1a36'); lgR(c, x + 2, y + 2, 56, 2, '#352c58'); } }
+      } else if(r.id === 'elec'){
+        lgR(c, X, 0, 1000, LG_FY0, '#3a3f46'); for(let x = X; x < X + 1000; x += 100){ lgR(c, x, 0, 2, LG_FY0, '#262a30'); lgR(c, x + 2, 0, 2, LG_FY0, '#4e545c'); for(let y = 20; y < 330; y += 60){ lgR(c, x + 8, y, 4, 4, '#5e646c'); lgR(c, x + 88, y, 4, 4, '#5e646c'); } }
+        lgR(c, X, 0, 1000, 30, '#1e2126'); for(const py of [36, 50]){ lgBev(c, X, py, 1000, 8, py === 36 ? '#8a6a3a' : '#5a7a8a', false); }
+        for(let x = X; x < X + 1000; x += 40){ c.fillStyle = (x / 40) % 2 ? '#ffd166' : '#1e2126'; c.beginPath(); c.moveTo(x, 330); c.lineTo(x + 20, 330); c.lineTo(x + 40, 352); c.lineTo(x + 20, 352); c.fill(); }
+        lgR(c, X, 352, 1000, LG_FY0 - 352, '#2a2e34'); lgR(c, X, 328, 1000, 2, '#111');
       } else if(r.sch === 'v'){
         lgR(c, X, 0, 1000, LG_FY0, '#2a0f1a'); for(let y = 30; y < LG_FY0; y += 30){ lgR(c, X, y, 1000, 2, '#1a0810'); for(let x = X + ((y / 30) % 2) * 40; x < X + 1000; x += 80) lgR(c, x, y - 30, 2, 30, '#1a0810'); }
         lgR(c, X, 330, 1000, LG_FY0 - 330, '#4a0f22'); lgR(c, X, 326, 1000, 4, '#c9a24a');
@@ -33909,9 +34162,10 @@
         lgBev(c, X, 294, 1000, 6, '#c9a24a', false);
       }
     }
+    if(mode === 'wall'){ c.textAlign = 'left'; return; }
     // ---- the floor
     const F = { control: ['#121a30', 'rgba(87,225,255,.18)', 'wood'], arcade: ['#2a1648', '#3a2060', 'check'], market: ['#22183e', '#30224f', 'check'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', 'rgba(0,0,0,.18)', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#3a2a22', 'rgba(0,0,0,.25)', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'] }[r.id];
-    lgFloorBand(c, X, F[0], F[1], F[2]);
+    if(!mode) lgFloorBand(c, X, F[0], F[1], F[2]);
     // ---- the room's own things
     const I = r.id;
     if(I === 'control'){
@@ -33928,7 +34182,7 @@
       c.font = "800 16px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.fillText('🏆 HALL OF FAME', X + 865, 72);
       lgBev(c, X + 766, 82, 198, 228, '#0f1830', '#ffd166');
       lgBev(c, X + 902, 314, 88, 22, '#0d3b2a'); c.font = "800 12px 'Inter',sans-serif"; c.fillStyle = '#7dffb0'; c.fillText('SCHOOL →', X + 946, 330);
-      lgEll(c, X + 165, 478, 124, 24, '#2a1d4a'); lgEll(c, X + 165, 478, 116, 20, '#3d2a6a'); lgEll(c, X + 165, 478, 90, 14, '#4a3480');
+      if(!mode){ lgEll(c, X + 165, 478, 124, 24, '#2a1d4a'); lgEll(c, X + 165, 478, 116, 20, '#3d2a6a'); lgEll(c, X + 165, 478, 90, 14, '#4a3480'); }
       lgFootSh(c, X + 300, 20); lgFootSh(c, X + 700, 20); lgPlant(c, X + 740, B, 1.1);
     } else if(I === 'lobby'){
       lgBev(c, X + 36, 132, 178, B - 132, '#6b4a2e'); lgStreet(c, 'st_cafe', X + 48, 144, 72, 200, .2); lgStreet(c, 'st_cafe', X + 130, 144, 72, 200, .3);
@@ -34005,6 +34259,10 @@
       lgR(c, X + 856, 120, 98, 18, '#e8d9b8'); c.font = "800 12px 'Inter',sans-serif"; c.fillStyle = '#5a3a1a'; c.textAlign = 'center'; c.fillText('🎯 QUESTS', X + 905, 134);
       for(let i = 0; i < 4; i++){ lgBev(c, X + 858, 146 + i * 39, 94, 30, ['#ffd166', '#9fd1ff', '#ffb0c8', '#b6f0a0'][i]); lgR(c, X + 902, 144 + i * 39, 6, 6, '#c0263b'); lgR(c, X + 866, 158 + i * 39, 60, 2, 'rgba(0,0,0,.4)'); lgR(c, X + 866, 166 + i * 39, 44, 2, 'rgba(0,0,0,.4)'); }
     } else if(I === 'vhall'){
+      for(const wx of [X + 96, X + 736]){ c.fillStyle = '#160c1c'; c.beginPath(); c.moveTo(wx - 6, 300); c.lineTo(wx - 6, 150); c.arc(wx + 84, 150, 90, Math.PI, 0); c.lineTo(wx + 174, 300); c.fill();
+        const wg = c.createLinearGradient(0, 70, 0, 296); wg.addColorStop(0, '#2a0610'); wg.addColorStop(1, '#8e1a2e'); c.fillStyle = wg; c.beginPath(); c.moveTo(wx, 296); c.lineTo(wx, 150); c.arc(wx + 84, 150, 84, Math.PI, 0); c.lineTo(wx + 168, 296); c.fill();
+        lgEll(c, wx + 110, 130, 22, 22, '#ffd8c0'); lgEll(c, wx + 118, 124, 20, 20, '#5a0e1c'); lgR(c, wx + 82, 70, 4, 226, '#c9a24a'); lgR(c, wx, 200, 168, 4, '#c9a24a'); lgBev(c, wx - 10, 296, 188, 10, '#c9a24a'); }
+      for(const bx of [X + 330, X + 640]){ lgBev(c, bx, 40, 30, 120, '#7a0f22'); c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(bx, 160); c.lineTo(bx + 30, 160); c.lineTo(bx + 15, 178); c.fill(); lgR(c, bx + 9, 80, 12, 12, '#c9a24a'); }
       for(const cx of LG_CANDS.vhall) lgCandelabra(c, X + cx);
       lgFootSh(c, X + 500, 420); lgBev(c, X + 290, 334, 420, 14, '#7a0f22'); lgR(c, X + 290, 348, 420, 22, '#5a0a1a'); lgR(c, X + 290, 364, 420, 3, '#c9a24a'); for(let x = X + 300; x < X + 700; x += 20) lgR(c, x, 370, 10, 4, '#5a0a1a');
       lgBev(c, X + 306, 374, 12, B - 374, '#3a1a12'); lgBev(c, X + 682, 374, 12, B - 374, '#3a1a12');
@@ -34020,7 +34278,7 @@
       lgBev(c, X + 760, 304, 160, 12, '#f4f0e6'); for(let k = 0; k < 15; k++) if(k % 7 !== 2 && k % 7 !== 6) lgR(c, X + 766 + k * 10, 304, 5, 7, '#111');
       lgBev(c, X + 768, 320, 144, 10, '#f4f0e6'); for(let k = 0; k < 14; k++) if(k % 7 !== 2 && k % 7 !== 6) lgR(c, X + 772 + k * 10, 320, 5, 6, '#111');
       lgR(c, X + 760, 340, 160, 2, '#3a2010'); lgR(c, X + 760, 360, 160, 2, '#3a2010'); lgBev(c, X + 770, B - 10, 140, 8, '#3a2010'); for(let k = 0; k < 9; k++) lgR(c, X + 776 + k * 15, B - 9, 8, 6, '#e8e0d0');
-      c.save(); c.translate(X + 500, 470); c.scale(1, .28); lgEll(c, 0, 0, 308, 308, '#3a0812'); lgEll(c, 0, 0, 300, 300, '#7a0f22'); lgEll(c, 0, 0, 240, 240, '#8e1a2e'); c.restore();
+      if(!mode){ c.save(); c.translate(X + 500, 470); c.scale(1, .28); lgEll(c, 0, 0, 308, 308, '#3a0812'); lgEll(c, 0, 0, 300, 300, '#7a0f22'); lgEll(c, 0, 0, 240, 240, '#8e1a2e'); c.restore(); }
     } else if(I === 'mclass'){
       if(!art) lgShelfBooks(c, X + 40, 70, 160, 4, 60, 'mc');
       lgFootSh(c, X + 840, 240); lgBev(c, X + 712, 142, 256, 8, '#5a3a26'); lgBev(c, X + 720, 150, 240, B - 150, '#4a2e1e'); lgR(c, X + 730, 160, 220, 176, '#2e1c12');
@@ -34043,38 +34301,117 @@
       c.beginPath(); c.ellipse(X + 500, 330, 200, 166, 0, Math.PI, 0); c.stroke(); c.restore();
       lgBev(c, X + 116, 330, 768, 12, '#5a4f90'); lgR(c, X, 342, 1000, B - 342, '#211b3a'); for(let x = X + 20; x < X + 1000; x += 120) lgR(c, x, 350, 90, 26, '#2a2346');
       lgShelfBooks(c, X + 12, 150, 100, 4, 58, 'oa'); lgShelfBooks(c, X + 888, 150, 100, 4, 58, 'ob');
-      c.save(); c.translate(X + 500, 476); c.scale(1, .16); lgEll(c, 0, 0, 290, 290, '#1a1430'); lgEll(c, 0, 0, 280, 280, '#3a2a6a'); lgEll(c, 0, 0, 230, 230, '#4a3a88'); c.restore();
+      if(!mode){ c.save(); c.translate(X + 500, 476); c.scale(1, .16); lgEll(c, 0, 0, 290, 290, '#1a1430'); lgEll(c, 0, 0, 280, 280, '#3a2a6a'); lgEll(c, 0, 0, 230, 230, '#4a3a88'); c.restore(); }
       lgFootSh(c, X + 335, 60); lgBev(c, X + 300, 340, 70, 10, '#5a3a1a'); lgBev(c, X + 330, 350, 10, B - 356, '#4a2e14'); lgBev(c, X + 316, B - 6, 38, 6, '#4a2e14');
       lgR(c, X + 333, 314, 4, 26, '#c9a24a'); lgEll(c, X + 335, 304, 10, 10, '#160c1c'); lgEll(c, X + 335, 304, 8, 8, '#ffd166'); c.strokeStyle = '#c9a24a'; c.lineWidth = 2; c.beginPath(); c.ellipse(X + 335, 304, 32, 9, 0, 0, 7); c.stroke(); lgR(c, X + 364, 302, 6, 6, '#57e1ff'); lgR(c, X + 302, 306, 5, 5, '#ff7a3a'); lgR(c, X + 344, 311, 4, 4, '#9be37a');
       lgFootSh(c, X + 600, 90);
       c.strokeStyle = '#160c1c'; c.lineWidth = 9; for(const ex of [556, 600, 644]){ c.beginPath(); c.moveTo(X + 600, 320); c.lineTo(X + ex, B); c.stroke(); } c.strokeStyle = '#6b4a2a'; c.lineWidth = 5; for(const ex of [556, 600, 644]){ c.beginPath(); c.moveTo(X + 600, 320); c.lineTo(X + ex, B); c.stroke(); }
       lgBev(c, X + 590, 304, 20, 20, '#8a6a2a');
       c.save(); c.translate(X + 600, 306); c.rotate(-.55); lgBev(c, -70, -15, 196, 30, '#c9a24a'); lgR(c, -70, -11, 196, 4, '#f0d080'); for(const bx of [-40, 20, 80]) lgR(c, bx, -15, 6, 30, '#8a6a2a'); lgBev(c, 122, -20, 20, 40, '#8a6a2a'); lgBev(c, -86, -7, 16, 14, '#6b4a2a'); c.restore();
+    } else if(I === 'elec'){
+      lgBev(c, X + 110, 86, 200, 56, '#ffd166'); lgR(c, X + 118, 94, 184, 40, '#1e2126'); c.font = "800 15px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#ffd166'; c.fillText('⚡ HIGH VOLTAGE ⚡', X + 210, 120);
+      for(const [fx, fy] of [[X + 60, 180], [X + 160, 180], [X + 60, 270]]){ lgBev(c, fx, fy, 80, 70, '#5a6068'); for(let k = 0; k < 3; k++) lgR(c, fx + 10 + k * 22, fy + 14, 14, 30, '#2a2e34'); lgR(c, fx + 8, fy + 54, 64, 6, '#ffd166'); }
+      lgFootSh(c, X + 500, 260); lgBev(c, X + 370, 110, 260, 230, '#6a7078'); lgR(c, X + 382, 122, 236, 206, '#2a2e34');
+      for(let rr = 0; rr < 5; rr++) for(let k = 0; k < 7; k++){ const h = lgHash('br' + rr + k); lgBev(c, X + 392 + k * 22, 134 + rr * 38, 14, 26, '#c8ccd8', false); lgR(c, X + 394 + k * 22, 136 + rr * 38 + (h % 2) * 12, 10, 10, h % 3 ? '#3fae6a' : '#c0263b'); }
+      lgBev(c, X + 548, 136, 58, 180, '#1e2126'); c.font = "800 10px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.fillText('MAIN', X + 577, 330);
+      for(let k = 0; k < 4; k++){ lgR(c, X + 400 + k * 50, 0, 8, 110, '#1e2126'); lgR(c, X + 402 + k * 50, 0, 2, 110, ['#c0263b', '#3d6fb3', '#ffd166', '#3fae6a'][k]); }
+      lgFootSh(c, X + 820, 240); lgBev(c, X + 700, 240, 240, B - 240, '#4a5a4a'); lgR(c, X + 712, 252, 216, 60, '#2a342a'); for(let k = 0; k < 8; k++) lgR(c, X + 720 + k * 26, 260, 16, 44, '#1a221a');
+      lgEll(c, X + 820, 350, 30, 30, '#1e2126'); lgEll(c, X + 820, 350, 24, 24, '#3a4a3a'); for(let k = 0; k < 4; k++) lgR(c, X + 760 + k * 12, 330, 6, 6, k % 2 ? '#ffd166' : '#3fae6a');
+      c.font = "800 11px 'Inter',sans-serif"; c.fillStyle = '#d8e8d0'; c.fillText('GENERATOR', X + 880, 348);
     } else if(I === 'vip'){
       lgBev(c, X + 300, 66, 400, 48, '#3a2408'); c.font = "800 30px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#ffe27a'; c.fillText('💎 GOLDEN COUNCIL 💎', X + 500, 100);
       if(!art) for(const px of [X + 160, X + 300, X + 700, X + 840]) lgBev(c, px, 130, 30, 170, '#e8c35a');
-      c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(X + 436, LG_FY0 - 10); c.lineTo(X + 564, LG_FY0 - 10); c.lineTo(X + 624, LG_VH); c.lineTo(X + 376, LG_VH); c.fill();
-      c.fillStyle = '#9e1b32'; c.beginPath(); c.moveTo(X + 444, LG_FY0 - 10); c.lineTo(X + 556, LG_FY0 - 10); c.lineTo(X + 612, LG_VH); c.lineTo(X + 388, LG_VH); c.fill(); lgR(c, X + 440, LG_FY0 - 10, 120, 2, '#e8c35a');
+      if(!mode){ c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(X + 436, LG_FY0 - 10); c.lineTo(X + 564, LG_FY0 - 10); c.lineTo(X + 624, LG_VH); c.lineTo(X + 376, LG_VH); c.fill();
+      c.fillStyle = '#9e1b32'; c.beginPath(); c.moveTo(X + 444, LG_FY0 - 10); c.lineTo(X + 556, LG_FY0 - 10); c.lineTo(X + 612, LG_VH); c.lineTo(X + 388, LG_VH); c.fill(); lgR(c, X + 440, LG_FY0 - 10, 120, 2, '#e8c35a'); }
       for(const cx of [X + 230, X + 770]){ const cy = 372; lgFootSh(c, cx, 100); lgBev(c, cx - 50, cy - 22, 100, 44, '#7a4a1e'); lgR(c, cx - 50, cy - 6, 100, 6, '#e8c35a'); lgBev(c, cx - 8, cy - 10, 16, 14, '#e8c35a'); lgR(c, cx - 2, cy - 6, 4, 6, '#3a2408'); for(const sx of [cx - 50, cx + 44]) lgR(c, sx, cy - 22, 6, 44, '#c9a24a');
         for(let i = 0; i < 12; i++){ const h = lgHash('vt' + cx + i); lgEll(c, cx - 40 + h % 80, cy - 26 - (h >>> 6) % 14, 7, 5, '#160c1c'); lgEll(c, cx - 40 + h % 80, cy - 27 - (h >>> 6) % 14, 6, 4, i % 3 ? '#ffe27a' : '#f0c23a'); }
         c.fillStyle = '#160c1c'; c.beginPath(); c.moveTo(cx, cy - 50); c.lineTo(cx + 13, cy - 35); c.lineTo(cx, cy - 20); c.lineTo(cx - 13, cy - 35); c.fill(); c.fillStyle = '#57e1ff'; c.beginPath(); c.moveTo(cx, cy - 46); c.lineTo(cx + 10, cy - 35); c.lineTo(cx, cy - 24); c.lineTo(cx - 10, cy - 35); c.fill(); lgR(c, cx - 4, cy - 40, 4, 4, '#e0fbff'); }
     }
     // doorway frames (each room draws the whole pillar; the room clip shows its half)
     const ri = LG_ROOMS.indexOf(r), pil = (x, sch) => { const col = { n: '#c4b38c', v: '#c9a24a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[sch]; lgBev(c, x - 14, 40, 28, B - 40, col); lgBev(c, x - 20, 34, 40, 10, lgShade(col, -.15)); lgBev(c, x - 18, B - 8, 36, 8, lgShade(col, -.2)); };
-    if(LG_ROOMS[ri + 1]) pil(X + 1000, LG_ROOMS[ri + 1].sch);
-    if(r.x > 0){ const col = { n: '#c4b38c', v: '#c9a24a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[r.sch]; lgBev(c, X - 14, 40, 28, B - 40, col); lgBev(c, X - 20, 34, 40, 10, lgShade(col, -.15)); lgBev(c, X - 18, B - 8, 36, 8, lgShade(col, -.2)); }
+    if(!mode && LG_ROOMS[ri + 1]) pil(X + 1000, LG_ROOMS[ri + 1].sch);
+    if(!mode && r.x > 0){ const col = { n: '#c4b38c', v: '#c9a24a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[r.sch]; lgBev(c, X - 14, 40, 28, B - 40, col); lgBev(c, X - 20, 34, 40, 10, lgShade(col, -.15)); lgBev(c, X - 18, B - 8, 36, 8, lgShade(col, -.2)); }
     c.textAlign = 'left';
   }
-  const LG_CH = 500;
-  function lgChunk(ci, s){
+  // ----- painting the map (cached in 512-unit chunks) -----
+  const LG_FLOOR = { control: ['#141c34', '#1a2442', 'grid'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', '#8a5a3a', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], arcade: ['#2a1648', '#3a2060', 'carpet'], market: ['#22183e', '#30224f', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#4a3426', '#3a281c', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'], elec: ['#2e3238', '#3a3f46', 'plate'], hall: ['#3a3654', '#2a2640', 'hall'] };
+  function lgFloorPat(c, id){
+    LG_SPR.fpat = LG_SPR.fpat || {}; let t = LG_SPR.fpat[id];
+    if(!t){ t = document.createElement('canvas'); t.width = t.height = 64; const x = t.getContext('2d'), f = LG_FLOOR[id];
+      for(let yy = 0; yy < 64; yy += 32) for(let xx = 0; xx < 64; xx += 32){ const i = ((xx + yy) / 32) % 2;
+        if(f[2] === 'check'){ lgR(x, xx, yy, 32, 32, i ? f[1] : f[0]); lgR(x, xx, yy, 32, 1, 'rgba(255,255,255,.08)'); }
+        else if(f[2] === 'wood'){ lgR(x, xx, yy, 32, 32, f[0]); for(let k = 0; k < 2; k++){ lgR(x, xx, yy + k * 16 + 15, 32, 1, f[1]); lgR(x, xx + ((yy / 16 + k) % 2) * 16, yy + k * 16, 1, 16, f[1]); } }
+        else if(f[2] === 'grid'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, 'rgba(87,225,255,.16)'); lgR(x, xx, yy, 1, 32, 'rgba(87,225,255,.16)'); }
+        else if(f[2] === 'carpet'){ lgR(x, xx, yy, 32, 32, f[0]); x.fillStyle = f[1]; x.beginPath(); x.moveTo(xx + 16, yy + 4); x.lineTo(xx + 28, yy + 16); x.lineTo(xx + 16, yy + 28); x.lineTo(xx + 4, yy + 16); x.fill(); lgR(x, xx + 15, yy + 15, 2, 2, i ? '#ff5fd2' : '#ffd166'); }
+        else if(f[2] === 'plate'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, '#4a5058'); lgR(x, xx, yy, 1, 32, '#4a5058'); for(const [a, b] of [[4, 4], [26, 4], [4, 26], [26, 26]]) lgR(x, xx + a, yy + b, 2, 2, '#5e646c'); }
+        else { lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 2, f[1]); for(let k = 6; k < 32; k += 8) lgR(x, xx + 3, yy + k, 26, 1, '#4a4668'); }
+      }
+      LG_SPR.fpat[id] = t; }
+    return c.createPattern(t, 'repeat');
+  }
+  const lgPolyPath = (c, P, keep) => { if(!keep) c.beginPath(); P.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath(); };
+  // everything that doesn't move, inside one rectangle of the map
+  function lgPaintMap(c, R){
+    const hitB = (b, m) => b.x0 < R.x1 + m && b.x1 > R.x0 - m && b.y0 < R.y1 + m && b.y1 > R.y0 - m;
+    lgR(c, R.x0, R.y0, R.x1 - R.x0, R.y1 - R.y0, '#0d0918');
+    for(let i = 0; i < 60; i++){ const h = lgHash('vs' + i), x = h % LG_WW, y = (h >>> 12) % LG_WH; if(x >= R.x0 && x < R.x1 && y >= R.y0 && y < R.y1 && !lgFloorAt(x, y)) lgR(c, x, y, 2, 2, 'rgba(180,160,255,.25)'); }
+    const G = LG_GRID.G, RID = LG_GRID.RID, M = LG_M;
+    // floors: hallways first, then the rooms on top
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = LG_HW; c.strokeStyle = lgFloorPat(c, 'hall');
+    for(const h of LG_HALLS){ c.beginPath(); h.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); } c.restore();
+    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.fillStyle = lgFloorPat(c, r.id); lgPolyPath(c, r.P); c.fill(); c.save(); lgPolyPath(c, r.P); c.clip(); lgRoomFloorStuff(c, r); c.restore(); }
+    // the walls you see (facing you): every floor cell with no floor above it gets a wall face going up, until it meets other floor
+    const i0 = Math.max(0, Math.floor((R.x0 - 40) / M)), i1 = Math.min(LG_MX - 1, Math.ceil((R.x1 + 40) / M)), j0 = Math.max(0, Math.floor((R.y0 - 40) / M)), j1 = Math.min(LG_MY - 1, Math.ceil((R.y1 + LG_FACEH + 40) / M));
+    const faces = new Map();      // owner (room index + 1, or 0 for hallways) → strips [x, top, bottom]
+    for(let j = j0; j <= j1; j++) for(let i = i0; i <= i1; i++){
+      const k = j * LG_MX + i; if(!G[k] || (j > 0 && G[k - LG_MX])) continue;
+      const own = RID[k]; let top = j * M - (own ? LG_FACEH : 96); for(let jj = j - 1; jj >= 0 && jj * M >= top; jj--) if(G[jj * LG_MX + i]){ top = (jj + 1) * M; break; } if(!faces.has(own)) faces.set(own, []); faces.get(own).push([i * M, top, j * M]);
+    }
+    for(const [own, strips] of faces){
+      c.save(); c.beginPath(); for(const [x, t, b] of strips) c.rect(x, t, M, b - t); c.clip();
+      if(own){ const r = LG_ROOMS[own - 1]; for(let k = -2; k * 500 < r.bb.x1 - r.x + 500; k++){ c.save(); c.translate(r.x + (r.w - 500) / 2 + k * 500, r.y - 196); c.scale(.5, .5); lgRoomPaint(c, Object.assign({}, r, { x: 0 }), null, 'wall'); c.restore(); } }
+      else { const bx0 = Math.min(...strips.map(s => s[0])), bx1 = Math.max(...strips.map(s => s[0])) + M, by0 = Math.min(...strips.map(s => s[1])), by1 = Math.max(...strips.map(s => s[2])); lgR(c, bx0, by0, bx1 - bx0, by1 - by0, '#24203a'); for(let x = Math.floor(bx0 / 32) * 32; x < bx1; x += 32) lgR(c, x, by0, 2, by1 - by0, '#1a1730'); for(let y = Math.floor(by0 / 48) * 48; y < by1; y += 48) lgR(c, bx0, y, bx1 - bx0, 2, '#2e2a48'); }
+      // a dark band where the wall meets the floor, and its top edge
+      for(const [x, t, b] of strips){ lgR(c, x, b - 10, M, 10, 'rgba(0,0,0,.25)'); }
+      c.restore();
+      for(const [x, t, b] of strips){ if(b - t >= (own ? LG_FACEH : 96) - 1) lgR(c, x, t - 6, M, 6, '#0a0714'); }
+    }
+    // the furniture on each room's back wall (the side-view furniture, at half size)
+    for(const r of LG_ROOMS){ if(!hitB({ x0: r.x, x1: r.x + r.w, y0: r.y - 200, y1: r.bb.y1 }, 60)) continue; c.save(); c.beginPath(); c.rect(r.x, r.y - LG_FACEH, r.w, LG_FACEH); lgPolyPath(c, r.P, true); c.clip(); lgOldT(c, r); lgRoomPaint(c, Object.assign({}, r, { x: r.ox }), null, 'things'); c.restore(); }
+    // the outline of the floor: dark wall tops on the sides and bottom
+    for(let j = j0; j <= j1; j++) for(let i = i0; i <= i1; i++){
+      const k = j * LG_MX + i; if(!G[k]) continue; const x = i * M, y = j * M;
+      const L = i > 0 && G[k - 1], Rt = i < LG_MX - 1 && G[k + 1], D = j < LG_MY - 1 && G[k + LG_MX];
+      if(!L) lgR(c, x - 6, y, 6, M + (D ? 0 : 6), '#0a0714'); if(!Rt) lgR(c, x + M, y, 6, M + (D ? 0 : 6), '#0a0714');
+      if(!D){ lgR(c, x - (L ? 0 : 6), y + M, M + (L ? 0 : 6) + (Rt ? 0 : 6), 6, '#0a0714'); lgR(c, x, y + M - 2, M, 2, '#3a3458'); }
+      if(!L) lgR(c, x, y, 2, M, '#2e2848'); if(!Rt) lgR(c, x + M - 2, y, 2, M, '#2e2848');
+    }
+    // the sides of the wall faces
+    for(const strips of faces.values()) for(const [x, t, b] of strips){ const i = x / M, j = b / M, k = j * LG_MX + i; const has = (ii) => ii >= 0 && ii < LG_MX && G[j * LG_MX + ii] && !(j > 0 && G[(j - 1) * LG_MX + ii]); if(!has(i - 1)) lgR(c, x - 6, t - 6, 6, b - t + 6, '#0a0714'); if(!has(i + 1)) lgR(c, x + M, t - 6, 6, b - t + 6, '#0a0714'); }
+  }
+  // rugs and carpets (top-down)
+  function lgRoomFloorStuff(c, r){
+    const X = r.x, Y = r.y, cx = X + r.w / 2;
+    if(r.id === 'control'){ lgEll(c, X + 163, Y + 300, 80, 36, '#2a1d4a'); lgEll(c, X + 163, Y + 300, 74, 32, '#3d2a6a'); lgEll(c, X + 163, Y + 300, 52, 22, '#4a3480'); lgEll(c, cx, Y + 50, 200, 36, 'rgba(87,225,255,.10)'); }
+    else if(r.id === 'lobby'){ for(let k = 0; k < 3; k++) lgR(c, X + 168 + k * 4, Y + 70 + k * 4, 300 - k * 8, 140 - k * 8, ['#7a2a2a', '#9e3a3a', '#7a2a2a'][k]); }
+    else if(r.id === 'vball'){ lgEll(c, cx, Y + 210, 220, 110, '#3a0812'); lgEll(c, cx, Y + 210, 214, 106, '#7a0f22'); lgEll(c, cx, Y + 210, 160, 80, '#8e1a2e'); lgEll(c, cx, Y + 210, 90, 44, '#7a0f22'); }
+    else if(r.id === 'vhall'){ lgR(c, cx - 56, Y, 112, r.h, '#5a0a1a'); lgR(c, cx - 50, Y, 100, r.h, '#7a0f22'); lgR(c, cx - 54, Y, 2, r.h, '#c9a24a'); lgR(c, cx + 52, Y, 2, r.h, '#c9a24a'); }
+    else if(r.id === 'mobs'){ lgEll(c, cx, Y + 200, 190, 80, '#1a1430'); lgEll(c, cx, Y + 200, 184, 76, '#3a2a6a'); lgEll(c, cx, Y + 200, 140, 56, '#4a3a88'); for(let i = 0; i < 12; i++){ const a = i / 12 * 6.283; lgR(c, cx + Math.cos(a) * 112, Y + 200 + Math.sin(a) * 44, 3, 3, '#ffe27a'); } }
+    else if(r.id === 'mclass'){ c.save(); c.translate(LG_CAUL.x, LG_CAUL.y); c.scale(1, .45); c.strokeStyle = '#5a4aa8'; c.lineWidth = 4; c.beginPath(); c.arc(0, 0, 130, 0, 7); c.stroke(); c.beginPath(); c.arc(0, 0, 108, 0, 7); c.stroke(); for(let i = 0; i < 6; i++){ const a = i / 6 * 6.283; c.beginPath(); c.moveTo(Math.cos(a) * 108, Math.sin(a) * 108); c.lineTo(Math.cos(a + 2.09) * 108, Math.sin(a + 2.09) * 108); c.stroke(); } c.restore(); }
+    else if(r.id === 'vip'){ lgR(c, X - 20, Y + 198, 320, 84, '#7a0f22'); lgR(c, X - 20, Y + 202, 320, 76, '#9e1b32'); lgR(c, X - 20, Y + 198, 320, 2, '#e8c35a'); lgR(c, X - 20, Y + 280, 320, 2, '#e8c35a'); lgR(c, X + 260, Y + 120, 80, 162, '#9e1b32'); }
+    else if(r.id === 'arcade'){ for(let i = 0; i < 4; i++) lgEll(c, X + 120 + i * 125, Y + 36, 50, 12, 'rgba(255,95,210,.12)'); }
+    else if(r.id === 'elec'){ for(let k = 0; k < 5; k++){ c.strokeStyle = ['#c0263b', '#3d6fb3', '#ffd166', '#3fae6a', '#e07a3a'][k]; c.lineWidth = 3; c.beginPath(); c.moveTo(X + 210 + k * 18, Y + 4); c.bezierCurveTo(X + 220 + k * 18, Y + 120, X + 380 - k * 10, Y + 90, X + 420 - k * 6, Y + 220 + k * 8); c.stroke(); } lgBev(c, X + 400, Y + 210, 70, 50, '#4a5058'); lgR(c, X + 410, Y + 220, 50, 6, '#ffd166'); }
+  }
+  const LG_CH = 512;
+  function lgChunk(ci, cj, s){
     if(LG.chunkS !== s){ LG.chunks = new Map(); LG.chunkS = s; }
-    let c = LG.chunks.get(ci); if(c) return c;
-    c = document.createElement('canvas'); c.width = Math.ceil(LG_CH * s); c.height = Math.ceil(LG_VH * s);
-    const g = c.getContext('2d'); g.scale(s, s); g.translate(-ci * LG_CH, 0);
-    g.save(); g.beginPath(); g.rect(ci * LG_CH, 0, LG_CH, LG_VH); g.clip();
-    for(const r of LG_ROOMS) if(r.x < (ci + 1) * LG_CH && r.x + 1000 > ci * LG_CH){ g.save(); g.beginPath(); g.rect(r.x, 0, 1000, LG_VH); g.clip(); lgRoomBg(g, r); g.restore(); }
-    g.restore();
-    LG.chunks.set(ci, c); return c;
+    const key = ci + ',' + cj; let c = LG.chunks.get(key); if(c) return c;
+    c = document.createElement('canvas'); c.width = Math.ceil(LG_CH * s); c.height = Math.ceil(LG_CH * s);
+    const g = c.getContext('2d'); g.scale(s, s); g.translate(-ci * LG_CH, -cj * LG_CH);
+    const nArt = Object.values(LG_SPR.art || {}).filter(im => im.complete && im.naturalWidth).length;
+    const R = { x0: ci * LG_CH, y0: cj * LG_CH, x1: (ci + 1) * LG_CH, y1: (cj + 1) * LG_CH };
+    lgPx(g, 'ch:' + key, R.x0, R.y0, LG_CH, LG_CH, (x) => { x.translate(-R.x0, -R.y0); lgPaintMap(x, R); }, { outline: false, P: 1, v: nArt });
+    LG.chunks.set(key, c); return c;
   }
   // the moving things on the back wall (drawn before people)
   function lgDecor(g, now, vis){
@@ -34175,21 +34512,24 @@
     if(on(8000, 10000)){
       for(let i = 0; i < 5; i++){ const t = now / 1000 + i, bx = 8140 + i * 110 + Math.sin(t * .7) * 26, by = 200 + Math.sin(t * 1.3) * 18 + (i % 2) * 40, col = ['#c0263b', '#3d6fb3', '#3fae6a', '#e8c35a', '#8b4dff'][i];
         lgPx(g, 'book' + i, bx - 20, by - 12, 40, 24, (c) => { lgR(c, 0, 0, 40, 24, col); lgR(c, 2, 2, 17, 18, '#f5ecd8'); lgR(c, 21, 2, 17, 18, '#f5ecd8'); lgR(c, 19, 0, 2, 24, lgShade(col, -.4)); for(let k = 0; k < 3; k++){ lgR(c, 5, 6 + k * 4, 11, 2, '#b8a888'); lgR(c, 24, 6 + k * 4, 11, 2, '#b8a888'); } }); }
-      g.save(); g.translate(8500, 470); g.scale(1, .26); g.globalCompositeOperation = 'lighter'; const k = .45 + .2 * Math.sin(now / 400); g.strokeStyle = `rgba(157,140,255,${k})`; g.lineWidth = 6; g.beginPath(); g.arc(0, 0, 230, 0, 7); g.stroke(); g.beginPath(); g.arc(0, 0, 190, 0, 7); g.stroke();
-      for(let i = 0; i < 6; i++){ const a = i / 6 * 6.28 + now / 4000; g.beginPath(); g.moveTo(Math.cos(a) * 190, Math.sin(a) * 190); g.lineTo(Math.cos(a + 2.09) * 190, Math.sin(a + 2.09) * 190); g.stroke(); } g.restore();
       for(let i = 0; i < 8; i++){ const h = lgHash('fc' + i), x = Math.round((9150 + h % 700) / 2) * 2, y = Math.round((50 + (h >>> 8) % 110 + Math.sin(now / 700 + i) * 8) / 2) * 2; g.fillStyle = '#160c1c'; g.fillRect(x - 5, y - 2, 10, 20); g.fillStyle = '#f0e6d0'; g.fillRect(x - 3, y, 6, 16); lgFlame(g, x, y, now, i); }
+    }
+    if(on(11000, 12000)){
+      const off = lgDark(), X = 11000;
+      lgPx(g, 'lever' + (off ? 0 : 1), X + 548, 136, 58, 180, (c) => { c.translate(-X - 548, -136); lgR(c, X + 572, 150, 10, 150, '#0a0c10'); const hy = off ? 262 : 158; lgBev(c, X + 560, hy, 34, 28, off ? '#c0263b' : '#3fae6a'); lgBev(c, X + 574, off ? 230 : 186, 6, 36, '#c8ccd8'); lgR(c, X + 556, off ? 300 : 140, 42, 8, off ? '#ff5f7a' : '#9be37a'); });
+      for(let k = 0; k < 4; k++){ if(Math.floor(now / 300 + k * 1.7) % 3) continue; g.fillStyle = k % 2 ? '#ffd166' : '#3fae6a'; g.fillRect(X + 760 + k * 12, 330, 6, 6); }
+      if(off){ g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = .45 + .25 * Math.sin(now / 200); g.fillStyle = '#ff2a2a'; g.beginPath(); g.arc(X + 500, 40, 14, 0, 7); g.fill(); g.restore(); }
     }
     if(on(10000, 11000)){
       for(let i = 0; i < 18; i++){ const h = lgHash('gs' + i), k = ((now / 1800) + (h % 100) / 100) % 1; g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.sin(k * Math.PI) * .9; g.drawImage(lgGlow(), 10050 + h % 900 - 8, 120 + (h >>> 7) % 300 - 8 - k * 20, 16, 16); g.restore(); }
     }
     g.textAlign = 'left';
   }
-  // seats and floor things (sorted with people)
+  // seats, tables, people at work, the cauldron, Mochi (sorted with the people; side-view drawings at half size)
   function lgProps(g, now, list, vis){
-    const add = (y, x, f) => { if(x > vis.x0 - 150 && x < vis.x1 + 150) list.push({ y, d: f }); };
-    // seats and furniture: pixel sprites (local origin = the seat spot on the floor)
-    const S = (k, X, Y, fn, w, h, ys) => add(ys == null ? Y + 2 : ys, X, () => lgPx(g, 'seat:' + k, X - w / 2, Y - h + 8, w, h, (c) => { c.translate(w / 2, h - 8); fn(c); }));
-    const shadow = (X, Y, w) => { g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(X, Y + 1, w, 6, 0, 0, 7); g.fill(); };
+    const add = (y, x, f) => { if(x > vis.x0 - 100 && x < vis.x1 + 100 && y > vis.y0 - 40 && y < vis.y1 + 160) list.push({ y, d: f }); };
+    const S = (k, X, Y, fn, w, h, ys) => add(ys == null ? Y + 2 : ys, X, () => lgOldAt(g, X, Y, () => lgPx(g, 'seat:' + k, -w / 2, -h + 8, w, h, (c) => { c.translate(w / 2, h - 8); fn(c); })));
+    const shadow = (X, Y, w) => { g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(X, Y + 1, w * .5, 3, 0, 0, 7); g.fill(); };
     for(const s of LG_SEATS){
       const X = s.x, Y = s.y;
       if(s.k === 'desk'){ const v = lgHash('d' + X) % 3; add(Y + 1, X, () => shadow(X, Y, 48)); S('desk' + v, X, Y, (c) => {
@@ -34208,7 +34548,7 @@
         c.fillStyle = '#4a2418'; c.beginPath(); c.moveTo(-44, -40); c.lineTo(44, -40); c.lineTo(36, 0); c.lineTo(-36, 0); c.fill(); lgR(c, -46, -44, 92, 6, '#6a3424'); lgR(c, -44, -44, 88, 2, '#8a4a30');
         lgR(c, -3, -36, 6, 26, '#e8c35a'); lgR(c, -11, -28, 22, 6, '#e8c35a'); lgR(c, -30, -36, 4, 4, '#c9a24a'); lgR(c, 26, -36, 4, 4, '#c9a24a'); lgR(c, -36, -10, 72, 2, '#2a1008');
       }, 110, 60); }
-      else if(s.k === 'sofa2'){ const L = X < 165; add(Y + 1, X, () => shadow(X, Y, 50)); S(L ? 'sofaL' : 'sofaR', X, Y, (c) => {
+      else if(s.k === 'sofa2'){ const L = X < lgRoomById('control').x + 123; add(Y + 1, X, () => shadow(X, Y, 50)); S(L ? 'sofaL' : 'sofaR', X, Y, (c) => {
         if(!L) c.scale(-1, 1);
         lgBev(c, -46, -66, 96, 26, '#5a3a8a'); for(let k = 0; k < 2; k++) lgR(c, -30 + k * 34, -60, 2, 16, '#46297a');
         lgBev(c, -46, -42, 96, 18, '#7a52b0'); lgR(c, -44, -40, 92, 3, '#9a72d0'); lgBev(c, -58, -54, 16, 44, '#4a2e78'); lgR(c, -58, -54, 16, 4, '#6a4a98');
@@ -34228,55 +34568,47 @@
         lgBev(c, -44, -20, 88, 10, '#2a1f5c'); for(const lx of [-46, 40]) lgBev(c, lx, -10, 6, 10, '#c9a24a');
       }, 130, 100); }
       else if(s.k === 'gthrone'){
-        add(Y - 1, X, () => { shadow(X, Y, 60); lgPx(g, 'throne', X - 60, Y - 214, 120, 220, (c) => { c.translate(60, 214);
+        add(Y - 1, X, () => { shadow(X, Y, 60); lgOldAt(g, X, Y, () => lgPx(g, 'throne', -60, -214, 120, 220, (c) => { c.translate(60, 214);
           c.fillStyle = '#7a5208'; c.beginPath(); c.moveTo(-48, 0); c.lineTo(-48, -170); c.lineTo(-30, -202); c.lineTo(0, -184); c.lineTo(30, -202); c.lineTo(48, -170); c.lineTo(48, 0); c.fill();
           c.fillStyle = '#e8b830'; c.beginPath(); c.moveTo(-44, 0); c.lineTo(-44, -168); c.lineTo(-28, -196); c.lineTo(0, -178); c.lineTo(28, -196); c.lineTo(44, -168); c.lineTo(44, 0); c.fill();
           lgR(c, -40, -166, 8, 164, '#fff0a0'); lgR(c, 34, -166, 6, 164, '#b8861a');
           c.fillStyle = '#3a1070'; roundRectPath(c, -34, -162, 68, 134, 12); c.fill(); c.fillStyle = '#5a1fb0'; roundRectPath(c, -30, -158, 60, 126, 10); c.fill(); lgR(c, -24, -150, 6, 110, '#7a3fd0');
           for(const [dx, col] of [[-24, '#57e1ff'], [0, '#ff4d6d'], [24, '#9be37a']]){ lgEll(c, dx, -184, 7, 7, '#160c1c'); lgEll(c, dx, -184, 5, 5, col); lgR(c, dx - 2, -187, 2, 2, '#fff'); }
-        }); });
-        add(Y + 2, X, () => lgPx(g, 'throneSeat', X - 60, Y - 40, 120, 44, (c) => { c.translate(60, 40); lgBev(c, -54, -36, 108, 14, '#d4a52e'); lgBev(c, -50, -22, 100, 22, '#b8861a'); lgR(c, -40, -18, 80, 2, '#e8c35a'); lgBev(c, -50, -36, 16, 36, '#e8b830'); lgBev(c, 34, -36, 16, 36, '#e8b830'); }));
+        })); });
+        add(Y + 2, X, () => lgOldAt(g, X, Y, () => lgPx(g, 'throneSeat', -60, -40, 120, 44, (c) => { c.translate(60, 40); lgBev(c, -54, -36, 108, 14, '#d4a52e'); lgBev(c, -50, -22, 100, 22, '#b8861a'); lgR(c, -40, -18, 80, 2, '#e8c35a'); lgBev(c, -50, -36, 16, 36, '#e8b830'); lgBev(c, 34, -36, 16, 36, '#e8b830'); })));
       }
     }
-    // cafeteria tables (between each pair of benches)
-    for(const tx of [3375, 3645]) add(484, tx, () => { shadow(tx, 482, 60); lgPx(g, 'ctable', tx - 64, 430, 128, 56, (c) => { c.translate(64, 52); lgBev(c, -58, -48, 116, 8, '#f4f0e6'); lgR(c, -58, -40, 116, 4, '#c0263b'); lgBev(c, -4, -36, 8, 34, '#7a7a88'); lgBev(c, -22, -4, 44, 4, '#5a5a68'); lgR(c, -40, -54, 14, 6, '#ff8a3a'); lgR(c, 20, -56, 10, 8, '#c8d8e0'); }); });
-    // the shop counter (the shopkeeper stands behind it)
-    add(410, 5670, () => lgPx(g, 'shopCounter', 5536, 336, 268, 60, (c) => { c.translate(-5536, -336); lgBev(c, 5540, 338, 260, 12, '#c9a24a'); lgBev(c, 5548, 350, 244, 42, '#5a2e7a'); for(let k = 0; k < 4; k++){ const sx = 5576 + k * 62; lgR(c, sx, 362, 18, 18, '#7a4a9a'); lgR(c, sx + 6, 366, 6, 10, '#ffd166'); lgR(c, sx + 2, 370, 14, 2, '#ffd166'); } lgBev(c, 5740, 316, 40, 22, '#3a3a48'); lgR(c, 5746, 320, 28, 8, '#9be37a'); lgR(c, 5750, 330, 20, 4, '#222'); }));
-    for(const n of LG_NPCS.slice(1)) add(n.y, n.x, () => lgDrawNpc(g, n, now, lgNpcNear(n, now)));
+    // cafeteria tables
+    for(const t of LG_CTABLES) add(t.y - 2, t.x, () => { shadow(t.x, t.y - 4, 60); lgOldAt(g, t.x, t.y, () => lgPx(g, 'ctable', -64, -52, 128, 56, (c) => { c.translate(64, 52); lgBev(c, -58, -48, 116, 8, '#f4f0e6'); lgR(c, -58, -40, 116, 4, '#c0263b'); lgBev(c, -4, -36, 8, 34, '#7a7a88'); lgBev(c, -22, -4, 44, 4, '#5a5a68'); lgR(c, -40, -54, 14, 6, '#ff8a3a'); lgR(c, 20, -56, 10, 8, '#c8d8e0'); })); });
+    // the shop counter (the shopkeeper stands behind it) and the people who work here
+    { const q = lgO2N(5536, 336), R = lgRoomById('market'); add(q.y + 9, q.x + 67, () => { g.save(); lgOldT(g, R); lgPx(g, 'shopCounter', 5536, 336, 268, 60, (c) => { c.translate(-5536, -336); lgBev(c, 5540, 338, 260, 12, '#c9a24a'); lgBev(c, 5548, 350, 244, 42, '#5a2e7a'); for(let k = 0; k < 4; k++){ const sx = 5576 + k * 62; lgR(c, sx, 362, 18, 18, '#7a4a9a'); lgR(c, sx + 6, 366, 6, 10, '#ffd166'); lgR(c, sx + 2, 370, 14, 2, '#ffd166'); } lgBev(c, 5740, 316, 40, 22, '#3a3a48'); lgR(c, 5746, 320, 28, 8, '#9be37a'); lgR(c, 5750, 330, 20, 4, '#222'); }); g.restore(); }); }
+    for(const n of LG_NPCS.slice(1)) add(n.Y, n.X, () => { g.save(); lgOldT(g, lgOldRoom(n.x)); lgDrawNpc(g, n, now, lgNpcNear(n, now)); g.restore(); });
     // the cauldron
-    add(452, 8500, () => {
-      const X = 8500, Y = 450, br = LG.brew && performance.now() - LG.brew < 2500;
-      g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(X, Y + 4, 64, 12, 0, 0, 7); g.fill();
-      lgPx(g, 'cauldron', X - 70, Y - 120, 140, 128, (c) => { c.translate(70, 120);
+    add(LG_CAUL.y + 1, LG_CAUL.x, () => {
+      const br = LG.brew && performance.now() - LG.brew < 2500; shadow(LG_CAUL.x, LG_CAUL.y + 2, 130);
+      g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = .35 + .15 * Math.sin(now / 400); g.drawImage(lgGlow(), LG_CAUL.x - 70, LG_CAUL.y - 60, 140, 80); g.restore();
+      lgOldAt(g, LG_CAUL.x, LG_CAUL.y, () => lgPx(g, 'cauldron', -70, -120, 140, 128, (c) => { c.translate(70, 120);
         for(let i = 0; i < 4; i++){ const f = Math.floor(now / 100 + i) % 3; lgR(c, -32 + i * 20, -14 - f * 2, 10, 14 + f * 2, '#ff7a1a'); lgR(c, -29 + i * 20, -10 - f, 4, 8, '#ffd34d'); }
         for(const lx of [-40, 34]) lgBev(c, lx, -24, 8, 24, '#2a2a34');
         c.fillStyle = '#2a2a34'; c.beginPath(); c.ellipse(0, -40, 56, 40, 0, 0, Math.PI); c.fill(); lgR(c, -56, -46, 112, 8, '#3a3a48'); lgR(c, -54, -46, 108, 2, '#5a5a6a'); lgR(c, -40, -30, 6, 16, '#3a3a48');
         lgEll(c, 0, -46, 50, 8, br ? '#ff5fd2' : '#5fe08a'); lgEll(c, -10, -47, 24, 4, br ? '#ffa0e8' : '#a0ffc0');
         for(let i = 0; i < (br ? 10 : 5); i++){ const k = ((now / 900) + i / 5) % 1; if(k > .85) continue; lgR(c, -30 + (lgHash('cb' + i) % 60), -52 - k * 64, 6 + Math.round(k * 4) * 2, 6 + Math.round(k * 4) * 2, br ? '#ff96e6' : '#96ffb4'); }
-      }, { fps: 10, now, v: br ? 'b' : 'g' });
-    });
-    // the gate to the Golden Council Room
-    add(LG_FY1 + 1, LG_GATE, () => {
-      const X = LG_GATE, open = lgRich();
-      lgPx(g, 'gate' + (open ? 1 : 0), X - 20, 110, 40, LG_VH - 110, (c) => { c.translate(20, -110); lgBev(c, -14, 120, 28, LG_VH - 120, '#e8c35a'); lgR(c, -8, 120, 4, LG_VH - 120, '#fff4c2'); lgBev(c, -20, 114, 40, 10, '#c9a24a');
-        if(!open) for(let y = 140; y < LG_VH; y += 26){ lgR(c, -12, y, 24, 6, '#b8861a'); lgR(c, -12, y, 24, 2, '#ffe27a'); } });
-      if(!open){ g.font = '30px sans-serif'; g.textAlign = 'center'; g.fillText('🔒', X, 300); }
-      g.font = "800 13px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = '#b8861a'; g.fillText('1B+ ONLY', X, 104); g.textAlign = 'left';
+      }, { fps: 10, now, v: br ? 'b' : 'g' }));
     });
     // Mochi
     const c = lgCatPos(now);
-    if(lgSeenAt(c.x)) add(c.y, c.x, () => {
-      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(c.x, c.y, 28, 7, 0, 0, 7); g.fill();
+    if(lgSeenAt(c.x, c.y)) add(c.y, c.x, () => {
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(c.x, c.y, 14, 3.5, 0, 0, 7); g.fill();
       const f = c.moving ? Math.floor(now / 90) % 4 : 0, tf = Math.floor(now / 200) % 6, b = c.moving ? [0, 2, 0, -2][f] : 0, tl = Math.sin(tf / 6 * 6.283) * 6;
-      lgPx(g, 'cat' + f + '_' + tf, c.x - 48, c.y - 66, 96, 70, (x) => { x.translate(48, 66); x.scale(1.4, 1.4);
+      lgOldAt(g, c.x, c.y, () => lgPx(g, 'cat' + f + '_' + tf, -48, -66, 96, 70, (x) => { x.translate(48, 66); x.scale(1.4, 1.4);
         x.fillStyle = '#f2b35e'; x.beginPath(); x.ellipse(-2, -12 + b * .3, 18, 11, 0, 0, 7); x.fill();
         x.strokeStyle = '#f2b35e'; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(-18, -14); x.quadraticCurveTo(-30, -30 + tl, -22, -36); x.stroke();
         x.beginPath(); x.arc(14, -22 + b * .3, 11, 0, 7); x.fill();
         x.beginPath(); x.moveTo(6, -30); x.lineTo(9, -40); x.lineTo(14, -32); x.fill(); x.beginPath(); x.moveTo(16, -32); x.lineTo(22, -40); x.lineTo(24, -28); x.fill();
         x.fillStyle = '#d8903e'; x.fillRect(-12, -20, 3, 8); x.fillRect(-4, -21, 3, 8); x.fillStyle = '#ffd8a0'; x.fillRect(4, -6, 10, 4); x.fillStyle = '#2a1a14'; x.fillRect(15, -25, 2.5, 3.5); x.fillRect(20, -25, 2.5, 3.5);
         x.fillStyle = '#f2b35e'; x.fillRect(-14 + (c.moving ? f % 2 * 3 : 0), -4, 4, 5); x.fillRect(6 - (c.moving ? f % 2 * 3 : 0), -4, 4, 5);
-      }, { flip: c.face < 0 });
-      g.font = "600 11px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.85)'; g.fillText('Mochi', c.x, c.y + 18); g.textAlign = 'left';
+      }, { flip: c.face < 0 }));
+      g.font = "600 9px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.85)'; g.fillText('Mochi', c.x, c.y + 11); g.textAlign = 'left';
     });
   }
   function lgWrap(g, t, max){ const out = []; let cur = ''; for(const w of t.split(' ')){ const n = cur ? cur + ' ' + w : w; if(g.measureText(n).width > max && cur){ out.push(cur); cur = w; } else cur = n; } if(cur) out.push(cur); return out.slice(0, 4); }
@@ -34286,7 +34618,7 @@
     const spr = lgChar(d.c), sit = d.a === 'sit' && !p.moving, dance = d.a === 'dance' && !p.moving;
     const talking = d.m && now - (d.mt || 0) < 4000;
     const ph = lgHash(d.u || 'me') % 997;
-    const k = 0.9 + (p.y - LG_FY0) / (LG_FY1 - LG_FY0) * 0.2, S = 1.85 * k;
+    const k = .5, S = LG_CS;
     let row = 'idle', fps = 7;
     if(p.moving){ row = p.fast && spr.rows.run ? 'run' : 'walk'; fps = p.fast ? 14 : 10; }
     else if(dance){ row = spr.rows.jump ? 'jump' : spr.rows.talk ? 'talk' : 'walk'; fps = 10; }
@@ -34296,23 +34628,25 @@
     if(atkT >= 0 && atkT < lgAtkLen(spr)){ if(spr.rows.atk){ row = 'atk'; fiOver = Math.min(spr.rows.atk[1] - 1, Math.floor(atkT / (1000 / 12))); } else { row = spr.rows.jump ? 'jump' : 'idle'; } }
     else if(hurtT < 420 && spr.rows.hurt){ row = 'hurt'; fiOver = Math.min(spr.rows.hurt[1] - 1, Math.floor(hurtT / (420 / spr.rows.hurt[1]))); }
     const [ri, n] = spr.rows[row] || spr.rows.idle, fi = fiOver >= 0 ? fiOver : Math.floor((now + ph * 37) / (1000 / fps)) % n;
-    const face = (atkT < lgAtkLen(spr) && d.af) ? d.af : (p.face || d._face || 1), lift = sit ? 14 : 0;
+    const face = (atkT < lgAtkLen(spr) && d.af) ? d.af : (p.face || d._face || 1), lift = sit ? 7 : 0;
     const shake = hurtT < 420 ? Math.sin(hurtT / 25) * 5 : 0;
     const top = p.y - (spr.h * S) - lift;
     g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(p.x, p.y - 2, 26 * k, 7 * k, 0, 0, 7); g.fill();
-    if(p.fast){ for(let i = 1; i < 4; i++){ g.fillStyle = `rgba(255,230,120,${.3 - i * .08})`; g.beginPath(); g.arc(p.x - face * i * 16, p.y - 50, 12 - i * 2, 0, 7); g.fill(); } }
+    if(p.fast){ for(let i = 1; i < 4; i++){ g.fillStyle = `rgba(255,230,120,${.3 - i * .08})`; g.beginPath(); g.arc(p.x - face * i * 9, p.y - 26, 7 - i, 0, 7); g.fill(); } }
     if(spr.im.complete && spr.im.naturalWidth){
       g.save(); g.imageSmoothingEnabled = false; g.translate(p.x + shake, p.y - lift); if(face < 0) g.scale(-1, 1);
       if(hurtT < 420 && !spr.rows.hurt) g.globalAlpha = Math.floor(hurtT / 70) % 2 ? .35 : 1;
       g.drawImage(spr.im, fi * spr.w, ri * spr.h, spr.w, spr.h, -spr.ax * S, -spr.h * S, spr.w * S, spr.h * S);
       g.restore();
-    } else { g.fillStyle = '#9d8cff'; g.beginPath(); g.ellipse(p.x, p.y - 50, 20, 40, 0, 0, 7); g.fill(); }
+    } else { g.fillStyle = '#9d8cff'; g.beginPath(); g.ellipse(p.x, p.y - 26, 10, 22, 0, 0, 7); g.fill(); }
     const soda = LG_SODAS.find(s => s.k === d.s);
     if(soda){ const cx = p.x + face * 22 * k, cy = p.y - spr.h * S * .5 - lift; g.fillStyle = soda.c; g.fillRect(cx - 5, cy - 8, 10, 16); g.fillStyle = '#ddd'; g.fillRect(cx - 5, cy - 9, 10, 3); }
-    if(hurtT < 500){ g.font = '22px sans-serif'; g.textAlign = 'center'; g.globalAlpha = 1 - hurtT / 500; g.fillText('💥', p.x, top + 30 - hurtT / 20); g.globalAlpha = 1; }
+    if(hurtT < 500){ g.font = '14px sans-serif'; g.textAlign = 'center'; g.globalAlpha = 1 - hurtT / 500; g.fillText('💥', p.x, top + 16 - hurtT / 40); g.globalAlpha = 1; }
     lgDrawTags(g, d, p, now, isMe, top);
   }
-  function lgDrawTags(g, d, p, now, isMe, top){
+  function lgDrawTags(g, d, p, now, isMe, top){ const K = .62; g.save(); g.translate(p.x, p.y); g.scale(K, K); g.translate(-p.x, -p.y); try{ lgDrawTags0(g, d, p, now, isMe, p.y + (top - p.y) / K); } finally { g.restore(); } }
+  function lgDrawTags0(g, d, p, now, isMe, top){
+    if(!isMe && LG.light && !lgInLight(p.x, p.y)) return;
     const dance = d.a === 'dance' && !p.moving;
     if((d.a === 'play' && d.gm && LG_GAMES[d.gm]) || d.a === 'edit'){ const t = d.a === 'edit' ? '🎬 making a video' : `${LG_GAMES[d.gm].em} ${LG_GAMES[d.gm].t}`; g.font = "700 11px 'Inter',sans-serif"; g.textAlign = 'center'; const w = g.measureText(t).width + 14; g.fillStyle = d.a === 'edit' ? 'rgba(87,225,255,.85)' : 'rgba(255,95,210,.85)'; roundRectPath(g, p.x - w / 2, top - 22, w, 18, 9); g.fill(); g.fillStyle = '#0d0918'; g.fillText(t, p.x, top - 9); top -= 24; }
     g.textAlign = 'center';
@@ -34329,102 +34663,8 @@
     lgRpsTag(g, d, p, now, top);
     g.textAlign = 'left';
   }
-  function lgFog(g, vis){
-    for(const r of LG_ROOMS){
-      if(LG.seen.has(r.id) || r.x > vis.x1 || r.x + 1000 < vis.x0) continue;
-      g.fillStyle = 'rgba(8,6,16,.94)'; g.fillRect(r.x + 14, 0, 1000 - 14, LG_VH);
-      const ic = { n: '🏫', v: '🧛', m: '🪄', g: '💎', a: '🎮', c: '🎛️' }[r.sch];
-      g.font = "800 34px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.4)'; g.fillText(ic + ' ???', r.x + 500, 250); g.font = "600 15px 'Inter',sans-serif"; g.fillText(r.vip ? 'only for 1B+ points' : 'walk in to explore', r.x + 500, 280); g.textAlign = 'left';
-    }
-  }
-  // the map (top right): every room; click one you've found to teleport there
-  const LG_MMIC = { control: '🎛️', lobby: '🏫', class: '📚', cafe: '🥤', arcade: '🎰', market: '📈', vhall: '🦇', vball: '🎹', mclass: '🧪', mobs: '🔭', vip: '💎' };
-  function lgMinimap(g, W, now, people){
-    const cw = Math.max(22, Math.min(34, (W - 330) / LG_ROOMS.length)), mw = cw * LG_ROOMS.length, mh = 26, x0 = W - mw - 12, y0 = 12, s = mw / LG_WW;
-    LG.mm = { x0, y0, w: mw, h: mh, cw };
-    g.fillStyle = 'rgba(10,8,20,.78)'; roundRectPath(g, x0 - 6, y0 - 6, mw + 12, mh + 12, 9); g.fill();
-    LG_ROOMS.forEach((r, i) => {
-      const seen = LG.seen.has(r.id), hov = LG.mmHover === i, here = LG.room === r.id;
-      g.fillStyle = !seen ? 'rgba(255,255,255,.07)' : { n: '#9fd1ff', v: '#c4102a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[r.sch];
-      g.globalAlpha = seen ? (hov ? 1 : .55) : 1; roundRectPath(g, x0 + i * cw + 1, y0, cw - 2, mh, 5); g.fill(); g.globalAlpha = 1;
-      if(here){ g.strokeStyle = '#fff'; g.lineWidth = 2; roundRectPath(g, x0 + i * cw + 1, y0, cw - 2, mh, 5); g.stroke(); }
-      g.font = `${Math.round(cw * .5)}px sans-serif`; g.textAlign = 'center'; g.globalAlpha = seen ? 1 : .35; g.fillText(seen ? LG_MMIC[r.id] : (r.vip ? '🔒' : '?'), x0 + i * cw + cw / 2, y0 + mh / 2 + cw * .18); g.globalAlpha = 1;
-    });
-    for(const o of people){ g.fillStyle = '#fff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + mh + 4, 2, 0, 7); g.fill(); }
-    const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mh + 4, 3.2, 0, 7); g.fill();
-    if(LG.mmHover != null){ const r = LG_ROOMS[LG.mmHover]; if(r){ const t = LG.seen.has(r.id) ? (LG.room === r.id ? `📍 ${r.name}` : `✨ Teleport to ${r.name}`) : r.vip ? '🔒 Golden Council Room · 1B+ points' : '❓ Not found yet — walk there first'; g.font = "700 12px 'Inter',sans-serif"; const tw = g.measureText(t).width + 16, tx = Math.min(W - tw / 2 - 8, x0 + LG.mmHover * cw + cw / 2); g.fillStyle = 'rgba(10,8,20,.9)'; roundRectPath(g, tx - tw / 2, y0 + mh + 12, tw, 22, 8); g.fill(); g.fillStyle = '#fff'; g.fillText(t, tx, y0 + mh + 27); } }
-    g.textAlign = 'left';
-  }
-  function lgMmIndex(e){
-    const m = LG.mm; if(!m) return null; const r = LG.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    if(x < m.x0 - 4 || x > m.x0 + m.w + 4 || y < m.y0 - 4 || y > m.y0 + m.h + 10) return null;
-    return Math.max(0, Math.min(LG_ROOMS.length - 1, Math.floor((x - m.x0) / m.cw)));
-  }
-  function lgTeleport(r){
-    if(!r) return;
-    if(!LG.seen.has(r.id)){ toast(r.vip ? '🔒 That room is only for people with more than 1B points.' : `❓ You haven't found that room yet — walk there first, then you can teleport.`, 2600); return; }
-    if(r.vip && !lgRich()){ lgVipNo(); return; }
-    if(LG.room === r.id){ return; }
-    const now = trdNow(); if(now - (LG.tpAt || 0) < 1200) return; LG.tpAt = now;
-    const from = lgPos(LG.me, now), x = r.x + 420 + Math.random() * 160, y = 455 + Math.random() * 50;
-    LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]);
-    Object.assign(LG.me, { x, y, tx: x, ty: y, p: '', t: now, a: '', gm: '' }); LG.pend = null; LG.cam = { x };
-    lgWrite(lgFull()); lgSfx('teleport'); lgHud();
-  }
-  function lgDrawTps(g){
-    const pn = performance.now(); LG.tps = (LG.tps || []).filter(t => pn - t.at < 900);
-    g.save(); g.globalCompositeOperation = 'lighter';
-    for(const t of LG.tps){ const k = (pn - t.at) / 900; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillStyle = '#b48cff'; g.fillRect(t.x - 24 * (1 - k), 0, 48 * (1 - k), t.y); for(let i = 0; i < 10; i++){ const a = i / 10 * 6.28; g.fillStyle = '#ffe27a'; g.beginPath(); g.arc(t.x + Math.cos(a) * 60 * k, t.y - 60 + Math.sin(a) * 30 * k, 3, 0, 7); g.fill(); } }
-    g.restore();
-  }
-  function lgLoop(){
-    cancelAnimationFrame(LG.raf); if(!LG.on || LG.paused) return;
-    LG.raf = requestAnimationFrame(lgLoop);
-    const cv = LG.cv; if(!cv || document.visibilityState !== 'visible') return;
-    const r = cv.getBoundingClientRect(); if(r.width < 10) return;
-    if(r.height < 10) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
-    if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
-    const g = cv.getContext('2d'), now = trdNow(), sc = H / LG_VH; LG.vw = W / sc;
-    const m = LG.me, mp = lgPos(m, now);
-    if(!mp.moving && LG.pend) lgArrived();
-    if(mp.face) LG.lastFace = mp.face;
-    const room = lgRoomAt(mp.x);
-    if(room.id !== LG.room){ LG.room = room.id; if(!LG.seen.has(room.id)){ LG.seen.add(room.id); chatLS('lgSeen3', JSON.stringify([...LG.seen])); lgBanner('✨ You found the ' + room.name + '!'); lgSfx('reveal'); } else lgBanner(room.name); }
-    LG.cam = LG.cam || { x: mp.x }; LG.cam.x += (mp.x - LG.cam.x) * 0.1;
-    const v = lgView(), x0 = v.x0, vis = { x0, x1: x0 + LG.vw };
-    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#0d0918'; g.fillRect(0, 0, W, H);
-    const cs = Math.round(sc * 100) / 100;
-    for(let ci = Math.floor(x0 / LG_CH); ci <= Math.floor((x0 + LG.vw) / LG_CH); ci++){ if(ci < 0 || ci * LG_CH >= LG_WW) continue; g.drawImage(lgChunk(ci, cs), Math.round((ci * LG_CH - x0) * sc), 0, Math.ceil(LG_CH * sc) + 1, H); }
-    g.setTransform(sc, 0, 0, sc, -x0 * sc, 0);
-    lgDecor(g, now, vis);
-    const list = []; lgProps(g, now, list, vis);
-    const people = [];
-    const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
-    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 120 && p.x < vis.x1 + 120) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
-    mp.face = mp.face || LG.lastFace;
-    list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
-    LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
-    lgHits(all, now);
-    list.sort((a, b) => a.y - b.y).forEach(x => x.d());
-    lgDrawShots(g, all, now); lgDrawTps(g);
-    const pn = performance.now();
-    LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
-    g.font = "18px sans-serif"; g.textAlign = 'center';
-    for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText('❤️', h.x + Math.sin(k * 8) * 6, h.y - k * 50); }
-    g.globalAlpha = 1; g.textAlign = 'left';
-    if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.beginPath(); g.ellipse(m.tx, m.ty, 14 + Math.sin(now / 120) * 2, 5, 0, 0, 7); g.stroke(); }
-    if(LG.song === 'hype' || LG.song === 'retro'){ g.save(); g.globalCompositeOperation = 'lighter'; for(let i = 0; i < 3; i++){ const a = now / 800 + i * 2.1; g.globalAlpha = .22; g.drawImage(lgGlow(), LG.cam.x + Math.cos(a) * 380 - 120, 420 + Math.sin(a * 1.3) * 40 - 60, 240, 120); } g.restore(); }
-    lgFog(g, vis);
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const Wc = W / dpr;
-    lgMinimap(g, Wc, now, people);
-    if(LG.banner){ const k = (pn - LG.banner.at) / 2600; if(k > 1) LG.banner = null; else { g.globalAlpha = k < .15 ? k / .15 : k > .8 ? (1 - k) / .2 : 1; g.font = "800 20px 'Inter',sans-serif"; g.textAlign = 'center'; const tw = g.measureText(LG.banner.t).width + 36; g.fillStyle = 'rgba(10,8,20,.78)'; roundRectPath(g, Wc / 2 - tw / 2, 14, tw, 38, 19); g.fill(); g.fillStyle = '#ffe27a'; g.fillText(LG.banner.t, Wc / 2, 40); g.textAlign = 'left'; g.globalAlpha = 1; } }
-  }
-  // the people who work here: the dealer, the shopkeeper and the broker (they chat when you're close, and cheer when you play)
-  const LG_NPCS = [{ i: 2, x: 4360, y: 372, S: 2.0, name: 'Dealer', near: 'bj' }, { i: 0, x: 5670, y: 404, S: 2.3, name: 'Shopkeeper', near: 'shop' }, { i: 1, x: 5470, y: 470, S: 2.0, name: 'Broker', near: 'trade' }];
   function lgNpcSpr(i){ if(!LG_SPR.npc) LG_SPR.npc = LG_NPC_SPR.map(m => { const im = new Image(); im.src = 'data:image/png;base64,' + m.png; return Object.assign({ im }, m); }); return LG_SPR.npc[i]; }
-  function lgNpcNear(n, now){ const m = lgPos(LG.me, now); if(Math.abs(m.x - n.x) < 170) return true; return (LG.snap ? lgPeople() : []).some(o => Math.abs(lgPos(o, now).x - n.x) < 170); }
+  function lgNpcNear(n, now){ const m = lgPos(LG.me, now); if(Math.hypot(m.x - n.X, m.y - n.Y) < 110) return true; return (LG.snap ? lgPeople() : []).some(o => { const q = lgShown(o, now); return Math.hypot(q.x - n.X, q.y - n.Y) < 110; }); }
   function lgDrawNpc(g, n, now, near){
     const spr = lgNpcSpr(n.i); if(!spr || !spr.im.complete || !spr.im.naturalWidth) return;
     const okT = now - ((LG.npcOk && LG.npcOk[n.near]) || 0);
@@ -34535,6 +34775,7 @@
       if(!r.ok) throw new Error('the chat server answered ' + r.status);
       ta.value = ''; CHAT._scrollDown = true; grow(); chatStopReply();
       try{ questEv('chat'); }catch(e){}
+      try{ if(LG.on && !LG.paused && lgIsUser()){ const t = text.length > 60 ? text.slice(0, 59) + '…' : text; Object.assign(LG.me, { m: t, mt: trdNow() }); lgWrite({ m: t, mt: { '.sv': 'timestamp' } }); } }catch(e){}
     }catch(err){ console.error(err); CHAT.lastSend = 0; toast("Couldn't send — check your internet connection. Your message is still in the box.", 3200); }
     finally{ if(send) send.disabled = !ta.value.trim() || !chatCanSend(); try{ sndBtnSync(); }catch(e){} if(!ta.disabled) ta.focus(); }
   }
