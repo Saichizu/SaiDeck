@@ -23396,7 +23396,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 220;                 // ← goes up by one with every published version
+  const SD_BUILD = 221;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33520,12 +33520,15 @@
     return bd < 200 * 200 ? best : -1;
   }
   // spots in front of something (a machine, the studio desk, a table): 1 2 3 4 / 5 6 7 8 / … — the first one nobody is standing on or heading to
-  function lgSlotFor(go, cols){
+  // (room: only spots inside that room; up: rows go upward; strict: give back null instead of the nearest floor anywhere)
+  function lgSlotFor(go, cols, room, up, strict){
     cols = cols || 4; const now = trdNow(), rich = lgRich(), taken = lgPeople().map(o => { const q = lgPos(o, now); return [o.tx != null ? o.tx : q.x, o.ty != null ? o.ty : q.y]; });
-    for(let i = 0; i < 32; i++){ const r = Math.floor(i / cols), c = i % cols, x = Math.round(go[0] + (c - (cols - 1) / 2) * 34), y = Math.round(go[1] + r * 28);
-      if(!lgOk(lgTile(x, y), rich)) continue; if(taken.some(q => Math.abs(q[0] - x) < 14 && Math.abs(q[1] - y) < 12)) continue; return [x, y]; }
-    return lgNearest(go[0], go[1], rich);
+    for(let i = 0; i < 32; i++){ const r = Math.floor(i / cols), c = i % cols, x = Math.round(go[0] + (c - (cols - 1) / 2) * 34), y = Math.round(go[1] + (up ? -r : r) * 28);
+      if(!lgOk(lgTile(x, y), rich)) continue; if(room){ const rr = lgRoomAt(x, y); if(!rr || rr.id !== room) continue; } if(taken.some(q => Math.abs(q[0] - x) < 14 && Math.abs(q[1] - y) < 12)) continue; return [x, y]; }
+    return strict ? null : lgNearest(go[0], go[1], rich);
   }
+  // a spot at a Council table: in front of it, or behind it when it's up against the bottom wall
+  const lgTableSpot = (o) => lgSlotFor([o.x, o.y + 22], 3, 'vip', false, true) || lgSlotFor([o.x, o.y - 46], 3, 'vip', true, true) || lgNearest(o.x, o.y - 46, lgRich());
   // you opened a game from the chat: if your character isn't at that machine, it pops over there and gets in line
   function lgGameJoin(g){
     try{
@@ -33593,7 +33596,7 @@
         lgWalk(s.x, s.y, 'sit'); return;
       }
     }
-    for(const o of LG_VIPF) if(o.k === 'table' && Math.abs(p.x - o.x) < o.w / 2 + 4 && p.y > o.y - 50 && p.y < o.y + 8 && lgSeenAt(o.x, o.y)){ const s = lgSlotFor([o.x, o.y + 22], 3); lgWalk(s[0], s[1], lgRich() ? 'wine' : null); return; }
+    for(const o of LG_VIPF) if(o.k === 'table' && Math.abs(p.x - o.x) < o.w / 2 + 4 && p.y > o.y - 50 && p.y < o.y + 8 && lgSeenAt(o.x, o.y)){ const s = lgTableSpot(o); lgWalk(s[0], s[1], lgRich() ? 'wine' : null); return; }
     for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.go[1])){ const s = lgSlotFor(t.go); lgWalk(s[0], s[1], t.k); return; }
     lgWalk(p.x, p.y, null);
   }
