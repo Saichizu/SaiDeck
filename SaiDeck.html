@@ -1280,7 +1280,16 @@
   .infil .infil-arrow{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .2s;transform:rotate(var(--ang,0rad)) translateX(31px);}
   .infil .infil-arrow::after{content:'';position:absolute;left:-2px;top:-8px;border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
   .infil.moving .infil-arrow{opacity:1;}
-  .chat-event.inf{border-color:rgba(53,208,184,.45);} .chat-event.lights{border-color:rgba(255,209,102,.5);background:rgba(20,10,30,.6);}
+  .chat-event.inf{border-color:rgba(53,208,184,.45);}
+  .chat-lstack{align-self:center;display:flex;flex-direction:column;align-items:center;gap:3px;max-width:92%;position:relative;}
+  .chat-lstack .ls-list{display:grid;justify-items:center;}
+  .chat-lstack .ls-list > .chat-event{grid-area:1/1;transition:transform .2s, opacity .2s;}
+  .chat-lstack.many:not(.open) .ls-list > .chat-event:nth-child(2){transform:translateY(5px) scale(.95);opacity:.55;z-index:-1;}
+  .chat-lstack.many:not(.open) .ls-list > .chat-event:nth-child(3){transform:translateY(10px) scale(.9);opacity:.3;z-index:-2;}
+  .chat-lstack:not(.open) .ls-list > .chat-event:nth-child(n+4){display:none;}
+  .chat-lstack.open .ls-list{display:flex;flex-direction:column;gap:3px;}
+  .chat-lstack .ls-more{all:unset;cursor:pointer;font-size:10px;color:var(--text-dim);margin-top:8px;padding:0 6px;border-radius:6px;} .chat-lstack .ls-more:hover{color:#fff;}
+  .chat-event.lights.on{border-color:rgba(155,227,122,.5);} .chat-event.lights{border-color:rgba(255,209,102,.5);background:rgba(20,10,30,.6);}
   .chat-join{all:unset;margin-left:6px;padding:2px 9px;border-radius:999px;cursor:pointer;font:800 10.5px 'Inter',sans-serif;color:#0e2a26;background:#35d0b8;}
   .chat-join:hover:not(:disabled){filter:brightness(1.1);}
   .chat-join:disabled{opacity:.4;cursor:default;}
@@ -23387,7 +23396,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 213;                 // ← goes up by one with every published version
+  const SD_BUILD = 214;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24718,12 +24727,17 @@
         body.appendChild(ev); continue;
       }
       if(m.e === 'lights'){
-        const ev = document.createElement('div'); ev.className = 'chat-event lights';
-        ev.innerHTML = `<span aria-hidden="true">${/on/.test(String(m.m || '')) && !/off/.test(String(m.m || '')) ? '💡' : '🔌'}</span><b></b> <span class="ev-t"></span>`;
+        // one stack for lights on/off in a row: the newest on top, older ones tucked under it
+        let st = body.lastElementChild; if(!st || !st.classList.contains('chat-lstack')){ st = document.createElement('div'); st.className = 'chat-lstack'; st.innerHTML = '<div class="ls-list"></div><button type="button" class="ls-more" hidden></button>'; body.appendChild(st); const mb = st.querySelector('.ls-more'); mb.addEventListener('click', () => { st.classList.toggle('open'); lsCount(); }); }
+        const off = !(/on/.test(String(m.m || '')) && !/off/.test(String(m.m || '')));
+        const ev = document.createElement('div'); ev.className = 'chat-event lights' + (off ? '' : ' on');
+        ev.innerHTML = `<span aria-hidden="true">${off ? '🔌' : '💡'}</span><b></b> <span class="ev-t"></span>`;
         ev.querySelector('b').textContent = chatBadName(m.n) ? 'someone' : m.n; ev.querySelector('b').style.color = chatColor(m.n);
         ev.querySelector('.ev-t').textContent = chatMask(m.m) + ' · ' + chatFmtTime(m.t);
         if(fresh(m._k)) ev.classList.add('in');
-        body.appendChild(ev); continue;
+        const L = st.querySelector('.ls-list'); L.insertBefore(ev, L.firstChild);
+        function lsCount(){ const n = L.children.length, mb = st.querySelector('.ls-more'); st.classList.toggle('many', n > 1); mb.hidden = n < 2; mb.textContent = st.classList.contains('open') ? 'show less' : `+${n - 1} more`; }
+        lsCount(); continue;
       }
       if(m.e === 'swat' || m.e === 'inf'){
         const inf = m.e === 'inf';
@@ -33092,67 +33106,67 @@
   // ===================== build 212: the lounge is a top-down map (like Among Us): rooms joined by hallways =====================
   // 1 world unit = 1 art pixel. Rooms keep their furniture from the side-view days: it's drawn at half size on each room's north wall (lgOldT).
   const LG_VH = 560, LG_FY0 = 398, LG_FY1 = 532;                       // (the old side-view units the furniture code still uses)
-  const LG_WW = 3712, LG_WH = 2048, LG_VIEW = 720, LG_VIP = 1e9, LG_CS = 0.9, LG_FACEH = 192, LG_HW = 128, LG_C = 16, LG_M = 8;
-  const LG_VIPX = 2960, LG_VIPY = 640, LG_GATE = 2970, LG_GATEY = 420; // the Golden Council Room: x ≥ 2960 while y < 640 (1B+ only)
+  const LG_K = .42, LG_KY = .42, LG_WW = 3200, LG_WH = 1664, LG_VIEW = 520, LG_VIP = 1e9, LG_CS = 0.9, LG_FACEH = 136, LG_HW = 128, LG_C = 16, LG_M = 8;
+  const LG_VIPX = 2520, LG_VIPY = 560, LG_GATE = 2524, LG_GATEY = 380; // the Golden Council Room: x ≥ 2520 while y < 560 (1B+ only)
   // rooms: (x, y) is the left end of the straight back wall (w long); p is the floor's shape under it
   const LG_ROOMS = [
-    { id: 'control', name: 'Control Room', sch: 'c', x: 1300, y: 260, w: 640, p: [[0, 0], [640, 0], [720, 120], [720, 300], [600, 420], [40, 420], [-80, 300], [-80, 120]], ox: 0 },
-    { id: 'lobby', name: 'School Lobby', sch: 'n', x: 360, y: 780, w: 576, p: [[0, 0], [576, 0], [576, 280], [480, 340], [0, 340], [-60, 170]], ox: 1000 },
-    { id: 'class', name: 'Classroom 1-A', sch: 'n', x: 160, y: 200, w: 576, p: [[0, 0], [576, 0], [576, 300], [80, 300], [0, 220]], ox: 2000 },
-    { id: 'cafe', name: 'Cafeteria', sch: 'n', x: 140, y: 1420, w: 600, p: [[0, 0], [600, 0], [660, 160], [600, 340], [0, 340], [-60, 160]], ox: 3000 },
-    { id: 'arcade', name: 'Game Hall', sch: 'a', x: 2200, y: 300, w: 600, p: [[0, 0], [600, 0], [660, 120], [660, 280], [0, 280], [-40, 140]], ox: 4000 },
-    { id: 'market', name: 'Trading Floor & Shop', sch: 'a', x: 2950, y: 880, w: 560, p: [[0, 0], [560, 0], [700, 180], [560, 360], [0, 360], [-40, 180]], ox: 5000 },
-    { id: 'vhall', name: 'Vampire Academy · Great Hall', sch: 'v', x: 1300, y: 960, w: 640, p: [[0, 0], [640, 0], [640, 280], [560, 340], [80, 340], [0, 280]], ox: 6000 },
-    { id: 'vball', name: 'Vampire Academy · Ballroom', sch: 'v', x: 2150, y: 980, w: 576, p: [[0, 0], [576, 0], [640, 100], [640, 260], [576, 340], [0, 340], [-64, 260], [-64, 100]], ox: 7000 },
-    { id: 'mclass', name: 'Magic Academy · Potions Class', sch: 'm', x: 980, y: 1560, w: 600, p: [[0, 0], [600, 0], [600, 300], [300, 380], [0, 300]], ox: 8000 },
-    { id: 'mobs', name: 'Magic Academy · Observatory', sch: 'm', x: 1720, y: 1560, w: 576, p: [[0, 0], [576, 0], [576, 180], [500, 280], [288, 330], [76, 280], [0, 180]], ox: 9000 },
-    { id: 'vip', name: 'Golden Council Room', sch: 'g', x: 3000, y: 220, w: 540, p: [[0, 0], [540, 0], [620, 160], [540, 320], [0, 320]], ox: 10000, vip: true },
-    { id: 'elec', name: 'Electrical', sch: 'e', x: 2550, y: 1520, w: 520, p: [[0, 0], [520, 0], [520, 180], [420, 280], [0, 280]], ox: 11000 },
+    { id: 'control', name: 'Control Room', sch: 'c', x: 1150, y: 230, w: 520, p: [[0, 0], [520, 0], [580, 100], [580, 240], [480, 320], [40, 320], [-60, 240], [-60, 100]], ox: 0 },
+    { id: 'lobby', name: 'School Lobby', sch: 'n', x: 330, y: 640, w: 480, p: [[0, 0], [480, 0], [480, 230], [400, 280], [0, 280], [-50, 140]], ox: 1000 },
+    { id: 'class', name: 'Classroom 1-A', sch: 'n', x: 180, y: 180, w: 480, p: [[0, 0], [480, 0], [480, 250], [70, 250], [0, 190]], ox: 2000 },
+    { id: 'cafe', name: 'Cafeteria', sch: 'n', x: 160, y: 1180, w: 480, p: [[0, 0], [480, 0], [530, 130], [480, 270], [0, 270], [-50, 130]], ox: 3000 },
+    { id: 'arcade', name: 'Game Hall', sch: 'a', x: 1880, y: 270, w: 480, p: [[0, 0], [480, 0], [530, 100], [530, 220], [0, 220], [-30, 110]], ox: 4000 },
+    { id: 'market', name: 'Trading Floor & Shop', sch: 'a', x: 2560, y: 700, w: 460, p: [[0, 0], [460, 0], [580, 150], [460, 290], [0, 290], [-30, 150]], ox: 5000 },
+    { id: 'vhall', name: 'Vampire Academy · Great Hall', sch: 'v', x: 1150, y: 760, w: 480, p: [[0, 0], [480, 0], [480, 210], [420, 260], [60, 260], [0, 210]], ox: 6000 },
+    { id: 'vball', name: 'Vampire Academy · Ballroom', sch: 'v', x: 1880, y: 760, w: 460, p: [[0, 0], [460, 0], [510, 80], [510, 210], [460, 270], [0, 270], [-50, 210], [-50, 80]], ox: 7000 },
+    { id: 'mclass', name: 'Magic Academy · Potions Class', sch: 'm', x: 860, y: 1270, w: 480, p: [[0, 0], [480, 0], [480, 230], [240, 290], [0, 230]], ox: 8000 },
+    { id: 'mobs', name: 'Magic Academy · Observatory', sch: 'm', x: 1560, y: 1290, w: 460, p: [[0, 0], [460, 0], [460, 150], [400, 230], [230, 270], [60, 230], [0, 150]], ox: 9000 },
+    { id: 'vip', name: 'Golden Council Room', sch: 'g', x: 2560, y: 200, w: 440, p: [[0, 0], [440, 0], [500, 130], [440, 260], [0, 260]], ox: 10000, vip: true },
+    { id: 'elec', name: 'Electrical', sch: 'e', x: 2300, y: 1240, w: 440, p: [[0, 0], [440, 0], [440, 150], [350, 230], [0, 230]], ox: 11000 },
   ].map(r => { const P = r.p.map(([a, b]) => [r.x + a, r.y + b]), xs = P.map(q => q[0]), ys = P.map(q => q[1]); return Object.assign(r, { P, h: Math.max(...r.p.map(q => q[1])), bb: { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) } }); });
   // corridors: wide, with 45° bends like a ship (they run into the rooms' sides, never through a back wall)
   const LG_HALLS = [
-    [[1980, 470], [2090, 470], [2200, 440]],                       // control → game hall
-    [[2820, 480], [2880, 420], [3040, 420]],                       // game hall → golden council (the gate)
-    [[1260, 450], [1100, 450], [1030, 380], [700, 380]],           // control → classroom
-    [[1350, 620], [1220, 750], [1220, 1000], [1340, 1100]],        // control → great hall
-    [[900, 900], [1220, 900]],                                     // lobby → (the great hall corridor)
-    [[400, 480], [300, 580], [300, 820], [370, 900]],              // classroom → lobby
-    [[700, 1100], [900, 1220], [900, 1420], [770, 1560]],          // lobby → cafeteria
-    [[760, 1660], [860, 1700], [1030, 1700]],                      // cafeteria → potions
-    [[1700, 1280], [1700, 1450], [1640, 1600], [1540, 1700]],      // great hall → potions
-    [[1540, 1790], [1640, 1760], [1770, 1700]],                    // potions → observatory
-    [[1900, 1100], [2000, 1150], [2120, 1150]],                    // great hall → ballroom
-    [[2700, 560], [2880, 740], [2880, 1000], [2770, 1150]],        // game hall → ballroom (and the trading floor)
-    [[3200, 1200], [3200, 1400], [3120, 1500], [3000, 1600]],      // trading floor → electrical
-    [[2260, 1650], [2400, 1700], [2590, 1660]],                    // observatory → electrical
+    [[1700, 400], [1790, 400], [1880, 380]],                       // control → game hall
+    [[2380, 430], [2450, 380], [2600, 380]],                       // game hall → golden council (the gate)
+    [[1120, 400], [980, 400], [900, 330], [620, 330]],             // control → classroom
+    [[1150, 500], [1010, 640], [1010, 800], [1190, 880]],          // control → great hall
+    [[780, 760], [1010, 760]],                                     // lobby → (the great hall corridor)
+    [[300, 410], [220, 520], [220, 700], [340, 780]],              // classroom → lobby
+    [[600, 900], [760, 1020], [760, 1200], [650, 1320]],           // lobby → cafeteria
+    [[650, 1380], [760, 1420], [900, 1420]],                       // cafeteria → potions
+    [[1390, 990], [1390, 1180], [1440, 1340], [1310, 1400]],      // great hall (out of the carpet) → potions
+    [[1200, 1500], [1400, 1590], [1600, 1470]],                    // potions → observatory
+    [[1600, 880], [1720, 920], [1850, 900]],                       // great hall → ballroom
+    [[2300, 470], [2470, 600], [2470, 820], [2370, 900]],          // game hall → ballroom (and the trading floor)
+    [[2800, 960], [2860, 1100], [2840, 1250], [2710, 1320]],       // trading floor → electrical
+    [[1990, 1380], [2150, 1400], [2340, 1360]],                    // observatory → electrical
   ];
   const lgRoomById = (id) => LG_ROOMS.find(r => r.id === id);
   const lgInPoly = (P, x, y) => { let c = false; for(let i = 0, j = P.length - 1; i < P.length; j = i++){ const [xi, yi] = P[i], [xj, yj] = P[j]; if((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
   // old side-view spot (x in 0..12000, y around the old floor line 392) → the new map (on that room's back wall)
   const lgOldRoom = (ox) => LG_ROOMS.find(r => r.ox === Math.floor(ox / 1000) * 1000) || LG_ROOMS[0];
-  const lgO2N = (ox, oy) => { const r = lgOldRoom(ox); return { x: r.x + (r.w - 500) / 2 + (ox - r.ox) * .5, y: r.y + (oy - 392) * .5 }; };
-  function lgOldT(g, r){ g.translate(r.x + (r.w - 500) / 2, r.y - 196); g.scale(.5, .5); g.translate(-r.ox, 0); }
+  const lgO2N = (ox, oy) => { const r = lgOldRoom(ox); return { x: r.x + (r.w - 1000 * LG_K) / 2 + (ox - r.ox) * LG_K, y: r.y + (oy - 392) * LG_K }; };
+  function lgOldT(g, r){ g.translate(r.x + (r.w - 1000 * LG_K) / 2, r.y - 392 * LG_K); g.scale(LG_K, LG_K); g.translate(-r.ox, 0); }
   function lgOldAt(g, x, y, f){ g.save(); g.translate(x, y); g.scale(.5, .5); try{ f(); } finally { g.restore(); } }
   const lgIn = (id, dx, dy) => { const r = lgRoomById(id); return { x: r.x + dx, y: r.y + dy }; };
   const LG_SEATS = [
-    ...[['lobby', 300, 230], ['lobby', 346, 230]].map(([id, x, y]) => Object.assign(lgIn(id, x, y), { k: 'bench' })),
-    ...[[160, 140], [270, 140], [380, 140], [215, 230], [325, 230], [435, 230]].map(([x, y]) => Object.assign(lgIn('class', x, y), { k: 'desk' })),
-    ...[[158, 192], [202, 192], [378, 192], [422, 192], [268, 292], [312, 292]].map(([x, y]) => Object.assign(lgIn('cafe', x, y), { k: 'cbench' })),
-    ...[[190, 250], [450, 250]].map(([x, y]) => Object.assign(lgIn('vhall', x, y), { k: 'coffin' })),
-    ...[[170, 280], [406, 280]].map(([x, y]) => Object.assign(lgIn('vball', x, y), { k: 'velvet' })),
-    ...[[150, 280], [450, 280]].map(([x, y]) => Object.assign(lgIn('mclass', x, y), { k: 'cushion' })),
-    Object.assign(lgIn('mobs', 150, 230), { k: 'armchair' }),
-    Object.assign(lgIn('vip', 330, 240), { k: 'gthrone', vip: true }),
-    Object.assign(lgIn('control', 140, 300), { k: 'sofa2' }), Object.assign(lgIn('control', 186, 300), { k: 'sofa2' }),
+    ...[['lobby', 240, 190], ['lobby', 286, 190]].map(([id, x, y]) => Object.assign(lgIn(id, x, y), { k: 'bench' })),
+    ...[[120, 120], [230, 120], [340, 120], [175, 205], [285, 205], [395, 205]].map(([x, y]) => Object.assign(lgIn('class', x, y), { k: 'desk' })),
+    ...[[108, 152], [152, 152], [308, 152], [352, 152], [208, 232], [252, 232]].map(([x, y]) => Object.assign(lgIn('cafe', x, y), { k: 'cbench' })),
+    ...[[130, 200], [350, 200]].map(([x, y]) => Object.assign(lgIn('vhall', x, y), { k: 'coffin' })),
+    ...[[130, 225], [330, 225]].map(([x, y]) => Object.assign(lgIn('vball', x, y), { k: 'velvet' })),
+    ...[[110, 205], [370, 205]].map(([x, y]) => Object.assign(lgIn('mclass', x, y), { k: 'cushion' })),
+    Object.assign(lgIn('mobs', 110, 180), { k: 'armchair' }),
+    Object.assign(lgIn('vip', 270, 190), { k: 'gthrone', vip: true }),
+    Object.assign(lgIn('control', 120, 250), { k: 'sofa2' }), Object.assign(lgIn('control', 166, 250), { k: 'sofa2' }),
   ];
-  const LG_CTABLES = [lgIn('cafe', 180, 190), lgIn('cafe', 400, 190), lgIn('cafe', 290, 290)];
-  const LG_CAUL = lgIn('mclass', 300, 220);
+  const LG_CTABLES = [lgIn('cafe', 130, 150), lgIn('cafe', 330, 150), lgIn('cafe', 230, 230)];
+  const LG_CAUL = lgIn('mclass', 240, 160);
   // slanted pixel furniture (seen from a corner, like the consoles and crates on a ship): k, spot, f = which way it's turned
   const LG_ISO = [
-    ['console', 'control', 70, 360, 1], ['console', 'control', 570, 360, -1], ['console', 'control', 470, 250, 1],
-    ['crate', 'elec', 70, 200, 1], ['crate', 'elec', 110, 246, 1], ['crate', 'elec', 52, 250, 1], ['drum', 'elec', 300, 236, 1],
-    ['crate', 'market', 470, 320, -1], ['crate', 'market', 520, 280, -1], ['crate', 'market', 430, 330, -1],
-    ['lab', 'mclass', 480, 170, -1], ['console', 'arcade', 560, 230, -1], ['lab', 'mobs', 420, 200, -1], ['crate', 'cafe', 40, 280, 1],
+    ['console', 'control', 50, 280, 1], ['console', 'control', 470, 280, -1], ['console', 'control', 380, 200, 1],
+    ['crate', 'elec', 60, 160, 1], ['crate', 'elec', 98, 200, 1], ['crate', 'elec', 40, 205, 1], ['drum', 'elec', 230, 190, 1],
+    ['crate', 'market', 400, 250, -1], ['crate', 'market', 440, 215, -1], ['crate', 'market', 360, 258, -1],
+    ['lab', 'mclass', 390, 120, -1], ['console', 'arcade', 440, 180, -1], ['lab', 'mobs', 340, 150, -1], ['crate', 'cafe', 26, 225, 1],
   ].map(([k, id, x, y, f]) => Object.assign(lgIn(id, x, y), { k, f, ...({ console: { w: 60, d: 30, h: 26 }, crate: { w: 38, d: 32, h: 34 }, drum: { w: 34, d: 24, h: 40 }, lab: { w: 96, d: 40, h: 24 } })[k] }));
   // the game machines (k 'g:<game>'), the Studio desk and the other things you can click: box + where you walk to
   const LG_GAMES = {
@@ -33175,10 +33189,10 @@
     { k: 'telescope', x: 9520, y: 190, w: 240, h: 210, go: [9590, 440] },
     { k: 'trophy', x: 1280, y: 196, w: 172, h: 200, go: [1366, 420] },
     { k: 'lights', x: 11370, y: 110, w: 260, h: 230, go: [11500, 430] },
-  ].map(t => { const a = lgO2N(t.x, t.y), b = lgO2N(t.go[0], t.go[1]); return Object.assign(t, { x: a.x, y: a.y, w: t.w * .5, h: t.h * .5, go: [b.x, Math.max(b.y, a.y + t.h * .5 + 14)] }); })
+  ].map(t => { const a = lgO2N(t.x, t.y), b = lgO2N(t.go[0], t.go[1]); return Object.assign(t, { x: a.x, y: a.y, w: t.w * LG_K, h: t.h * LG_K, go: [b.x, Math.max(b.y, a.y + t.h * LG_K + 14)] }); })
     .concat([{ k: 'cauldron', x: LG_CAUL.x - 32, y: LG_CAUL.y - 60, w: 64, h: 64, go: [LG_CAUL.x, LG_CAUL.y + 34] }]);
   const LG_STUDIO = LG_THINGS[0].go.slice();
-  const LG_SPAWN = [lgRoomById('control').x + 320, lgRoomById('control').y + 280];
+  const LG_SPAWN = [lgRoomById('control').x + 270, lgRoomById('control').y + 220];
   // ----- the floor: an 8-unit mask (what's floor, which room) and a 16-unit walking grid -----
   const LG_MX = LG_WW / LG_M, LG_MY = LG_WH / LG_M, LG_GX = LG_WW / LG_C, LG_GY = LG_WH / LG_C;
   function lgTrace(x, sc){ x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = LG_HW * sc; for(const h of LG_HALLS){ x.beginPath(); h.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.stroke(); } for(const r of LG_ROOMS){ x.beginPath(); r.P.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.closePath(); x.fill(); } }
@@ -33339,7 +33353,7 @@
         <div class="lg-hud"><span class="lg-who"></span><span class="lg-song"></span><button type="button" class="lg-mute" title="Music volume">🔊</button></div></div>
       <div class="lg-bar">
         <div class="lg-emos">${LG_EMOTES.map(e => `<button type="button" data-emo="${e}" title="Show ${e}">${e}</button>`).join('')}</div>
-        <button type="button" class="lg-b lg-u" data-act="atk" title="Attack (F)">⚔️ Attack</button>
+        <button type="button" class="lg-b lg-u" data-act="atk" title="Attack mode: when it's on, click someone to attack them (F attacks straight ahead)">⚔️ Attack</button>
         <button type="button" class="lg-b lg-u" data-act="dance" title="Dance">💃 Dance</button>
         <form class="lg-say"><input maxlength="60" placeholder="Say something…" aria-label="Say something"><button type="submit" class="lg-b">💬</button></form>
         <button type="button" class="lg-b lg-u" data-act="look" title="Pick your character">🧑‍🎓 Character</button>
@@ -33359,7 +33373,7 @@
       if(!d) return; e.preventDefault(); const p = lgPos(LG.me, trdNow()); lgWalk(p.x + d[0], p.y + d[1], null);
     });
     w.querySelectorAll('[data-emo]').forEach(b => b.addEventListener('click', () => lgEmote(b.dataset.emo)));
-    w.querySelector('[data-act="atk"]').addEventListener('click', () => lgAttack());
+    w.querySelector('[data-act="atk"]').addEventListener('click', (e) => { if(!lgIsUser()){ lgNeedLogin(); return; } LG.atkMode = !LG.atkMode; e.currentTarget.classList.toggle('on', LG.atkMode); e.currentTarget.textContent = LG.atkMode ? '⚔️ Attack: ON' : '⚔️ Attack'; toast(LG.atkMode ? '⚔️ Attack mode on — click someone to attack them.' : 'Attack mode off.', 1800); LG.cv.style.cursor = LG.atkMode ? 'crosshair' : ''; });
     w.querySelector('[data-act="dance"]').addEventListener('click', () => lgAct(LG.me.a === 'dance' ? '' : 'dance'));
     w.querySelector('[data-act="look"]').addEventListener('click', () => lgPanel(LG.panel === 'look' ? '' : 'look'));
     w.querySelector('[data-act="soda"]').addEventListener('click', () => lgPanel(LG.panel === 'mysoda' ? '' : 'mysoda'));
@@ -33506,7 +33520,7 @@
   function lgPt(e){ const v = lgView(); return { x: v.x0 + (e.clientX - v.r.left) / v.sc, y: v.y0 + (e.clientY - v.r.top) / v.sc }; }
   function lgCatPos(now){
     const L = lgRoomById('lobby'), seg = Math.floor(now / 7000), k = (now % 7000) / 3500;
-    const wp = (s) => { const h = lgHash('mochi' + s); return { x: L.x + 200 + (h % 320), y: L.y + 40 + ((h >>> 10) % 200) }; };
+    const wp = (s) => { const h = lgHash('mochi' + s); return { x: L.x + 110 + (h % 300), y: L.y + 40 + ((h >>> 10) % 170) }; };
     const a = wp(seg), b = wp(seg + 1), p = Math.min(1, k), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
     return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, moving: p < 1, face: b.x < a.x ? -1 : 1 };
   }
@@ -33521,7 +33535,7 @@
     const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
-    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ lgPersonPop(o); return; } }
+    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
     const cat = lgCatPos(now);
     if(lgSeenAt(cat.x, cat.y) && Math.abs(p.x - cat.x) < 24 && p.y > cat.y - 30 && p.y < cat.y + 6){ lgWalk(cat.x + (LG.me.x < cat.x ? -34 : 34), cat.y, 'pet'); return; }
     for(const s of LG_SEATS){
@@ -33534,6 +33548,19 @@
     }
     for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.go[1])){ lgWalk(t.go[0] + (Math.random() - .5) * 16, t.go[1], t.k); return; }
     lgWalk(p.x, p.y, null);
+  }
+  // attack mode: wizards and shooters fire at you from where they stand (walking closer if you're far); fighters walk up to you first
+  function lgAttackAt(o){
+    const now = trdNow(), me = lgPos(LG.me, now), q = lgShown(o, now), ranged = !!LG_RANGED[lgChar(LG.me.c).k], d = Math.hypot(q.x - me.x, q.y - me.y);
+    LG.atkWho = o.u;
+    if(ranged){ if(d <= 360){ lgAttackAim(o); return; } const k = 300 / d; lgWalk(q.x + (me.x - q.x) * k, q.y + (me.y - q.y) * k, 'atk'); return; }
+    if(d < 56 && Math.abs(q.y - me.y) < 24){ lgAttackAim(o); return; }
+    const side = me.x < q.x ? -1 : 1; let tx = q.x + side * 36; if(!lgOk(lgTile(tx, q.y), lgRich())) tx = q.x - side * 36;
+    lgWalk(tx, q.y, 'atk');
+  }
+  function lgAttackAim(o){
+    const now = trdNow(), me = lgPos(LG.me, now), q = lgShown(o, now), ranged = !!LG_RANGED[lgChar(LG.me.c).k];
+    if(ranged) lgAttack(Math.atan2(q.y - me.y, q.x - me.x)); else { LG.lastFace = q.x < me.x ? -1 : 1; lgAttack(q.x < me.x ? Math.PI : 0); }
   }
   function lgVipNo(){
     const b = lgIsUser() && SC.loaded ? scBal() : 0;
@@ -33553,7 +33580,7 @@
     lgHud();
   }
   // the people who work here: the dealer, the shopkeeper and the broker (side-view spots → the map)
-  const LG_NPCS = [{ i: 2, x: 4360, y: 372, S: 2.0, name: 'Dealer', near: 'bj' }, { i: 0, x: 5670, y: 404, S: 2.3, name: 'Shopkeeper', near: 'shop' }, { i: 1, x: 5470, y: 470, S: 2.0, name: 'Broker', near: 'trade' }].map(n => { const q = lgO2N(n.x, n.y); return Object.assign(n, { X: q.x, Y: q.y }); });
+  const LG_NPCS = [{ i: 2, x: 4360, y: 372, S: 2.0, name: 'Dealer', near: 'bj' }, { i: 0, x: 5670, y: 404, S: 2.3, name: 'Shopkeeper', near: 'shop' }, { i: 1, x: 5470, y: 470, S: 2.0, name: 'Broker', near: 'trade' }].map(n => { const q = lgO2N(n.x, n.y); return Object.assign(n, { X: q.x, Y: q.y + ({ Dealer: 10, Shopkeeper: 12, Broker: 30 })[n.name] }); });
   function lgLoop(){
     cancelAnimationFrame(LG.raf); if(!LG.on || LG.paused) return;
     LG.raf = requestAnimationFrame(lgLoop);
@@ -33561,7 +33588,7 @@
     const r = cv.getBoundingClientRect(); if(r.width < 10 || r.height < 10) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
-    const g = cv.getContext('2d'), now = trdNow(), sc = H / LG_VIEW; LG.vw = W / sc;
+    const g = cv.getContext('2d'), now = trdNow(), sc = r.height / LG_VIEW; LG.vw = r.width / sc;
     const m = LG.me, mp = lgPos(m, now);
     if(!mp.moving && LG.pend) lgArrived();
     if(mp.face) LG.lastFace = mp.face;
@@ -33658,6 +33685,7 @@
     if(!lgIsUser() && (k === 'vend' || k === 'juke')){ lgNeedLogin(); return; }
     if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); } LG.lastFace = dir; } return; }
     if(k === 'lights'){ lgLights(); return; }
+    if(k === 'atk'){ const o = (LG.rpsAll || new Map()).get(LG.atkWho); if(o) lgAttackAim(Object.assign({ u: LG.atkWho }, o)); return; }
     if(k === 'sit') lgAct('sit');
     else if(k === 'vend') lgPanel('vend');
     else if(k === 'juke') lgPanel('juke');
@@ -33730,7 +33758,7 @@
       <button type="button" class="lg-pp-x" aria-label="Close">✕</button>`;
     el.querySelector('b').textContent = nm; el.querySelector('b').style.color = chatColor(nm);
     st.appendChild(el);
-    const x = cv.offsetLeft + (q.x - v.x0) * v.sc, y = cv.offsetTop + (q.y - 150) * v.sc;
+    const x = cv.offsetLeft + (q.x - v.x0) * v.sc, y = cv.offsetTop + (q.y - 70 - v.y0) * v.sc;
     el.style.left = Math.max(8, Math.min(st.clientWidth - el.offsetWidth - 8, x - el.offsetWidth / 2)) + 'px';
     el.style.top = Math.max(8, y - el.offsetHeight - 6) + 'px';
     el.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -33954,13 +33982,15 @@
   const LG_RANGED = { 'Fire vizard': 'fire', 'Lightning Mage': 'bolt', 'Wanderer Magican': 'arcane', 'Gangsters_1': 'bullet', 'Gangsters_3': 'bullet', 'Girl_1': 'book', 'Countess_Vampire': 'blood' };
   const LG_SHOT = { fire: { c: '#ff8a3a', c2: '#ffe066', r: 13, v: 820 }, bolt: { c: '#57e1ff', c2: '#ffffff', r: 11, v: 1100 }, arcane: { c: '#b48cff', c2: '#ffd1f4', r: 10, v: 950 }, bullet: { c: '#ffd166', c2: '#ffffff', r: 4, v: 1700 }, book: { c: '#8a5a3a', c2: '#f5ecd8', r: 9, v: 700 }, blood: { c: '#ff2a4a', c2: '#ffb0c0', r: 12, v: 760 } };
   const lgAtkLen = (spr) => { const r = spr.rows.atk; return r ? r[1] * 1000 / 12 : 450; };
-  function lgAttack(){
+  function lgAttack(aa){
     if(!lgIsUser()){ lgNeedLogin(); return; }
     const now = trdNow(); if(now - (LG.me.at || 0) < 650) return;
-    const p = lgPos(LG.me, now), face = p.face || LG.lastFace || 1;
+    const p = lgPos(LG.me, now), face = typeof aa === 'number' ? (Math.cos(aa) < 0 ? -1 : 1) : (p.face || LG.lastFace || 1);
     if(LG.me.a === 'sit' || LG.me.a === 'play') LG.me.a = '';
-    Object.assign(LG.me, { at: now, af: face, ak: 0 });
-    lgWrite({ at: { '.sv': 'timestamp' }, af: face, ak: 0, a: LG.me.a || null });
+    aa = typeof aa === 'number' ? Math.round(aa * 100) / 100 : null;
+    Object.assign(LG.me, { at: now, af: face, ak: 0, aa }); LG.lastFace = face;
+    const w = { at: { '.sv': 'timestamp' }, af: face, ak: 0, a: LG.me.a || null, aa };
+    lgWrite(w).then(ok => { if(!ok && aa != null){ delete w.aa; LG.me.aa = null; LG.warned = false; lgWrite(w); } });
     lgSfx(LG_RANGED[lgChar(LG.me.c).k] ? 'zap' : 'swoosh');
   }
   // the flying part of a ranged attack: where it is now (or null when it's gone)
@@ -33968,7 +33998,8 @@
     const spr = lgChar(d.c), kind = LG_RANGED[spr.k]; if(!kind || !d.at) return null;
     const rel = d.at + lgAtkLen(spr) * 0.45, t = (now - rel) / 1000; if(t < 0 || t > 0.9) return null;
     const S = LG_SHOT[kind], o = lgPos(d, d.at), dist = t * S.v * .55; if(dist > 420) return null;
-    return { kind, x: o.x + (d.af || 1) * (22 + dist), y: o.y - 36, gy: o.y, S, t };
+    const aim = typeof d.aa === 'number', ux = aim ? Math.cos(d.aa) : (d.af || 1), uy = aim ? Math.sin(d.aa) : 0, gy = o.y + uy * (22 + dist);
+    return { kind, x: o.x + ux * (22 + dist), y: gy - 36, gy, ux, uy, S, t };
   }
   // who got hit (worked out the same way on every screen): melee in front, or a shot passing by
   function lgHits(all, now){
@@ -33978,7 +34009,7 @@
       const spr = lgChar(d.c), kind = LG_RANGED[spr.k], key = a.u + ':' + d.at;
       if(kind){
         const s = lgShotAt(d, now); if(!s) continue;
-        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.abs(b.p.x - s.x) < 16 && Math.abs(b.p.y - s.gy) < 26 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
+        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.hypot(b.p.x - s.x, b.p.y - s.gy) < 24 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
       } else {
         const rel = d.at + lgAtkLen(spr) * 0.5; if(now < rel || now > rel + 250) continue;
         const o = lgPos(d, d.at), f = d.af || 1;
@@ -33994,10 +34025,10 @@
       g.save(); g.translate(s.x, s.y); g.scale(.55, .55); g.translate(-s.x, -s.y); try {
       const fade = s.t > .75 ? (0.9 - s.t) / .15 : 1, f = a.d.af || 1;
       if(s.kind === 'book'){ g.globalCompositeOperation = 'source-over'; g.globalAlpha = fade; g.save(); g.translate(s.x, s.y); g.rotate(now / 60); g.fillStyle = '#8a5a3a'; g.fillRect(-11, -8, 22, 16); g.fillStyle = '#f5ecd8'; g.fillRect(-9, -6, 18, 12); g.restore(); g.globalCompositeOperation = 'lighter'; continue; }
-      if(s.kind === 'bullet'){ g.globalAlpha = fade; g.strokeStyle = s.S.c; g.lineWidth = 3; g.beginPath(); g.moveTo(s.x - f * 26, s.y + 8); g.lineTo(s.x, s.y + 8); g.stroke(); continue; }
-      for(let i = 4; i >= 0; i--){ g.globalAlpha = fade * (i ? .22 : .55); g.fillStyle = s.S.c; g.beginPath(); g.arc(s.x - f * i * 12, s.y, s.S.r * (i ? 1.6 - i * .2 : 2.2), 0, 7); g.fill(); }
+      if(s.kind === 'bullet'){ g.globalAlpha = fade; g.strokeStyle = s.S.c; g.lineWidth = 3; g.beginPath(); g.moveTo(s.x - s.ux * 26, s.y + 8 - s.uy * 26); g.lineTo(s.x, s.y + 8); g.stroke(); continue; }
+      for(let i = 4; i >= 0; i--){ g.globalAlpha = fade * (i ? .22 : .55); g.fillStyle = s.S.c; g.beginPath(); g.arc(s.x - s.ux * i * 12, s.y - s.uy * i * 12, s.S.r * (i ? 1.6 - i * .2 : 2.2), 0, 7); g.fill(); }
       g.globalAlpha = fade; g.fillStyle = s.S.c2; g.beginPath(); g.arc(s.x, s.y, s.S.r * .5, 0, 7); g.fill();
-      if(s.kind === 'bolt'){ g.strokeStyle = s.S.c; g.lineWidth = 2; g.beginPath(); for(let i = 0; i < 5; i++) g.lineTo(s.x - f * i * 9, s.y + (i % 2 ? 7 : -7)); g.stroke(); }
+      if(s.kind === 'bolt'){ g.strokeStyle = s.S.c; g.lineWidth = 2; g.beginPath(); for(let i = 0; i < 5; i++) g.lineTo(s.x - s.ux * i * 9, s.y - s.uy * i * 9 + (i % 2 ? 7 : -7)); g.stroke(); }
       } finally { g.restore(); }
     }
     g.restore();
@@ -34034,7 +34065,7 @@
     g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(X, Y, 1000, 6);
   }
   // ===== pixel-art look (build 209): rooms and props are drawn on a 2-unit pixel grid (like the sprites), with dark outlines and a few colour steps
-  const LG_P = 2, LG_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], lgFT = CanvasRenderingContext2D.prototype.fillText;
+  const LG_P = 3, LG_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], lgFT = CanvasRenderingContext2D.prototype.fillText;
   function lgPxPost(c, outline){
     const x = c.getContext('2d'), w = c.width, h = c.height; if(!w || !h) return;
     const im = x.getImageData(0, 0, w, h), d = im.data, Q = 12;
@@ -34064,7 +34095,7 @@
       const T = [];
       x.fillText = function(t, a, b){ if(/[A-Za-z0-9]/.test(t)){ const m = this.getTransform(); T.push({ t, x: (m.a * a + m.c * b + m.e - 2) * P, y: (m.b * a + m.d * b + m.f - 2) * P, f: lgFontK(this.font, Math.hypot(m.a, m.b) * P), c: this.fillStyle, al: this.textAlign, ga: this.globalAlpha, sc: this.shadowColor, sb: this.shadowBlur * Math.hypot(m.a, m.b) * P }); } else lgFT.call(this, t, a, b); };
       x.save(); try { fn(x); } catch(err){ console.warn('lgPx', key, err); } x.restore(); x.setTransform(1, 0, 0, 1, 0, 0);
-      lgPxPost(c, o.outline !== false);
+      if(o.post !== false) lgPxPost(c, o.outline !== false);
       if(!e && M.size > 300) M.delete(M.keys().next().value);
       e = { c, v, T }; M.set(key, e);
     }
@@ -34176,8 +34207,8 @@
     // ---- the room's own things
     const I = r.id;
     if(I === 'control'){
-      lgBev(c, X + 34, 54, 232, 242, '#1e3a5c'); lgStreet(c, 'st_neon', X + 40, 60, 220, 230, .55); lgR(c, X + 148, 60, 4, 230, '#1e3a5c'); lgR(c, X + 40, 172, 220, 4, '#1e3a5c'); c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.strokeRect(X + 33, 53, 234, 244);
-      lgBev(c, X + 26, 296, 248, 10, '#2a4670');
+      c.save(); c.translate(0, 16); lgBev(c, X + 34, 54, 232, 242, '#1e3a5c'); lgStreet(c, 'st_neon', X + 40, 60, 220, 230, .55); lgR(c, X + 148, 60, 4, 230, '#1e3a5c'); lgR(c, X + 40, 172, 220, 4, '#1e3a5c'); c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.strokeRect(X + 33, 53, 234, 244); c.restore();
+      c.save(); c.translate(0, 16); lgBev(c, X + 26, 296, 248, 10, '#2a4670'); c.restore();
       lgPool(c, X + 500, 360, 300, 60, '87,225,255', .18);
       c.font = "800 22px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#9ff3ff'; c.fillText('🎬 SAIDECK STUDIO', X + 500, 108);
       lgBev(c, X + 290, 120, 420, 206, '#0f1830'); c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.strokeRect(X + 296, 126, 408, 194);
@@ -34186,8 +34217,8 @@
       lgBev(c, X + 262, 330, 476, 16, '#2a3550'); lgBev(c, X + 290, 346, 18, B - 346, '#1a2340'); lgBev(c, X + 692, 346, 18, B - 346, '#1a2340');
       lgBev(c, X + 430, 322, 140, 8, '#3a4870'); for(let k = 0; k < 16; k++) lgR(c, X + 436 + k * 8, 324, 5, 3, '#9ff3ff');
       c.font = "600 13px 'Inter',sans-serif"; c.fillStyle = 'rgba(159,243,255,.85)'; c.fillText('▼ click the desk to open your projects ▼', X + 500, 374);
-      c.font = "800 16px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.fillText('🏆 HALL OF FAME', X + 865, 72);
-      lgBev(c, X + 766, 82, 198, 228, '#0f1830', '#ffd166');
+      c.save(); c.translate(0, 16); c.font = "800 16px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.fillText('🏆 HALL OF FAME', X + 865, 72); c.restore();
+      c.save(); c.translate(0, 10); lgBev(c, X + 766, 82, 198, 228, '#0f1830', '#ffd166'); c.restore();
       lgBev(c, X + 902, 314, 88, 22, '#0d3b2a'); c.font = "800 12px 'Inter',sans-serif"; c.fillStyle = '#7dffb0'; c.fillText('SCHOOL →', X + 946, 330);
       if(!mode){ lgEll(c, X + 165, 478, 124, 24, '#2a1d4a'); lgEll(c, X + 165, 478, 116, 20, '#3d2a6a'); lgEll(c, X + 165, 478, 90, 14, '#4a3480'); }
       lgFootSh(c, X + 300, 20); lgFootSh(c, X + 700, 20); lgPlant(c, X + 740, B, 1.1);
@@ -34209,30 +34240,30 @@
       lgFootSh(c, X + 718, 380); lgBev(c, X + 526, 164, 384, 8, '#2a4f86');
       for(let i = 0; i < 8; i++){ const lx = X + 530 + i * 47; lgBev(c, lx, 174, 43, B - 182, i % 2 ? '#3d6fb3' : '#4a7fc4'); for(let s = 0; s < 3; s++) lgR(c, lx + 10, 184 + s * 6, 23, 2, '#24467a'); lgR(c, lx + 12, 206, 18, 10, '#c9d6e8'); c.font = "700 8px 'Inter',sans-serif"; c.fillStyle = '#24467a'; c.fillText(String(101 + i), lx + 21, 214); lgBev(c, lx + 32, 268, 4, 18, '#c9d6e8', false); for(let s = 0; s < 3; s++) lgR(c, lx + 10, 340 + s * 6, 23, 2, '#24467a'); }
       lgR(c, X + 526, B - 8, 384, 8, '#24467a');
-      lgBev(c, X + 530, 66, 376, 72, '#e8c35a'); lgR(c, X + 538, 74, 360, 56, '#9e1b32'); lgR(c, X + 538, 74, 360, 2, '#c03050');
-      c.font = "800 28px 'Inter',sans-serif"; c.fillStyle = '#ffe27a'; c.fillText('SAIDECK ACADEMY', X + 718, 114);
-      c.strokeStyle = '#6b4a2e'; c.lineWidth = 2; c.beginPath(); c.moveTo(X + 228, 46); c.quadraticCurveTo(X + 370, 70, X + 510, 46); c.stroke();
-      for(let i = 0; i < 10; i++){ const t = (i + .5) / 10, px = X + 228 + t * 282, py = 46 + 4 * t * (1 - t) * 12; c.fillStyle = ['#c0263b', '#e8c35a', '#3d6fb3', '#3fae6a'][i % 4]; c.beginPath(); c.moveTo(px - 9, py); c.lineTo(px + 9, py); c.lineTo(px, py + 18); c.fill(); }
-      lgEll(c, X + 950, 96, 30, 30, '#2a2a2a'); lgEll(c, X + 950, 96, 25, 25, '#fff'); for(let k = 0; k < 12; k++){ const a = k / 12 * 6.283; lgR(c, X + 949 + Math.cos(a) * 20, 95 + Math.sin(a) * 20, 3, 3, '#555'); } lgR(c, X + 949, 78, 3, 19, '#222'); lgR(c, X + 949, 95, 14, 3, '#222'); lgR(c, X + 948, 94, 5, 5, '#c0263b');
+      c.save(); c.translate(0, 12); lgBev(c, X + 530, 66, 376, 72, '#e8c35a'); lgR(c, X + 538, 74, 360, 56, '#9e1b32'); lgR(c, X + 538, 74, 360, 2, '#c03050'); c.restore();
+      c.save(); c.translate(0, 12); c.font = "800 28px 'Inter',sans-serif"; c.fillStyle = '#ffe27a'; c.fillText('SAIDECK ACADEMY', X + 718, 114); c.restore();
+      c.save(); c.translate(0, 36); c.strokeStyle = '#6b4a2e'; c.lineWidth = 2; c.beginPath(); c.moveTo(X + 228, 46); c.quadraticCurveTo(X + 370, 70, X + 510, 46); c.stroke(); c.restore();
+      c.save(); c.translate(0, 36); for(let i = 0; i < 10; i++){ const t = (i + .5) / 10, px = X + 228 + t * 282, py = 46 + 4 * t * (1 - t) * 12; c.fillStyle = ['#c0263b', '#e8c35a', '#3d6fb3', '#3fae6a'][i % 4]; c.beginPath(); c.moveTo(px - 9, py); c.lineTo(px + 9, py); c.lineTo(px, py + 18); c.fill(); } c.restore();
+      c.save(); c.translate(0, 14); lgEll(c, X + 950, 96, 30, 30, '#2a2a2a'); lgEll(c, X + 950, 96, 25, 25, '#fff'); for(let k = 0; k < 12; k++){ const a = k / 12 * 6.283; lgR(c, X + 949 + Math.cos(a) * 20, 95 + Math.sin(a) * 20, 3, 3, '#555'); } lgR(c, X + 949, 78, 3, 19, '#222'); lgR(c, X + 949, 95, 14, 3, '#222'); lgR(c, X + 948, 94, 5, 5, '#c0263b'); c.restore();
     } else if(I === 'class'){
-      for(let i = 0; i < 12; i++){ lgBev(c, X + 214 + i * 48, 46, 40, 24, '#fff8e8'); c.font = "800 13px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = i % 2 ? '#3d6fb3' : '#c0263b'; c.fillText('ABCDEFGHIJKL'[i] + 'abcdefghijkl'[i], X + 234 + i * 48, 63); }
+      c.save(); c.translate(0, 26); for(let i = 0; i < 12; i++){ lgBev(c, X + 214 + i * 48, 46, 40, 24, '#fff8e8'); c.font = "800 13px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = i % 2 ? '#3d6fb3' : '#c0263b'; c.fillText('ABCDEFGHIJKL'[i] + 'abcdefghijkl'[i], X + 234 + i * 48, 63); } c.restore();
       for(const wx of [X + 40, X + 850]){
         lgBev(c, wx, 90, 110, 170, '#7a5a3a'); lgStreet(c, 'st_bar', wx + 6, 96, 98, 158, wx > X + 500 ? .8 : .15); lgR(c, wx + 53, 96, 4, 158, '#7a5a3a'); lgR(c, wx + 6, 173, 98, 4, '#7a5a3a');
         lgBev(c, wx - 8, 260, 126, 10, '#a0704a'); lgR(c, wx - 18, 78, 146, 4, '#5a3a22');
         for(const cx of [wx - 14, wx + 102]){ lgBev(c, cx, 82, 22, 160, '#c0263b'); for(let k = 0; k < 3; k++) lgR(c, cx + 4 + k * 6, 84, 2, 156, '#8e1a2a'); }
       }
-      lgBev(c, X + 196, 80, 568, 196, '#7a5a3a'); lgR(c, X + 206, 90, 548, 176, '#2f4f3a'); c.fillStyle = 'rgba(255,255,255,.05)'; c.fillRect(X + 230, 220, 160, 30); c.fillRect(X + 600, 110, 120, 24);
-      c.font = "600 24px 'Comic Sans MS','Inter',sans-serif"; c.fillStyle = 'rgba(255,255,255,.88)'; c.textAlign = 'left'; c.fillText('Today: Vibes 101 ✨', X + 236, 138); c.font = "20px 'Comic Sans MS','Inter',sans-serif"; c.fillText('1. be nice   2. no ragebait (jk)', X + 236, 178); c.fillText('homework: hit 777 on slots', X + 236, 213); c.fillStyle = 'rgba(255,255,255,.6)'; c.fillText('E = mc² + vibes', X + 540, 250);
-      lgBev(c, X + 196, 276, 568, 8, '#a0704a'); lgR(c, X + 260, 272, 16, 4, '#fff'); lgR(c, X + 300, 272, 16, 4, '#ff8fb1'); lgR(c, X + 680, 270, 26, 6, '#e8e0d0');
+      c.save(); c.translate(0, 20); lgBev(c, X + 196, 80, 568, 196, '#7a5a3a'); lgR(c, X + 206, 90, 548, 176, '#2f4f3a'); c.fillStyle = 'rgba(255,255,255,.05)'; c.fillRect(X + 230, 220, 160, 30); c.fillRect(X + 600, 110, 120, 24); c.restore();
+      c.save(); c.translate(0, 20); c.font = "600 24px 'Comic Sans MS','Inter',sans-serif"; c.fillStyle = 'rgba(255,255,255,.88)'; c.textAlign = 'left'; c.fillText('Today: Vibes 101 ✨', X + 236, 138); c.font = "20px 'Comic Sans MS','Inter',sans-serif"; c.fillText('1. be nice   2. no ragebait (jk)', X + 236, 178); c.fillText('homework: hit 777 on slots', X + 236, 213); c.fillStyle = 'rgba(255,255,255,.6)'; c.fillText('E = mc² + vibes', X + 540, 250); c.restore();
+      c.save(); c.translate(0, 20); lgBev(c, X + 196, 276, 568, 8, '#a0704a'); lgR(c, X + 260, 272, 16, 4, '#fff'); lgR(c, X + 300, 272, 16, 4, '#ff8fb1'); lgR(c, X + 680, 270, 26, 6, '#e8e0d0'); c.restore();
       lgFootSh(c, X + 885, 170); lgBev(c, X + 800, 300, 170, 12, '#a0704a'); lgBev(c, X + 810, 312, 150, B - 312, '#8a5a3a'); lgR(c, X + 820, 324, 60, 26, '#7a4a2e'); lgR(c, X + 846, 334, 10, 4, '#e8c35a'); lgR(c, X + 886, 312, 2, B - 312, '#6b3e24');
       lgR(c, X + 832, 286, 14, 14, '#d02a2a'); lgR(c, X + 834, 288, 4, 4, '#ff7a7a'); lgR(c, X + 838, 280, 2, 6, '#5a3a22'); lgR(c, X + 840, 280, 6, 3, '#3fae6a');
       lgBev(c, X + 878, 292, 34, 6, '#3d6fb3'); lgBev(c, X + 880, 286, 30, 6, '#e8c35a'); lgBev(c, X + 876, 280, 34, 6, '#3fae6a');
       lgR(c, X + 939, 290, 6, 10, '#5a3a22'); lgR(c, X + 930, 298, 24, 2, '#5a3a22'); lgEll(c, X + 942, 276, 14, 14, '#160c1c'); lgEll(c, X + 942, 276, 12, 12, '#3d6fb3'); lgR(c, X + 934, 270, 8, 6, '#3fae6a'); lgR(c, X + 944, 278, 6, 6, '#3fae6a');
     } else if(I === 'cafe'){
       for(let y = 38; y < 284; y += 28) for(let x = X; x < X + 1000; x += 28){ lgR(c, x, y, 28, 28, ((x - X + y) / 28) % 2 ? '#f6f1e6' : '#ece4d2'); lgR(c, x, y, 28, 2, '#d8d0bc'); lgR(c, x, y, 2, 28, '#d8d0bc'); }
-      lgBev(c, X + 356, 52, 388, 128, '#5a3a22'); lgR(c, X + 364, 60, 372, 112, '#1e1612');
-      c.font = "800 24px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.textAlign = 'center'; c.fillText('🍔 TODAY\'S MENU 🍕', X + 550, 96); c.font = "600 17px 'Inter',sans-serif"; c.fillStyle = '#fff'; c.fillText('Pizza Friday · Ramen · Mystery Meat (?)', X + 550, 130); c.fillText('Soda from the machine →  50 pts', X + 550, 158);
-      lgBev(c, X + 800, 56, 180, 176, '#b8b8c8'); lgStreet(c, 'st_cafe', X + 806, 62, 168, 164, .75); lgR(c, X + 888, 62, 4, 164, '#b8b8c8'); lgBev(c, X + 792, 232, 196, 8, '#d8d8e6');
+      c.save(); c.translate(0, 16); lgBev(c, X + 356, 52, 388, 128, '#5a3a22'); lgR(c, X + 364, 60, 372, 112, '#1e1612'); c.restore();
+      c.save(); c.translate(0, 16); c.font = "800 24px 'Inter',sans-serif"; c.fillStyle = '#ffd166'; c.textAlign = 'center'; c.fillText('🍔 TODAY\'S MENU 🍕', X + 550, 96); c.font = "600 17px 'Inter',sans-serif"; c.fillStyle = '#fff'; c.fillText('Pizza Friday · Ramen · Mystery Meat (?)', X + 550, 130); c.fillText('Soda from the machine →  50 pts', X + 550, 158); c.restore();
+      c.save(); c.translate(0, 14); lgBev(c, X + 800, 56, 180, 176, '#b8b8c8'); lgStreet(c, 'st_cafe', X + 806, 62, 168, 164, .75); lgR(c, X + 888, 62, 4, 164, '#b8b8c8'); lgBev(c, X + 792, 232, 196, 8, '#d8d8e6'); c.restore();
       for(const px of [X + 430, X + 670]){ lgR(c, px - 1, 38, 2, 150, '#333'); lgPool(c, px, 200, 120, 80, '255,230,170', .35); c.fillStyle = '#160c1c'; c.beginPath(); c.moveTo(px - 24, 196); c.lineTo(px + 24, 196); c.lineTo(px + 14, 180); c.lineTo(px - 14, 180); c.fill(); c.fillStyle = '#e85a3a'; c.beginPath(); c.moveTo(px - 20, 194); c.lineTo(px + 20, 194); c.lineTo(px + 12, 182); c.lineTo(px - 12, 182); c.fill(); lgR(c, px - 4, 194, 8, 4, '#fff6c8'); }
       lgFootSh(c, X + 540, 444); lgR(c, X + 332, 200, 416, 2, '#d8d8e6'); c.fillStyle = 'rgba(200,235,255,.35)'; c.fillRect(X + 334, 202, 412, 30); lgR(c, X + 332, 200, 4, 34, '#a8a8b8'); lgR(c, X + 744, 200, 4, 34, '#a8a8b8');
       c.font = '22px sans-serif'; ['🍕', '🍜', '🍔', '🍙', '🧁'].forEach((f, i) => c.fillText(f, X + 380 + i * 80, 228));
@@ -34248,28 +34279,28 @@
         c.fillStyle = `rgba(${rgb},.10)`; c.beginPath(); c.moveTo(X + cx - 12, 34); c.lineTo(X + cx + 12, 34); c.lineTo(X + cx + w / 2 - 8, B); c.lineTo(X + cx - w / 2 + 8, B); c.fill(); lgPool(c, X + cx, B + 10, w * .6, 22, rgb, .35);
         lgBev(c, X + cx - 10, 34, 20, 8, '#3a2a50');
       }
-      lgBev(c, X + 316, 30, 368, 70, '#2a0f3a'); for(let i = 0; i < 22; i++){ lgR(c, X + 322 + i * 16, 34, 6, 6, i % 2 ? '#ffe066' : '#ff5fd2'); lgR(c, X + 322 + i * 16, 90, 6, 6, i % 2 ? '#ff5fd2' : '#ffe066'); }
-      c.save(); c.font = "800 34px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ff5fd2'; c.shadowBlur = 16; c.fillStyle = '#ffd1f4'; c.fillText('GAME HALL', X + 500, 78); c.restore();
-      lgBev(c, X + 270, 112, 180, 32, '#1a0f2a'); c.save(); c.font = "800 16px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ffd166'; c.shadowBlur = 8; c.fillStyle = '#ffe9a8'; c.fillText('♠ BLACKJACK ♥', X + 360, 134); c.restore();
+      c.save(); c.translate(0, 40); lgBev(c, X + 316, 30, 368, 70, '#2a0f3a'); for(let i = 0; i < 22; i++){ lgR(c, X + 322 + i * 16, 34, 6, 6, i % 2 ? '#ffe066' : '#ff5fd2'); lgR(c, X + 322 + i * 16, 90, 6, 6, i % 2 ? '#ff5fd2' : '#ffe066'); } c.restore();
+      c.save(); c.translate(0, 40); c.save(); c.font = "800 34px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ff5fd2'; c.shadowBlur = 16; c.fillStyle = '#ffd1f4'; c.fillText('GAME HALL', X + 500, 78); c.restore(); c.restore();
+      c.save(); c.translate(0, 44); lgBev(c, X + 270, 112, 180, 32, '#1a0f2a'); c.save(); c.font = "800 16px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ffd166'; c.shadowBlur = 8; c.fillStyle = '#ffe9a8'; c.fillText('♠ BLACKJACK ♥', X + 360, 134); c.restore(); c.restore();
       for(const cx of [120, 625, 845]) lgFootSh(c, X + cx, 130);
     } else if(I === 'market'){
       c.save(); c.font = "800 22px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#57e1ff'; c.shadowBlur = 12; c.fillStyle = '#c8f6ff'; c.fillText('TRADING FLOOR', X + 250, 76); c.restore();
       lgBev(c, X + 36, 92, 428, 222, '#1a2340'); lgBev(c, X + 36, 320, 428, 20, '#05070f');
       lgFootSh(c, X + 250, 200); lgBev(c, X + 150, 362, 200, 10, '#5a3a22'); lgBev(c, X + 160, 372, 10, B - 372, '#3a2418'); lgBev(c, X + 330, 372, 10, B - 372, '#3a2418');
       for(const [mx, col] of [[X + 176, '#3fdc8a'], [X + 266, '#ff5f7a']]){ lgBev(c, mx, 340, 58, 20, '#1a2340'); lgR(c, mx + 4, 344, 50, 12, '#05070f'); c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); for(let k = 0; k <= 6; k++) c.lineTo(mx + 6 + k * 7, 352 - (col === '#3fdc8a' ? k : -k) * .8 - (k % 2) * 3); c.stroke(); }
-      ['NEW YORK', 'LONDON', 'SINGAPORE'].forEach((nm, i) => { const cx = X + 560 + i * 90; lgEll(c, cx, 62, 24, 24, '#160c1c'); lgEll(c, cx, 62, 22, 22, '#c9a24a'); lgEll(c, cx, 62, 17, 17, '#fff'); lgR(c, cx - 1, 48 + i * 2, 3, 15, '#222'); lgR(c, cx - 1, 61, 10 - i * 3, 3, '#222'); c.font = "700 10px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#c8f6ff'; c.fillText(nm, cx, 102); });
-      lgBev(c, X + 566, 112, 208, 30, '#3a1f5c'); c.save(); c.font = "800 20px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ff5fd2'; c.shadowBlur = 10; c.fillStyle = '#ffd1f4'; c.fillText('SHOP', X + 670, 135); c.restore();
+      c.save(); c.translate(0, 30); ['NEW YORK', 'LONDON', 'SINGAPORE'].forEach((nm, i) => { const cx = X + 560 + i * 90; lgEll(c, cx, 62, 24, 24, '#160c1c'); lgEll(c, cx, 62, 22, 22, '#c9a24a'); lgEll(c, cx, 62, 17, 17, '#fff'); lgR(c, cx - 1, 48 + i * 2, 3, 15, '#222'); lgR(c, cx - 1, 61, 10 - i * 3, 3, '#222'); c.font = "700 10px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#c8f6ff'; c.fillText(nm, cx, 102); }); c.restore();
+      c.save(); c.translate(0, 16); lgBev(c, X + 566, 112, 208, 30, '#3a1f5c'); c.save(); c.font = "800 20px 'Inter',sans-serif"; c.textAlign = 'center'; c.shadowColor = '#ff5fd2'; c.shadowBlur = 10; c.fillStyle = '#ffd1f4'; c.fillText('SHOP', X + 670, 135); c.restore(); c.restore();
       lgBev(c, X + 550, 194, 240, B - 194, '#4a2e6a'); lgR(c, X + 558, 200, 224, 130, '#2e1a48'); for(const sy of [240, 288]) lgBev(c, X + 556, sy, 228, 6, '#8a5aa8', false);
       c.font = '18px sans-serif'; c.textAlign = 'center'; ['🫧', '💣', '🧨', '🎆', '🍩', '🎁', '🎈', '🍬', '⭐', '💎'].forEach((em, i) => c.fillText(em, X + 580 + (i % 5) * 45, (i < 5 ? 238 : 286)));
-      for(let i = 0; i < 13; i++){ lgR(c, X + 538 + i * 20, 150, 20, 36, i % 2 ? '#ff5fd2' : '#fff0f8'); lgEll(c, X + 548 + i * 20, 186, 10, 8, i % 2 ? '#ff5fd2' : '#fff0f8'); } lgR(c, X + 536, 146, 264, 4, '#160c1c');
+      c.save(); c.translate(0, 10); for(let i = 0; i < 13; i++){ lgR(c, X + 538 + i * 20, 150, 20, 36, i % 2 ? '#ff5fd2' : '#fff0f8'); lgEll(c, X + 548 + i * 20, 186, 10, 8, i % 2 ? '#ff5fd2' : '#fff0f8'); } lgR(c, X + 536, 146, 264, 4, '#160c1c'); c.restore();
       lgBev(c, X + 836, 106, 138, 208, '#8a5a3a'); lgR(c, X + 844, 114, 122, 192, '#c99a6a'); for(let k = 0; k < 40; k++){ const h = lgHash('ck' + k); lgR(c, X + 846 + h % 118, 116 + (h >> 7) % 186, 2, 2, '#a87a4a'); }
       lgR(c, X + 856, 120, 98, 18, '#e8d9b8'); c.font = "800 12px 'Inter',sans-serif"; c.fillStyle = '#5a3a1a'; c.textAlign = 'center'; c.fillText('🎯 QUESTS', X + 905, 134);
       for(let i = 0; i < 4; i++){ lgBev(c, X + 858, 146 + i * 39, 94, 30, ['#ffd166', '#9fd1ff', '#ffb0c8', '#b6f0a0'][i]); lgR(c, X + 902, 144 + i * 39, 6, 6, '#c0263b'); lgR(c, X + 866, 158 + i * 39, 60, 2, 'rgba(0,0,0,.4)'); lgR(c, X + 866, 166 + i * 39, 44, 2, 'rgba(0,0,0,.4)'); }
     } else if(I === 'vhall'){
-      for(const wx of [X + 96, X + 736]){ c.fillStyle = '#160c1c'; c.beginPath(); c.moveTo(wx - 6, 300); c.lineTo(wx - 6, 150); c.arc(wx + 84, 150, 90, Math.PI, 0); c.lineTo(wx + 174, 300); c.fill();
+      c.save(); c.translate(0, 12); for(const wx of [X + 96, X + 736]){ c.fillStyle = '#160c1c'; c.beginPath(); c.moveTo(wx - 6, 300); c.lineTo(wx - 6, 150); c.arc(wx + 84, 150, 90, Math.PI, 0); c.lineTo(wx + 174, 300); c.fill();
         const wg = c.createLinearGradient(0, 70, 0, 296); wg.addColorStop(0, '#2a0610'); wg.addColorStop(1, '#8e1a2e'); c.fillStyle = wg; c.beginPath(); c.moveTo(wx, 296); c.lineTo(wx, 150); c.arc(wx + 84, 150, 84, Math.PI, 0); c.lineTo(wx + 168, 296); c.fill();
-        lgEll(c, wx + 110, 130, 22, 22, '#ffd8c0'); lgEll(c, wx + 118, 124, 20, 20, '#5a0e1c'); lgR(c, wx + 82, 70, 4, 226, '#c9a24a'); lgR(c, wx, 200, 168, 4, '#c9a24a'); lgBev(c, wx - 10, 296, 188, 10, '#c9a24a'); }
-      for(const bx of [X + 330, X + 640]){ lgBev(c, bx, 40, 30, 120, '#7a0f22'); c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(bx, 160); c.lineTo(bx + 30, 160); c.lineTo(bx + 15, 178); c.fill(); lgR(c, bx + 9, 80, 12, 12, '#c9a24a'); }
+        lgEll(c, wx + 110, 130, 22, 22, '#ffd8c0'); lgEll(c, wx + 118, 124, 20, 20, '#5a0e1c'); lgR(c, wx + 82, 70, 4, 226, '#c9a24a'); lgR(c, wx, 200, 168, 4, '#c9a24a'); lgBev(c, wx - 10, 296, 188, 10, '#c9a24a'); } c.restore();
+      c.save(); c.translate(0, 34); for(const bx of [X + 330, X + 640]){ lgBev(c, bx, 40, 30, 120, '#7a0f22'); c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(bx, 160); c.lineTo(bx + 30, 160); c.lineTo(bx + 15, 178); c.fill(); lgR(c, bx + 9, 80, 12, 12, '#c9a24a'); } c.restore();
       for(const cx of LG_CANDS.vhall) lgCandelabra(c, X + cx);
       lgFootSh(c, X + 500, 420); lgBev(c, X + 290, 334, 420, 14, '#7a0f22'); lgR(c, X + 290, 348, 420, 22, '#5a0a1a'); lgR(c, X + 290, 364, 420, 3, '#c9a24a'); for(let x = X + 300; x < X + 700; x += 20) lgR(c, x, 370, 10, 4, '#5a0a1a');
       lgBev(c, X + 306, 374, 12, B - 374, '#3a1a12'); lgBev(c, X + 682, 374, 12, B - 374, '#3a1a12');
@@ -34279,15 +34310,15 @@
       if(!art) for(const [px, py] of [[X + 80, 90], [X + 780, 90]]){ lgBev(c, px, py, 140, 180, '#c9a24a'); lgR(c, px + 10, py + 10, 120, 160, '#3a1020'); }
       for(const cx of LG_CANDS.vball) lgCandelabra(c, X + cx);
       lgFootSh(c, X + 840, 200);
-      lgBev(c, X + 744, 140, 192, 132, '#4a2a14'); c.fillStyle = '#160c1c'; c.beginPath(); c.arc(X + 840, 142, 98, Math.PI, 0); c.fill(); c.fillStyle = '#5a3a1a'; c.beginPath(); c.arc(X + 840, 142, 94, Math.PI, 0); c.fill(); c.fillStyle = '#3a2010'; c.beginPath(); c.arc(X + 840, 142, 74, Math.PI, 0); c.fill();
-      for(let i = 0; i < 11; i++){ const px = X + 752 + i * 16, h = 176 - Math.abs(5 - i) * 13, top = 268 - h; lgBev(c, px, top, 12, h, '#d8b25a'); lgR(c, px + 3, top, 3, h, '#fff0b8'); lgR(c, px + 2, top + h - 34, 8, 6, '#3a2010'); }
+      c.save(); c.translate(0, 26); lgBev(c, X + 744, 140, 192, 132, '#4a2a14'); c.fillStyle = '#160c1c'; c.beginPath(); c.arc(X + 840, 142, 98, Math.PI, 0); c.fill(); c.fillStyle = '#5a3a1a'; c.beginPath(); c.arc(X + 840, 142, 94, Math.PI, 0); c.fill(); c.fillStyle = '#3a2010'; c.beginPath(); c.arc(X + 840, 142, 74, Math.PI, 0); c.fill(); c.restore();
+      c.save(); c.translate(0, 26); for(let i = 0; i < 11; i++){ const px = X + 752 + i * 16, h = 176 - Math.abs(5 - i) * 13, top = 268 - h; lgBev(c, px, top, 12, h, '#d8b25a'); lgR(c, px + 3, top, 3, h, '#fff0b8'); lgR(c, px + 2, top + h - 34, 8, 6, '#3a2010'); } c.restore();
       lgBev(c, X + 748, 268, 184, B - 268, '#5a3a1a'); lgBev(c, X + 800, 274, 80, 24, '#3a2010'); lgR(c, X + 806, 278, 68, 16, '#f0e6d0'); for(let k = 0; k < 3; k++) lgR(c, X + 810, 281 + k * 4, 60, 1, '#555');
       lgBev(c, X + 760, 304, 160, 12, '#f4f0e6'); for(let k = 0; k < 15; k++) if(k % 7 !== 2 && k % 7 !== 6) lgR(c, X + 766 + k * 10, 304, 5, 7, '#111');
       lgBev(c, X + 768, 320, 144, 10, '#f4f0e6'); for(let k = 0; k < 14; k++) if(k % 7 !== 2 && k % 7 !== 6) lgR(c, X + 772 + k * 10, 320, 5, 6, '#111');
       lgR(c, X + 760, 340, 160, 2, '#3a2010'); lgR(c, X + 760, 360, 160, 2, '#3a2010'); lgBev(c, X + 770, B - 10, 140, 8, '#3a2010'); for(let k = 0; k < 9; k++) lgR(c, X + 776 + k * 15, B - 9, 8, 6, '#e8e0d0');
       if(!mode){ c.save(); c.translate(X + 500, 470); c.scale(1, .28); lgEll(c, 0, 0, 308, 308, '#3a0812'); lgEll(c, 0, 0, 300, 300, '#7a0f22'); lgEll(c, 0, 0, 240, 240, '#8e1a2e'); c.restore(); }
     } else if(I === 'mclass'){
-      if(!art) lgShelfBooks(c, X + 40, 70, 160, 4, 60, 'mc');
+      c.save(); c.translate(0, 14); if(!art) lgShelfBooks(c, X + 40, 70, 160, 4, 60, 'mc'); c.restore();
       lgFootSh(c, X + 840, 240); lgBev(c, X + 712, 142, 256, 8, '#5a3a26'); lgBev(c, X + 720, 150, 240, B - 150, '#4a2e1e'); lgR(c, X + 730, 160, 220, 176, '#2e1c12');
       for(const [s, y] of [[0, 212], [1, 266], [2, 330]]){ lgBev(c, X + 726, y, 228, 6, '#6b4a2e', false);
         for(let b = 0; b < 7; b++){ const h = lgHash('pt' + s + b), bh = 20 + h % 16, bx = X + 734 + b * 30, col = ['#ff5fa8', '#5fe08a', '#57e1ff', '#ffd166', '#b48cff', '#ff7a3a'][h % 6], y0 = y - bh;
@@ -34296,16 +34327,16 @@
       lgBev(c, X + 770, 116, 140, 22, '#2a1f5c'); c.font = "800 12px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#d8ccff'; c.fillText('✦ POTIONS ✦', X + 840, 132);
       lgFootSh(c, X + 120, 50); lgBev(c, X + 96, B - 8, 48, 8, '#4a2e1e'); lgBev(c, X + 112, 316, 16, B - 324, '#5a3a26'); c.save(); c.translate(X + 120, 312); c.rotate(-.18); lgBev(c, -34, -8, 68, 14, '#4a2e1e'); lgBev(c, -30, -16, 60, 10, '#f5ecd8'); lgR(c, -1, -16, 2, 10, '#8a5a3a'); c.restore();
     } else if(I === 'mobs'){
-      c.save(); c.beginPath(); c.ellipse(X + 500, 330, 374, 312, 0, Math.PI, 0); c.fillStyle = '#4a3f78'; c.fill(); c.restore();
-      c.save(); c.beginPath(); c.ellipse(X + 500, 330, 360, 298, 0, Math.PI, 0); c.clip();
+      c.save(); c.beginPath(); c.ellipse(X + 500, 330, 374, 256, 0, Math.PI, 0); c.fillStyle = '#4a3f78'; c.fill(); c.restore();
+      c.save(); c.beginPath(); c.ellipse(X + 500, 330, 360, 242, 0, Math.PI, 0); c.clip();
       const sk = c.createLinearGradient(0, 30, 0, 330); sk.addColorStop(0, '#05041a'); sk.addColorStop(1, '#221a5a'); c.fillStyle = sk; c.fillRect(X + 130, 20, 740, 320);
       lgPool(c, X + 620, 160, 170, 70, '160,110,255', .35); lgPool(c, X + 400, 240, 140, 50, '90,140,255', .25);
       for(let i = 0; i < 120; i++){ const h = lgHash('ob' + i); lgR(c, X + 140 + h % 720, 30 + (h >>> 10) % 300, h % 7 ? 2 : 4, h % 7 ? 2 : 4, h % 5 ? '#ffffff' : '#ffe9a8'); }
       lgEll(c, X + 720, 110, 30, 30, '#fff4c8'); lgEll(c, X + 708, 102, 26, 26, '#120e33');
       lgEll(c, X + 300, 160, 30, 30, '#160c1c'); lgEll(c, X + 300, 160, 28, 28, '#e8b04a'); lgR(c, X + 276, 154, 48, 4, '#c98a2a'); lgR(c, X + 280, 166, 40, 3, '#f5d08a');
       c.save(); c.translate(X + 300, 160); c.rotate(-.3); c.strokeStyle = '#f5d08a'; c.lineWidth = 4; c.beginPath(); c.ellipse(0, 0, 54, 14, 0, Math.PI * .05, Math.PI * .95); c.stroke(); c.restore();
-      c.strokeStyle = '#4a3f78'; c.lineWidth = 6; for(let k = 1; k < 6; k++){ const a = Math.PI + k / 6 * Math.PI; c.beginPath(); c.moveTo(X + 500, 330); c.lineTo(X + 500 + Math.cos(a) * 380, 330 + Math.sin(a) * 320); c.stroke(); }
-      c.beginPath(); c.ellipse(X + 500, 330, 200, 166, 0, Math.PI, 0); c.stroke(); c.restore();
+      c.strokeStyle = '#4a3f78'; c.lineWidth = 6; for(let k = 1; k < 6; k++){ const a = Math.PI + k / 6 * Math.PI; c.beginPath(); c.moveTo(X + 500, 330); c.lineTo(X + 500 + Math.cos(a) * 380, 330 + Math.sin(a) * 262); c.stroke(); }
+      c.beginPath(); c.ellipse(X + 500, 330, 200, 136, 0, Math.PI, 0); c.stroke(); c.restore();
       lgBev(c, X + 116, 330, 768, 12, '#5a4f90'); lgR(c, X, 342, 1000, B - 342, '#211b3a'); for(let x = X + 20; x < X + 1000; x += 120) lgR(c, x, 350, 90, 26, '#2a2346');
       lgShelfBooks(c, X + 12, 150, 100, 4, 58, 'oa'); lgShelfBooks(c, X + 888, 150, 100, 4, 58, 'ob');
       if(!mode){ c.save(); c.translate(X + 500, 476); c.scale(1, .16); lgEll(c, 0, 0, 290, 290, '#1a1430'); lgEll(c, 0, 0, 280, 280, '#3a2a6a'); lgEll(c, 0, 0, 230, 230, '#4a3a88'); c.restore(); }
@@ -34326,7 +34357,7 @@
       lgEll(c, X + 820, 350, 30, 30, '#1e2126'); lgEll(c, X + 820, 350, 24, 24, '#3a4a3a'); for(let k = 0; k < 4; k++) lgR(c, X + 760 + k * 12, 330, 6, 6, k % 2 ? '#ffd166' : '#3fae6a');
       c.font = "800 11px 'Inter',sans-serif"; c.fillStyle = '#d8e8d0'; c.fillText('GENERATOR', X + 880, 348);
     } else if(I === 'vip'){
-      lgBev(c, X + 300, 66, 400, 48, '#3a2408'); c.font = "800 30px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#ffe27a'; c.fillText('💎 GOLDEN COUNCIL 💎', X + 500, 100);
+      c.save(); c.translate(0, 12); lgBev(c, X + 300, 66, 400, 48, '#3a2408'); c.font = "800 30px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#ffe27a'; c.fillText('💎 GOLDEN COUNCIL 💎', X + 500, 100); c.restore();
       if(!art) for(const px of [X + 160, X + 300, X + 700, X + 840]) lgBev(c, px, 130, 30, 170, '#e8c35a');
       if(!mode){ c.fillStyle = '#7a0f22'; c.beginPath(); c.moveTo(X + 436, LG_FY0 - 10); c.lineTo(X + 564, LG_FY0 - 10); c.lineTo(X + 624, LG_VH); c.lineTo(X + 376, LG_VH); c.fill();
       c.fillStyle = '#9e1b32'; c.beginPath(); c.moveTo(X + 444, LG_FY0 - 10); c.lineTo(X + 556, LG_FY0 - 10); c.lineTo(X + 612, LG_VH); c.lineTo(X + 388, LG_VH); c.fill(); lgR(c, X + 440, LG_FY0 - 10, 120, 2, '#e8c35a'); }
@@ -34341,7 +34372,8 @@
     c.textAlign = 'left';
   }
   // ----- painting the map (cached in 512-unit chunks) -----
-  const LG_FLOOR = { control: ['#141c34', '#1a2442', 'grid'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', '#8a5a3a', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], arcade: ['#2a1648', '#3a2060', 'carpet'], market: ['#22183e', '#30224f', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#4a3426', '#3a281c', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'], elec: ['#2e3238', '#3a3f46', 'plate'], hall: ['#3a3654', '#2a2640', 'hall'] };
+  const LG_FLOOR = { control: ['#141c34', '#1a2442', 'grid'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', '#8a5a3a', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], arcade: ['#2a1648', '#3a2060', 'carpet'], market: ['#22183e', '#30224f', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#4a3426', '#3a281c', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'], elec: ['#2e3238', '#3a3f46', 'plate'], hall: ['#2c2a33', '#25232b', 'hall'] };
+  const LG_SCHC = { n: '#c4b38c', v: '#c9a24a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2', e: '#ffd166' };
   function lgFloorPat(c, id){
     LG_SPR.fpat = LG_SPR.fpat || {}; let t = LG_SPR.fpat[id];
     if(!t){ t = document.createElement('canvas'); t.width = t.height = 64; const x = t.getContext('2d'), f = LG_FLOOR[id];
@@ -34351,64 +34383,77 @@
         else if(f[2] === 'grid'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, 'rgba(87,225,255,.16)'); lgR(x, xx, yy, 1, 32, 'rgba(87,225,255,.16)'); }
         else if(f[2] === 'carpet'){ lgR(x, xx, yy, 32, 32, f[0]); x.fillStyle = f[1]; x.beginPath(); x.moveTo(xx + 16, yy + 4); x.lineTo(xx + 28, yy + 16); x.lineTo(xx + 16, yy + 28); x.lineTo(xx + 4, yy + 16); x.fill(); lgR(x, xx + 15, yy + 15, 2, 2, i ? '#ff5fd2' : '#ffd166'); }
         else if(f[2] === 'plate'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, '#4a5058'); lgR(x, xx, yy, 1, 32, '#4a5058'); for(const [a, b] of [[4, 4], [26, 4], [4, 26], [26, 26]]) lgR(x, xx + a, yy + b, 2, 2, '#5e646c'); }
-        else { lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 2, f[1]); for(let k = 6; k < 32; k += 8) lgR(x, xx + 3, yy + k, 26, 1, '#4a4668'); }
+        else { lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, f[1]); lgR(x, xx, yy, 1, 32, f[1]); }
       }
       LG_SPR.fpat[id] = t; }
     return c.createPattern(t, 'repeat');
   }
   const lgPolyPath = (c, P, keep) => { if(!keep) c.beginPath(); P.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.closePath(); };
   // everything that doesn't move, inside one rectangle of the map
+  // the walls facing you: each room edge that faces north gets a wall going straight up (smooth, also on slanted edges)
+  function lgFaces(){
+    if(LG_SPR.faces) return LG_SPR.faces;
+    const out = [];
+    for(const r of LG_ROOMS){ const P = r.P; for(let k = 0; k < P.length; k++){ const a = P[k], b = P[(k + 1) % P.length], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1; let nx = dy / L, ny = -dx / L; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; if(lgInPoly(P, mx + nx * 3, my + ny * 3)){ nx = -nx; ny = -ny; } if(ny > -.3) continue; out.push({ r, a, b, back: a[1] === r.y && b[1] === r.y }); } }
+    return (LG_SPR.faces = out);
+  }
+  const lgFacePath = (c, f, H, keep) => { if(!keep) c.beginPath(); c.moveTo(f.a[0], f.a[1]); c.lineTo(f.b[0], f.b[1]); c.lineTo(f.b[0], f.b[1] - H); c.lineTo(f.a[0], f.a[1] - H); c.closePath(); };
+  // everything that doesn't move, inside one rectangle of the map
   function lgPaintMap(c, R){
     const hitB = (b, m) => b.x0 < R.x1 + m && b.x1 > R.x0 - m && b.y0 < R.y1 + m && b.y1 > R.y0 - m;
     lgR(c, R.x0, R.y0, R.x1 - R.x0, R.y1 - R.y0, '#0d0918');
     for(let i = 0; i < 60; i++){ const h = lgHash('vs' + i), x = h % LG_WW, y = (h >>> 12) % LG_WH; if(x >= R.x0 && x < R.x1 && y >= R.y0 && y < R.y1 && !lgFloorAt(x, y)) lgR(c, x, y, 2, 2, 'rgba(180,160,255,.25)'); }
-    const G = LG_GRID.G, RID = LG_GRID.RID, M = LG_M;
+    const H = LG_FACEH, faces = lgFaces();
+    // 1. the hull: a thick two-tone border around every room, corridor and wall (drawn first, the floors cover its inside)
+    c.save(); c.lineJoin = 'round'; c.lineCap = 'round';
+    for(const [lw, col] of [[44, '#14101f'], [36, '#55507a'], [10, '#3e3a5c']]){
+      c.strokeStyle = col; c.fillStyle = col;
+      c.lineWidth = LG_HW + lw; for(const h of LG_HALLS){ c.beginPath(); h.forEach(([a, b], k) => k ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); }
+      c.lineWidth = lw; for(const r of LG_ROOMS){ if(!hitB(r.bb, 300)) continue; lgPolyPath(c, r.P); c.stroke(); c.fill(); }
+      for(const f of faces){ if(!hitB(f.r.bb, 300)) continue; lgFacePath(c, f, H); c.stroke(); c.fill(); }
+    }
+    c.restore();
+    // 2. the walls
+    for(const f of faces){
+      const r = f.r; if(!hitB({ x0: r.bb.x0, x1: r.bb.x1, y0: r.y - H - 40, y1: r.bb.y1 }, 60)) continue;
+      c.save(); lgFacePath(c, f, H); c.clip();
+      for(let k = -2; k * 1000 * LG_K < r.bb.x1 - r.x + 1000 * LG_K; k++){ c.save(); c.translate(r.x + (r.w - 1000 * LG_K) / 2 + k * 1000 * LG_K, r.y - 392 * LG_K); c.scale(LG_K, LG_K); lgRoomPaint(c, Object.assign({}, r, { x: 0 }), null, 'wall'); c.restore(); }
+      if(!f.back){ c.fillStyle = 'rgba(0,0,0,.18)'; lgFacePath(c, f, H); c.fill(); }
+      c.restore();
+      c.save(); c.strokeStyle = '#14101f'; c.lineWidth = 4; c.beginPath(); c.moveTo(f.a[0], f.a[1] - H); c.lineTo(f.b[0], f.b[1] - H); c.stroke(); c.restore();
+    }
     // floors: hallways first, then the rooms on top
     c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = LG_HW; c.strokeStyle = lgFloorPat(c, 'hall');
     for(const h of LG_HALLS){ c.beginPath(); h.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); } c.restore();
-    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.fillStyle = lgFloorPat(c, r.id); lgPolyPath(c, r.P); c.fill(); c.save(); lgPolyPath(c, r.P); c.clip(); lgRoomFloorStuff(c, r); c.restore(); }
-    // the walls you see (facing you): every floor cell with no floor above it gets a wall face going up, until it meets other floor
-    const i0 = Math.max(0, Math.floor((R.x0 - 40) / M)), i1 = Math.min(LG_MX - 1, Math.ceil((R.x1 + 40) / M)), j0 = Math.max(0, Math.floor((R.y0 - 40) / M)), j1 = Math.min(LG_MY - 1, Math.ceil((R.y1 + LG_FACEH + 40) / M));
-    const faces = new Map();      // owner (room index + 1, or 0 for hallways) → strips [x, top, bottom]
-    for(let j = j0; j <= j1; j++) for(let i = i0; i <= i1; i++){
-      const k = j * LG_MX + i; if(!G[k] || (j > 0 && G[k - LG_MX])) continue;
-      const own = RID[k]; let top = j * M - (own ? LG_FACEH : 96); for(let jj = j - 1; jj >= 0 && jj * M >= top; jj--) if(G[jj * LG_MX + i]){ top = (jj + 1) * M; break; } if(!faces.has(own)) faces.set(own, []); faces.get(own).push([i * M, top, j * M]);
-    }
-    for(const [own, strips] of faces){
-      c.save(); c.beginPath(); for(const [x, t, b] of strips) c.rect(x, t, M, b - t); c.clip();
-      if(own){ const r = LG_ROOMS[own - 1]; for(let k = -2; k * 500 < r.bb.x1 - r.x + 500; k++){ c.save(); c.translate(r.x + (r.w - 500) / 2 + k * 500, r.y - 196); c.scale(.5, .5); lgRoomPaint(c, Object.assign({}, r, { x: 0 }), null, 'wall'); c.restore(); } }
-      else { const bx0 = Math.min(...strips.map(s => s[0])), bx1 = Math.max(...strips.map(s => s[0])) + M, by0 = Math.min(...strips.map(s => s[1])), by1 = Math.max(...strips.map(s => s[2])); lgR(c, bx0, by0, bx1 - bx0, by1 - by0, '#24203a'); for(let x = Math.floor(bx0 / 32) * 32; x < bx1; x += 32) lgR(c, x, by0, 2, by1 - by0, '#1a1730'); for(let y = Math.floor(by0 / 48) * 48; y < by1; y += 48) lgR(c, bx0, y, bx1 - bx0, 2, '#2e2a48'); }
-      // a dark band where the wall meets the floor, and its top edge
-      for(const [x, t, b] of strips){ lgR(c, x, b - 10, M, 10, 'rgba(0,0,0,.25)'); }
+    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.fillStyle = lgFloorPat(c, r.id); lgPolyPath(c, r.P); c.fill(); }
+    // at each door the room's colour fades out into the dark grey corridor (the great hall carpet carries on down its corridor)
+    for(const h of LG_HALLS) for(const end of [0, 1]){
+      const pts = end ? h.slice().reverse() : h, r = LG_ROOMS.find(q => lgInPoly(q.P, pts[0][0], pts[0][1])); if(!r || !hitB(r.bb, 300)) continue;
+      let d = null, u = null; for(let k = 1; k < pts.length && !d; k++){ const a = pts[k - 1], b = pts[k], L = Math.hypot(b[0] - a[0], b[1] - a[1]); for(let t = 0; t <= L; t += 4){ const x = a[0] + (b[0] - a[0]) * t / L, y = a[1] + (b[1] - a[1]) * t / L; if(!lgInPoly(r.P, x, y)){ d = [x, y]; u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; break; } } }
+      if(!d) continue; const e = [d[0] + u[0] * 90, d[1] + u[1] * 90], col = LG_FLOOR[r.id][0], n = parseInt(col.slice(1), 16), rgb = `${n >> 16},${n >> 8 & 255},${n & 255}`;
+      const gr = c.createLinearGradient(d[0], d[1], e[0], e[1]); gr.addColorStop(0, `rgba(${rgb},.85)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+      c.save(); c.lineCap = 'butt'; c.lineWidth = LG_HW; c.strokeStyle = gr; c.beginPath(); c.moveTo(d[0] - u[0] * 2, d[1] - u[1] * 2); c.lineTo(e[0], e[1]); c.stroke();
+      if(r.id === 'vhall' && Math.abs(pts[0][0] - (r.x + r.w / 2)) < 30){ const e2 = [d[0] + u[0] * 120, d[1] + u[1] * 120]; c.lineWidth = 112; c.strokeStyle = '#5a0a1a'; c.beginPath(); c.moveTo(d[0] - u[0] * 4, d[1] - u[1] * 4); c.lineTo(e2[0], e2[1]); c.stroke(); c.lineWidth = 100; c.strokeStyle = '#7a0f22'; c.stroke(); }
       c.restore();
-      for(const [x, t, b] of strips){ if(b - t >= (own ? LG_FACEH : 96) - 1){ lgR(c, x - 1, t - 18, M + 2, 18, '#55507a'); lgR(c, x - 1, t - 18, M + 2, 4, '#14101f'); lgR(c, x - 1, t - 3, M + 2, 3, '#2a2540'); } }
     }
-    // the furniture on each room's back wall (the side-view furniture, at half size)
-    for(const r of LG_ROOMS){ if(!hitB({ x0: r.x, x1: r.x + r.w, y0: r.y - 200, y1: r.bb.y1 }, 60)) continue; c.save(); c.beginPath(); c.rect(r.x, r.y - LG_FACEH, r.w, LG_FACEH); lgPolyPath(c, r.P, true); c.clip(); lgOldT(c, r); lgRoomPaint(c, Object.assign({}, r, { x: r.ox }), null, 'things'); c.restore(); }
-    // the outline of the floor: dark wall tops on the sides and bottom
-    for(let j = j0; j <= j1; j++) for(let i = i0; i <= i1; i++){
-      const k = j * LG_MX + i; if(!G[k]) continue; const x = i * M, y = j * M;
-      const L = i > 0 && G[k - 1], Rt = i < LG_MX - 1 && G[k + 1], D = j < LG_MY - 1 && G[k + LG_MX];
-      const T = 18;
-      if(!L){ lgR(c, x - T, y, T, M + (D ? 0 : T), '#55507a'); lgR(c, x - T, y, 4, M + (D ? 0 : T), '#14101f'); lgR(c, x - 4, y, 4, M, '#2a2540'); }
-      if(!Rt){ lgR(c, x + M, y, T, M + (D ? 0 : T), '#55507a'); lgR(c, x + M + T - 4, y, 4, M + (D ? 0 : T), '#14101f'); lgR(c, x + M, y, 4, M, '#2a2540'); }
-      if(!D){ lgR(c, x - (L ? 0 : T), y + M, M + (L ? 0 : T) + (Rt ? 0 : T), T, '#3e3a5c'); lgR(c, x - (L ? 0 : T), y + M + T - 4, M + (L ? 0 : T) + (Rt ? 0 : T), 4, '#14101f'); lgR(c, x, y + M, M, 3, '#6e6898'); }
-    }
-    // the sides of the wall faces
-    for(const strips of faces.values()) for(const [x, t, b] of strips){ const i = x / M, j = b / M; const has = (ii) => ii >= 0 && ii < LG_MX && G[j * LG_MX + ii] && !(j > 0 && G[(j - 1) * LG_MX + ii]); if(!has(i - 1)){ lgR(c, x - 18, t - 18, 18, b - t + 18, '#55507a'); lgR(c, x - 18, t - 18, 4, b - t + 18, '#14101f'); } if(!has(i + 1)){ lgR(c, x + M, t - 18, 18, b - t + 18, '#55507a'); lgR(c, x + M + 14, t - 18, 4, b - t + 18, '#14101f'); } }
+    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.save(); lgPolyPath(c, r.P); c.clip(); lgRoomFloorStuff(c, r); c.restore(); }
+    // 3. the furniture on each room's back wall
+    for(const r of LG_ROOMS){ if(!hitB({ x0: r.x, x1: r.x + r.w, y0: r.y - H - 20, y1: r.bb.y1 }, 60)) continue; c.save(); c.beginPath(); c.rect(r.x, r.y - H, r.w, H); lgPolyPath(c, r.P, true); c.clip(); lgOldT(c, r); lgRoomPaint(c, Object.assign({}, r, { x: r.ox }), null, 'things'); c.restore(); }
+    // 4. a soft shadow along the foot of each wall
+    for(const f of faces){ if(!hitB(f.r.bb, 300)) continue; c.save(); c.beginPath(); c.moveTo(f.a[0], f.a[1]); c.lineTo(f.b[0], f.b[1]); c.lineTo(f.b[0], f.b[1] + 12); c.lineTo(f.a[0], f.a[1] + 12); c.closePath(); c.fillStyle = 'rgba(0,0,0,.22)'; c.fill(); c.restore(); }
   }
   // rugs and carpets (top-down)
   function lgRoomFloorStuff(c, r){
     const X = r.x, Y = r.y, cx = X + r.w / 2;
-    if(r.id === 'control'){ lgEll(c, X + 163, Y + 300, 80, 36, '#2a1d4a'); lgEll(c, X + 163, Y + 300, 74, 32, '#3d2a6a'); lgEll(c, X + 163, Y + 300, 52, 22, '#4a3480'); lgEll(c, cx, Y + 50, 200, 36, 'rgba(87,225,255,.10)'); }
-    else if(r.id === 'lobby'){ for(let k = 0; k < 3; k++) lgR(c, X + 168 + k * 4, Y + 70 + k * 4, 300 - k * 8, 140 - k * 8, ['#7a2a2a', '#9e3a3a', '#7a2a2a'][k]); }
-    else if(r.id === 'vball'){ lgEll(c, cx, Y + 210, 220, 110, '#3a0812'); lgEll(c, cx, Y + 210, 214, 106, '#7a0f22'); lgEll(c, cx, Y + 210, 160, 80, '#8e1a2e'); lgEll(c, cx, Y + 210, 90, 44, '#7a0f22'); }
+    if(r.id === 'control'){ lgEll(c, X + 143, Y + 250, 74, 32, '#2a1d4a'); lgEll(c, X + 143, Y + 250, 68, 28, '#3d2a6a'); lgEll(c, X + 143, Y + 250, 48, 18, '#4a3480'); lgEll(c, cx, Y + 40, 180, 30, 'rgba(87,225,255,.10)'); }
+    else if(r.id === 'lobby'){ for(let k = 0; k < 3; k++) lgR(c, X + 140 + k * 4, Y + 60 + k * 4, 250 - k * 8, 110 - k * 8, ['#7a2a2a', '#9e3a3a', '#7a2a2a'][k]); }
+    else if(r.id === 'vball'){ lgEll(c, cx, Y + 150, 180, 86, '#3a0812'); lgEll(c, cx, Y + 150, 174, 82, '#7a0f22'); lgEll(c, cx, Y + 150, 130, 62, '#8e1a2e'); lgEll(c, cx, Y + 150, 72, 34, '#7a0f22'); }
     else if(r.id === 'vhall'){ lgR(c, cx - 56, Y, 112, r.h, '#5a0a1a'); lgR(c, cx - 50, Y, 100, r.h, '#7a0f22'); lgR(c, cx - 54, Y, 2, r.h, '#c9a24a'); lgR(c, cx + 52, Y, 2, r.h, '#c9a24a'); }
-    else if(r.id === 'mobs'){ lgEll(c, cx, Y + 200, 190, 80, '#1a1430'); lgEll(c, cx, Y + 200, 184, 76, '#3a2a6a'); lgEll(c, cx, Y + 200, 140, 56, '#4a3a88'); for(let i = 0; i < 12; i++){ const a = i / 12 * 6.283; lgR(c, cx + Math.cos(a) * 112, Y + 200 + Math.sin(a) * 44, 3, 3, '#ffe27a'); } }
-    else if(r.id === 'mclass'){ c.save(); c.translate(LG_CAUL.x, LG_CAUL.y); c.scale(1, .45); c.strokeStyle = '#5a4aa8'; c.lineWidth = 4; c.beginPath(); c.arc(0, 0, 130, 0, 7); c.stroke(); c.beginPath(); c.arc(0, 0, 108, 0, 7); c.stroke(); for(let i = 0; i < 6; i++){ const a = i / 6 * 6.283; c.beginPath(); c.moveTo(Math.cos(a) * 108, Math.sin(a) * 108); c.lineTo(Math.cos(a + 2.09) * 108, Math.sin(a + 2.09) * 108); c.stroke(); } c.restore(); }
-    else if(r.id === 'vip'){ lgR(c, X - 20, Y + 158, 370, 84, '#7a0f22'); lgR(c, X - 20, Y + 162, 370, 76, '#9e1b32'); lgR(c, X - 20, Y + 158, 370, 2, '#e8c35a'); lgR(c, X - 20, Y + 240, 370, 2, '#e8c35a'); }
-    else if(r.id === 'arcade'){ for(let i = 0; i < 4; i++) lgEll(c, X + 120 + i * 125, Y + 36, 50, 12, 'rgba(255,95,210,.12)'); }
-    else if(r.id === 'elec'){ for(let k = 0; k < 5; k++){ c.strokeStyle = ['#c0263b', '#3d6fb3', '#ffd166', '#3fae6a', '#e07a3a'][k]; c.lineWidth = 3; c.beginPath(); c.moveTo(X + 210 + k * 18, Y + 4); c.bezierCurveTo(X + 220 + k * 18, Y + 120, X + 380 - k * 10, Y + 90, X + 420 - k * 6, Y + 220 + k * 8); c.stroke(); } lgBev(c, X + 400, Y + 210, 70, 50, '#4a5058'); lgR(c, X + 410, Y + 220, 50, 6, '#ffd166'); }
+    else if(r.id === 'mobs'){ lgEll(c, cx, Y + 150, 160, 64, '#1a1430'); lgEll(c, cx, Y + 150, 154, 60, '#3a2a6a'); lgEll(c, cx, Y + 150, 116, 44, '#4a3a88'); for(let i = 0; i < 12; i++){ const a = i / 12 * 6.283; lgR(c, cx + Math.cos(a) * 96, Y + 150 + Math.sin(a) * 36, 3, 3, '#ffe27a'); } }
+    else if(r.id === 'mclass'){ c.save(); c.translate(LG_CAUL.x, LG_CAUL.y); c.scale(1, .45); c.strokeStyle = '#5a4aa8'; c.lineWidth = 4; c.beginPath(); c.arc(0, 0, 110, 0, 7); c.stroke(); c.beginPath(); c.arc(0, 0, 92, 0, 7); c.stroke(); for(let i = 0; i < 6; i++){ const a = i / 6 * 6.283; c.beginPath(); c.moveTo(Math.cos(a) * 92, Math.sin(a) * 92); c.lineTo(Math.cos(a + 2.09) * 92, Math.sin(a + 2.09) * 92); c.stroke(); } c.restore(); }
+    else if(r.id === 'vip'){ lgR(c, X - 20, Y + 140, 300, 80, '#7a0f22'); lgR(c, X - 20, Y + 144, 300, 72, '#9e1b32'); lgR(c, X - 20, Y + 140, 300, 2, '#e8c35a'); lgR(c, X - 20, Y + 218, 300, 2, '#e8c35a'); }
+    else if(r.id === 'arcade'){ for(let i = 0; i < 4; i++) lgEll(c, X + 70 + i * 105, Y + 30, 42, 10, 'rgba(255,95,210,.12)'); }
+    else if(r.id === 'elec'){ for(let k = 0; k < 5; k++){ c.strokeStyle = ['#c0263b', '#3d6fb3', '#ffd166', '#3fae6a', '#e07a3a'][k]; c.lineWidth = 3; c.beginPath(); c.moveTo(X + 190 + k * 14, Y + 4); c.bezierCurveTo(X + 200 + k * 14, Y + 90, X + 320 - k * 8, Y + 70, X + 350 - k * 5, Y + 170 + k * 6); c.stroke(); } lgBev(c, X + 330, Y + 160, 60, 40, '#4a5058'); lgR(c, X + 338, Y + 168, 44, 6, '#ffd166'); }
   }
   const LG_CH = 512;
   function lgChunk(ci, cj, s){
@@ -34418,7 +34463,7 @@
     const g = c.getContext('2d'); g.scale(s, s); g.translate(-ci * LG_CH, -cj * LG_CH);
     const nArt = Object.values(LG_SPR.art || {}).filter(im => im.complete && im.naturalWidth).length;
     const R = { x0: ci * LG_CH, y0: cj * LG_CH, x1: (ci + 1) * LG_CH, y1: (cj + 1) * LG_CH };
-    lgPx(g, 'ch:' + key, R.x0, R.y0, LG_CH, LG_CH, (x) => { x.translate(-R.x0, -R.y0); lgPaintMap(x, R); }, { outline: false, P: 1, v: nArt });
+    lgPx(g, 'ch:' + key, R.x0, R.y0, LG_CH, LG_CH, (x) => { x.translate(-R.x0, -R.y0); lgPaintMap(x, R); }, { outline: false, post: false, P: 1, v: nArt });
     LG.chunks.set(key, c); return c;
   }
   // the moving things on the back wall (drawn before people)
@@ -34465,8 +34510,7 @@
         lgR(c, X + 126, Y + 66, 6, 50, '#c8ccd8'); lgR(c, X + 120, Y + 108, 10, 8, '#8a8a98'); lgEll(c, X + 129, Y + 60, 10, 10, '#160c1c'); lgEll(c, X + 129, Y + 60, 8, 8, '#e0263b'); lgR(c, X + 125, Y + 56, 3, 3, '#ff9aa8');
       }, { fps: 8, now });
       // blackjack: the dealer behind the table
-      lgDrawNpc(g, LG_NPCS[0], now, lgNpcNear(LG_NPCS[0], now));
-      W('bjtable', 4234, 340, 254, 92, (c) => { const X = 4240, Y = 330;
+      if(0) W('bjtable', 4234, 340, 254, 92, (c) => { const X = 4240, Y = 330;
         lgBev(c, X + 20, Y + 54, 14, 46, '#5a3a1a'); lgBev(c, X + 206, Y + 54, 14, 46, '#5a3a1a');
         c.fillStyle = '#0f6b3a'; c.beginPath(); c.ellipse(X + 120, Y + 40, 120, 34, 0, 0, Math.PI); c.lineTo(X, Y + 40); c.fill(); lgR(c, X, Y + 18, 240, 24, '#0f6b3a'); lgR(c, X + 10, Y + 40, 220, 2, '#1a8a4e');
         lgBev(c, X - 4, Y + 12, 248, 8, '#7a4a1e');
@@ -34509,18 +34553,18 @@
     if(on(6000, 8000)){
       for(const [rx, list] of [[6000, LG_CANDS.vhall], [7000, LG_CANDS.vball]]) for(const cx of list) for(const dx of [-21, 0, 21]) lgFlame(g, rx + cx + dx, 236, now, cx + dx);
       for(const x of [6440, 6500, 6560]) lgFlame(g, x, 306, now, x);
-      for(let i = 0; i < 5; i++){ const t = now / 1000 + i * 2.3, bx = 6000 + ((t * 120 + i * 400) % 2000), by = 90 + Math.sin(t * 2 + i) * 40, f = Math.floor(now / 90 + i) % 2;
+      for(let i = 0; i < 5; i++){ const t = now / 1000 + i * 2.3, bx = 6000 + ((t * 120 + i * 400) % 2000), by = 124 + Math.sin(t * 2 + i) * 28, f = Math.floor(now / 90 + i) % 2;
         lgPx(g, 'bat' + f, bx - 18, by - 10, 36, 18, (c) => { lgR(c, 14, 4, 8, 10, '#2a1a2a'); lgR(c, 14, 2, 2, 2, '#2a1a2a'); lgR(c, 20, 2, 2, 2, '#2a1a2a'); lgR(c, 16, 7, 2, 2, '#ff4060'); lgR(c, 18, 7, 2, 2, '#ff4060');
           if(f){ lgR(c, 2, 0, 12, 4, '#3a2440'); lgR(c, 6, 4, 8, 4, '#3a2440'); lgR(c, 22, 0, 12, 4, '#3a2440'); lgR(c, 22, 4, 8, 4, '#3a2440'); } else { lgR(c, 4, 8, 10, 4, '#3a2440'); lgR(c, 0, 12, 8, 4, '#3a2440'); lgR(c, 22, 8, 10, 4, '#3a2440'); lgR(c, 28, 12, 8, 4, '#3a2440'); } }); }
       // ballroom chandelier
-      const CX = 7500, CY = 70; g.fillStyle = '#8a6a2a'; g.fillRect(CX - 2, 0, 4, CY - 10);
+      const CX = 7500, CY = 104; g.fillStyle = '#8a6a2a'; g.fillRect(CX - 2, 0, 4, CY - 10);
       lgPx(g, 'chand', CX - 90, CY - 30, 180, 56, (c) => { lgBev(c, 10, 30, 160, 10, '#d8b25a'); lgBev(c, 40, 40, 100, 8, '#c9a24a'); lgBev(c, 80, 48, 20, 6, '#b8902e'); for(let i = 0; i < 7; i++){ const x = 18 + i * 24; lgR(c, x - 4, 26, 12, 4, '#e8c35a'); lgBev(c, x - 1, 12, 6, 14, '#fff0d0'); } for(let i = 0; i < 9; i++) lgR(c, 16 + i * 18, 42, 4, 8, '#bfe8ff'); });
       for(let i = 0; i < 7; i++) lgFlame(g, CX - 90 + 20 + i * 24, CY - 18, now, i);
     }
     if(on(8000, 10000)){
       for(let i = 0; i < 5; i++){ const t = now / 1000 + i, bx = 8140 + i * 110 + Math.sin(t * .7) * 26, by = 200 + Math.sin(t * 1.3) * 18 + (i % 2) * 40, col = ['#c0263b', '#3d6fb3', '#3fae6a', '#e8c35a', '#8b4dff'][i];
         lgPx(g, 'book' + i, bx - 20, by - 12, 40, 24, (c) => { lgR(c, 0, 0, 40, 24, col); lgR(c, 2, 2, 17, 18, '#f5ecd8'); lgR(c, 21, 2, 17, 18, '#f5ecd8'); lgR(c, 19, 0, 2, 24, lgShade(col, -.4)); for(let k = 0; k < 3; k++){ lgR(c, 5, 6 + k * 4, 11, 2, '#b8a888'); lgR(c, 24, 6 + k * 4, 11, 2, '#b8a888'); } }); }
-      for(let i = 0; i < 8; i++){ const h = lgHash('fc' + i), x = Math.round((9150 + h % 700) / 2) * 2, y = Math.round((50 + (h >>> 8) % 110 + Math.sin(now / 700 + i) * 8) / 2) * 2; g.fillStyle = '#160c1c'; g.fillRect(x - 5, y - 2, 10, 20); g.fillStyle = '#f0e6d0'; g.fillRect(x - 3, y, 6, 16); lgFlame(g, x, y, now, i); }
+      for(let i = 0; i < 8; i++){ const h = lgHash('fc' + i), x = Math.round((9150 + h % 700) / 2) * 2, y = Math.round((86 + (h >>> 8) % 100 + Math.sin(now / 700 + i) * 8) / 2) * 2; g.fillStyle = '#160c1c'; g.fillRect(x - 5, y - 2, 10, 20); g.fillStyle = '#f0e6d0'; g.fillRect(x - 3, y, 6, 16); lgFlame(g, x, y, now, i); }
     }
     if(on(11000, 12000)){
       const off = lgDark(), X = 11000;
@@ -34603,12 +34647,20 @@
       }
     }
     // slanted furniture
-    for(const o of LG_ISO) add(o.y, o.x, () => { shadow(o.x + o.d * .35 * o.f, o.y - 2, o.w + o.d * .7); lgPx(g, 'iso:' + o.k + o.f + (o.k === 'console' ? Math.floor(now / 400) % 2 : ''), o.x - o.w / 2 - o.d, o.y - o.h - o.d, o.w + o.d * 2, o.h + o.d + 4, (c) => { c.translate(o.w / 2 + o.d, o.h + o.d); lgDrawIso(c, o, now); }, { P: 1 }); });
+    for(const o of LG_ISO) add(o.y, o.x, () => {
+      const dx = o.d * .7 * o.f, dy = -o.d * .7, w2 = o.w / 2; g.fillStyle = 'rgba(0,0,0,.32)'; g.beginPath(); g.moveTo(o.x - w2 + 6, o.y + 6); g.lineTo(o.x + w2 + 10, o.y + 6); g.lineTo(o.x + w2 + 10 + dx, o.y + 6 + dy); g.lineTo(o.x - w2 + 6 + dx, o.y + 6 + dy); g.fill();
+      lgPx(g, 'iso2:' + o.k + o.f + (o.k === 'console' ? Math.floor(now / 400) % 2 : ''), o.x - o.w / 2 - o.d, o.y - o.h - o.d, o.w + o.d * 2, o.h + o.d + 4, (c) => { c.translate(o.w / 2 + o.d, o.h + o.d); lgDrawIso(c, o, now); }, { P: 2 }); });
     // cafeteria tables
     for(const t of LG_CTABLES) add(t.y - 2, t.x, () => { shadow(t.x, t.y - 4, 60); lgOldAt(g, t.x, t.y, () => lgPx(g, 'ctable', -64, -52, 128, 56, (c) => { c.translate(64, 52); lgBev(c, -58, -48, 116, 8, '#f4f0e6'); lgR(c, -58, -40, 116, 4, '#c0263b'); lgBev(c, -4, -36, 8, 34, '#7a7a88'); lgBev(c, -22, -4, 44, 4, '#5a5a68'); lgR(c, -40, -54, 14, 6, '#ff8a3a'); lgR(c, 20, -56, 10, 8, '#c8d8e0'); })); });
     // the shop counter (the shopkeeper stands behind it) and the people who work here
-    { const q = lgO2N(5536, 336), R = lgRoomById('market'); add(q.y + 9, q.x + 67, () => { g.save(); lgOldT(g, R); lgPx(g, 'shopCounter', 5536, 336, 268, 60, (c) => { c.translate(-5536, -336); lgBev(c, 5540, 338, 260, 12, '#c9a24a'); lgBev(c, 5548, 350, 244, 42, '#5a2e7a'); for(let k = 0; k < 4; k++){ const sx = 5576 + k * 62; lgR(c, sx, 362, 18, 18, '#7a4a9a'); lgR(c, sx + 6, 366, 6, 10, '#ffd166'); lgR(c, sx + 2, 370, 14, 2, '#ffd166'); } lgBev(c, 5740, 316, 40, 22, '#3a3a48'); lgR(c, 5746, 320, 28, 8, '#9be37a'); lgR(c, 5750, 330, 20, 4, '#222'); }); g.restore(); }); }
-    for(const n of LG_NPCS.slice(1)) add(n.Y, n.X, () => { g.save(); lgOldT(g, lgOldRoom(n.x)); lgDrawNpc(g, n, now, lgNpcNear(n, now)); g.restore(); });
+    { const q = lgO2N(5670, 392), sk = LG_NPCS[1]; add(sk.Y + 4, q.x, () => lgOldAt(g, q.x, sk.Y + 8, () => lgPx(g, 'shopCounter2', -134, -80, 268, 84, (c) => { c.translate(-5536, -316); lgBev(c, 5540, 338, 260, 12, '#c9a24a'); lgBev(c, 5548, 350, 244, 42, '#5a2e7a'); for(let k = 0; k < 4; k++){ const sx = 5576 + k * 62; lgR(c, sx, 362, 18, 18, '#7a4a9a'); lgR(c, sx + 6, 366, 6, 10, '#ffd166'); lgR(c, sx + 2, 370, 14, 2, '#ffd166'); } lgBev(c, 5740, 316, 40, 22, '#3a3a48'); lgR(c, 5746, 320, 28, 8, '#9be37a'); lgR(c, 5750, 330, 20, 4, '#222'); }))); }
+    for(const n of LG_NPCS) add(n.Y, n.X, () => lgOldAt(g, n.X, n.Y, () => lgDrawNpc(g, Object.assign({}, n, { x: 0, y: 0 }), now, lgNpcNear(n, now))));
+    { const q = lgO2N(4360, 430); add(q.y, q.x, () => lgOldAt(g, q.x, q.y, () => lgPx(g, 'bjtable2', -126, -100, 252, 104, (c) => { c.translate(126, 100); const X = -120, Y = -100;
+        lgBev(c, X + 20, Y + 54, 14, 46, '#5a3a1a'); lgBev(c, X + 206, Y + 54, 14, 46, '#5a3a1a');
+        c.fillStyle = '#0f6b3a'; c.beginPath(); c.ellipse(X + 120, Y + 40, 120, 34, 0, 0, Math.PI); c.lineTo(X, Y + 40); c.fill(); lgR(c, X, Y + 18, 240, 24, '#0f6b3a'); lgR(c, X + 10, Y + 40, 220, 2, '#1a8a4e');
+        lgBev(c, X - 4, Y + 12, 248, 8, '#7a4a1e');
+        for(let i = 0; i < 4; i++){ lgBev(c, X + 60 + i * 34, Y + 24, 22, 30, '#ffffff'); c.font = "700 12px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = i % 2 ? '#c0263b' : '#111'; c.fillText(['A♠', 'K♥', '7♣', 'Q♦'][i], X + 71 + i * 34, Y + 43); }
+      }, { v: 2 }))); }
     // the cauldron
     add(LG_CAUL.y + 1, LG_CAUL.x, () => {
       const br = LG.brew && performance.now() - LG.brew < 2500; shadow(LG_CAUL.x, LG_CAUL.y + 2, 130);
