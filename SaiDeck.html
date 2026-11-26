@@ -23396,7 +23396,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 219;                 // ← goes up by one with every published version
+  const SD_BUILD = 220;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -26534,6 +26534,7 @@
   }
   const casSeatLive = (st) => st && typeof st.t === 'number' && Date.now() + PRES.offset - st.t < 95000;
   async function casJoin(){
+    try{ if(typeof lgGameJoin === 'function') lgGameJoin('slots'); }catch(e){}
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
     CAS.on = true; CAS.seen = {}; CAS.seen10 = {}; CAS.feed = []; CAS.joinT = Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0) - 2000; CAS.sess = { spins: 0, bet: 0, won: 0 }; CAS.held = 0; CAS.heldBy = {};
@@ -27225,6 +27226,7 @@
   }
   // getting a seat
   async function bjJoin(){
+    try{ if(typeof lgGameJoin === 'function') lgGameJoin('bj'); }catch(e){}
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(!SC.loaded) await scLoad();
     BJ.on = true; BJ.watch = false; BJ.joinedAt = Date.now(); BJ.skip = new Set(); BJ.shown = {}; BJ.sess = { hands: 0, bet: 0, won: 0 };
@@ -28239,6 +28241,7 @@
     });
   }
   function trdOpen(){
+    try{ if(typeof lgGameJoin === 'function') lgGameJoin('trade'); }catch(e){}
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(TRD.on) return; TRD.on = true; TRD.drawKey = ''; TRD.tapeKey = null; TRD.lastP = 0; TRD.woke = false;
     const w = document.createElement('div'); w.className = 'td-win trd-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Trading');
@@ -28699,6 +28702,7 @@
     else { toast("Couldn't start it — try again.", 1500); await cfStep(); }
   }
   function cfOpen(){
+    try{ if(typeof lgGameJoin === 'function') lgGameJoin('cf'); }catch(e){}
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(CF.on) return; CF.on = true; CF.shownF = 0; CF.said = ''; CF.jit = Math.floor(Math.random() * 900);
     const w = document.createElement('div'); w.className = 'td-win cf-win'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Coin Flip');
@@ -29093,6 +29097,7 @@
   const tdDay = () => { const n = tdNow(); return n - (n + 28800000) % 86400000; };
   // ----- the window -----
   function tdOpen(){
+    try{ if(typeof lgGameJoin === 'function') lgGameJoin('td'); }catch(e){}
     if(!chatName()){ toast('Set your chat name first.', 2000); return; }
     if(TDG.on){ return; }
     TDG.on = true; TDG.view = 'lobby';
@@ -33333,7 +33338,7 @@
     const a = c.pts[i - 1], b = c.pts[i], seg = c.cum[i] - c.cum[i - 1], k = seg > 0 ? (s - c.cum[i - 1]) / seg : 1;
     return fix({ x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k, moving: true, face: b[0] < a[0] - 1 ? -1 : b[0] > a[0] + 1 ? 1 : 0, fast });
   }
-  async function lgWrite(obj, method){
+  async function lgWrite(obj, method, quiet){
     try{
       const tok = await lgAuth(), me = lgUid(); if(!me) return false;
       if(LG.ident && LG.ident !== me) await lgForgetOld();
@@ -33341,7 +33346,7 @@
       const r = await fetch(`${CHAT_DB}/lounge/${me}.json?auth=${encodeURIComponent(tok)}`, { method: method || 'PATCH', body: method === 'DELETE' ? undefined : JSON.stringify(obj) });
       if(!r.ok && method !== 'DELETE'){
         console.warn('lounge write refused', r.status, obj);
-        if(!LG.warned){ LG.warned = true; toast(r.status === 401 || r.status === 403 ? "😕 The lounge didn't let your character in — tell Saichizu to publish the newest Firebase rules." : "😕 Couldn't reach the lounge — check your connection.", 4200); }
+        if(!LG.warned && !quiet){ LG.warned = true; toast(r.status === 401 || r.status === 403 ? "😕 The lounge didn't let your character in — tell Saichizu to publish the newest Firebase rules." : "😕 Couldn't reach the lounge — check your connection.", 4200); }
         return false;
       }
       LG.warned = false; return true;
@@ -33386,6 +33391,8 @@
     w.addEventListener('keydown', (e) => e.stopPropagation()); w.addEventListener('keyup', (e) => e.stopPropagation());
     const cv = w.querySelector('.lg-cv'); LG.cv = cv;
     cv.addEventListener('pointerdown', lgClick);
+    cv.addEventListener('pointermove', (e) => { if(e.pointerType === 'mouse') LG.mouseC = { x: e.clientX, y: e.clientY }; });
+    cv.addEventListener('pointerleave', () => { LG.mouseC = null; });
     cv.addEventListener('pointermove', (e) => { const i = lgMmIndex(e); if(i !== LG.mmHover){ LG.mmHover = i; cv.style.cursor = i != null ? 'pointer' : ''; } });
     cv.addEventListener('pointerleave', () => { LG.mmHover = null; cv.style.cursor = ''; });
     cv.addEventListener('keydown', (e) => {
@@ -33429,7 +33436,7 @@
     LG.paused = true;
     clearInterval(LG.beat); clearInterval(LG.poll); cancelAnimationFrame(LG.raf);
     liveClose('lounge'); liveClose('loungejb'); liveClose('loungelt'); lgAudioStop(); lgPanel('');
-    Object.assign(LG.me, { x: LG_STUDIO[0] + (Math.random() - .5) * 80, y: LG_STUDIO[1] + Math.random() * 20, a: 'edit', gm: '', p: '' });
+    { const [sx, sy] = lgSlotFor(LG_STUDIO); Object.assign(LG.me, { x: sx, y: sy, a: 'edit', gm: '', p: '' }); }
     LG.me.tx = LG.me.x; LG.me.ty = LG.me.y; LG.me.t = trdNow(); LG.pend = null;
     lgWrite(lgFull(), 'PUT');
     clearInterval(LG.editBeat); LG.editBeat = setInterval(() => lgWrite({ h: { '.sv': 'timestamp' } }), 240000);
@@ -33512,6 +33519,25 @@
     LG_ROOMS.forEach((r, i) => { const dx = Math.max(r.bb.x0 - wx, 0, wx - r.bb.x1), dy = Math.max(r.bb.y0 - wy, 0, wy - r.bb.y1), d = dx * dx + dy * dy; if(d < bd){ bd = d; best = i; } });
     return bd < 200 * 200 ? best : -1;
   }
+  // spots in front of something (a machine, the studio desk, a table): 1 2 3 4 / 5 6 7 8 / … — the first one nobody is standing on or heading to
+  function lgSlotFor(go, cols){
+    cols = cols || 4; const now = trdNow(), rich = lgRich(), taken = lgPeople().map(o => { const q = lgPos(o, now); return [o.tx != null ? o.tx : q.x, o.ty != null ? o.ty : q.y]; });
+    for(let i = 0; i < 32; i++){ const r = Math.floor(i / cols), c = i % cols, x = Math.round(go[0] + (c - (cols - 1) / 2) * 34), y = Math.round(go[1] + r * 28);
+      if(!lgOk(lgTile(x, y), rich)) continue; if(taken.some(q => Math.abs(q[0] - x) < 14 && Math.abs(q[1] - y) < 12)) continue; return [x, y]; }
+    return lgNearest(go[0], go[1], rich);
+  }
+  // you opened a game from the chat: if your character isn't at that machine, it pops over there and gets in line
+  function lgGameJoin(g){
+    try{
+      if(!LG.on || LG.paused || !lgIsUser() || LG.me.gm === g) return;
+      const t = LG_THINGS.find(t => t.k === 'g:' + g); if(!t) return;
+      const now = trdNow(), from = lgPos(LG.me, now), [x, y] = lgSlotFor(t.go);
+      if(Math.hypot(from.x - x, from.y - y) > 6){ LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]); lgSfx('teleport'); }
+      Object.assign(LG.me, { x, y, tx: x, ty: y, p: '', t: now, a: 'play', gm: g }); LG.pend = null; LG.cam = { x, y }; LG.playAt = Date.now();
+      const r = lgRoomAt(x, y); if(r){ LG.seen.add(r.id); }
+      lgWrite(Object.assign(lgFull(), { h: { '.sv': 'timestamp' } })); lgHud();
+    }catch(e){}
+  }
   function lgTeleport(r){
     if(!r) return;
     if(!LG.seen.has(r.id)){ toast(r.vip ? '🔒 That room is only for people with more than 1B points.' : `❓ You haven't found that room yet — walk there first, then you can teleport.`, 2600); return; }
@@ -33556,7 +33582,7 @@
     const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
-    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
+    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(lgBooTry(o, q, now)) return; if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
     const cat = lgCatPos(now);
     if(lgSeenAt(cat.x, cat.y) && Math.abs(p.x - cat.x) < 24 && p.y > cat.y - 30 && p.y < cat.y + 6){ lgWalk(cat.x + (LG.me.x < cat.x ? -34 : 34), cat.y, 'pet'); return; }
     for(const s of LG_SEATS){
@@ -33567,7 +33593,8 @@
         lgWalk(s.x, s.y, 'sit'); return;
       }
     }
-    for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.go[1])){ lgWalk(t.go[0] + (Math.random() - .5) * 16, t.go[1], t.k); return; }
+    for(const o of LG_VIPF) if(o.k === 'table' && Math.abs(p.x - o.x) < o.w / 2 + 4 && p.y > o.y - 50 && p.y < o.y + 8 && lgSeenAt(o.x, o.y)){ const s = lgSlotFor([o.x, o.y + 22], 3); lgWalk(s[0], s[1], lgRich() ? 'wine' : null); return; }
+    for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2, t.go[1])){ const s = lgSlotFor(t.go); lgWalk(s[0], s[1], t.k); return; }
     lgWalk(p.x, p.y, null);
   }
   // attack mode: wizards and shooters fire at you from where they stand (walking closer if you're far); fighters walk up to you first
@@ -33584,7 +33611,7 @@
     if(ranged) lgAttack(Math.atan2(q.y - me.y, q.x - me.x)); else { LG.lastFace = q.x < me.x ? -1 : 1; lgAttack(q.x < me.x ? Math.PI : 0); }
   }
   // ----- the Council Lounge guardian: under 1B you can step in the door, then he roasts you and shoves you back out -----
-  const LG_GUARD = { x: LG_VIPX + 36, y: LG_GATEY, c: 4 };
+  const LG_GUARD = { x: LG_VIPX + 36, y: LG_GATEY, c: 4 }, LG_VIPDOOR = LG_VIPX - 34;
   const LG_GUARD_LINES = [
     (b) => `bruh you got ${b} points and walked in here?? 💀 OUT`,
     () => '1B club only lmao, come back when you\'re not flat broke',
@@ -33602,7 +33629,7 @@
   // who's standing in the doorway (stopped at the 1B line: nobody rich stops there on the way in)
   function lgGuard(g, all, list, now){
     const pn = performance.now(), G = LG.guardP || (LG.guardP = { x: LG_GUARD.x, y: LG_GUARD.y });
-    let tgt = null; for(const a of all){ const p = a.p; if(p.x >= LG_VIPIN && p.x < LG_VIPX && p.y < LG_VIPY && !p.moving && (a.d.tx == null || a.d.tx < LG_VIPX)){ tgt = { u: a.u, x: p.x, y: p.y }; break; } }
+    const me = lgUid(), rich = lgRich(); let tgt = null; for(const a of all){ const p = a.p; if(!(p.x >= LG_VIPIN && p.x < LG_VIPX && p.y < LG_VIPY && !p.moving)) continue; if(a.u === me ? rich : Math.abs((a.d.tx == null ? p.x : a.d.tx) - LG_VIPDOOR) > 2) continue; tgt = { u: a.u, x: p.x, y: p.y }; break; }
     const mine = LG.guard && pn - LG.guard.t < 2600;
     const gx = tgt ? Math.max(LG_VIPX + 4, tgt.x + 52) : LG_GUARD.x, gy = tgt ? tgt.y : LG_GUARD.y;
     G.x += (gx - G.x) * .12; G.y += (gy - G.y) * .12;
@@ -33612,13 +33639,33 @@
     const p = { x: G.x, y: G.y, moving: Math.hypot(gx - G.x, gy - G.y) > 3, face: -1 };
     if(lgSeenAt(p.x, p.y)) list.push({ y: p.y, d: () => lgDrawChar(g, d, p, now, false) });
   }
+  // ----- Boo!: lights out, sneak up behind someone and click them -----
+  function lgBooTry(o, q, now){
+    if(!lgDark()) return false;
+    const me = lgPos(LG.me, now), qf = q.face || (o.tx < o.x ? -1 : 1) || 1;
+    if(Math.hypot(me.x - q.x, me.y - q.y) > 90 || (me.x - q.x) * qf > 0) return false;    // too far, or they're looking at you
+    const t = 'Boo! 👻'; Object.assign(LG.me, { m: t, mt: now }); lgWrite({ m: t, mt: { '.sv': 'timestamp' } });
+    LG.lastFace = q.x < me.x ? -1 : 1; LG.booBy = LG.booBy || new Set();
+    try{ lgSfx('boo'); }catch(e){}
+    return true;
+  }
+  // someone shouted Boo! right behind me → I jump (everyone sees the 😱, I hear the scream)
+  function lgBooCheck(all, mp, now){
+    const me = lgUid(); LG.booDone = LG.booDone || new Set();
+    for(const a of all){ if(a.u === me || !a.d.m || !/^Boo!/.test(a.d.m) || now - (a.d.mt || 0) > 2500) continue;
+      const key = a.u + ':' + a.d.mt; if(LG.booDone.has(key)) continue; LG.booDone.add(key);
+      const myFace = mp.face || LG.lastFace || 1;
+      if(Math.hypot(a.p.x - mp.x, a.p.y - mp.y) < 110 && (a.p.x - mp.x) * myFace <= 0){ try{ lgSfx('scare'); }catch(e){} lgEmote('😱'); LG.hurt = LG.hurt || new Map(); LG.hurt.set('u:' + me, now); LG.scareAt = performance.now(); }
+    }
+    if(LG.booDone.size > 200) LG.booDone = new Set([...LG.booDone].slice(-50));
+  }
   function lgVipNo(){
     const b = lgIsUser() && SC.loaded ? scBal() : 0;
     toast(`🔒 The Council Lounge is only for people with more than 1B points right now — you have ${lbNum(Math.max(0, b))}.`, 3200);
   }
   function lgWalk(x, y, then){
     const m = LG.me, now = trdNow(), cur = lgPos(m, now), rich = lgRich();
-    if(!rich && x >= LG_VIPIN && y < LG_VIPY){ x = Math.min(x, LG_VIPX - 34); y = Math.max(LG_GATEY - 40, Math.min(LG_GATEY + 40, y)); then = 'vipguard'; }
+    if(!rich && x >= LG_VIPIN && y < LG_VIPY){ x = LG_VIPX - 34; y = Math.max(LG_GATEY - 40, Math.min(LG_GATEY + 40, y)); then = 'vipguard'; }
     const route = lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
     while(route.length > 2 && route.join(';').length > 580) route.splice(1, 1);
     const end = route[route.length - 1];
@@ -33657,7 +33704,6 @@
     g.setTransform(sc * dpr, 0, 0, sc * dpr, -x0 * sc * dpr, -y0 * sc * dpr);
     // the moving things on the walls, room by room (the side-view decor code, at half size)
     for(const R of LG_ROOMS){ if(R.bb.x0 > vis.x1 + 50 || R.bb.x1 < vis.x0 - 50 || R.y - 200 > vis.y1 || R.bb.y1 < vis.y0) continue; g.save(); g.beginPath(); g.rect(R.x, R.y - LG_FACEH, R.w, LG_FACEH); lgPolyPath(g, R.P, true); g.clip(); lgOldT(g, R); lgDecor(g, now, { x0: R.ox + 70, x1: R.ox + 930 }); g.restore(); }
-    lgGate(g, now);
     const list = []; lgProps(g, now, list, vis);
     const people = [];
     const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
@@ -33665,18 +33711,19 @@
     mp.face = mp.face || LG.lastFace;
     list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
     LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
-    lgHits(all, now); lgGuard(g, all, list, now);
+    lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now);
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
     lgDrawShots(g, all, now); lgDrawTps(g);
     const pn = performance.now();
     LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
     g.font = "12px sans-serif"; g.textAlign = 'center';
-    for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText('❤️', h.x + Math.sin(k * 8) * 4, h.y - k * 30); }
+    for(const h of LG.hearts){ const k = (pn - h.t) / 1400; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillText(h.e || '❤️', h.x + Math.sin(k * 8) * 4, h.y - k * 30); }
     g.globalAlpha = 1; g.textAlign = 'left';
     if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(m.tx, m.ty, 9 + Math.sin(now / 120), 3.5, 0, 0, 7); g.stroke(); }
     if(LG.song === 'hype' || LG.song === 'retro'){ g.save(); g.globalCompositeOperation = 'lighter'; for(let i = 0; i < 3; i++){ const a = now / 800 + i * 2.1; g.globalAlpha = .2; g.drawImage(lgGlow(), LG.cam.x + Math.cos(a) * 260 - 80, LG.cam.y + Math.sin(a * 1.3) * 120 - 60, 160, 90); } g.restore(); }
     lgFog(g, vis);
     if(lgDark()) lgDrawDark(g, W, H, v, mp, now); else LG.light = null;
+    if(LG.scareAt && performance.now() - LG.scareAt < 600){ const k = 1 - (performance.now() - LG.scareAt) / 600; g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(160,0,20,${.45 * k})`; g.fillRect(0, 0, W, H); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const Wc = W / dpr;
     lgMinimap(g, Wc, now, lgDark() ? [] : people);
@@ -33707,9 +33754,11 @@
     const pn = performance.now();
     if(mp.moving && LG.lastP){ const dx = mp.x - LG.lastP.x, dy = mp.y - LG.lastP.y; if(Math.hypot(dx, dy) > .4) LG.dirT = Math.atan2(dy, dx); }
     LG.lastP = { x: mp.x, y: mp.y }; if(LG.dirT == null || (!mp.moving && LG.faceWas !== LG.lastFace)) LG.dirT = (LG.lastFace || 1) < 0 ? Math.PI : 0; LG.faceWas = LG.lastFace;
+    // with a mouse, the beam points at the mouse
+    if(LG.mouseC){ const mv = lgView(), wx = mv.x0 + (LG.mouseC.x - mv.r.left) / mv.sc, wy = mv.y0 + (LG.mouseC.y - mv.r.top) / mv.sc; if(Math.hypot(wx - mp.x, wy - (mp.y - 24)) > 8) LG.dirT = Math.atan2(wy - (mp.y - 24), wx - mp.x); }
     // (the beam swings round to where you're heading instead of snapping there)
     const dt = Math.min(.1, (pn - (LG.dirAt || pn)) / 1000); LG.dirAt = pn;
-    if(LG.dirA == null) LG.dirA = LG.dirT; else { const df = Math.atan2(Math.sin(LG.dirT - LG.dirA), Math.cos(LG.dirT - LG.dirA)); LG.dirA += df * Math.min(1, dt * 7); }
+    if(LG.dirA == null) LG.dirA = LG.dirT; else { const df = Math.atan2(Math.sin(LG.dirT - LG.dirA), Math.cos(LG.dirT - LG.dirA)); LG.dirA += df * Math.min(1, dt * (LG.mouseC ? 14 : 7)); }
     LG.light = { x: mp.x, y: mp.y, a: LG.dirA };
     const c = LG.darkCv || (LG.darkCv = document.createElement('canvas')); if(c.width !== W || c.height !== H){ c.width = W; c.height = H; }
     const x = c.getContext('2d'), k = W / v.vw, sx = (mp.x - v.x0) * k, sy = (mp.y - 24 - v.y0) * k, R = 340 * k, a = LG.dirA;
@@ -33739,6 +33788,7 @@
     if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); } LG.lastFace = dir; } return; }
     if(k === 'lights'){ lgLights(); return; }
     if(k === 'vipguard'){ lgGuardEngage(); return; }
+    if(k === 'wine'){ lgEmote(['🍷', '🥂', '🍗', '🍰'][Math.floor(Math.random() * 4)]); try{ lgSfx('bubble'); }catch(e){} for(let i = 0; i < 3; i++) LG.hearts.push({ x: LG.me.tx + (Math.random() - .5) * 20, y: LG.me.ty - 50, t: performance.now() + i * 150, e: '🍷' }); return; }
     if(k === 'atk'){ const o = (LG.rpsAll || new Map()).get(LG.atkWho); if(o) lgAttackAim(Object.assign({ u: LG.atkWho }, o)); return; }
     if(k === 'sit') lgAct('sit');
     else if(k === 'vend') lgPanel('vend');
@@ -33999,6 +34049,8 @@
     else if(k === 'swoosh'){ lgNoise(t, 0.18, 0.12, 1200); }
     else if(k === 'organ'){ [0, 3, 7, 12, 15, 12, 7, 3].forEach((d, i) => { lgTone('sawtooth', 130.8 * Math.pow(2, d / 12), t + i * 0.16, 0.6, 0.05); lgTone('sine', 261.6 * Math.pow(2, d / 12), t + i * 0.16, 0.6, 0.06); }); }
     else if(k === 'bubble'){ for(let i = 0; i < 8; i++) lgTone('sine', 300 + Math.random() * 500, t + i * 0.07, 0.08, 0.08, 900 + Math.random() * 400); }
+    else if(k === 'boo'){ lgTone('sawtooth', 160, t, 0.3, 0.15, 90); lgNoise(t, 0.2, 0.08, 900); }
+    else if(k === 'scare'){ lgNoise(t, 0.5, 0.35, 2500); lgTone('sawtooth', 1400, t, 0.7, 0.18, 400); lgTone('square', 1480, t, 0.7, 0.12, 380); lgTone('sawtooth', 60, t, 0.6, 0.3, 30); }
     else if(k === 'purr'){ for(let i = 0; i < 6; i++) lgTone('sine', 46, t + i * 0.09, 0.08, 0.25, 40); lgTone('sine', 880, t + 0.1, 0.25, 0.06, 1200); }
   }
   const LG_SCALE = [0, 2, 3, 5, 7, 8, 10];
@@ -34041,10 +34093,10 @@
     const now = trdNow(); if(now - (LG.me.at || 0) < 650) return;
     const p = lgPos(LG.me, now), face = typeof aa === 'number' ? (Math.cos(aa) < 0 ? -1 : 1) : (p.face || LG.lastFace || 1);
     if(LG.me.a === 'sit' || LG.me.a === 'play') LG.me.a = '';
-    aa = typeof aa === 'number' ? Math.round(aa * 100) / 100 : null;
+    aa = typeof aa === 'number' && !LG.noAA ? Math.round(aa * 100) / 100 : null;
     Object.assign(LG.me, { at: now, af: face, ak: 0, aa }); LG.lastFace = face;
     const w = { at: { '.sv': 'timestamp' }, af: face, ak: 0, a: LG.me.a || null, aa };
-    lgWrite(w).then(ok => { if(!ok && aa != null){ delete w.aa; LG.me.aa = null; LG.warned = false; lgWrite(w); } });
+    lgWrite(w, null, aa != null).then(ok => { if(!ok && aa != null){ LG.noAA = true; delete w.aa; LG.me.aa = null; lgWrite(w); } });
     lgSfx(LG_RANGED[lgChar(LG.me.c).k] ? 'zap' : 'swoosh');
   }
   // the flying part of a ranged attack: where it is now (or null when it's gone)
