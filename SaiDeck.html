@@ -342,6 +342,10 @@
   .lg-chars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;} .lg-chars button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid transparent;} .lg-chars button:hover{border-color:rgba(180,140,255,.5);} .lg-chars button.on{border-color:#b48cff;background:rgba(180,140,255,.2);}
   .lg-chars canvas{height:56px;width:auto;image-rendering:pixelated;} .lg-chars span{font:600 10px 'Inter',sans-serif;color:rgba(241,236,255,.8);text-align:center;}
   .lg-cols{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:6px 0 4px;} .lg-cols button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:50%;border:2px solid transparent;} .lg-cols button.on{border-color:#fff;box-shadow:0 0 0 2px #b48cff;}
+  .cs-dev{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--bg-control);border:1px solid var(--border);margin-top:6px;}
+  .cs-dev.me{border-color:rgba(180,140,255,.5);} .cs-devic{font-size:20px;} .cs-dev > div{flex:1;min-width:0;display:flex;flex-direction:column;} .cs-dev b{font:600 12.5px 'Inter',sans-serif;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .cs-dev i{font:normal 11px 'Inter',sans-serif;color:var(--text-dim);}
+  .cs-pwrow[hidden], .cs-acct[hidden], .cs-pwbox[hidden]{display:none !important;}
+  .cs-devnote{margin:6px 0 0 !important;font-size:11px !important;color:var(--text-faint) !important;}
   .acct-note{margin:0;padding:10px 12px;border-radius:10px;background:rgba(120,200,140,.12);border:1px solid rgba(120,200,140,.35);color:var(--text);font:12px/1.45 'Inter',sans-serif;}
   .acct-warn{margin:0;padding:8px 11px;border-radius:9px;background:rgba(255,190,90,.12);border:1px solid rgba(255,190,90,.35);color:var(--text);font:12px/1.4 'Inter',sans-serif;}
   .acct-err{color:#ff8a8a;font:600 12px 'Inter',sans-serif;}
@@ -23350,7 +23354,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 202;                 // ← goes up by one with every published version
+  const SD_BUILD = 203;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24837,7 +24841,7 @@
     try{ chatDisconnect(); }catch(e){}
     for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
     try{ chatPanel.innerHTML = ''; if(CHAT.open) chatRender(); }catch(e){}
-    toast(why === 'other' ? `🔐 Logged out here — ${nm || 'your account'} is being used on another device.` : why === 'self' ? '👋 Logged out of this device.' : '🔐 Logged out — log in again to use the chat.', 4200);
+    toast(why === 'removed' ? '🔐 This device was removed from your account — log in again to use it.' : why === 'other' ? `🔐 Logged out here — the password or username was changed on another device.` : why === 'self' ? '👋 Logged out of this device.' : '🔐 Logged out — log in again to use the chat.', 4200);
   }
   // the login / new account / set-your-password screen (in the chat panel)
   function acctRender(mode){
@@ -24849,7 +24853,7 @@
         <button type="button" class="chat-icon chat-x" title="Close (Esc)" aria-label="Close chat">${ICON_X}</button></div>
       <div class="chat-setup acct-box">
         ${mode === 'setup' ? `<p class="acct-note">🔒 SaiDeck now has logins! Keep your name (or change it) and choose a password — then you can log in on any device, like the SaiDeck website or your phone, and everything comes with you. Your points, items and chats stay exactly as they are, kept safely in SaiDeck's database (Firebase). Your password is checked by Firebase's sign-in service — nobody, not even the admin, can see it.</p>` : ''}
-        ${mode === 'login' && ACCT.out === 'other' ? `<p class="acct-warn">You were logged out here because your account was used on another device.</p>` : ''}
+        ${mode === 'login' && ACCT.out === 'other' ? `<p class="acct-warn">You were logged out here because the password or username was changed on another device.</p>` : ''}${mode === 'login' && ACCT.out === 'removed' ? `<p class="acct-warn">This device was removed from your account in Settings.</p>` : ''}
         ${mode === 'login' && hasId ? `<p class="acct-warn">Logging in switches this device to that account.</p>` : ''}
         <label>Username<input type="text" class="acct-u" maxlength="${CHAT_NAME_MAX}" autocomplete="username" placeholder="e.g. Sai"></label>
         <label>Password<input type="password" class="acct-p" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}" placeholder="${mode === 'login' ? '' : 'at least ' + ACCT_MIN + ' characters'}"></label>
@@ -25226,8 +25230,10 @@
         ${fromSettings ? `<label class="cs-pwrow" hidden>Your password (to change your username)<input type="password" class="cs-pw" autocomplete="current-password"></label>
         <div class="cs-acct" hidden>
           <div style="font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);margin-top:4px">Your login</div>
-          <p style="margin:2px 0 6px">Your username is the name above — use it with your password to log in on any device. Logging in somewhere else logs this device out.</p>
+          <p style="margin:2px 0 6px">Your username is the name above — use it with your password to log in on any device. You can stay logged in on several devices; only one can use SaiDeck at a time (it asks to move the session).</p>
           <div class="chat-row"><button type="button" class="chat-sbtn cs-chpw">Change password…</button><button type="button" class="chat-sbtn cs-out">Log out</button></div>
+          <div style="font:600 11.5px 'Inter',sans-serif;color:var(--text-dim);margin-top:10px">Your devices</div>
+          <div class="cs-devs"></div>
           <div class="cs-pwbox" hidden>
             <label>Current password<input type="password" class="cs-p0" autocomplete="current-password"></label>
             <label>New password<input type="password" class="cs-p1" autocomplete="new-password" placeholder="at least ${ACCT_MIN} characters"></label>
@@ -25268,7 +25274,7 @@
     let hasLogin = false;
     const nameMoved = () => hasLogin && acctNorm(ni.value) !== acctNorm(name);
     if(fromSettings && acBox){
-      acctHasLogin().then(h => { hasLogin = h; acBox.hidden = !h; pwRow.hidden = !nameMoved(); }).catch(() => {});
+      acctHasLogin().then(h => { hasLogin = h; acBox.hidden = !h; pwRow.hidden = !nameMoved(); if(h) devRender(chatPanel.querySelector('.cs-devs')); }).catch(() => {});
       ni.addEventListener('input', () => { pwRow.hidden = !nameMoved(); });
       for(const i of chatPanel.querySelectorAll('.cs-acct input, .cs-pw')){ i.addEventListener('keydown', (e) => e.stopPropagation()); i.addEventListener('keyup', (e) => e.stopPropagation()); }
       pwIn.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); go(); } });
@@ -25276,7 +25282,8 @@
       chatPanel.querySelector('.cs-out').addEventListener('click', () => {
         const ok = chatPanel.querySelector('.cs-out');
         if(ok.dataset.sure !== '1'){ ok.dataset.sure = '1'; ok.textContent = 'Tap again to log out'; setTimeout(() => { ok.dataset.sure = ''; ok.textContent = 'Log out'; }, 3500); return; }
-        acctSignedOut('self');
+        ok.disabled = true;
+        devForget(devId()).finally(() => { chatLS('devReg', null); acctSignedOut('self'); });
       });
       chatPanel.querySelector('.cs-pwgo').addEventListener('click', async () => {
         const b = chatPanel.querySelector('.cs-pwgo'), p0 = chatPanel.querySelector('.cs-p0').value, p1 = chatPanel.querySelector('.cs-p1').value, p2 = chatPanel.querySelector('.cs-p2').value;
@@ -31099,7 +31106,6 @@
   }
   // frozen: nothing goes out from this device. Touch it again and it asks to move the session back here.
   function sessKill(){
-    if(chatLS('acct') === '1'){ SESS.own = false; acctSignedOut('other'); return; }
     if(SESS.dead) return; SESS.dead = true; SESS.own = false; SESS.wasOpen = !!CHAT.open;
     try{ chatToggle(false); }catch(e){} try{ chatDisconnect(); }catch(e){}
     for(const f of [() => tdClose(), () => trdClose(), () => cfClose()]) try{ f(); }catch(e){}
@@ -31125,6 +31131,62 @@
     toast('📲 The session is on this device now.', 2200);
   }
   setInterval(() => { if(!SESS.dead && chatName() && CHAT.watching && document.visibilityState === 'visible') sessCheck(); }, 12000);
+  // ----- your devices (build 203) -----
+  // One account can be logged in on several devices (only one uses it at a time — "Move the session here?").
+  // Each device lists itself at vault/<uid>/dv/<device id> = { n: "Chrome on Windows · website", t: last seen, w };
+  // removing a device in Settings deletes its entry, and that device logs itself out the next time it checks.
+  function devId(){ let d = chatLS('dev'); if(!d || !/^[a-z0-9]{6,30}$/.test(d)){ d = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); chatLS('dev', d); } return d; }
+  function devName(){
+    const ua = navigator.userAgent || '';
+    const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /CrOS/.test(ua) ? 'Chromebook' : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'a device';
+    const br = /Edg\//.test(ua) ? 'Edge' : /OPR\/|Opera/.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'a browser';
+    return `${br} on ${os}`;
+  }
+  const devWhere = () => location.protocol === 'file:' ? 'app' : 'web';
+  const DEV = { at: 0, busy: false };
+  async function devBeat(force){
+    const me = chatUid(); if(!me || !chatName() || !chatLS('rt') || SESS.dead) return;
+    if(!force && Date.now() - DEV.at < 5 * 60000) return;
+    try{
+      const tok = await chatAuth();
+      const r = await fetch(`${CHAT_DB}/vault/${encodeURIComponent(me)}/dv/${devId()}.json?auth=${encodeURIComponent(tok)}`, { method: 'PUT', body: JSON.stringify({ n: devName(), t: { '.sv': 'timestamp' }, w: devWhere() }) });
+      if(r.ok){ DEV.at = Date.now(); chatLS('devReg', me); }
+    }catch(e){}
+  }
+  async function devCheck(){
+    const me = chatUid(); if(DEV.busy || !me || !chatName() || !chatLS('rt') || chatLS('acct') !== '1') return;
+    DEV.busy = true;
+    try{
+      const v = await vaultGet(`vault/${encodeURIComponent(me)}/dv/${devId()}`);
+      if(v == null && chatLS('devReg') === me){ chatLS('devReg', null); acctSignedOut('removed'); return; }
+      await devBeat(v == null);
+    }catch(e){} finally{ DEV.busy = false; }
+  }
+  setInterval(() => { if(document.visibilityState === 'visible') devCheck(); }, 45000);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setTimeout(devCheck, 1500); });
+  setTimeout(devCheck, 6000);
+  async function devForget(id){
+    const me = chatUid(); if(!me) return false;
+    try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/vault/${encodeURIComponent(me)}/dv/${id}.json?auth=${encodeURIComponent(tok)}`, { method: 'DELETE' }); return r.ok; }catch(e){ return false; }
+  }
+  // the list in Settings › profile
+  async function devRender(box){
+    if(!box) return;
+    box.innerHTML = `<p class="cs-devnote">Loading your devices…</p>`;
+    let L = null; try{ await devBeat(true); L = await vaultGet(`vault/${encodeURIComponent(chatUid())}/dv`); }catch(e){}
+    if(!box.isConnected) return;
+    const mine = devId(), rows = Object.entries(L || {}).filter(([k, v]) => v && typeof v.n === 'string').sort((a, b) => (a[0] === mine ? -1 : b[0] === mine ? 1 : (b[1].t || 0) - (a[1].t || 0)));
+    const ic = (n) => /iPhone|Android/.test(n) ? '📱' : /iPad/.test(n) ? '📲' : '💻';
+    box.innerHTML = (rows.length ? rows.map(([k, v]) => `<div class="cs-dev${k === mine ? ' me' : ''}"><span class="cs-devic">${ic(v.n)}</span><div><b>${escapeHtml(v.n)}${v.w === 'web' ? ' · website' : v.w === 'app' ? ' · app file' : ''}</b><i>${k === mine ? 'This device' : 'Last used ' + (v.t ? fmtRelativeTime(v.t) : 'a while ago')}</i></div>${k === mine ? '' : `<button type="button" class="chat-sbtn cs-devx" data-d="${escapeHtml(k)}">Remove</button>`}</div>`).join('') : `<p class="cs-devnote">No devices yet.</p>`)
+      + `<p class="cs-devnote">Removing a device logs it out the next time it's online. If you don't trust a device, change your password too — that logs out every other device right away.</p>`;
+    box.querySelectorAll('.cs-devx').forEach(b => b.addEventListener('click', async () => {
+      if(b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap to remove'; setTimeout(() => { if(b.isConnected){ b.dataset.sure = ''; b.textContent = 'Remove'; } }, 3500); return; }
+      b.disabled = true;
+      if(await devForget(b.dataset.d)){ toast('Device removed — it logs out the next time it opens SaiDeck.', 3000); devRender(box); }
+      else { b.disabled = false; toast("Couldn't remove it — check your connection.", 2400); }
+    }));
+  }
+
   let vaultBusy = false;
   async function mgCheck(){
     if(vaultBusy || !chatName()) return; vaultBusy = true;
