@@ -23380,7 +23380,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 206;                 // ← goes up by one with every published version
+  const SD_BUILD = 207;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33245,6 +33245,8 @@
     w.addEventListener('keydown', (e) => e.stopPropagation()); w.addEventListener('keyup', (e) => e.stopPropagation());
     const cv = w.querySelector('.lg-cv'); LG.cv = cv;
     cv.addEventListener('pointerdown', lgClick);
+    cv.addEventListener('pointermove', (e) => { const i = lgMmIndex(e); if(i !== LG.mmHover){ LG.mmHover = i; cv.style.cursor = i != null ? 'pointer' : ''; } });
+    cv.addEventListener('pointerleave', () => { LG.mmHover = null; cv.style.cursor = ''; });
     cv.addEventListener('keydown', (e) => {
       if(e.key === 'f' || e.key === 'F' || e.key === ' '){ e.preventDefault(); lgAttack(); return; }
       const d = { ArrowLeft: [-220, 0], ArrowRight: [220, 0], ArrowUp: [0, -60], ArrowDown: [0, 60], a: [-220, 0], d: [220, 0], w: [0, -60], s: [0, 60] }[e.key];
@@ -33355,6 +33357,7 @@
     if(e.button !== 0) return;
     LG.cv.focus({ preventScroll: true }); const p = lgPt(e), now = trdNow();
     const tip = LG.win.querySelector('.lg-tip'); if(tip) tip.classList.add('gone');
+    const mi = lgMmIndex(e); if(mi != null){ lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     const cat = lgCatPos(now);
     if(lgSeenAt(cat.x) && Math.abs(p.x - cat.x) < 40 && p.y > cat.y - 50 && p.y < cat.y + 10){ lgWalk(cat.x + (LG.me.x < cat.x ? -60 : 60), cat.y, 'pet'); return; }
@@ -33522,6 +33525,7 @@
     else if(k === 'piano'){ [0, 4, 7, 12, 7, 4].forEach((d, i) => lgTone('triangle', 261.6 * Math.pow(2, d / 12), t + i * 0.12, 0.5, 0.12)); }
     else if(k === 'coin'){ lgTone('square', 988, t, 0.08, 0.08); lgTone('square', 1319, t + 0.08, 0.3, 0.08); lgNoise(t + 0.35, 0.3, 0.06, 2000); }
     else if(k === 'reveal'){ [0, 4, 7, 11, 14].forEach((d, i) => lgTone('sine', 523 * Math.pow(2, d / 12), t + i * 0.07, 0.4, 0.06)); }
+    else if(k === 'teleport'){ [0, 7, 12, 19, 24].forEach((d, i) => lgTone('triangle', 392 * Math.pow(2, d / 12), t + i * 0.05, 0.25, 0.06)); lgNoise(t, 0.4, 0.04, 5000); }
     else if(k === 'zap'){ lgTone('sawtooth', 880, t, 0.25, 0.06, 220); lgNoise(t, 0.2, 0.05, 3000); }
     else if(k === 'swoosh'){ lgNoise(t, 0.18, 0.12, 1200); }
     else if(k === 'organ'){ [0, 3, 7, 12, 15, 12, 7, 3].forEach((d, i) => { lgTone('sawtooth', 130.8 * Math.pow(2, d / 12), t + i * 0.16, 0.6, 0.05); lgTone('sine', 261.6 * Math.pow(2, d / 12), t + i * 0.16, 0.6, 0.06); }); }
@@ -33889,12 +33893,45 @@
       g.font = "800 34px 'Inter',sans-serif"; g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.4)'; g.fillText(ic + ' ???', r.x + 500, 250); g.font = "600 15px 'Inter',sans-serif"; g.fillText(r.vip ? 'only for 1B+ points' : 'walk in to explore', r.x + 500, 280); g.textAlign = 'left';
     }
   }
+  // the map (top right): every room; click one you've found to teleport there
+  const LG_MMIC = { control: '🎛️', lobby: '🏫', class: '📚', cafe: '🥤', arcade: '🎰', market: '📈', vhall: '🦇', vball: '🎹', mclass: '🧪', mobs: '🔭', vip: '💎' };
   function lgMinimap(g, W, now, people){
-    const mw = 200, mh = 14, x0 = W - mw - 12, y0 = 12, s = mw / LG_WW;
-    g.fillStyle = 'rgba(10,8,20,.7)'; roundRectPath(g, x0 - 6, y0 - 6, mw + 12, mh + 12, 7); g.fill();
-    for(const r of LG_ROOMS){ g.fillStyle = !LG.seen.has(r.id) ? 'rgba(255,255,255,.08)' : { n: '#9fd1ff', v: '#c4102a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[r.sch]; g.fillRect(x0 + r.x * s + 1, y0, 1000 * s - 2, mh); }
-    for(const o of people){ g.fillStyle = '#fff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + mh / 2, 2.2, 0, 7); g.fill(); }
-    const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mh / 2, 3.4, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 1; g.stroke();
+    const cw = Math.max(22, Math.min(34, (W - 330) / LG_ROOMS.length)), mw = cw * LG_ROOMS.length, mh = 26, x0 = W - mw - 12, y0 = 12, s = mw / LG_WW;
+    LG.mm = { x0, y0, w: mw, h: mh, cw };
+    g.fillStyle = 'rgba(10,8,20,.78)'; roundRectPath(g, x0 - 6, y0 - 6, mw + 12, mh + 12, 9); g.fill();
+    LG_ROOMS.forEach((r, i) => {
+      const seen = LG.seen.has(r.id), hov = LG.mmHover === i, here = LG.room === r.id;
+      g.fillStyle = !seen ? 'rgba(255,255,255,.07)' : { n: '#9fd1ff', v: '#c4102a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2' }[r.sch];
+      g.globalAlpha = seen ? (hov ? 1 : .55) : 1; roundRectPath(g, x0 + i * cw + 1, y0, cw - 2, mh, 5); g.fill(); g.globalAlpha = 1;
+      if(here){ g.strokeStyle = '#fff'; g.lineWidth = 2; roundRectPath(g, x0 + i * cw + 1, y0, cw - 2, mh, 5); g.stroke(); }
+      g.font = `${Math.round(cw * .5)}px sans-serif`; g.textAlign = 'center'; g.globalAlpha = seen ? 1 : .35; g.fillText(seen ? LG_MMIC[r.id] : (r.vip ? '🔒' : '?'), x0 + i * cw + cw / 2, y0 + mh / 2 + cw * .18); g.globalAlpha = 1;
+    });
+    for(const o of people){ g.fillStyle = '#fff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + mh + 4, 2, 0, 7); g.fill(); }
+    const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mh + 4, 3.2, 0, 7); g.fill();
+    if(LG.mmHover != null){ const r = LG_ROOMS[LG.mmHover]; if(r){ const t = LG.seen.has(r.id) ? (LG.room === r.id ? `📍 ${r.name}` : `✨ Teleport to ${r.name}`) : r.vip ? '🔒 Golden Council Room · 1B+ points' : '❓ Not found yet — walk there first'; g.font = "700 12px 'Inter',sans-serif"; const tw = g.measureText(t).width + 16, tx = Math.min(W - tw / 2 - 8, x0 + LG.mmHover * cw + cw / 2); g.fillStyle = 'rgba(10,8,20,.9)'; roundRectPath(g, tx - tw / 2, y0 + mh + 12, tw, 22, 8); g.fill(); g.fillStyle = '#fff'; g.fillText(t, tx, y0 + mh + 27); } }
+    g.textAlign = 'left';
+  }
+  function lgMmIndex(e){
+    const m = LG.mm; if(!m) return null; const r = LG.cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if(x < m.x0 - 4 || x > m.x0 + m.w + 4 || y < m.y0 - 4 || y > m.y0 + m.h + 10) return null;
+    return Math.max(0, Math.min(LG_ROOMS.length - 1, Math.floor((x - m.x0) / m.cw)));
+  }
+  function lgTeleport(r){
+    if(!r) return;
+    if(!LG.seen.has(r.id)){ toast(r.vip ? '🔒 That room is only for people with more than 1B points.' : `❓ You haven't found that room yet — walk there first, then you can teleport.`, 2600); return; }
+    if(r.vip && !lgRich()){ lgVipNo(); return; }
+    if(LG.room === r.id){ return; }
+    const now = trdNow(); if(now - (LG.tpAt || 0) < 1200) return; LG.tpAt = now;
+    const from = lgPos(LG.me, now), x = r.x + 420 + Math.random() * 160, y = 455 + Math.random() * 50;
+    LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]);
+    Object.assign(LG.me, { x, y, tx: x, ty: y, p: '', t: now, a: '', gm: '' }); LG.pend = null; LG.cam = { x };
+    lgWrite(lgFull()); lgSfx('teleport'); lgHud();
+  }
+  function lgDrawTps(g){
+    const pn = performance.now(); LG.tps = (LG.tps || []).filter(t => pn - t.at < 900);
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for(const t of LG.tps){ const k = (pn - t.at) / 900; if(k < 0) continue; g.globalAlpha = 1 - k; g.fillStyle = '#b48cff'; g.fillRect(t.x - 24 * (1 - k), 0, 48 * (1 - k), t.y); for(let i = 0; i < 10; i++){ const a = i / 10 * 6.28; g.fillStyle = '#ffe27a'; g.beginPath(); g.arc(t.x + Math.cos(a) * 60 * k, t.y - 60 + Math.sin(a) * 30 * k, 3, 0, 7); g.fill(); } }
+    g.restore();
   }
   function lgLoop(){
     cancelAnimationFrame(LG.raf); if(!LG.on || LG.paused) return;
@@ -33925,7 +33962,7 @@
     list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
     lgHits(all, now);
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
-    lgDrawShots(g, all, now);
+    lgDrawShots(g, all, now); lgDrawTps(g);
     const pn = performance.now();
     LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
     g.font = "18px sans-serif"; g.textAlign = 'center';
