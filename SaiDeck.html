@@ -23396,7 +23396,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 214;                 // ← goes up by one with every published version
+  const SD_BUILD = 215;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33159,6 +33159,7 @@
     Object.assign(lgIn('vip', 270, 190), { k: 'gthrone', vip: true }),
     Object.assign(lgIn('control', 120, 250), { k: 'sofa2' }), Object.assign(lgIn('control', 166, 250), { k: 'sofa2' }),
   ];
+  const LG_PLANTS = ['control', 'lobby', 'class', 'cafe', 'arcade', 'vhall', 'vball', 'mclass', 'vip'].flatMap(id => { const r = lgRoomById(id); return [{ x: r.x + 24, y: r.y + 16 }, { x: r.x + r.w - 24, y: r.y + 16 }]; });
   const LG_CTABLES = [lgIn('cafe', 130, 150), lgIn('cafe', 330, 150), lgIn('cafe', 230, 230)];
   const LG_CAUL = lgIn('mclass', 240, 160);
   // slanted pixel furniture (seen from a corner, like the consoles and crates on a ship): k, spot, f = which way it's turned
@@ -34372,7 +34373,7 @@
     c.textAlign = 'left';
   }
   // ----- painting the map (cached in 512-unit chunks) -----
-  const LG_FLOOR = { control: ['#141c34', '#1a2442', 'grid'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', '#8a5a3a', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], arcade: ['#2a1648', '#3a2060', 'carpet'], market: ['#22183e', '#30224f', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#4a3426', '#3a281c', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'], elec: ['#2e3238', '#3a3f46', 'plate'], hall: ['#2c2a33', '#25232b', 'hall'] };
+  const LG_FLOOR = { control: ['#141c34', '#1a2442', 'grid'], lobby: ['#d8d2c4', '#c4bca8', 'check'], class: ['#a0704a', '#8a5a3a', 'wood'], cafe: ['#cfd8e0', '#b8c4d0', 'check'], arcade: ['#2a1648', '#3a2060', 'carpet'], market: ['#22183e', '#30224f', 'check'], vhall: ['#2a1a20', '#4a0f22', 'check'], vball: ['#3a2a2e', '#2a1a20', 'check'], mclass: ['#3a2f6b', '#2a2154', 'check'], mobs: ['#4a3426', '#3a281c', 'wood'], vip: ['#e2b84a', '#c99a2e', 'check'], elec: ['#2e3238', '#3a3f46', 'plate'], hall: ['#36353f', '#2c2b34', 'hall'] };
   const LG_SCHC = { n: '#c4b38c', v: '#c9a24a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2', e: '#ffd166' };
   function lgFloorPat(c, id){
     LG_SPR.fpat = LG_SPR.fpat || {}; let t = LG_SPR.fpat[id];
@@ -34383,7 +34384,7 @@
         else if(f[2] === 'grid'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, 'rgba(87,225,255,.16)'); lgR(x, xx, yy, 1, 32, 'rgba(87,225,255,.16)'); }
         else if(f[2] === 'carpet'){ lgR(x, xx, yy, 32, 32, f[0]); x.fillStyle = f[1]; x.beginPath(); x.moveTo(xx + 16, yy + 4); x.lineTo(xx + 28, yy + 16); x.lineTo(xx + 16, yy + 28); x.lineTo(xx + 4, yy + 16); x.fill(); lgR(x, xx + 15, yy + 15, 2, 2, i ? '#ff5fd2' : '#ffd166'); }
         else if(f[2] === 'plate'){ lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, '#4a5058'); lgR(x, xx, yy, 1, 32, '#4a5058'); for(const [a, b] of [[4, 4], [26, 4], [4, 26], [26, 26]]) lgR(x, xx + a, yy + b, 2, 2, '#5e646c'); }
-        else { lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 1, f[1]); lgR(x, xx, yy, 1, 32, f[1]); }
+        else { lgR(x, xx, yy, 32, 32, f[0]); lgR(x, xx, yy, 32, 2, f[1]); lgR(x, xx, yy, 2, 32, f[1]); lgR(x, xx + 2, yy + 2, 30, 1, '#403f4a'); if(i){ lgR(x, xx + 14, yy + 14, 4, 4, '#2e2d36'); } }
       }
       LG_SPR.fpat[id] = t; }
     return c.createPattern(t, 'repeat');
@@ -34436,7 +34437,18 @@
       if(r.id === 'vhall' && Math.abs(pts[0][0] - (r.x + r.w / 2)) < 30){ const e2 = [d[0] + u[0] * 120, d[1] + u[1] * 120]; c.lineWidth = 112; c.strokeStyle = '#5a0a1a'; c.beginPath(); c.moveTo(d[0] - u[0] * 4, d[1] - u[1] * 4); c.lineTo(e2[0], e2[1]); c.stroke(); c.lineWidth = 100; c.strokeStyle = '#7a0f22'; c.stroke(); }
       c.restore();
     }
-    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.save(); lgPolyPath(c, r.P); c.clip(); lgRoomFloorStuff(c, r); c.restore(); }
+    for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.save(); lgPolyPath(c, r.P); c.clip(); lgRoomFloorStuff(c, r);
+      // ceiling lights: warm pools along the back wall, darker corners
+      const n = Math.max(2, Math.round(r.w / 170)); for(let k = 0; k < n; k++){ const lx = r.x + r.w * (k + .5) / n; lgPool(c, lx, r.y + 34, 120, 70, '255,244,220', .16); lgPool(c, lx, r.y + 6, 60, 20, '255,250,235', .22); }
+      const cx = (r.bb.x0 + r.bb.x1) / 2, cy = (r.bb.y0 + r.bb.y1) / 2, rad = Math.max(r.bb.x1 - r.bb.x0, r.bb.y1 - r.bb.y0) * .62, vg = c.createRadialGradient(cx, cy - 20, rad * .35, cx, cy, rad); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.32)'); c.fillStyle = vg; c.fillRect(r.bb.x0, r.bb.y0, r.bb.x1 - r.bb.x0, r.bb.y1 - r.bb.y0);
+      c.restore(); }
+    // corridor lights: little light strips along both edges, and a glow at every door
+    for(const h of LG_HALLS) for(let k = 1; k < h.length; k++){
+      const a = h[k - 1], b = h[k], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L, nx = -uy, ny = ux;
+      for(let t = 50; t < L - 20; t += 140){ for(const sd of [-1, 1]){ const x = a[0] + ux * t + nx * sd * (LG_HW / 2 - 10), y = a[1] + uy * t + ny * sd * (LG_HW / 2 - 10); if(LG_ROOMS.some(r => lgInPoly(r.P, x, y)) || x < R.x0 - 60 || x > R.x1 + 60 || y < R.y0 - 60 || y > R.y1 + 60) continue;
+        lgPool(c, x, y, 30, 30, '220,235,255', .16); c.save(); c.translate(x, y); c.rotate(Math.atan2(uy, ux)); lgR(c, -8, -2, 16, 4, '#e8f2ff'); lgR(c, -8, -2, 16, 1, '#ffffff'); c.restore(); } }
+    }
+    for(const h of LG_HALLS) for(const e of [h[0], h[h.length - 1]]){ const r = LG_ROOMS.find(q => lgInPoly(q.P, e[0], e[1])); if(r && hitB(r.bb, 200)) lgPool(c, e[0], e[1], 110, 110, '255,245,225', .10); }
     // 3. the furniture on each room's back wall
     for(const r of LG_ROOMS){ if(!hitB({ x0: r.x, x1: r.x + r.w, y0: r.y - H - 20, y1: r.bb.y1 }, 60)) continue; c.save(); c.beginPath(); c.rect(r.x, r.y - H, r.w, H); lgPolyPath(c, r.P, true); c.clip(); lgOldT(c, r); lgRoomPaint(c, Object.assign({}, r, { x: r.ox }), null, 'things'); c.restore(); }
     // 4. a soft shadow along the foot of each wall
@@ -34611,7 +34623,7 @@
         for(let k = 0; k < 3; k++) lgBev(c, -46, -62 + k * 10, 92, 6, '#8a5a3a'); lgBev(c, -42, -64, 6, 34, '#5a3a22'); lgBev(c, 36, -64, 6, 34, '#5a3a22');
         lgBev(c, -48, -32, 96, 10, '#9a6a44'); lgBev(c, -42, -22, 6, 22, '#3a2a20'); lgBev(c, 36, -22, 6, 22, '#3a2a20');
       }, 120, 90); }
-      else if(s.k === 'cbench'){ add(Y + 1, X, () => shadow(X, Y, 40)); S('cbench', X, Y, (c) => { lgBev(c, -40, -30, 80, 10, '#e0784e'); lgR(c, -38, -28, 76, 2, '#ffa880'); lgBev(c, -32, -20, 6, 20, '#6a6a78'); lgBev(c, 26, -20, 6, 20, '#6a6a78'); lgR(c, -36, -2, 72, 2, '#4a4a58'); }, 100, 50); }
+      else if(s.k === 'cbench'){ add(Y + 1, X, () => shadow(X, Y, 30)); S('cstool', X, Y, (c) => { lgBev(c, -4, -24, 8, 22, '#6a6a78'); lgEll(c, 0, -2, 14, 4, '#4a4a58'); lgEll(c, 0, -28, 22, 9, '#7a2a1a'); lgEll(c, 0, -30, 20, 7, '#e0784e'); lgEll(c, -4, -31, 10, 3, '#ffa880'); }, 70, 50); }
       else if(s.k === 'coffin'){ add(Y + 1, X, () => shadow(X, Y, 44)); S('coffin', X, Y, (c) => {
         c.fillStyle = '#4a2418'; c.beginPath(); c.moveTo(-44, -40); c.lineTo(44, -40); c.lineTo(36, 0); c.lineTo(-36, 0); c.fill(); lgR(c, -46, -44, 92, 6, '#6a3424'); lgR(c, -44, -44, 88, 2, '#8a4a30');
         lgR(c, -3, -36, 6, 26, '#e8c35a'); lgR(c, -11, -28, 22, 6, '#e8c35a'); lgR(c, -30, -36, 4, 4, '#c9a24a'); lgR(c, 26, -36, 4, 4, '#c9a24a'); lgR(c, -36, -10, 72, 2, '#2a1008');
@@ -34651,7 +34663,9 @@
       const dx = o.d * .7 * o.f, dy = -o.d * .7, w2 = o.w / 2; g.fillStyle = 'rgba(0,0,0,.32)'; g.beginPath(); g.moveTo(o.x - w2 + 6, o.y + 6); g.lineTo(o.x + w2 + 10, o.y + 6); g.lineTo(o.x + w2 + 10 + dx, o.y + 6 + dy); g.lineTo(o.x - w2 + 6 + dx, o.y + 6 + dy); g.fill();
       lgPx(g, 'iso2:' + o.k + o.f + (o.k === 'console' ? Math.floor(now / 400) % 2 : ''), o.x - o.w / 2 - o.d, o.y - o.h - o.d, o.w + o.d * 2, o.h + o.d + 4, (c) => { c.translate(o.w / 2 + o.d, o.h + o.d); lgDrawIso(c, o, now); }, { P: 2 }); });
     // cafeteria tables
-    for(const t of LG_CTABLES) add(t.y - 2, t.x, () => { shadow(t.x, t.y - 4, 60); lgOldAt(g, t.x, t.y, () => lgPx(g, 'ctable', -64, -52, 128, 56, (c) => { c.translate(64, 52); lgBev(c, -58, -48, 116, 8, '#f4f0e6'); lgR(c, -58, -40, 116, 4, '#c0263b'); lgBev(c, -4, -36, 8, 34, '#7a7a88'); lgBev(c, -22, -4, 44, 4, '#5a5a68'); lgR(c, -40, -54, 14, 6, '#ff8a3a'); lgR(c, 20, -56, 10, 8, '#c8d8e0'); })); });
+    for(const t of LG_CTABLES) add(t.y - 2, t.x, () => { shadow(t.x, t.y - 2, 70); lgOldAt(g, t.x, t.y, () => lgPx(g, 'ctable2', -64, -60, 128, 64, (c) => { c.translate(64, 60);
+      lgBev(c, -6, -34, 12, 32, '#5a3a22'); lgEll(c, 0, -2, 26, 6, '#3a2414'); lgEll(c, 0, -40, 58, 20, '#3a2414'); lgEll(c, 0, -42, 56, 18, '#9a6a3e'); lgEll(c, -8, -45, 34, 9, '#b8844e'); lgR(c, -20, -50, 12, 6, '#ff8a3a'); lgR(c, 10, -48, 10, 8, '#c8d8e0'); })); });
+    for(const p of LG_PLANTS) add(p.y, p.x, () => { shadow(p.x, p.y, 34); lgOldAt(g, p.x, p.y, () => lgPx(g, 'plant2', -40, -92, 80, 96, (c) => { c.translate(40, 92); lgPlant(c, 0, 0, 1.05); })); });
     // the shop counter (the shopkeeper stands behind it) and the people who work here
     { const q = lgO2N(5670, 392), sk = LG_NPCS[1]; add(sk.Y + 4, q.x, () => lgOldAt(g, q.x, sk.Y + 8, () => lgPx(g, 'shopCounter2', -134, -80, 268, 84, (c) => { c.translate(-5536, -316); lgBev(c, 5540, 338, 260, 12, '#c9a24a'); lgBev(c, 5548, 350, 244, 42, '#5a2e7a'); for(let k = 0; k < 4; k++){ const sx = 5576 + k * 62; lgR(c, sx, 362, 18, 18, '#7a4a9a'); lgR(c, sx + 6, 366, 6, 10, '#ffd166'); lgR(c, sx + 2, 370, 14, 2, '#ffd166'); } lgBev(c, 5740, 316, 40, 22, '#3a3a48'); lgR(c, 5746, 320, 28, 8, '#9be37a'); lgR(c, 5750, 330, 20, 4, '#222'); }))); }
     for(const n of LG_NPCS) add(n.Y, n.X, () => lgOldAt(g, n.X, n.Y, () => lgDrawNpc(g, Object.assign({}, n, { x: 0, y: 0 }), now, lgNpcNear(n, now))));
