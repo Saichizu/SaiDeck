@@ -330,6 +330,12 @@
   .lg-cv{display:block;width:100%;aspect-ratio:1000/560;border-radius:10px;cursor:pointer;outline:none;background:#2b1f4a;touch-action:manipulation;}
   .lg-tip.gone{opacity:0;transition:opacity .6s;}
   .lg-tip{position:absolute;left:10px;bottom:8px;font:500 10.5px 'Inter',sans-serif;color:rgba(255,255,255,.6);pointer-events:none;text-shadow:0 1px 3px #000;}
+.lg-ppop{position:absolute;z-index:6;min-width:220px;padding:10px 12px;border-radius:14px;background:rgba(20,16,36,.96);border:1px solid rgba(180,140,255,.45);box-shadow:0 12px 32px rgba(0,0,0,.5);color:#f1ecff;font-family:'Inter',sans-serif;} .lg-ppop > b{display:block;font:800 14px 'Inter',sans-serif;margin:0 22px 8px 0;}
+  .lg-pp-btns{display:flex;flex-direction:column;gap:6px;} .lg-pp-btns .lg-b{justify-content:flex-start;text-align:left;} .lg-pp-btns .lg-b:disabled{opacity:.4;cursor:default;}
+  .lg-pp-gift{display:flex;gap:6px;margin-top:8px;} .lg-pp-gift[hidden]{display:none;} .lg-pp-gift input{width:100px;box-sizing:border-box;padding:6px 8px;border-radius:9px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font:600 13px 'Inter',sans-serif;}
+  .lg-pp-x{all:unset;position:absolute;top:8px;right:10px;cursor:pointer;opacity:.6;font-size:13px;} .lg-pp-x:hover{opacity:1;}
+  .lg-rps{position:absolute;z-index:6;left:50%;top:58px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px);padding:8px 12px;border-radius:14px;background:rgba(20,16,36,.94);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 28px rgba(0,0,0,.45);color:#f1ecff;font:600 13px 'Inter',sans-serif;}
+  .lg-rps .lg-hand{font-size:22px;padding:4px 10px;} .lg-rps i{font-style:normal;opacity:.7;font-size:12px;} .lg-rres{color:#ffd166;}
   .lg-pop{position:absolute;top:12px;right:12px;width:min(380px, calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:14px;border-radius:14px;background:rgba(20,16,36,.96);border:1px solid rgba(180,140,255,.4);box-shadow:0 16px 40px rgba(0,0,0,.5);color:#f1ecff;font-family:'Inter',sans-serif;}
   .lg-pop h4{margin:0 0 6px;font:800 15px 'Inter',sans-serif;} .lg-pop p{margin:4px 0 10px;font-size:12px;color:rgba(241,236,255,.75);} .lg-small{font-size:11px !important;}
   .lg-px{all:unset;position:absolute;top:8px;right:10px;cursor:pointer;font-size:13px;opacity:.7;} .lg-px:hover{opacity:1;}
@@ -23380,7 +23386,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 209;                 // ← goes up by one with every published version
+  const SD_BUILD = 210;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33213,7 +33219,7 @@
   }
   function lgRec(){
     const m = LG.me, user = lgIsUser();
-    return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), p: m.p || null, n: user ? chatName().slice(0, CHAT_NAME_MAX) : lgGuestName(lgUid()), c: m.c, hat: 0, a: m.a || null, s: user ? (m.s || null) : null, gm: m.gm || null, o: user ? null : true };
+    return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), p: m.p || null, n: user ? chatName().slice(0, CHAT_NAME_MAX) : lgGuestName(lgUid()), c: m.c, hat: 0, a: m.a || null, s: user ? (m.s || null) : null, gm: m.gm || null, o: user ? null : true, rw: m.rw || null, rp: m.rp || null, rr: m.rr || null, rt: m.rt || null };
   }
   function lgFull(){ return Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }); }
   // ----- the lounge on screen (built once; stays for the whole visit) -----
@@ -33241,7 +33247,7 @@
         <button type="button" class="lg-b lg-g" data-act="join" title="Make an account to get a character">✨ Get a character</button>
       </div>`;
     LG.win = w;
-    w.addEventListener('keydown', (e) => { if(e.key === 'Escape' && LG.panel){ e.stopPropagation(); lgPanel(''); } });
+    w.addEventListener('keydown', (e) => { if(e.key === 'Escape' && LG.ppop){ e.stopPropagation(); lgPersonClose(); return; } if(e.key === 'Escape' && LG.panel){ e.stopPropagation(); lgPanel(''); } });
     w.addEventListener('keydown', (e) => e.stopPropagation()); w.addEventListener('keyup', (e) => e.stopPropagation());
     const cv = w.querySelector('.lg-cv'); LG.cv = cv;
     cv.addEventListener('pointerdown', lgClick);
@@ -33359,6 +33365,8 @@
     const tip = LG.win.querySelector('.lg-tip'); if(tip) tip.classList.add('gone');
     const mi = lgMmIndex(e); if(mi != null){ lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
+    if(LG.ppop){ lgPersonClose(); return; }
+    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 34 && p.y > q.y - 150 && p.y < q.y + 8 && lgSeenAt(q.x)){ lgPersonPop(o); return; } }
     const cat = lgCatPos(now);
     if(lgSeenAt(cat.x) && Math.abs(p.x - cat.x) < 40 && p.y > cat.y - 50 && p.y < cat.y + 10){ lgWalk(cat.x + (LG.me.x < cat.x ? -60 : 60), cat.y, 'pet'); return; }
     for(const s of LG_SEATS){
@@ -33370,7 +33378,6 @@
       }
     }
     for(const t of LG_THINGS) if(p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h && lgSeenAt(t.x + t.w / 2)){ lgWalk(t.go[0] + (Math.random() - .5) * 30, t.go[1], t.k); return; }
-    for(const o of lgPeople()){ const q = lgPos(o, now); if(Math.abs(p.x - q.x) < 34 && p.y > q.y - 150 && p.y < q.y + 8){ lgEmote('👋'); return; } }
     lgWalk(p.x, p.y < LG_FY0 ? lgPos(LG.me, now).y : p.y, null);
   }
   function lgVipNo(){
@@ -33435,6 +33442,113 @@
   }
   function lgAct(a){ LG.me.a = a; if(a !== 'play') LG.me.gm = ''; lgWrite({ a: a || null, gm: LG.me.gm || null, h: { '.sv': 'timestamp' } }); lgHud(); }
   function lgEmote(e){ Object.assign(LG.me, { e, et: trdNow() }); lgWrite({ e, et: { '.sv': 'timestamp' } }); }
+  // ----- build 210: other people walk (fast) to where their record says, so nobody jumps around on a slow connection -----
+  function lgShow(o, now){
+    const t = lgPos(o, now), pn = performance.now(); LG.disp = LG.disp || new Map();
+    let s = LG.disp.get(o.u);
+    if(!s || pn - s.at > 3000){ LG.disp.set(o.u, { x: t.x, y: t.y, at: pn, p: t }); return t; }
+    const dt = Math.min(.1, (pn - s.at) / 1000); s.at = pn;
+    const dx = t.x - s.x, dy = t.y - s.y, dist = Math.hypot(dx, dy);
+    if(dist > 2600){ LG.tps = (LG.tps || []).concat([{ x: s.x, y: s.y, at: pn }, { x: t.x, y: t.y, at: pn + 120 }]); s.x = t.x; s.y = t.y; s.p = t; return t; }   // (a map teleport: beams at both ends)
+    if(dist < 3){ s.x = t.x; s.y = t.y; s.p = t; return t; }
+    const base = t.moving ? (t.fast ? 480 : 260) : 0, sp = Math.min(2400, base + Math.max(260, dist * 3)), step = Math.min(dist, sp * dt);
+    s.x += dx / dist * step; s.y += dy / dist * step;
+    s.p = { x: s.x, y: s.y, moving: true, fast: sp > 420, face: Math.abs(dx) > 2 ? (dx < 0 ? -1 : 1) : (t.face || 0) };
+    return s.p;
+  }
+  const lgShown = (o, now) => { const s = LG.disp && LG.disp.get(o.u); return s && s.p ? s.p : lgPos(o, now); };
+  // ----- clicking someone: a little card (send points · rock paper scissors · wave) -----
+  const LG_HANDS = { r: '✊', p: '✋', s: '✌️' }, LG_HN = { r: 'Rock', p: 'Paper', s: 'Scissors' };
+  function lgPersonPop(o){
+    lgPersonClose();
+    const st = LG.win.querySelector('.lg-stage'), v = lgView(), cv = LG.cv, q = lgShown(o, trdNow());
+    const el = document.createElement('div'); el.className = 'lg-ppop'; el.setAttribute('role', 'dialog');
+    const nm = String(o.n || 'someone'), guest = !!o.o;
+    el.innerHTML = `<b></b><div class="lg-pp-btns">
+      <button type="button" class="lg-b" data-pp="gift"${guest ? ' disabled title="Guests can\'t get points"' : ''}>💸 Send points</button>
+      <button type="button" class="lg-b" data-pp="rps">✊ Rock Paper Scissors</button>
+      <button type="button" class="lg-b" data-pp="wave">👋 Wave</button></div>
+      <div class="lg-pp-gift" hidden><input type="number" min="1" step="1" value="10" aria-label="Points to send"><button type="button" class="lg-b gp-send">Send</button></div>
+      <button type="button" class="lg-pp-x" aria-label="Close">✕</button>`;
+    el.querySelector('b').textContent = nm; el.querySelector('b').style.color = chatColor(nm);
+    st.appendChild(el);
+    const x = cv.offsetLeft + (q.x - v.x0) * v.sc, y = cv.offsetTop + (q.y - 150) * v.sc;
+    el.style.left = Math.max(8, Math.min(st.clientWidth - el.offsetWidth - 8, x - el.offsetWidth / 2)) + 'px';
+    el.style.top = Math.max(8, y - el.offsetHeight - 6) + 'px';
+    el.addEventListener('pointerdown', (e) => e.stopPropagation());
+    el.querySelector('.lg-pp-x').onclick = lgPersonClose;
+    el.querySelector('[data-pp="wave"]').onclick = () => { lgEmote('👋'); lgPersonClose(); };
+    el.querySelector('[data-pp="rps"]').onclick = () => { lgPersonClose(); lgRpsChallenge(o); };
+    el.querySelector('[data-pp="gift"]').onclick = () => {
+      if(!lgIsUser()){ lgPersonClose(); lgNeedLogin(); return; }
+      const gp = el.querySelector('.lg-pp-gift'); gp.hidden = false; const inp = gp.querySelector('input'); inp.focus(); inp.select();
+      if(!SC.loaded) scLoad();
+      const send = () => giftSend(o.u, nm, Math.round(Number(inp.value)), el).then(() => { const b = el.querySelector('.gp-send'); if(b && b.disabled) lgPersonClose(); });
+      gp.querySelector('.gp-send').onclick = send;
+      inp.onkeydown = (e) => { e.stopPropagation(); if(e.key === 'Enter') send(); if(e.key === 'Escape') lgPersonClose(); };
+    };
+    LG.ppop = el;
+  }
+  function lgPersonClose(){ if(LG.ppop){ LG.ppop.remove(); LG.ppop = null; } }
+  // ----- rock paper scissors: rw = who you're playing, rr = round, rp = your hand, rt = when you asked -----
+  function lgRpsSet(o){ Object.assign(LG.me, o); const w = {}; for(const k of ['rw', 'rp', 'rr', 'rt']) if(k in o) w[k] = o[k] == null || o[k] === '' ? null : o[k]; w.h = { '.sv': 'timestamp' }; lgWrite(w); LG.rpsKey = null; lgRpsUI(); }
+  function lgRpsChallenge(o){
+    if(LG.me.rw && LG.me.rw !== o.u) lgRpsSet({ rw: null, rp: null, rr: null, rt: null });
+    LG.rpsName = String(o.n || 'someone');
+    // they already asked me? then this is a yes
+    if(o.rw === lgUid() && trdNow() - (o.rt || 0) < 45000){ lgRpsSet({ rw: o.u, rp: null, rr: o.rr || 0, rt: Math.floor(trdNow()) - 1500 }); return; }
+    lgRpsSet({ rw: o.u, rp: null, rr: 0, rt: Math.floor(trdNow()) - 1500 }); lgEmote('✊');
+  }
+  function lgRpsWin(a, b){ return a === b ? 0 : ((a === 'r' && b === 's') || (a === 'p' && b === 'r') || (a === 's' && b === 'p')) ? 1 : -1; }
+  // what's going on for one person (works for anyone: used for the hands over everyone's heads)
+  function lgRpsState(u, d, map){
+    if(!d || !d.rw) return null;
+    const q = map.get(d.rw), now = trdNow();
+    if(!q || q.rw !== u) return now - (d.rt || 0) < 45000 ? { k: 'ask', q } : null;
+    const a = d.rr || 0, b = q.rr || 0;
+    if(a === b && d.rp && q.rp) return { k: 'done', q, res: lgRpsWin(d.rp, q.rp) };
+    return { k: d.rp && a >= b ? 'ready' : 'think', q };
+  }
+  function lgRpsTag(g, d, p, now, top){
+    const map = LG.rpsAll; if(!map) return; const st = lgRpsState(d.u, d, map); if(!st) return;
+    const y = top - 30; g.textAlign = 'center';
+    g.fillStyle = 'rgba(255,255,255,.95)'; roundRectPath(g, p.x - 28, y - 30, 56, 40, 14); g.fill(); g.beginPath(); g.moveTo(p.x - 6, y + 10); g.lineTo(p.x, y + 17); g.lineTo(p.x + 6, y + 10); g.fill();
+    if(st.k === 'ask'){ g.font = "16px sans-serif"; g.fillText('✊✋✌️', p.x, y - 4); g.font = "800 10px 'Inter',sans-serif"; g.fillStyle = '#5a2ab0'; g.fillText('play?', p.x, y + 7); }
+    else if(st.k === 'done'){ g.font = "28px sans-serif"; g.fillText(LG_HANDS[d.rp], p.x, y); if(st.res){ g.font = "20px sans-serif"; g.fillText(st.res > 0 ? '👑' : '💫', p.x, y - 34 + Math.sin(now / 200) * 3); } else { g.font = "800 11px 'Inter',sans-serif"; g.fillStyle = '#ffd166'; g.fillText('DRAW', p.x, y - 36); } }
+    else { const b = Math.abs(Math.sin(now / 140)) * 6; g.font = "26px sans-serif"; g.fillText('✊', p.x, y - b); if(st.k === 'ready'){ g.fillStyle = '#3fae6a'; g.beginPath(); g.arc(p.x + 22, y - 24, 8, 0, 7); g.fill(); g.font = "800 11px 'Inter',sans-serif"; g.fillStyle = '#fff'; g.fillText('✓', p.x + 22, y - 20); } }
+    g.textAlign = 'left';
+  }
+  // the card at the top of the lounge for your own game (and for someone asking you)
+  function lgRpsUI(){
+    if(!LG.win) return; const me = lgUid(), map = LG.rpsAll || new Map(), m = LG.me, now = trdNow();
+    let st = m.rw ? lgRpsState(me, Object.assign({}, m, { u: me }), map) : null, key = '', html = '', who = '';
+    if(m.rw){
+      const q = map.get(m.rw); who = String((q && q.n) || LG.rpsName || 'them'); if(q) LG.rpsSeen = now; if(q && q.rw === me) LG.rpsMut = m.rw;
+      const gone = !q && now - Math.max(LG.rpsSeen || 0, m.rt || 0) > 20000, quit = q && q.rw !== me && LG.rpsMut === m.rw, noAns = q && q.rw !== me && LG.rpsMut !== m.rw && now - (m.rt || 0) > 45000;
+      if(gone || quit || noAns){ LG.rpsMut = ''; lgRpsSet({ rw: null, rp: null, rr: null, rt: null }); toast(noAns ? `${bjName(who)} didn't answer — maybe next time.` : `${bjName(who)} left the game.`, 2400); return; }
+      if(!st) st = { k: 'ask' };
+    }
+    if(!m.rw){
+      const inv = [...map.entries()].find(([u, d]) => u !== me && d && d.rw === me && now - (d.rt || 0) < 45000 && !(LG.rpsNo || new Set()).has(u + ':' + d.rt));
+      if(inv){ who = String(inv[1].n || 'someone'); key = 'inv' + inv[0] + inv[1].rt; html = `<span><b></b> wants to play <b>Rock Paper Scissors</b>!</span><button type="button" class="lg-b" data-r="yes">✊ Play</button><button type="button" class="lg-b" data-r="no">No thanks</button>`; st = { k: 'inv', u: inv[0], d: inv[1] }; }
+    } else if(st.k === 'ask'){ key = 'ask'; html = `<span>Waiting for <b></b> to say yes…</span><button type="button" class="lg-b" data-r="quit">Cancel</button>`; }
+    else if(st.k === 'think'){ const q = st.q; if((q.rr || 0) > (m.rr || 0) && m.rp){ key = 'rem' + q.rr; html = `<span><b></b> wants a rematch!</span><button type="button" class="lg-b" data-r="again">🔁 Rematch</button><button type="button" class="lg-b" data-r="quit">Done</button>`; } else { key = 'pick' + (m.rr || 0); html = `<span>vs <b></b> — pick one:</span>${['r', 'p', 's'].map(k => `<button type="button" class="lg-b lg-hand" data-h="${k}" title="${LG_HN[k]}">${LG_HANDS[k]}</button>`).join('')}<button type="button" class="lg-b" data-r="quit">Leave</button>`; } }
+    else if(st.k === 'ready'){ key = 'ready' + (m.rr || 0); html = `<span>You picked ${LG_HANDS[m.rp]} — waiting for <b></b>…</span><button type="button" class="lg-b" data-r="quit">Leave</button>`; }
+    else if(st.k === 'done'){ const q = st.q; key = 'done' + (m.rr || 0); html = `<span>${LG_HANDS[m.rp]} vs ${LG_HANDS[q.rp]} — <b class="lg-rres">${st.res > 0 ? 'You win! 👑' : st.res < 0 ? 'You lose 💫' : 'Draw!'}</b> <i>(vs <b></b>)</i></span><button type="button" class="lg-b" data-r="again">🔁 Rematch</button><button type="button" class="lg-b" data-r="quit">Done</button>`;
+      if(LG.rpsDone !== m.rw + (m.rr || 0)){ LG.rpsDone = m.rw + (m.rr || 0); lgSfx(st.res > 0 ? 'reveal' : 'bubble'); if(st.res > 0) lgEmote('😎'); } }
+    if(key === LG.rpsKey) return; LG.rpsKey = key;
+    let el = LG.win.querySelector('.lg-rps');
+    if(!html){ if(el) el.remove(); return; }
+    if(!el){ el = document.createElement('div'); el.className = 'lg-rps'; el.addEventListener('pointerdown', (e) => e.stopPropagation()); LG.win.querySelector('.lg-stage').appendChild(el); }
+    el.innerHTML = html; el.querySelectorAll('b:not(.lg-rres)').forEach((b, i) => { if(/^(Rock Paper Scissors)$/.test(b.textContent)) return; if(!b.textContent){ b.textContent = bjName(who); b.style.color = chatColor(who); } });
+    el.querySelectorAll('[data-h]').forEach(b => b.onclick = () => { lgRpsSet({ rp: b.dataset.h }); lgSfx('bubble'); });
+    const R = (k, f) => { const b = el.querySelector(`[data-r="${k}"]`); if(b) b.onclick = f; };
+    R('yes', () => { LG.rpsName = who; lgRpsSet({ rw: st.u, rp: null, rr: st.d.rr || 0, rt: Math.floor(trdNow()) - 1500 }); });
+    R('no', () => { (LG.rpsNo = LG.rpsNo || new Set()).add(st.u + ':' + st.d.rt); LG.rpsKey = null; lgRpsUI(); });
+    R('again', () => { const q = map.get(m.rw); lgRpsSet({ rp: null, rr: Math.max((m.rr || 0) + 1, (q && q.rr) || 0) }); });
+    R('quit', () => { const q = map.get(m.rw); if(q && q.rw === me) (LG.rpsNo = LG.rpsNo || new Set()).add(m.rw + ':' + q.rt); LG.rpsMut = ''; lgRpsSet({ rw: null, rp: null, rr: null, rt: null }); });
+    el.animate([{ opacity: 0, transform: 'translate(-50%,-6px)' }, { opacity: 1, transform: 'translate(-50%,0)' }], { duration: 160, easing: 'ease-out' });
+  }
   function lgSay(t){
     t = String(t || '').trim().replace(/\s+/g, ' ').slice(0, 60); if(!t) return;
     if(chatBad(t)){ toast("That has a word that isn't allowed — keep it friendly.", 2400); return; }
@@ -34196,6 +34310,7 @@
       g.fillStyle = 'rgba(255,255,255,.96)'; roundRectPath(g, p.x - bw / 2, by, bw, bh, 10); g.fill(); g.beginPath(); g.moveTo(p.x - 7, by + bh); g.lineTo(p.x, by + bh + 8); g.lineTo(p.x + 7, by + bh); g.fill();
       g.fillStyle = '#1d1530'; lines.forEach((l, i) => g.fillText(l, p.x, by + 20 + i * lh));
     }
+    lgRpsTag(g, d, p, now, top);
     g.textAlign = 'left';
   }
   function lgFog(g, vis){
@@ -34270,9 +34385,10 @@
     const list = []; lgProps(g, now, list, vis);
     const people = [];
     const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
-    for(const o of lgPeople()){ const p = lgPos(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 120 && p.x < vis.x1 + 120) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
+    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 120 && p.x < vis.x1 + 120) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
     mp.face = mp.face || LG.lastFace;
     list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
+    LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
     lgHits(all, now);
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
     lgDrawShots(g, all, now); lgDrawTps(g);
