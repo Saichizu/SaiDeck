@@ -258,6 +258,8 @@
   body.sd-online .chat-panel .chat-x{display:none;}
   body.sd-online .arc-dock{display:none !important;}
   .on-board,.on-games{display:none;}
+  .sd-ohomebtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 10px;border-radius:10px;border:1px solid rgba(180,140,255,.4);background:rgba(180,140,255,.12);color:#fff;font:600 13px 'Inter',sans-serif;cursor:pointer;} .sd-ohomebtn:hover{background:rgba(180,140,255,.25);border-color:#b48cff;} .sd-ohomebtn svg{width:16px;height:16px;fill:currentColor;}
+  @media (max-width:520px){.sd-ohomebtn span{display:none;}}
   .dash-top .sd-update-btn{height:36px;margin-right:4px;} .sd-obar .sd-update-btn{height:34px;}
   @media (max-width:520px){.sd-obar .sd-upd-copy .sd-update-lbl{display:none;}}
   body.sd-online .on-board{display:flex;flex-direction:column;position:fixed;z-index:340;top:68px;bottom:12px;left:12px;width:280px;box-sizing:border-box;padding:16px;gap:10px;
@@ -23356,7 +23358,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 204;                 // ← goes up by one with every published version
+  const SD_BUILD = 205;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25066,9 +25068,10 @@
     let bar = document.querySelector('.sd-obar');
     if(!bar){
       bar = document.createElement('div'); bar.className = 'sd-obar';
-      bar.innerHTML = `<span class="dash-logo"></span><b>SaiDeck <em>Online</em></b><span class="dash-sp"></span><span class="sd-opts" title="Your points — what you can spend in every game"></span>${sdUpdClone()}<button type="button" class="sd-ohome" title="Make videos">🎬<span class="t"> Make videos</span></button>`;
+      bar.innerHTML = `<button type="button" class="sd-ohomebtn" title="Back to the home screen" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg><span>Home</span></button><span class="dash-logo"></span><b>SaiDeck <em>Online</em></b><span class="dash-sp"></span><span class="sd-opts" title="Your points — what you can spend in every game"></span>${sdUpdClone()}<button type="button" class="sd-ohome" title="Make videos">🎬<span class="t"> Make videos</span></button>`;
       try{ bar.querySelector('.dash-logo').appendChild(Object.assign(new Image(), { src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SD_EMBLEM_SVG), alt: '' })); }catch(e){}
       bar.querySelector('.sd-ohome').addEventListener('click', () => dashOpen());
+      bar.querySelector('.sd-ohomebtn').addEventListener('click', () => dashOpen());
       document.body.appendChild(bar);
     }
     if(!document.querySelector('.on-board')){
