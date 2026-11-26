@@ -23396,7 +23396,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 217;                 // ← goes up by one with every published version
+  const SD_BUILD = 218;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33113,12 +33113,12 @@
     { id: 'control', name: 'Control Room', sch: 'c', x: 1150, y: 230, w: 520, p: [[0, 0], [520, 0], [520, 260], [460, 320], [60, 320], [0, 260]], ox: 0 },
     { id: 'lobby', name: 'School Lobby', sch: 'n', x: 400, y: 620, w: 480, p: [[0, 0], [480, 0], [480, 320], [0, 320]], ox: 1000 },
     { id: 'class', name: 'Classroom 1-A', sch: 'n', x: 150, y: 180, w: 480, p: [[0, 0], [480, 0], [480, 250], [0, 250]], ox: 2000 },
-    { id: 'cafe', name: 'Cafeteria', sch: 'n', x: 60, y: 1140, w: 480, p: [[0, 0], [480, 0], [480, 270], [60, 270], [0, 210]], ox: 3000 },
+    { id: 'cafe', name: 'Cafeteria', sch: 'n', x: 60, y: 1240, w: 480, p: [[0, 0], [480, 0], [480, 270], [60, 270], [0, 210]], ox: 3000 },
     { id: 'arcade', name: 'Game Hall', sch: 'a', x: 1840, y: 270, w: 440, p: [[0, 0], [440, 0], [440, 220], [0, 220]], ox: 4000 },
     { id: 'market', name: 'Trading Floor & Shop', sch: 'a', x: 2560, y: 700, w: 460, p: [[0, 0], [460, 0], [460, 230], [400, 290], [0, 290]], ox: 5000 },
     { id: 'vhall', name: 'Vampire Academy · Great Hall', sch: 'v', x: 1150, y: 740, w: 480, p: [[0, 0], [480, 0], [480, 200], [420, 260], [60, 260], [0, 200]], ox: 6000 },
     { id: 'vball', name: 'Vampire Academy · Ballroom', sch: 'v', x: 1840, y: 740, w: 460, p: [[0, 0], [460, 0], [460, 270], [60, 270], [0, 210]], ox: 7000 },
-    { id: 'mclass', name: 'Magic Academy · Potions Class', sch: 'm', x: 800, y: 1320, w: 480, p: [[0, 0], [480, 0], [480, 230], [420, 290], [60, 290], [0, 230]], ox: 8000 },
+    { id: 'mclass', name: 'Magic Academy · Potions Class', sch: 'm', x: 800, y: 1320, w: 510, p: [[0, 0], [510, 0], [510, 230], [450, 290], [60, 290], [0, 230]], ox: 8000 },
     { id: 'mobs', name: 'Magic Academy · Observatory', sch: 'm', x: 1560, y: 1320, w: 460, p: [[0, 0], [460, 0], [460, 210], [400, 270], [0, 270]], ox: 9000 },
     { id: 'vip', name: 'Golden Council Room', sch: 'g', x: 2560, y: 210, w: 440, p: [[0, 0], [440, 0], [440, 200], [380, 260], [0, 260]], ox: 10000, vip: true },
     { id: 'elec', name: 'Electrical', sch: 'e', x: 2300, y: 1300, w: 440, p: [[0, 0], [440, 0], [440, 260], [50, 260], [0, 210]], ox: 11000 },
@@ -33126,21 +33126,22 @@
   // corridors (build 217): every room is a rectangle with at most two cut corners; a corridor always leaves a room
   // straight (sideways through a side wall, or down through the bottom) and only bends 45° once it's well clear
   const LG_HALLS = [
-    [[600, 320], [1180, 320]],                                     // classroom → control
-    [[1010, 320], [1010, 840]],                                    // (down from that corridor to the lobby/great hall one)
-    [[1640, 380], [1870, 380]],                                    // control → game hall
-    [[2250, 380], [2590, 380]],                                    // game hall → golden council (the gate)
-    [[2420, 380], [2420, 880]],                                    // (down past the gate to the ballroom/trading corridor)
-    [[250, 400], [250, 630], [330, 710], [430, 710]],              // classroom → lobby
-    [[850, 840], [1180, 840]],                                     // lobby → great hall
-    [[1600, 840], [1870, 840]],                                    // great hall → ballroom
-    [[2270, 880], [2590, 880]],                                    // ballroom → trading floor
-    [[1390, 970], [1390, 1460]],                                   // great hall (out of the carpet) → down to the academy
-    [[1250, 1460], [1590, 1460]],                                  // potions ↔ observatory
-    [[510, 1300], [610, 1300], [730, 1420], [830, 1420]],          // cafeteria → potions
-    [[1990, 1420], [2330, 1420]],                                  // observatory → electrical
-    [[2870, 960], [2870, 1330], [2810, 1400], [2710, 1400]],       // trading floor → electrical
-  ];
+    [[600, 320], [1180, 320], 112],                                // classroom → control
+    [[1010, 320], [1010, 840], 96],                                // (down from that corridor to the lobby/great hall one)
+    [[1640, 380], [1870, 380], 144],                               // control → game hall
+    [[2250, 380], [2590, 380], 128],                               // game hall → golden council (the gate)
+    [[2420, 380], [2420, 880], 104],                               // (down past the gate to the ballroom/trading corridor)
+    [[250, 400], [250, 630], [330, 710], [430, 710], 112],         // classroom → lobby
+    [[850, 840], [1180, 840], 128],                                // lobby → great hall
+    [[1600, 840], [1870, 840], 152],                               // great hall → ballroom (a grand one)
+    [[2270, 880], [2590, 880], 120],                               // ballroom → trading floor
+    [[1390, 970], [1390, 1452], 128],                              // great hall (out of the carpet) → down to the academy
+    [[1250, 1460], [1590, 1460], 112],                             // potions ↔ observatory
+    [[510, 1420], [830, 1420], 128],                               // cafeteria ↔ potions
+    [[670, 910], [670, 1420], 112],                                // lobby (lockers) → down into the cafeteria/potions corridor (a T)
+    [[1990, 1420], [2330, 1420], 96],                              // observatory → electrical
+    [[2870, 960], [2870, 1330], [2810, 1400], [2710, 1400], 112],  // trading floor → electrical
+  ].map(h => { const w = typeof h[h.length - 1] === 'number' ? h.pop() : LG_HW; h.w = w; return h; });   // (each corridor has its own width)
   const lgRoomById = (id) => LG_ROOMS.find(r => r.id === id);
   const lgInPoly = (P, x, y) => { let c = false; for(let i = 0, j = P.length - 1; i < P.length; j = i++){ const [xi, yi] = P[i], [xj, yj] = P[j]; if((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
   // old side-view spot (x in 0..12000, y around the old floor line 392) → the new map (on that room's back wall)
@@ -33201,7 +33202,7 @@
   const LG_SPAWN = [lgRoomById('control').x + 270, lgRoomById('control').y + 220];
   // ----- the floor: an 8-unit mask (what's floor, which room) and a 16-unit walking grid -----
   const LG_MX = LG_WW / LG_M, LG_MY = LG_WH / LG_M, LG_GX = LG_WW / LG_C, LG_GY = LG_WH / LG_C;
-  function lgTrace(x, sc){ x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = LG_HW * sc; for(const h of LG_HALLS){ x.beginPath(); h.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.stroke(); } for(const r of LG_ROOMS){ x.beginPath(); r.P.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.closePath(); x.fill(); } }
+  function lgTrace(x, sc){ x.lineCap = 'round'; x.lineJoin = 'round'; for(const h of LG_HALLS){ x.lineWidth = h.w * sc; x.beginPath(); h.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.stroke(); } for(const r of LG_ROOMS){ x.beginPath(); r.P.forEach(([a, b], i) => i ? x.lineTo(a * sc, b * sc) : x.moveTo(a * sc, b * sc)); x.closePath(); x.fill(); } }
   const LG_GRID = (() => {
     const c = document.createElement('canvas'); c.width = LG_MX; c.height = LG_MY; const x = c.getContext('2d', { willReadFrequently: true });
     x.fillStyle = x.strokeStyle = '#fff'; lgTrace(x, 1 / LG_M);
@@ -33477,7 +33478,7 @@
     const mw = Math.max(150, Math.min(240, W * .22)), s = mw / LG_WW, mh = LG_WH * s, x0 = W - mw - 14, y0 = 14;
     LG.mm = { x0, y0, w: mw, h: mh, s };
     g.fillStyle = 'rgba(10,8,20,.8)'; roundRectPath(g, x0 - 8, y0 - 8, mw + 16, mh + 16, 10); g.fill();
-    g.save(); g.translate(x0, y0); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = LG_HW * s; g.lineCap = g.lineJoin = 'round'; for(const h of LG_HALLS){ g.beginPath(); h.forEach(([a, b], i) => i ? g.lineTo(a * s, b * s) : g.moveTo(a * s, b * s)); g.stroke(); } g.restore();
+    g.save(); g.translate(x0, y0); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineCap = g.lineJoin = 'round'; for(const h of LG_HALLS){ g.lineWidth = h.w * s; g.beginPath(); h.forEach(([a, b], i) => i ? g.lineTo(a * s, b * s) : g.moveTo(a * s, b * s)); g.stroke(); } g.restore();
     LG_ROOMS.forEach((r, i) => {
       const seen = LG.seen.has(r.id), hov = LG.mmHover === i, here = LG.room === r.id, rx = x0 + r.bb.x0 * s, ry = y0 + r.y * s, rw = (r.bb.x1 - r.bb.x0) * s, rh = r.h * s, mpath = () => lgPolyPath(g, r.P.map(([a, b]) => [x0 + a * s, y0 + b * s]));
       g.fillStyle = !seen ? 'rgba(255,255,255,.08)' : { n: '#9fd1ff', v: '#c4102a', m: '#9d8cff', g: '#e8c35a', c: '#57e1ff', a: '#ff5fd2', e: '#ffd166' }[r.sch];
@@ -34407,8 +34408,8 @@
   // where the corridor lamps go: on the corridor wall (the outline), every ~150 units, spaced from each other and from rooms
   function lgLamps(){
     if(LG_SPR.lamps) return LG_SPR.lamps;
-    const out = [], off = LG_HW / 2 + 6;
-    for(const h of LG_HALLS) for(let k = 1; k < h.length; k++){
+    const out = [];
+    for(const h of LG_HALLS) for(let k = 1, off = h.w / 2 + 6; k < h.length; k++){
       const a = h[k - 1], b = h[k], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L;
       for(let t = 60; t < L - 40; t += 150) for(const sd of [-1, 1]){
         const nx = -uy * sd, ny = ux * sd, x = a[0] + ux * t + nx * off, y = a[1] + uy * t + ny * off;
@@ -34431,7 +34432,7 @@
     c.save(); c.lineJoin = 'round'; c.lineCap = 'round';
     for(const [lw, col] of [[44, '#14101f'], [36, '#55507a'], [10, '#3e3a5c']]){
       c.strokeStyle = col; c.fillStyle = col;
-      c.lineWidth = LG_HW + lw; for(const h of LG_HALLS){ c.beginPath(); h.forEach(([a, b], k) => k ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); }
+      for(const h of LG_HALLS){ c.lineWidth = h.w + lw; c.beginPath(); h.forEach(([a, b], k) => k ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); }
       c.lineWidth = lw; for(const r of LG_ROOMS){ if(!hitB(r.bb, 300)) continue; lgPolyPath(c, r.P); c.stroke(); c.fill(); }
       for(const f of faces){ if(!hitB(f.r.bb, 300)) continue; lgFacePath(c, f, H); c.stroke(); c.fill(); }
     }
@@ -34446,16 +34447,16 @@
       c.save(); c.strokeStyle = '#14101f'; c.lineWidth = 4; c.beginPath(); c.moveTo(f.a[0], f.a[1] - H); c.lineTo(f.b[0], f.b[1] - H); c.stroke(); c.restore();
     }
     // floors: hallways first, then the rooms on top
-    c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = LG_HW; c.strokeStyle = lgFloorPat(c, 'hall');
-    for(const h of LG_HALLS){ c.beginPath(); h.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); } c.restore();
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = lgFloorPat(c, 'hall');
+    for(const h of LG_HALLS){ c.lineWidth = h.w; c.beginPath(); h.forEach(([a, b], i) => i ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); } c.restore();
     for(const r of LG_ROOMS){ if(!hitB(r.bb, 250)) continue; c.fillStyle = lgFloorPat(c, r.id); lgPolyPath(c, r.P); c.fill(); }
     // at each door the room's colour fades out into the dark grey corridor (the great hall carpet carries on down its corridor)
     for(const h of LG_HALLS) for(const end of [0, 1]){
       const pts = end ? h.slice().reverse() : h, r = LG_ROOMS.find(q => lgInPoly(q.P, pts[0][0], pts[0][1])); if(!r || !hitB(r.bb, 300)) continue;
       let d = null, u = null; for(let k = 1; k < pts.length && !d; k++){ const a = pts[k - 1], b = pts[k], L = Math.hypot(b[0] - a[0], b[1] - a[1]); for(let t = 0; t <= L; t += 4){ const x = a[0] + (b[0] - a[0]) * t / L, y = a[1] + (b[1] - a[1]) * t / L; if(!lgInPoly(r.P, x, y)){ d = [x, y]; u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; break; } } }
-      if(!d) continue; const e = [d[0] + u[0] * 90, d[1] + u[1] * 90], col = LG_FLOOR[r.id][0], n = parseInt(col.slice(1), 16), rgb = `${n >> 16},${n >> 8 & 255},${n & 255}`;
-      const gr = c.createLinearGradient(d[0], d[1], e[0], e[1]); gr.addColorStop(0, `rgba(${rgb},.85)`); gr.addColorStop(1, `rgba(${rgb},0)`);
-      c.save(); c.lineCap = 'butt'; c.lineWidth = LG_HW; c.strokeStyle = gr; c.beginPath(); c.moveTo(d[0] - u[0] * 2, d[1] - u[1] * 2); c.lineTo(e[0], e[1]); c.stroke();
+      if(!d) continue; const bend = pts.length > 2 ? Math.hypot(pts[1][0] - d[0], pts[1][1] - d[1]) - h.w / 2 : 1e9, fl = Math.max(16, Math.min(48, bend)); const e = [d[0] + u[0] * fl, d[1] + u[1] * fl], col = LG_FLOOR[r.id][0], n = parseInt(col.slice(1), 16), rgb = `${n >> 16},${n >> 8 & 255},${n & 255}`;
+      const gr = c.createLinearGradient(d[0], d[1], e[0], e[1]); gr.addColorStop(0, `rgba(${rgb},.6)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+      c.save(); c.lineCap = 'butt'; c.lineWidth = h.w; c.strokeStyle = gr; c.beginPath(); c.moveTo(d[0] - u[0] * 2, d[1] - u[1] * 2); c.lineTo(e[0], e[1]); c.stroke();
       if(r.id === 'vhall' && Math.abs(pts[0][0] - (r.x + r.w / 2)) < 30){ const e2 = [d[0] + u[0] * 120, d[1] + u[1] * 120]; c.lineWidth = 112; c.strokeStyle = '#5a0a1a'; c.beginPath(); c.moveTo(d[0] - u[0] * 4, d[1] - u[1] * 4); c.lineTo(e2[0], e2[1]); c.stroke(); c.lineWidth = 100; c.strokeStyle = '#7a0f22'; c.stroke(); }
       c.restore();
     }
