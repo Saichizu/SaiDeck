@@ -23386,7 +23386,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 210;                 // ← goes up by one with every published version
+  const SD_BUILD = 211;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33400,6 +33400,7 @@
     if(k && k.startsWith('g:')){ lgPlay(k.slice(2)); return; }
     if(k === 'studio'){ dashOpen(); return; }
     if(!lgIsUser() && (k === 'vend' || k === 'juke')){ lgNeedLogin(); return; }
+    if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir) lgWalk(cur.x + dir * 4, cur.y, null); LG.lastFace = dir; } return; }
     if(k === 'sit') lgAct('sit');
     else if(k === 'vend') lgPanel('vend');
     else if(k === 'juke') lgPanel('juke');
@@ -33499,6 +33500,21 @@
     if(o.rw === lgUid() && trdNow() - (o.rt || 0) < 45000){ lgRpsSet({ rw: o.u, rp: null, rr: o.rr || 0, rt: Math.floor(trdNow()) - 1500 }); return; }
     lgRpsSet({ rw: o.u, rp: null, rr: 0, rt: Math.floor(trdNow()) - 1500 }); lgEmote('✊');
   }
+  // the duel starts: the one who said yes walks over next to the other; the other turns to face them
+  function lgRpsMeet(q){
+    const now = trdNow(), cur = lgPos(LG.me, now), me = lgUid(), m = LG.me;
+    const iWalk = (m.rt || 0) > (q.rt || 0) || ((m.rt || 0) === (q.rt || 0) && me > q.u);
+    const qx = q.tx ?? q.x, qy = q.ty ?? q.y;
+    if(iWalk){
+      let side = cur.x < qx ? -1 : 1; if(qx + side * 70 < 40 || qx + side * 70 > LG_WW - 40 || (side > 0 && qx + 70 > LG_GATE - 30 && qx < LG_GATE && !lgRich())) side = -side;
+      if(Math.hypot(cur.x - (qx + side * 70), cur.y - qy) > 6) lgWalk(qx + side * 70, qy, 'rpsface');
+      LG.rpsFace = q.u;
+    } else {
+      const qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1;
+      if(!cur.moving) lgWalk(cur.x + dir * 4, cur.y, null);
+      LG.lastFace = dir;
+    }
+  }
   function lgRpsWin(a, b){ return a === b ? 0 : ((a === 'r' && b === 's') || (a === 'p' && b === 'r') || (a === 's' && b === 'p')) ? 1 : -1; }
   // what's going on for one person (works for anyone: used for the hands over everyone's heads)
   function lgRpsState(u, d, map){
@@ -33523,7 +33539,7 @@
     if(!LG.win) return; const me = lgUid(), map = LG.rpsAll || new Map(), m = LG.me, now = trdNow();
     let st = m.rw ? lgRpsState(me, Object.assign({}, m, { u: me }), map) : null, key = '', html = '', who = '';
     if(m.rw){
-      const q = map.get(m.rw); who = String((q && q.n) || LG.rpsName || 'them'); if(q) LG.rpsSeen = now; if(q && q.rw === me) LG.rpsMut = m.rw;
+      const q = map.get(m.rw); who = String((q && q.n) || LG.rpsName || 'them'); if(q) LG.rpsSeen = now; if(q && q.rw === me && LG.rpsMut !== m.rw){ LG.rpsMut = m.rw; lgRpsMeet(q); }
       const gone = !q && now - Math.max(LG.rpsSeen || 0, m.rt || 0) > 20000, quit = q && q.rw !== me && LG.rpsMut === m.rw, noAns = q && q.rw !== me && LG.rpsMut !== m.rw && now - (m.rt || 0) > 45000;
       if(gone || quit || noAns){ LG.rpsMut = ''; lgRpsSet({ rw: null, rp: null, rr: null, rt: null }); toast(noAns ? `${bjName(who)} didn't answer — maybe next time.` : `${bjName(who)} left the game.`, 2400); return; }
       if(!st) st = { k: 'ask' };
