@@ -374,6 +374,60 @@
   .lg-home .lg-cv{width:100%;height:100%;aspect-ratio:auto;border-radius:0;}
   .lg-home .lg-bar{padding:8px 12px 10px;background:rgba(18,13,34,.92);border-top:1px solid rgba(180,140,255,.2);}
   .lg-hud{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:10px;padding:5px 10px;border-radius:10px;background:rgba(10,8,20,.6);color:#f1ecff;font:600 12px 'Inter',sans-serif;max-width:calc(100% - 260px);}
+  /* ----- Sabotrack (build 222) ----- */
+  .sb-hud{position:absolute;inset:0;pointer-events:none;z-index:5;font-family:'Inter',sans-serif;color:#f1ecff;}
+  .sb-hud > *{pointer-events:auto;}
+  .sb-hud [hidden]{display:none !important;}
+  .sb-lobby-btn{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);padding:10px 20px;border-radius:999px;border:2px solid #ff4d6d;background:linear-gradient(135deg,#2a0d1a,#4a0f2a);color:#fff;font:800 15px 'Inter',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(255,77,109,.35);animation:sbPulse 1.8s ease-in-out infinite;}
+  .sb-lobby-btn:hover{background:linear-gradient(135deg,#4a0f2a,#6a1a3a);}
+  @keyframes sbPulse{0%,100%{box-shadow:0 6px 24px rgba(255,77,109,.3);}50%{box-shadow:0 6px 34px rgba(255,77,109,.65);}}
+  .sb-panel{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);width:min(420px,92%);padding:16px 18px;border-radius:14px;background:rgba(16,10,26,.96);border:1px solid rgba(255,77,109,.45);box-shadow:0 12px 40px rgba(0,0,0,.5);}
+  .sb-panel h4{margin:0 0 6px;font-size:18px;} .sb-panel p{margin:0 0 10px;font-size:12.5px;line-height:1.45;color:rgba(241,236,255,.78);}
+  .sb-pl{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;} .sb-pl span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12.5px;} .sb-pl span.host{background:rgba(255,209,102,.18);} .sb-pl i{font-size:12px;opacity:.7;}
+  .sb-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .sb-wait{font-size:12px;opacity:.75;}
+  .sb-go{background:#ff4d6d !important;color:#fff !important;border-color:#ff4d6d !important;} .sb-go[disabled]{opacity:.5;cursor:not-allowed;}
+  .sb-x{position:absolute;right:10px;top:8px;background:none;border:0;color:#f1ecff;font-size:16px;cursor:pointer;opacity:.7;} .sb-x:hover{opacity:1;}
+  .sb-prog{position:absolute;left:10px;top:50px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:10px;background:rgba(10,8,20,.72);font-size:12px;font-weight:700;pointer-events:none;}
+  .sb-prog i{display:block;width:160px;height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;} .sb-prog b{display:block;height:100%;background:linear-gradient(90deg,#35d0b8,#57e1ff);transition:width .4s;}
+  .sb-prog em{font-style:normal;opacity:.85;}
+  .sb-list{position:absolute;left:10px;top:90px;display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:rgba(10,8,20,.66);font-size:12px;max-height:60%;overflow:auto;}
+  .sb-list b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-bottom:2px;} .sb-list .dead, .sb-list .ej{opacity:.55;text-decoration:line-through;} .sb-list .bad{color:#ff8fa3;}
+  .sb-acts{position:absolute;right:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;max-width:330px;}
+  .sb-act{min-width:74px;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:rgba(20,14,32,.88);color:#fff;font:800 13px 'Inter',sans-serif;cursor:pointer;}
+  .sb-act:hover{border-color:#fff;} .sb-act.off{opacity:.4;cursor:default;}
+  .sb-act[data-sb="kill"]{border-color:#ff4d6d;} .sb-act[data-sb="report"]{border-color:#ffd166;} .sb-act[data-sb="portal"]{border-color:#9d6bff;}
+  .sb-gates{width:100%;display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-radius:10px;background:rgba(16,10,26,.95);} .sb-gates b{width:100%;font-size:12px;}
+  .sb-gates button{padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:#24162e;color:#fff;font-size:11.5px;cursor:pointer;} .sb-gates button:hover{background:#3a2048;}
+  .sb-splash{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 30px;border-radius:16px;background:rgba(8,6,14,.88);border:2px solid var(--c,#fff);text-align:center;pointer-events:none;animation:sbIn .35s ease-out;max-width:80%;}
+  .sb-splash b{font-size:28px;color:var(--c,#fff);letter-spacing:.02em;} .sb-splash span{font-size:13.5px;opacity:.85;}
+  @keyframes sbIn{from{transform:translate(-50%,-50%) scale(.7);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+  .sb-meet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94%);padding:16px 18px;border-radius:16px;background:rgba(24,12,20,.97);border:2px solid #ffd166;box-shadow:0 16px 50px rgba(0,0,0,.6);}
+  .sb-meet h4{margin:0 0 12px;font-size:18px;} .sb-meet small{font-size:12px;opacity:.75;font-weight:600;margin-left:6px;}
+  .sb-vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-bottom:12px;}
+  .sb-v{padding:9px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#2a1a24;color:#fff;font:700 13px 'Inter',sans-serif;text-align:left;cursor:pointer;}
+  .sb-v:hover:not([disabled]){border-color:#ffd166;} .sb-v[disabled]{cursor:default;} .sb-v.dead{opacity:.45;} .sb-v.mine{border-color:#ffd166;background:#4a3420;}
+  .sb-mg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);}
+  .sb-mgbox{position:relative;width:min(340px,92%);padding:16px 18px 18px;border-radius:14px;background:#160f22;border:1px solid rgba(87,225,255,.4);display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center;}
+  .sb-mgbox > b{font-size:16px;} .sb-mgbox p{margin:0;font-size:12.5px;opacity:.8;} .sb-mgbox.shake{animation:sbShake .3s;}
+  @keyframes sbShake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .sb-bar{width:100%;height:14px;border-radius:7px;background:rgba(255,255,255,.12);overflow:hidden;} .sb-bar i{display:block;height:100%;width:0;background:#35d0b8;}
+  .sb-hold{padding:12px 26px !important;font-size:15px !important;user-select:none;touch-action:none;}
+  .sb-wires{display:flex;justify-content:space-between;width:100%;} .sb-wires > div{display:flex;flex-direction:column;gap:10px;}
+  .sb-w{width:56px;height:16px;border-radius:4px;border:2px solid rgba(255,255,255,.3);background:var(--c);cursor:pointer;} .sb-w.sel{outline:3px solid #fff;} .sb-w.ok{opacity:.35;box-shadow:0 0 12px var(--c);}
+  .sb-simon{display:grid;grid-template-columns:repeat(2,70px);gap:10px;} .sb-simon button{width:70px;height:70px;border-radius:12px;border:0;background:var(--c);opacity:.45;cursor:pointer;transition:opacity .1s;} .sb-simon button.lit{opacity:1;box-shadow:0 0 20px var(--c);}
+  .sb-track{position:relative;width:100%;height:22px;border-radius:6px;background:rgba(255,255,255,.1);} .sb-track .z{position:absolute;top:0;bottom:0;width:18%;background:rgba(53,208,184,.55);border-radius:6px;} .sb-track .m{position:absolute;top:-3px;bottom:-3px;width:4px;margin-left:-2px;background:#ff4d6d;border-radius:2px;}
+  .sb-code{font-size:20px;letter-spacing:.2em;color:#ffd166;} .sb-screen{font:800 24px monospace;letter-spacing:.3em;padding:6px 14px;border-radius:8px;background:#0a0710;}
+  .sb-keys{display:grid;grid-template-columns:repeat(3,54px);gap:6px;} .sb-keys button{height:42px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#24162e;color:#fff;font:800 16px 'Inter',sans-serif;cursor:pointer;} .sb-keys button:hover{background:#3a2048;}
+  .sb-wave{width:260px;height:80px;border-radius:8px;background:#0a0710;} .sb-sl{width:100%;}
+  .sb-portal{position:absolute;inset:0;pointer-events:none;} .sb-portal .sb-pdim{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(60,10,120,.15),rgba(30,0,60,.75));box-shadow:inset 0 0 120px rgba(157,107,255,.6);animation:sbPortal 3s ease-in-out infinite;}
+  @keyframes sbPortal{0%,100%{opacity:.85;}50%{opacity:1;}}
+  .sb-pbox{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 16px;border-radius:14px;background:rgba(20,6,40,.92);border:1px solid #9d6bff;pointer-events:auto;text-align:center;}
+  .sb-pbox span{font-size:12px;opacity:.8;} .sb-prow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+  .sb-cctv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);}
+  .sb-cbox{position:relative;padding:14px 16px;border-radius:14px;background:#0b0f0c;border:1px solid #35d07a;max-width:96%;} .sb-cbox > b{display:block;margin-bottom:10px;font-size:16px;color:#9fffc4;}
+  .sb-cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,320px));gap:10px;} .sb-cgrid figure{margin:0;position:relative;} .sb-cgrid canvas{width:100%;height:auto;display:block;border-radius:6px;border:1px solid #1e3a28;}
+  .sb-cgrid figcaption{position:absolute;left:6px;top:5px;font:700 11px monospace;color:#dfffe8;text-shadow:0 1px 2px #000;display:flex;align-items:center;gap:5px;}
+  .sb-cgrid .rec{width:8px;height:8px;border-radius:50%;background:#ff2a3a;animation:sbRec 1s steps(2) infinite;} @keyframes sbRec{50%{opacity:0;}}
   .lg-hud .lg-song{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:rgba(241,236,255,.75);}
   .lg-home .lg-g{display:none;} .lg-home.guest .lg-g{display:inline-flex;} .lg-home.guest .lg-u{display:none;}
   .lg-home .lg-tip{bottom:10px;}
@@ -23396,7 +23450,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 221;                 // ← goes up by one with every published version
+  const SD_BUILD = 222;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24011,7 +24065,7 @@
   const chatName = () => (chatLS('name') || '').trim();
   // ----- rooms: "Everyone", or a group chat "g-<code>" -----
   const chatRoom = () => { const r = chatLS('room'); return r && /^g-[a-z0-9-]{3,24}$/.test(r) && CHAT.cfg.rooms !== false ? r : CHAT_ROOM; };
-  const chatRoomLabel = (r) => r === CHAT_ROOM ? 'Everyone' : '#' + r.slice(2);
+  const chatRoomLabel = (r) => r === CHAT_ROOM ? 'Everyone' : r === 'g-sabotrack' ? '🎮 Sabotrack' : '#' + r.slice(2);
   function chatGroups(){ try{ const a = JSON.parse(chatLS('groups') || '[]'); return Array.isArray(a) ? a.filter(x => /^g-[a-z0-9-]{3,24}$/.test(x)) : []; }catch(e){ return []; } }
   function chatCodeClean(s){ return String(s || '').trim().toLowerCase().replace(/^#/, '').replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 24); }
   function chatGoRoom(r){
@@ -24293,11 +24347,11 @@
     if(bar){
       bar.innerHTML = room === CHAT_ROOM
         ? `<span class="chat-room-tag">Everyone</span><span>everyone on SaiDeck sees this</span>`
-        : `<span class="chat-room-tag grp">${escapeHtml(chatRoomLabel(room))}</span><span>group chat · share the code to invite</span><button type="button" class="chat-link chat-back">Back to Everyone</button>`;
+        : `<span class="chat-room-tag grp">${escapeHtml(chatRoomLabel(room))}</span><span>${room === 'g-sabotrack' ? 'the Sabotrack game chat' : 'group chat · share the code to invite'}</span><button type="button" class="chat-link chat-back">Back to Everyone</button>`;
       const back = bar.querySelector('.chat-back'); if(back) back.addEventListener('click', () => chatGoRoom(CHAT_ROOM));
     }
     const ta = chatPanel.querySelector('textarea');
-    if(ta) ta.placeholder = room === CHAT_ROOM ? 'Message everyone…  (Enter to send)' : `Message ${chatRoomLabel(room)}…  (Enter to send)`;
+    if(ta) ta.placeholder = (() => { try{ if(sbIn() && sbDeadU(sbMe())) return '👻 Only other ghosts can see this…'; }catch(e){} return room === CHAT_ROOM ? 'Message everyone…  (Enter to send)' : `Message ${chatRoomLabel(room)}…  (Enter to send)`; })();
     const why = chatBlock(), note = chatPanel.querySelector('.chat-note');
     if(note){ note.hidden = !why; note.textContent = why; }
     if(ta){ ta.disabled = !!why; if(CHAT._grow) CHAT._grow(); }
@@ -24501,14 +24555,14 @@
       <p class="chat-side-p">Type any code (3–24 letters, numbers or dashes). If nobody has used it yet, it's your new group — tell your friends the code so they can join. Anyone with the code can read it.</p>`
       : `<p class="chat-side-p">Group chats are turned off by the admin right now.</p>`}`;
     const list = side.querySelector('.chat-rlist');
-    const rooms = [CHAT_ROOM].concat(groupsOn ? chatGroups() : []);
+    const rooms = [CHAT_ROOM].concat(groupsOn ? ['g-sabotrack'].concat(chatGroups().filter(r => r !== 'g-sabotrack')) : []);
     for(const r of rooms){
       const row = document.createElement('div'); row.className = 'chat-rrow' + (r === cur ? ' cur' : '');
       const b = document.createElement('button'); b.type = 'button'; b.className = 'chat-rgo';
-      b.innerHTML = `<b>${escapeHtml(chatRoomLabel(r))}</b><span>${r === CHAT_ROOM ? 'everyone on SaiDeck' : 'group chat'}${r === cur ? ' · you\'re here' : ''}</span>`;
+      b.innerHTML = `<b>${escapeHtml(chatRoomLabel(r))}</b><span>${r === CHAT_ROOM ? 'everyone on SaiDeck' : r === 'g-sabotrack' ? 'the Sabotrack game chat' : 'group chat'}${r === cur ? ' · you\'re here' : ''}</span>`;
       b.addEventListener('click', () => { if(r !== cur) chatGoRoom(r); else { CHAT.side = null; chatRenderSide(); } });
       row.appendChild(b);
-      if(r !== CHAT_ROOM){
+      if(r !== CHAT_ROOM && r !== 'g-sabotrack'){
         const x = document.createElement('button'); x.type = 'button'; x.className = 'chat-icon chat-rx'; x.title = 'Remove from your list'; x.setAttribute('aria-label', `Remove ${chatRoomLabel(r)} from your list`); x.innerHTML = ICON_X;
         x.addEventListener('click', () => { chatLS('groups', JSON.stringify(chatGroups().filter(g => g !== r))); side.dataset.built = ''; if(r === cur) chatGoRoom(CHAT_ROOM); else chatRenderSide(); });
         row.appendChild(x);
@@ -33236,7 +33290,7 @@
   })();
   const lgTile = (x, y) => { const i = Math.floor(x / LG_C), j = Math.floor(y / LG_C); return i < 0 || j < 0 || i >= LG_GX || j >= LG_GY ? -1 : j * LG_GX + i; };
   const lgVipTile = (i) => (i % LG_GX + .5) * LG_C >= LG_VIPX && (Math.floor(i / LG_GX) + .5) * LG_C < LG_VIPY;
-  const lgOk = (i, rich) => i >= 0 && LG_GRID.W[i] && (rich || !lgVipTile(i));
+  const lgOk = (i, rich) => i >= 0 && LG_GRID.W[i] && (rich || !lgVipTile(i)) && (typeof SB === 'undefined' || !SB.blk || !SB.blk.has(i));
   const lgFloorAt = (x, y) => { const i = Math.floor(x / LG_M), j = Math.floor(y / LG_M); return i >= 0 && j >= 0 && i < LG_MX && j < LG_MY && LG_GRID.G[j * LG_MX + i] === 1; };
   function lgNearest(x, y, rich){
     if(lgOk(lgTile(x, y), rich)) return [x, y];
@@ -33359,7 +33413,7 @@
   }
   function lgRec(){
     const m = LG.me, user = lgIsUser();
-    return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), p: m.p || null, n: user ? chatName().slice(0, CHAT_NAME_MAX) : lgGuestName(lgUid()), c: m.c, hat: 0, a: m.a || null, s: user ? (m.s || null) : null, gm: m.gm || null, o: user ? null : true, rw: m.rw || null, rp: m.rp || null, rr: m.rr || null, rt: m.rt || null };
+    return { x: Math.round(m.x), y: Math.round(m.y), tx: Math.round(m.tx), ty: Math.round(m.ty), p: m.p || null, n: user ? chatName().slice(0, CHAT_NAME_MAX) : lgGuestName(lgUid()), c: m.c, hat: 0, a: m.a || null, s: user ? (m.s || null) : null, gm: m.gm || null, o: user ? null : true, f: m.f > trdNow() ? Math.round(m.f) : null, hv: m.hv != null ? m.hv : null, rw: m.rw || null, rp: m.rp || null, rr: m.rr || null, rt: m.rt || null };
   }
   function lgFull(){ return Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }); }
   // ----- the lounge on screen (built once; stays for the whole visit) -----
@@ -33396,6 +33450,7 @@
     cv.addEventListener('pointermove', (e) => { const i = lgMmIndex(e); if(i !== LG.mmHover){ LG.mmHover = i; cv.style.cursor = i != null ? 'pointer' : ''; } });
     cv.addEventListener('pointerleave', () => { LG.mmHover = null; cv.style.cursor = ''; });
     cv.addEventListener('keydown', (e) => {
+      if(sbIn()){ const k = e.key.toLowerCase(); if(k === 'e'){ e.preventDefault(); sbUse(); return; } if(k === 'q'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd) sbMeeting(bd.u); return; } }
       if(e.key === 'f' || e.key === 'F' || e.key === ' '){ e.preventDefault(); lgAttack(); return; }
       const d = { ArrowLeft: [-110, 0], ArrowRight: [110, 0], ArrowUp: [0, -110], ArrowDown: [0, 110], a: [-110, 0], d: [110, 0], w: [0, -110], s: [0, 110] }[e.key];
       if(!d) return; e.preventDefault(); const p = lgPos(LG.me, trdNow()); lgWalk(p.x + d[0], p.y + d[1], null);
@@ -33532,7 +33587,7 @@
   // you opened a game from the chat: if your character isn't at that machine, it pops over there and gets in line
   function lgGameJoin(g){
     try{
-      if(!LG.on || LG.paused || !lgIsUser() || LG.me.gm === g) return;
+      if(!LG.on || LG.paused || !lgIsUser() || LG.me.gm === g || sbIn()) return;
       const t = LG_THINGS.find(t => t.k === 'g:' + g); if(!t) return;
       const now = trdNow(), from = lgPos(LG.me, now), [x, y] = lgSlotFor(t.go);
       if(Math.hypot(from.x - x, from.y - y) > 6){ LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]); lgSfx('teleport'); }
@@ -33542,6 +33597,7 @@
     }catch(e){}
   }
   function lgTeleport(r){
+    if(sbIn()){ toast('No teleporting during Sabotrack — walk (or sneak through a portal 😈).', 2200); return; }
     if(!r) return;
     if(!LG.seen.has(r.id)){ toast(r.vip ? '🔒 That room is only for people with more than 1B points.' : `❓ You haven't found that room yet — walk there first, then you can teleport.`, 2600); return; }
     if(r.vip && !lgRich()){ lgVipNo(); return; }
@@ -33582,10 +33638,11 @@
     if(e.button !== 0) return;
     LG.cv.focus({ preventScroll: true }); const p = lgPt(e), now = trdNow();
     const tip = LG.win.querySelector('.lg-tip'); if(tip) tip.classList.add('gone');
+    if(SB.inPortal != null) return;
     const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
-    for(const o of lgPeople()){ const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(lgBooTry(o, q, now)) return; if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
+    for(const o of lgPeople()){ if(sbHide(o)) continue; const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(lgBooTry(o, q, now)) return; if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
     const cat = lgCatPos(now);
     if(lgSeenAt(cat.x, cat.y) && Math.abs(p.x - cat.x) < 24 && p.y > cat.y - 30 && p.y < cat.y + 6){ lgWalk(cat.x + (LG.me.x < cat.x ? -34 : 34), cat.y, 'pet'); return; }
     for(const s of LG_SEATS){
@@ -33667,6 +33724,7 @@
     toast(`🔒 The Council Lounge is only for people with more than 1B points right now — you have ${lbNum(Math.max(0, b))}.`, 3200);
   }
   function lgWalk(x, y, then){
+    if(SB.inPortal != null) return; { const G = sbG(); if(sbIn(G) && G.st === 'meet') return; }
     const m = LG.me, now = trdNow(), cur = lgPos(m, now), rich = lgRich();
     if(!rich && x >= LG_VIPIN && y < LG_VIPY){ x = LG_VIPX - 34; y = Math.max(LG_GATEY - 40, Math.min(LG_GATEY + 40, y)); then = 'vipguard'; }
     const route = lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
@@ -33694,7 +33752,7 @@
     if(mp.face) LG.lastFace = mp.face;
     const room = lgRoomAt(mp.x, mp.y);
     if(room && room.id !== LG.room){ LG.room = room.id; if(!LG.seen.has(room.id)){ LG.seen.add(room.id); chatLS('lgSeen3', JSON.stringify([...LG.seen])); lgBanner('✨ You found the ' + room.name + '!'); lgSfx('reveal'); } else lgBanner(room.name); }
-    LG.cam = LG.cam || { x: mp.x, y: mp.y }; LG.cam.x += (mp.x - LG.cam.x) * 0.12; LG.cam.y += (mp.y - LG.cam.y) * 0.12;
+    LG.cam = LG.cam || { x: mp.x, y: mp.y }; { const ct = SB.camAt || mp; LG.cam.x += (ct.x - LG.cam.x) * 0.12; LG.cam.y += (ct.y - LG.cam.y) * 0.12; }
     const v = lgView(), x0 = v.x0, y0 = v.y0, vis = { x0, y0, x1: x0 + v.vw, y1: y0 + v.vh };
     g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#0d0918'; g.fillRect(0, 0, W, H);
     const cs = Math.round(sc * dpr * 100) / 100;
@@ -33710,11 +33768,11 @@
     const list = []; lgProps(g, now, list, vis);
     const people = [];
     const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
-    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x, p.y)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 80 && p.x < vis.x1 + 80 && p.y > vis.y0 - 20 && p.y < vis.y1 + 120) list.push({ y: p.y, d: () => lgDrawChar(g, o, p, now, false) }); }
+    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x, p.y) || sbHide(o)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 80 && p.x < vis.x1 + 80 && p.y > vis.y0 - 20 && p.y < vis.y1 + 120) list.push({ y: p.y, d: () => sbDrawP(g, o, p, now, false) }); }
     mp.face = mp.face || LG.lastFace;
-    list.push({ y: mp.y + .1, d: () => lgDrawChar(g, meD, mp, now, true) });
+    list.push({ y: mp.y + .1, d: () => sbDrawP(g, meD, mp, now, true) });
     LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
-    lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now);
+    lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now); try{ sbDraw(g, now, list, all); }catch(e){ console.warn(e); }
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
     lgDrawShots(g, all, now); lgDrawTps(g);
     const pn = performance.now();
@@ -33730,14 +33788,628 @@
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const Wc = W / dpr;
     lgMinimap(g, Wc, now, lgDark() ? [] : people);
-    if(lgDark()){ g.font = "800 13px 'Inter',sans-serif"; g.textAlign = 'center'; const t = `🔦 ${chatBadName(LG.lt.n || '') ? 'Someone' : (LG.lt.n || 'Someone')} turned off the lights — flip the switch in ⚡ Electrical`; const tw = g.measureText(t).width + 24; g.fillStyle = 'rgba(120,10,20,.85)'; roundRectPath(g, Wc / 2 - tw / 2, H / dpr - 44, tw, 28, 14); g.fill(); g.fillStyle = '#fff'; g.fillText(t, Wc / 2, H / dpr - 25); g.textAlign = 'left'; }
+    if(lgDark()){ g.font = "800 13px 'Inter',sans-serif"; g.textAlign = 'center'; const t = sbDark() ? '⚡ The lights were sabotaged — fix them at the switch in ⚡ Electrical' : `🔦 ${chatBadName(LG.lt.n || '') ? 'Someone' : (LG.lt.n || 'Someone')} turned off the lights — flip the switch in ⚡ Electrical`; const tw = g.measureText(t).width + 24; g.fillStyle = 'rgba(120,10,20,.85)'; roundRectPath(g, Wc / 2 - tw / 2, H / dpr - 44, tw, 28, 14); g.fill(); g.fillStyle = '#fff'; g.fillText(t, Wc / 2, H / dpr - 25); g.textAlign = 'left'; }
     if(LG.banner){ const k = (pn - LG.banner.at) / 2600; if(k > 1) LG.banner = null; else { g.globalAlpha = k < .15 ? k / .15 : k > .8 ? (1 - k) / .2 : 1; g.font = "800 20px 'Inter',sans-serif"; g.textAlign = 'center'; const tw = g.measureText(LG.banner.t).width + 36; g.fillStyle = 'rgba(10,8,20,.78)'; roundRectPath(g, Wc / 2 - tw / 2, 14, tw, 38, 19); g.fill(); g.fillStyle = '#ffe27a'; g.fillText(LG.banner.t, Wc / 2, 40); g.textAlign = 'left'; g.globalAlpha = 1; } }
   }
 
+  // ===================== SABOTRACK (build 222): the lounge's own whodunit =====================
+  // One game at a time, everything under sabo/:
+  //   sabo/game  { id, st: lobby|play|meet|over, host, t, nb (how many saboteurs), pl: {uid: {n, c, j}}, dead: {uid: {t, x, y}},
+  //                ej: {uid: t}, tasks: {uid: {k: true}}, sab: {k: lights|melt, t, a: {u, t}, b: {u, t}}, sabAt, gates: {room: t},
+  //                gu: {uid: n}, em: {uid: true}, meet: {by, t, b, n}, votes: {uid: target|'skip'}, res: {ej, t, n}, mt, mn, win, why }
+  //   sabo/roles/<game>/<uid>  'bad' | 'good'   (you can read your own; saboteurs read each other; everyone after the game)
+  //   sabo/ghost/<game>/<id>   the dead's chat (only the dead can read it until the game's over)
+  //   sabo/hist/<game>         { t, w }  (finished games, so their ghost chat stays in the Sabotrack room)
+  const SB_ROOM = 'g-sabotrack', SB_MIN = 4, SB_KILL_CD = 25000, SB_KILL_R = 70, SB_SAB_CD = 30000, SB_MELT_MS = 45000, SB_GATE_MS = 10000, SB_GATES = 3,
+    SB_DISC = 20000, SB_VOTE = 40000, SB_EACH = 5, SB_PORTAL_R = 34;
+  var SB = { role: '', roleG: '', bad: new Set(), ejRole: {}, allRoles: null, st: '', gid: '', killAt: 0, inPortal: null, peek: null, camAt: null, blk: null, blkKey: '',
+    splash: null, ghosts: new Map(), ghostAt: 0, hud: null, mg: null, meetSeen: 0, resSeen: 0, cctv: false, fAt: 0, voted: '' };
+  const sbG = () => { try{ const L = LIVE.get('sabo/game'); return (L && (L.ready ? L.data : L.pd)) || null; }catch(e){ return null; } };
+  // (if the live line isn't delivering, read it every 1.5 s instead)
+  function sbPoll(){ const L = LIVE.get('sabo/game'); if(L && L.ready) return; if(Date.now() - (SB.pollAt || 0) < 1500 || SB.polling) return; SB.polling = true; SB.pollAt = Date.now(); sbGet('sabo/game').then(d => { const L2 = LIVE.get('sabo/game'); if(L2 && d !== undefined) L2.pd = d; }).finally(() => { SB.polling = false; }); }
+  const sbMe = () => lgUid();
+  const sbPlaying = (g = sbG()) => !!(g && g.id && (g.st === 'play' || g.st === 'meet'));
+  const sbIn = (g = sbG()) => sbPlaying(g) && !!(g.pl && g.pl[sbMe()]);
+  const sbDeadU = (u, g = sbG()) => !!(g && ((g.dead && g.dead[u]) || (g.ej && g.ej[u])));
+  const sbBad = () => SB.role === 'bad' && SB.roleG === (sbG() || {}).id;
+  const sbName = (u, g = sbG()) => { const p = g && g.pl && g.pl[u]; return p && p.n && !chatBadName(p.n) ? p.n : 'Someone'; };
+  const sbAlive = (g = sbG()) => Object.keys((g && g.pl) || {}).filter(u => !sbDeadU(u, g));
+  const sbDark = () => { const g = sbG(); return sbIn(g) && g.sab && g.sab.k === 'lights' && !sbBad() && !sbDeadU(sbMe(), g); };
+  const sbCritical = (g = sbG()) => !!(g && g.sab && g.sab.k === 'melt');
+
+  // ----- places on the map -----
+  const SB_TASKS = [
+    { k: 'mix', room: 'control', dx: 470, dy: 230, n: 'Tune the mix', mg: 'slider', em: '🎚️' },
+    { k: 'wire', room: 'elec', dx: 330, dy: 150, n: 'Fix the wiring', mg: 'wires', em: '🔌' },
+    { k: 'trash', room: 'cafe', dx: 420, dy: 120, n: 'Empty the trash', mg: 'hold', em: '🗑️' },
+    { k: 'brew', room: 'mclass', dx: 110, dy: 200, n: 'Brew the potion', mg: 'simon', em: '🧪' },
+    { k: 'scope', room: 'mobs', dx: 330, dy: 150, n: 'Align the telescope', mg: 'timing', em: '🔭' },
+    { k: 'locker', room: 'lobby', dx: 80, dy: 140, n: 'Open your locker', mg: 'keypad', em: '🔐' },
+    { k: 'organ', room: 'vball', dx: 380, dy: 120, n: 'Play the organ', mg: 'simon', em: '🎹' },
+    { k: 'stock', room: 'market', dx: 120, dy: 220, n: 'Check the stocks', mg: 'timing', em: '📈' },
+    { k: 'board', room: 'class', dx: 400, dy: 110, n: 'Clean the board', mg: 'hold', em: '🧽' },
+    { k: 'slots', room: 'arcade', dx: 380, dy: 170, n: 'Reset the slot machine', mg: 'wires', em: '🎰' },
+  ];
+  // portals (saboteurs only): each one links to a few others
+  const SB_PORTALS = [
+    { room: 'control', dx: 40, dy: 230, to: [1, 4, 10] }, { room: 'class', dx: 440, dy: 200, to: [0, 2] }, { room: 'lobby', dx: 440, dy: 270, to: [1, 3, 4] },
+    { room: 'cafe', dx: 430, dy: 230, to: [2, 5] }, { room: 'vhall', dx: 40, dy: 170, to: [0, 2, 5, 8] }, { room: 'mclass', dx: 450, dy: 180, to: [3, 4, 6] },
+    { room: 'mobs', dx: 40, dy: 220, to: [5, 7] }, { room: 'elec', dx: 400, dy: 200, to: [6, 9] }, { room: 'vball', dx: 420, dy: 220, to: [4, 9, 10] },
+    { room: 'market', dx: 420, dy: 210, to: [7, 8] }, { room: 'arcade', dx: 40, dy: 190, to: [0, 8] },
+  ];
+  // the emergency button (on a table in the middle of the Great Hall), the meltdown consoles (Control Room), the CCTV cameras
+  const SB_SPOTS = {};
+  const SB_CAMS = [
+    { n: '🦇 Great Hall', x: 1390, y: 860 }, { n: '🏫 Lobby corridor', x: 900, y: 700 }, { n: '🎰 Game Hall', x: 2060, y: 380 }, { n: '⚡ Electrical', x: 2520, y: 1420 },
+  ];
+  function sbPlaces(){
+    if(SB.placed) return; SB.placed = true;
+    const fix = (o) => { const p = lgNearest(o.x, o.y, true); o.x = p[0]; o.y = p[1]; return o; };
+    for(const t of SB_TASKS) Object.assign(t, fix(lgIn(t.room, t.dx, t.dy)));
+    for(const q of SB_PORTALS) Object.assign(q, fix(lgIn(q.room, q.dx, q.dy)));
+    SB_SPOTS.btn = lgIn('vhall', 240, 120);
+    SB_SPOTS.meltA = fix(lgIn('control', 60, 200)); SB_SPOTS.meltB = fix(lgIn('control', 460, 200));
+  }
+  // my tasks this game (the same 5 every time you look: picked from the game id)
+  function sbMyTasks(g = sbG()){
+    if(!g || !g.id) return [];
+    const idx = SB_TASKS.map((t, i) => [lgHash(g.id + ':' + sbMe() + ':' + i), i]).sort((a, b) => a[0] - b[0]).slice(0, SB_EACH).map(x => x[1]);
+    return idx.map(i => SB_TASKS[i]);
+  }
+  function sbProgress(g = sbG()){
+    if(!g || !g.pl) return [0, 1];
+    const n = Object.keys(g.pl).length, crew = Math.max(1, n - (g.nb | 0)), total = crew * SB_EACH;
+    let done = 0; for(const v of Object.values(g.tasks || {})) done += Math.min(SB_EACH, Object.keys(v || {}).length);
+    return [Math.min(done, total), total];
+  }
+  // doors: where each corridor leaves a room (for the saboteurs' gates)
+  function sbDoors(){
+    if(SB.doors) return SB.doors; const out = [];
+    for(const h of LG_HALLS) for(const end of [0, 1]){
+      const pts = end ? h.slice().reverse() : h, r = LG_ROOMS.find(r => lgInPoly(r.P, pts[0][0], pts[0][1])); if(!r) continue;
+      const a = pts[0], b = pts[1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+      let d = 0; while(d < L && lgInPoly(r.P, a[0] + u[0] * d, a[1] + u[1] * d)) d += 2;
+      out.push({ room: r.id, x: a[0] + u[0] * (d + 8), y: a[1] + u[1] * (d + 8), u, w: h.w || LG_HW });
+    }
+    return SB.doors = out;
+  }
+  function sbClosed(g = sbG()){ const now = trdNow(), out = []; if(!sbPlaying(g)) return out; for(const [r, t] of Object.entries(g.gates || {})) if(now - t < SB_GATE_MS) out.push(r); return out; }
+  // closed gates block those tiles (my own routes go round them)
+  function sbBlockUpdate(){
+    const shut = sbClosed(), key = shut.sort().join();
+    if(key === SB.blkKey) return; SB.blkKey = key;
+    if(!shut.length){ SB.blk = null; return; }
+    const s = new Set();
+    for(const d of sbDoors()) if(shut.includes(d.room)){
+      const nx = -d.u[1], ny = d.u[0], hw = d.w / 2 + 10;
+      for(let along = -14; along <= 14; along += 4) for(let ac = -hw; ac <= hw; ac += 4){ const i = lgTile(d.x + d.u[0] * along + nx * ac, d.y + d.u[1] * along + ny * ac); if(i >= 0) s.add(i); }
+    }
+    SB.blk = s;
+    // (if I'm walking through one right now, stop on my side of it)
+    try{ const now = trdNow(), cur = lgPos(LG.me, now); if(cur.moving){ const c = lgPathOf(LG.me); if(c.pts.some(p => s.has(lgTile(p[0], p[1]))) || s.has(lgTile(LG.me.tx, LG.me.ty))) lgWalk(LG.me.tx, LG.me.ty); } }catch(e){}
+  }
+
+  // ----- talking to the database -----
+  const sbSv = () => ({ '.sv': 'timestamp' });
+  async function sbPatch(body, quietFail){
+    const ok = await bjPatch(body).catch(() => null);
+    if(!ok && !quietFail) toast('😕 Sabotrack couldn\'t save that — tell Saichizu to publish the newest Firebase rules.', 3200);
+    SB.pollAt = 0; return !!ok;
+  }
+  async function sbGet(path){ try{ const tok = await chatAuth(); const r = await fetch(`${CHAT_DB}/${path}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' }); return r.ok ? await r.json() : undefined; }catch(e){ return undefined; } }
+
+  // ----- lobby: join, leave, start -----
+  function sbNewId(){ return 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  async function sbJoin(){
+    if(!lgIsUser()){ lgNeedLogin(); return; }
+    const g = sbG(), me = sbMe(), mine = { n: chatName().slice(0, CHAT_NAME_MAX), c: LG.me.c | 0, j: sbSv() };
+    const stale = g && g.st === 'lobby' && trdNow() - (g.t || 0) > 3600000;
+    if(!g || !g.id || g.st === 'over' || stale){
+      await sbPatch({ 'sabo/game': { id: sbNewId(), st: 'lobby', host: me, t: sbSv(), pl: { [me]: mine } } });
+    } else if(g.st === 'lobby'){
+      if(Object.keys(g.pl || {}).length >= 15){ toast('Sabotrack is full (15 players).', 2400); return; }
+      await sbPatch({ [`sabo/game/pl/${me}`]: mine });
+    } else { toast('A Sabotrack game is already running — wait for it to finish.', 2600); return; }
+    lgSfx('reveal'); sbHud(true);
+  }
+  async function sbLeave(){
+    const g = sbG(), me = sbMe(); if(!g || g.st !== 'lobby' || !g.pl || !g.pl[me]) return;
+    const rest = Object.keys(g.pl).filter(u => u !== me);
+    if(!rest.length) await sbPatch({ 'sabo/game': null }, true);
+    else await sbPatch(Object.assign({ [`sabo/game/pl/${me}`]: null }, g.host === me ? { 'sabo/game/host': rest[0] } : {}), true);
+    sbHud(true);
+  }
+  // saboteurs like Among Us: 1 for up to 6 players, 2 for 7–9, 3 for 10+
+  const sbBadCount = (n) => n <= 6 ? 1 : n <= 9 ? 2 : 3;
+  async function sbStart(){
+    const g = sbG(), me = sbMe(); if(!g || g.st !== 'lobby' || g.host !== me) return;
+    const ids = Object.keys(g.pl || {}); if(ids.length < SB_MIN){ toast(`Sabotrack needs at least ${SB_MIN} players.`, 2400); return; }
+    const nb = sbBadCount(ids.length), sh = ids.slice(); for(let i = sh.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [sh[i], sh[j]] = [sh[j], sh[i]]; }
+    const roles = {}; sh.forEach((u, i) => roles[u] = i < nb ? 'bad' : 'good');
+    const ok = await sbPatch({ [`sabo/roles/${g.id}`]: roles, 'sabo/game/st': 'play', 'sabo/game/t': sbSv(), 'sabo/game/mt': sbSv(), 'sabo/game/nb': nb, 'sabo/game/mn': 0 });
+    if(ok) lgSfx('reveal');
+  }
+
+  // ----- the game starting, meetings, the end (every client reacts to what changed) -----
+  async function sbWatch(){
+    const g = sbG(), me = sbMe();
+    if(!g || !g.id){ if(SB.st){ SB.st = ''; sbHud(true); } return; }
+    if(g.id !== SB.gid){ SB.gid = g.id; SB.role = ''; SB.roleG = ''; SB.bad = new Set(); SB.ejRole = {}; SB.allRoles = null; SB.meetSeen = 0; SB.resSeen = 0; SB.killAt = 0; SB.voted = ''; SB.gatesUsed = 0; SB.st = ''; }
+    const was = SB.st; SB.st = g.st;
+    const mine = !!(g.pl && g.pl[me]);
+    if(mine && (g.st === 'play' || g.st === 'meet') && SB.roleG !== g.id && !SB.roleBusy){
+      SB.roleBusy = true;
+      const r = await sbGet(`sabo/roles/${g.id}/${me}`); SB.roleBusy = false;
+      if(r === 'bad' || r === 'good'){ SB.role = r; SB.roleG = g.id;
+        if(r === 'bad'){ const all = await sbGet(`sabo/roles/${g.id}`); if(all) SB.bad = new Set(Object.keys(all).filter(u => all[u] === 'bad')); }
+        if(was === 'lobby' || (!was && trdNow() - (g.t || 0) < 15000)) sbOnStart(g); else { sbPlaces(); sbFast(); try{ if(chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){} }
+      }
+    }
+    if(g.st === 'meet' && g.meet && g.meet.n !== SB.meetSeen && mine){ SB.meetSeen = g.meet.n; SB.voted = ''; sbOnMeeting(g); }
+    if(g.res && g.res.n && g.res.n !== SB.resSeen && mine && g.st !== 'meet'){ SB.resSeen = g.res.n; sbOnResult(g); }
+    for(const u of Object.keys(g.ej || {})) if(!SB.ejRole[u] && !SB.ejBusy){ SB.ejBusy = true; const r = await sbGet(`sabo/roles/${g.id}/${u}`); SB.ejBusy = false; if(r) SB.ejRole[u] = r; }
+    if(g.st === 'over' && was !== 'over' && was){ sbOnOver(g); }
+    const deadNow = mine && sbPlaying(g) && sbDeadU(me, g); if(deadNow !== !!SB.wasDead){ SB.wasDead = deadNow; if(deadNow && g.dead && g.dead[me]){ sbSplash('💀 You got sabotaged', 'You\'re a ghost now: you can still do tasks, and chat with the other ghosts.', '#ff4d6d', 4000); lgSfx('scare'); SB.mg && sbMgClose(); } SB.ghostAt = 0; try{ chatRender(); }catch(e){} }
+    if(mine && sbPlaying(g)) sbWinCheck(g);
+  }
+  // line everyone up in the Great Hall: 1 2 3 4 / 5 6 7 8 …
+  function sbHallSpot(g){
+    const ids = Object.keys(g.pl || {}).sort((a, b) => ((g.pl[a].j || 0) - (g.pl[b].j || 0)) || (a < b ? -1 : 1)), i = Math.max(0, ids.indexOf(sbMe()));
+    const R = lgRoomById('vhall'), cols = 5, r = Math.floor(i / cols), c = i % cols;
+    const x = R.x + R.w / 2 + (c - (cols - 1) / 2) * 60, y = R.y + 70 + r * 50 + (r >= 1 ? 60 : 0);
+    return lgNearest(Math.round(x), Math.round(y), true);
+  }
+  function sbTeleport(x, y){
+    const now = trdNow(), from = lgPos(LG.me, now);
+    LG.tps = (LG.tps || []).concat([{ x: from.x, y: from.y, at: performance.now() }, { x, y, at: performance.now() + 120 }]);
+    Object.assign(LG.me, { x, y, tx: x, ty: y, p: '', t: now, a: '', gm: '' }); LG.pend = null; LG.cam = { x, y };
+    const rr = lgRoomAt(x, y); if(rr) LG.seen.add(rr.id);
+    lgWrite(lgFull());
+  }
+  function sbFast(){ const now = trdNow(); LG.me.f = now + 55000; SB.fAt = now; lgWrite({ f: LG.me.f }); }
+  function sbOnStart(g){
+    sbPlaces();
+    const [x, y] = sbHallSpot(g); sbTeleport(x, y); sbFast();
+    SB.killAt = trdNow() - SB_KILL_CD + 15000; SB.sabAt = trdNow() - SB_SAB_CD + 20000;
+    try{ if(chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){}
+    const bad = sbBad(), mates = [...SB.bad].filter(u => u !== sbMe()).map(u => sbName(u, g));
+    sbSplash(bad ? '🔪 You are a SABOTEUR' : '🎧 You are CREW', bad ? (mates.length ? 'Your partner' + (mates.length > 1 ? 's: ' : ': ') + mates.join(', ') + '. ' : '') + 'Kill the crew, sabotage the lounge, don\'t get caught.' : `Finish your tasks around the lounge and find the ${g.nb > 1 ? g.nb + ' saboteurs' : 'saboteur'}.`, bad ? '#ff4d6d' : '#57e1ff', 4500);
+    lgSfx(bad ? 'zap' : 'reveal');
+  }
+  function sbOnMeeting(g){
+    const [x, y] = sbHallSpot(g); sbTeleport(x, y);
+    const b = g.meet.b; sbSplash(b ? '📣 DEAD BODY REPORTED' : '🚨 EMERGENCY MEETING', b ? `${sbName(g.meet.by, g)} found ${sbName(b, g)}.` : `${sbName(g.meet.by, g)} pressed the button.`, '#ffd166', 2600);
+    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); SB.cctv && sbCctv(false);
+  }
+  function sbOnResult(g){
+    const u = g.res.ej;
+    if(!u){ sbSplash('🤷 Nobody was ejected', g.res.tie ? 'It was a tie.' : 'Skipped.', '#cfd8e6', 3000); }
+    else {
+      const show = () => { const r = SB.ejRole[u]; sbSplash(`👋 ${sbName(u, g)} was ejected`, r ? (r === 'bad' ? `${sbName(u, g)} was a Saboteur. 🔪` : `${sbName(u, g)} was not a Saboteur.`) : '', r === 'bad' ? '#ff4d6d' : '#57e1ff', 3500); };
+      if(SB.ejRole[u]) show(); else sbGet(`sabo/roles/${g.id}/${u}`).then(r => { if(r) SB.ejRole[u] = r; show(); });
+    }
+    SB.killAt = trdNow();
+  }
+  async function sbOnOver(g){
+    const all = await sbGet(`sabo/roles/${g.id}`); SB.allRoles = all || null;
+    const bad = Object.keys(all || {}).filter(u => all[u] === 'bad').map(u => sbName(u, g));
+    const mineWon = g.pl && g.pl[sbMe()] ? ((g.win === 'bad') === (SB.role === 'bad')) : null;
+    sbSplash(g.win === 'bad' ? '🔪 SABOTEURS WIN' : '🎧 CREW WINS', (g.why ? g.why + ' ' : '') + (bad.length ? `Saboteur${bad.length > 1 ? 's' : ''}: ${bad.join(', ')}.` : ''), g.win === 'bad' ? '#ff4d6d' : '#57e1ff', 6000);
+    if(mineWon != null){ lgSfx(mineWon ? 'reveal' : 'zap'); lgEmote(mineWon ? '🎉' : '😭'); }
+    if(g.pl && g.pl[sbMe()]){ LG.me.f = 0; lgWrite({ f: 0 }); }
+    sbPortalOut(true); SB.mg && sbMgClose(); SB.cctv && sbCctv(false); SB.ghostAt = 0;
+  }
+  // somebody's won? (anyone in the game can call it; the first one to notice writes it)
+  function sbWinCheck(g){
+    if(SB.winBusy || g.st === 'over') return;
+    const [done, total] = sbProgress(g), now = trdNow(), ids = Object.keys(g.pl || {}), nb = g.nb | 0;
+    const ejBad = Object.keys(g.ej || {}).filter(u => SB.ejRole[u] === 'bad').length, ejKnown = Object.keys(g.ej || {}).every(u => SB.ejRole[u]);
+    const aliveBad = nb - ejBad, aliveAll = ids.filter(u => !sbDeadU(u, g)).length, aliveGood = aliveAll - aliveBad;
+    let win = '', why = '';
+    if(total > 0 && done >= total){ win = 'good'; why = 'Every task got done.'; }
+    else if(ejKnown && aliveBad <= 0){ win = 'good'; why = 'Every saboteur got ejected.'; }
+    else if(ejKnown && aliveBad >= aliveGood && g.st === 'play'){ win = 'bad'; why = 'The saboteurs took over.'; }
+    else if(g.sab && g.sab.k === 'melt' && now - (g.sab.t || 0) > SB_MELT_MS){ win = 'bad'; why = 'The track melted down.'; }
+    if(!win) return;
+    SB.winBusy = true;
+    sbPatch({ 'sabo/game/st': 'over', 'sabo/game/win': win, 'sabo/game/why': why, 'sabo/game/end': sbSv(), [`sabo/hist/${g.id}`]: { t: sbSv(), w: win } }, true).finally(() => { SB.winBusy = false; });
+  }
+
+  // ----- the saboteurs' moves -----
+  function sbNearVictim(g = sbG()){
+    const now = trdNow(), me = lgPos(LG.me, now); let best = null, bd = SB_KILL_R;
+    for(const o of lgPeople()){ if(!g.pl[o.u] || sbDeadU(o.u, g) || SB.bad.has(o.u) || o.hv != null) continue; const q = lgShown(o, now), d = Math.hypot(q.x - me.x, q.y - me.y); if(d < bd){ bd = d; best = { u: o.u, x: q.x, y: q.y }; } }
+    return best;
+  }
+  async function sbKill(){
+    const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play' || sbDeadU(sbMe(), g) || SB.inPortal != null) return;
+    if(trdNow() - SB.killAt < SB_KILL_CD) return;
+    const v = sbNearVictim(g); if(!v){ toast('Get closer to someone first.', 1600); return; }
+    SB.killAt = trdNow();
+    LG.me.at = trdNow(); LG.me.af = v.x < LG.me.x ? -1 : 1;
+    const ok = await sbPatch({ [`sabo/game/dead/${v.u}`]: { t: sbSv(), x: Math.round(v.x), y: Math.round(v.y) } });
+    if(ok){ lgSfx('hit'); const p = lgNearest(v.x, v.y, true); sbTeleport(p[0], p[1]); } else SB.killAt = 0;
+  }
+  async function sbSabotage(k){
+    const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
+    if(g.sab){ toast('Something is already sabotaged.', 1600); return; }
+    if(trdNow() - Math.max(SB.sabAt || 0, g.sabAt || 0) < SB_SAB_CD){ toast('Sabotage is cooling down.', 1600); return; }
+    SB.sabAt = trdNow();
+    await sbPatch({ 'sabo/game/sab': { k, t: sbSv() }, 'sabo/game/sabAt': sbSv() });
+    lgSfx('zap');
+  }
+  async function sbGate(room){
+    const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
+    const used = ((g.gu || {})[sbMe()] | 0); if(used >= SB_GATES){ toast('You\'ve used all your gates.', 1600); return; }
+    await sbPatch({ [`sabo/game/gates/${room}`]: sbSv(), [`sabo/game/gu/${sbMe()}`]: used + 1 });
+    lgSfx('zap'); SB.gatePick = false; sbHud(true);
+  }
+  // fixing: the lights (the switch in Electrical), the meltdown (two people holding both consoles in the Control Room)
+  async function sbFixLights(){ const g = sbG(); if(!sbIn(g) || !g.sab || g.sab.k !== 'lights') return false; await sbPatch({ 'sabo/game/sab': null, 'sabo/game/sabAt': sbSv() }); lgSfx('reveal'); toast('💡 Lights fixed!', 1800); return true; }
+  function sbMeltHold(side){
+    const g = sbG(); if(!sbIn(g) || !sbCritical(g)) return;
+    clearInterval(SB.holdT); SB.holding = side;
+    const beat = () => { const gg = sbG(); if(!sbCritical(gg) || SB.holding !== side){ clearInterval(SB.holdT); return; } const now = trdNow(), p = lgPos(LG.me, now), s = SB_SPOTS[side === 'a' ? 'meltA' : 'meltB']; if(Math.hypot(p.x - s.x, p.y - s.y) > 60){ clearInterval(SB.holdT); SB.holding = null; return; }
+      sbPatch({ [`sabo/game/sab/${side}`]: { u: sbMe(), t: sbSv() } }, true);
+      const o = gg.sab[side === 'a' ? 'b' : 'a']; if(o && now - (o.t || 0) < 2500){ clearInterval(SB.holdT); SB.holding = null; sbPatch({ 'sabo/game/sab': null, 'sabo/game/sabAt': sbSv() }, true); toast('☢️ Meltdown stopped!', 2000); lgSfx('reveal'); } };
+    beat(); SB.holdT = setInterval(beat, 900);
+  }
+  // ----- meetings -----
+  async function sbMeeting(body){
+    const g = sbG(); if(!sbIn(g) || g.st !== 'play' || sbDeadU(sbMe(), g)) return;
+    if(!body && sbCritical(g)){ toast('You can\'t call a meeting during a meltdown!', 2000); return; }
+    if(!body && (g.em || {})[sbMe()]){ toast('You already used your emergency meeting.', 2000); return; }
+    const body2 = { 'sabo/game/st': 'meet', 'sabo/game/meet': { by: sbMe(), t: sbSv(), b: body || '', n: (g.mn | 0) + 1 }, 'sabo/game/mn': (g.mn | 0) + 1, 'sabo/game/votes': null };
+    if(!body) body2[`sabo/game/em/${sbMe()}`] = true;
+    if(g.sab && g.sab.k === 'lights'){ body2['sabo/game/sab'] = null; }
+    await sbPatch(body2);
+  }
+  async function sbVote(target){
+    const g = sbG(); if(!sbIn(g) || g.st !== 'meet' || sbDeadU(sbMe(), g) || SB.voted) return;
+    if(trdNow() - (g.meet.t || 0) < SB_DISC){ toast('Talk first — voting opens in a moment.', 1600); return; }
+    SB.voted = target; await sbPatch({ [`sabo/game/votes/${sbMe()}`]: target }); lgSfx('bubble'); sbHud(true);
+  }
+  function sbMeetTick(g){
+    if(g.st !== 'meet' || !g.meet || SB.resBusy) return;
+    const alive = sbAlive(g), votes = g.votes || {}, now = trdNow(), end = (g.meet.t || 0) + SB_DISC + SB_VOTE;
+    if(!(alive.every(u => votes[u]) || now > end)) return;
+    const tally = {}; for(const u of alive){ const v = votes[u] || 'skip'; tally[v] = (tally[v] || 0) + 1; }
+    const top = Object.entries(tally).sort((a, b) => b[1] - a[1]); const tie = top.length > 1 && top[0][1] === top[1][1];
+    const ej = !tie && top.length && top[0][0] !== 'skip' ? top[0][0] : '';
+    SB.resBusy = true;
+    const body = { 'sabo/game/st': 'play', 'sabo/game/mt': sbSv(), 'sabo/game/meet': null, 'sabo/game/votes': null, 'sabo/game/res': { ej, t: sbSv(), n: g.meet.n, tie: tie || null } };
+    if(ej) body[`sabo/game/ej/${ej}`] = sbSv();
+    // (the one alive player with the smallest id writes it, a few seconds later anyone does — so it always resolves)
+    const first = alive.slice().sort()[0] === sbMe() || now > end + 4000;
+    if(!first){ SB.resBusy = false; return; }
+    sbPatch(body, true).finally(() => setTimeout(() => { SB.resBusy = false; }, 1500));
+  }
+  // ----- the dead -----
+  function sbBodies(g = sbG()){
+    const out = []; if(!sbPlaying(g)) return out;
+    for(const [u, d] of Object.entries(g.dead || {})) if(d && (d.t || 0) > (g.mt || 0) && !(g.ej || {})[u]) out.push({ u, x: d.x, y: d.y, c: ((g.pl || {})[u] || {}).c | 0 });
+    return out;
+  }
+  function sbNearBody(){ const now = trdNow(), me = lgPos(LG.me, now); return sbBodies().find(b => Math.hypot(b.x - me.x, b.y - me.y) < 90); }
+  // (who to leave out when drawing people: hidden in a portal, or a ghost and I'm alive)
+  function sbHide(o){
+    if(o.hv != null) return true;
+    const g = sbG(); if(!sbIn(g)) return false;
+    return sbDeadU(o.u, g) && !sbDeadU(sbMe(), g);
+  }
+  function sbDrawP(g2, o, p, now, me){
+    const G = sbG(), ghost = sbIn(G) && sbDeadU(me ? sbMe() : o.u, G);
+    if(me && SB.inPortal != null) return;
+    if(ghost){ g2.save(); g2.globalAlpha = .45; lgDrawChar(g2, o, p, now, me); g2.restore(); } else lgDrawChar(g2, o, p, now, me);
+  }
+  // ----- drawing the game into the lounge -----
+  function sbDraw(g2, now, list, all, cam){
+    const G = sbG(); if(!sbPlaying(G)) return;
+    sbPlaces(); const pn = performance.now(), mine = sbIn(G);
+    // the emergency button table
+    { const s = SB_SPOTS.btn; list.push({ y: s.y, d: () => {
+      g2.fillStyle = 'rgba(0,0,0,.35)'; g2.beginPath(); g2.ellipse(s.x, s.y, 34, 9, 0, 0, 7); g2.fill();
+      g2.fillStyle = '#3a2216'; g2.fillRect(s.x - 4, s.y - 22, 8, 22);
+      g2.fillStyle = '#5a3424'; g2.beginPath(); g2.ellipse(s.x, s.y - 24, 34, 12, 0, 0, 7); g2.fill(); g2.fillStyle = '#7a4a32'; g2.beginPath(); g2.ellipse(s.x, s.y - 26, 32, 10, 0, 0, 7); g2.fill();
+      g2.fillStyle = '#7a0a14'; g2.beginPath(); g2.ellipse(s.x, s.y - 30, 12, 5, 0, 0, 7); g2.fill();
+      g2.fillStyle = '#ff2a3a'; g2.beginPath(); g2.ellipse(s.x, s.y - 33, 10, 5, 0, Math.PI, 0); g2.fill(); g2.fillRect(s.x - 10, s.y - 33, 20, 3);
+      g2.fillStyle = 'rgba(255,255,255,.5)'; g2.fillRect(s.x - 5, s.y - 37, 4, 2);
+      g2.font = "800 9px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#ffd166'; g2.fillText('EMERGENCY', s.x, s.y - 44); g2.textAlign = 'left';
+    } }); }
+    // portals (everyone sees them; only saboteurs can use them)
+    // (the CCTV can't see the portals)
+    if(!cam) for(const [i, q] of SB_PORTALS.entries()) list.push({ y: q.y - 20, d: () => {
+      g2.save(); g2.translate(q.x, q.y - 4); g2.scale(1, .42);
+      for(let r = 4; r >= 0; r--){ g2.fillStyle = ['#1a0630', '#3a0f6a', '#6a2acb', '#9d6bff', '#d8c2ff'][r]; g2.beginPath(); g2.arc(0, 0, 8 + r * 4 + Math.sin(pn / 300 + r) * 1.5, 0, 7); g2.fill(); }
+      g2.rotate(pn / 600); g2.strokeStyle = 'rgba(255,255,255,.5)'; g2.lineWidth = 2; g2.beginPath(); g2.arc(0, 0, 14, 0, 4); g2.stroke(); g2.restore();
+      // someone peeking out of this one
+      for(const a of all) if(a.d && a.d.hv === i && a.u !== sbMe()){ g2.save(); g2.beginPath(); g2.rect(q.x - 40, q.y - 90, 80, 84); g2.clip(); g2.translate(0, 40 + Math.sin(pn / 200) * 3); lgDrawChar(g2, Object.assign({}, a.d, { n: '', m: '' }), { x: q.x, y: q.y, face: 1 }, now, false); g2.restore(); }
+    } });
+    // bodies (until the next meeting)
+    for(const b of sbBodies(G)) list.push({ y: b.y, d: () => {
+      g2.fillStyle = 'rgba(150,0,20,.55)'; g2.beginPath(); g2.ellipse(b.x + 6, b.y - 2, 26, 7, 0, 0, 7); g2.fill();
+      g2.save(); g2.translate(b.x - 18, b.y - 6); g2.rotate(-Math.PI / 2); lgDrawChar(g2, { c: b.c, n: '' }, { x: 0, y: 0, face: 1 }, now, false); g2.restore();
+      g2.font = '13px sans-serif'; g2.textAlign = 'center'; g2.fillText('🦴', b.x + 22, b.y - 4); g2.textAlign = 'left';
+    } });
+    // closed gates
+    const shut = sbClosed(G);
+    if(shut.length) for(const d of sbDoors()) if(shut.includes(d.room)) list.push({ y: d.y + 6, d: () => {
+      const nx = -d.u[1], ny = d.u[0], hw = d.w / 2 + 4;
+      g2.save(); g2.lineCap = 'round';
+      g2.strokeStyle = '#1a1a24'; g2.lineWidth = 14; g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke();
+      g2.strokeStyle = '#6b7385'; g2.lineWidth = 10; g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke();
+      g2.strokeStyle = '#ffd166'; g2.lineWidth = 3; g2.setLineDash([8, 8]); g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke(); g2.restore();
+    } });
+    if(!mine) return;
+    // my tasks: a yellow ! over each one not done yet
+    const done = (G.tasks || {})[sbMe()] || {};
+    if(G.st === 'play') for(const t of sbMyTasks(G)) if(!done[t.k]){ const b = Math.sin(pn / 250) * 3; g2.font = "900 18px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#000'; g2.fillText('!', t.x + 1, t.y - 31 + b); g2.fillStyle = '#ffd166'; g2.fillText('!', t.x, t.y - 32 + b); g2.font = '13px sans-serif'; g2.fillText(t.em, t.x, t.y - 8); g2.textAlign = 'left'; }
+    // the meltdown consoles
+    if(sbCritical(G)) for(const k of ['meltA', 'meltB']){ const s = SB_SPOTS[k], on = Math.floor(pn / 300) % 2; g2.fillStyle = on ? '#ff2a3a' : '#7a0a14'; g2.fillRect(s.x - 14, s.y - 34, 28, 26); g2.fillStyle = '#e8ecf4'; g2.font = "800 9px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillText('HOLD', s.x, s.y - 18); g2.textAlign = 'left'; }
+  }
+
+  // ----- what I can do right now (the action buttons) -----
+  function sbNearTask(){ const G = sbG(), now = trdNow(), me = lgPos(LG.me, now), done = ((G.tasks || {})[sbMe()]) || {}; return sbMyTasks(G).find(t => !done[t.k] && Math.hypot(t.x - me.x, t.y - me.y) < 60); }
+  function sbNearPortal(){ const now = trdNow(), me = lgPos(LG.me, now); let best = -1, bd = SB_PORTAL_R; SB_PORTALS.forEach((q, i) => { const d = Math.hypot(q.x - me.x, q.y - me.y); if(d < bd){ bd = d; best = i; } }); return best; }
+  function sbNearMelt(){ const now = trdNow(), me = lgPos(LG.me, now); for(const [k, s] of [['a', SB_SPOTS.meltA], ['b', SB_SPOTS.meltB]]) if(Math.hypot(s.x - me.x, s.y - me.y) < 60) return k; return null; }
+  function sbNearBtn(){ const now = trdNow(), me = lgPos(LG.me, now), s = SB_SPOTS.btn; return Math.hypot(s.x - me.x, s.y - me.y) < 80; }
+  async function sbUse(){
+    const G = sbG(); if(!sbIn(G) || G.st !== 'play') return;
+    if(SB.inPortal != null) return;
+    const dead = sbDeadU(sbMe(), G);
+    if(!dead && sbNearBtn()){ sbMeeting(''); return; }
+    const k = sbNearMelt(); if(k && sbCritical(G) && !sbBad() && !dead){ sbMeltHold(k); toast('Holding… someone else needs to hold the other console!', 1800); return; }
+    const t = sbNearTask(); if(t && !sbBad()){ sbMg(t); return; }
+    if(t && sbBad()){ toast('🤫 You\'re a saboteur — you can only pretend to do tasks.', 1800); return; }
+    toast('Nothing to use here.', 1200);
+  }
+
+  // ----- the HUD (DOM over the lounge) -----
+  function sbHudEl(){
+    if(SB.hud && SB.hud.isConnected) return SB.hud;
+    const st = LG.win && LG.win.querySelector('.lg-stage'); if(!st) return null;
+    const h = document.createElement('div'); h.className = 'sb-hud';
+    h.innerHTML = `<div class="sb-prog" hidden><span>Mission progress</span><i><b></b></i><em></em></div>
+      <div class="sb-list" hidden></div>
+      <div class="sb-acts" hidden></div>
+      <button type="button" class="sb-lobby-btn" hidden></button>
+      <div class="sb-panel" hidden></div>
+      <div class="sb-splash" hidden><b></b><span></span></div>
+      <div class="sb-meet" hidden></div>
+      <div class="sb-mg" hidden></div>
+      <div class="sb-portal" hidden></div>
+      <div class="sb-cctv" hidden></div>`;
+    st.appendChild(h); SB.hud = h;
+    h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; sbHud(true); });
+    h.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-sb]'); if(!b) return; const a = b.dataset.sb;
+      if(a === 'join') sbJoin(); else if(a === 'leave') sbLeave(); else if(a === 'start') sbStart(); else if(a === 'close'){ SB.panelOpen = false; sbHud(true); }
+      else if(a === 'kill') sbKill(); else if(a === 'use') sbUse(); else if(a === 'report'){ const bd = sbNearBody(); if(bd) sbMeeting(bd.u); }
+      else if(a === 'lights') sbSabotage('lights'); else if(a === 'melt') sbSabotage('melt'); else if(a === 'gates'){ SB.gatePick = !SB.gatePick; sbHud(true); }
+      else if(a === 'gate') sbGate(b.dataset.r); else if(a === 'portal') sbPortalIn(); else if(a === 'vote') sbVote(b.dataset.u);
+      else if(a === 'pgo') sbPortalGo(+b.dataset.i); else if(a === 'pout') sbPortalOut(); else if(a === 'cctvx') sbCctv(false);
+    });
+    h.addEventListener('pointerover', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b) sbPortalPeek(+b.dataset.i); });
+    h.addEventListener('pointerout', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b && !b.contains(e.relatedTarget)) sbPortalPeek(null); });
+    return h;
+  }
+  function sbSplash(t, s, c, ms){ SB.splash = { t, s, c, at: performance.now(), ms: ms || 3000 }; sbHud(true); }
+  function sbHud(force){
+    const h = sbHudEl(); if(!h) return;
+    const G = sbG(), me = sbMe(), mine = sbIn(G), now = trdNow(), pn = performance.now();
+    // lobby button: in the Great Hall, logged in, no game running (or the game I'm in hasn't started)
+    const lb = h.querySelector('.sb-lobby-btn'), pnl = h.querySelector('.sb-panel');
+    const lobbyN = G && G.st === 'lobby' ? Object.keys(G.pl || {}).length : 0, inLobby = !!(G && G.st === 'lobby' && G.pl && G.pl[me]);
+    const showBtn = lgIsUser() && !sbPlaying(G) && (LG.room === 'vhall' || inLobby);
+    lb.hidden = !showBtn; if(showBtn){ const t = `🎮 Sabotrack${lobbyN ? ` · ${lobbyN} joined` : ''}`; if(lb.textContent !== t) lb.textContent = t; }
+    if(!showBtn) SB.panelOpen = false;
+    pnl.hidden = !SB.panelOpen;
+    if(SB.panelOpen){
+      const ids = G && G.st === 'lobby' ? Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)) : [];
+      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win]);
+      if(force || pnl.dataset.k !== key){ pnl.dataset.k = key;
+        pnl.innerHTML = `<button type="button" class="sb-x" data-sb="close" aria-label="Close">✕</button><h4>🎮 Sabotrack</h4>
+          <p>Crew do tasks around the lounge; ${ids.length ? sbBadCount(Math.max(SB_MIN, ids.length)) : 1} hidden saboteur${ids.length >= 7 ? 's' : ''} kill, cut the lights, lock gates and sneak through portals. Report bodies or hit the button in the Great Hall to vote someone out.</p>
+          ${G && G.st === 'over' && G.win ? `<p class="sb-last">Last game: <b>${G.win === 'bad' ? '🔪 Saboteurs won' : '🎧 Crew won'}</b></p>` : ''}
+          <div class="sb-pl">${ids.map(u => `<span class="${u === G.host ? 'host' : ''}">${u === G.host ? '👑 ' : ''}${escapeHtml(sbName(u, G))}</span>`).join('') || '<i>Nobody yet — be the first!</i>'}</div>
+          <div class="sb-row">${inLobby ? `<button type="button" class="lg-b" data-sb="leave">Leave</button>` : `<button type="button" class="lg-b sb-go" data-sb="join">Join</button>`}
+          ${host ? `<button type="button" class="lg-b sb-go" data-sb="start" ${ids.length < SB_MIN ? 'disabled' : ''}>Start${ids.length < SB_MIN ? ` (${ids.length}/${SB_MIN})` : ''}</button>` : inLobby ? `<span class="sb-wait">Waiting for ${escapeHtml(sbName(G.host, G))} to start…</span>` : ''}</div>`; }
+    }
+    // in a game: progress, players, actions
+    const prog = h.querySelector('.sb-prog'), list = h.querySelector('.sb-list'), acts = h.querySelector('.sb-acts');
+    prog.hidden = !mine; list.hidden = !mine; acts.hidden = !mine || G.st !== 'play';
+    if(mine){
+      const [d, t] = sbProgress(G); prog.querySelector('b').style.width = Math.round(d / t * 100) + '%'; prog.querySelector('em').textContent = sbBad() ? '🔪 Saboteur' : '🎧 Crew';
+      const ids = Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0));
+      // (a kill only shows on the list once a meeting has happened since; your own death you know right away)
+      const shown = (u) => (G.ej || {})[u] ? 'ej' : (G.dead && G.dead[u] && ((G.dead[u].t || 0) < (G.mt || 0) || G.st === 'meet' || u === me || sbDeadU(me, G))) ? 'dead' : 'alive';
+      const lk = ids.map(u => u + shown(u) + (SB.bad.has(u) ? 'b' : '')).join();
+      if(force || list.dataset.k !== lk){ list.dataset.k = lk; list.innerHTML = `<b>Players</b>` + ids.map(u => { const s = shown(u); return `<span class="${s}${SB.bad.has(u) ? ' bad' : ''}">${s === 'alive' ? '🟢' : s === 'ej' ? '👋' : '💀'} ${escapeHtml(sbName(u, G))}${u === me ? ' (you)' : ''}</span>`; }).join(''); }
+      if(G.st === 'play'){
+        const dead = sbDeadU(me, G), bad = sbBad(), cd = Math.max(0, SB_KILL_CD - (now - SB.killAt)), sabCd = Math.max(0, SB_SAB_CD - (now - Math.max(SB.sabAt || 0, G.sabAt || 0))), used = ((G.gu || {})[me] | 0);
+        const nearV = bad && !dead ? sbNearVictim(G) : null, nearB = !dead ? sbNearBody() : null, portal = bad && !dead ? sbNearPortal() : -1;
+        const btn = (a, t, on, extra) => `<button type="button" class="sb-act${on ? '' : ' off'}" data-sb="${a}" ${extra || ''}>${t}</button>`;
+        let html = btn('use', '✋ Use', !!(sbNearTask() || (!dead && sbNearBtn()) || (sbCritical(G) && sbNearMelt())));
+        if(!dead) html += btn('report', '📣 Report', !!nearB);
+        if(bad && !dead){
+          html += btn('kill', cd > 0 ? `🔪 ${Math.ceil(cd / 1000)}` : '🔪 Kill', cd <= 0 && !!nearV);
+          html += btn('lights', sabCd > 0 || G.sab ? `💡 ${G.sab ? '…' : Math.ceil(sabCd / 1000)}` : '💡 Lights', sabCd <= 0 && !G.sab);
+          html += btn('melt', sabCd > 0 || G.sab ? `☢️ ${G.sab ? '…' : Math.ceil(sabCd / 1000)}` : '☢️ Meltdown', sabCd <= 0 && !G.sab);
+          html += btn('gates', `🚪 Gates ${SB_GATES - used}`, used < SB_GATES);
+          if(portal >= 0) html += btn('portal', '🌀 Portal', true);
+        }
+        if(SB.gatePick && bad) html = `<div class="sb-gates"><b>Close a room's gates (${SB_GATES - used} left)</b>${LG_ROOMS.filter(r => !r.vip).map(r => `<button type="button" data-sb="gate" data-r="${r.id}">${escapeHtml(r.name.replace(/^.*· /, ''))}</button>`).join('')}</div>` + html;
+        if(acts.dataset.k !== html){ acts.dataset.k = html; acts.innerHTML = html; }
+      }
+    }
+    // the meltdown / sabotage banner is drawn on the canvas; meetings are a panel
+    const mt = h.querySelector('.sb-meet'); mt.hidden = !(mine && G.st === 'meet' && G.meet);
+    if(!mt.hidden){
+      const alive = sbAlive(G), dead = sbDeadU(me, G), left = Math.max(0, (G.meet.t || 0) + SB_DISC + SB_VOTE - now), talk = now - (G.meet.t || 0) < SB_DISC;
+      const ids = Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)), votes = G.votes || {};
+      const key = JSON.stringify([ids, Object.keys(votes), SB.voted, talk, Math.ceil(left / 1000), dead]);
+      if(force || mt.dataset.k !== key){ mt.dataset.k = key;
+        mt.innerHTML = `<h4>${G.meet.b ? '📣 Body reported' : '🚨 Emergency meeting'} <small>${talk ? `talk — voting in ${Math.ceil((SB_DISC - (now - G.meet.t)) / 1000)}s` : `vote — ${Math.ceil(left / 1000)}s left`}</small></h4>
+          <div class="sb-vgrid">${ids.map(u => { const d = sbDeadU(u, G); return `<button type="button" class="sb-v${d ? ' dead' : ''}${SB.voted === u ? ' mine' : ''}" data-sb="vote" data-u="${u}" ${d || dead || SB.voted || talk ? 'disabled' : ''}>${d ? '💀' : votes[u] ? '✅' : '🟢'} ${escapeHtml(sbName(u, G))}${u === me ? ' (you)' : ''}</button>`; }).join('')}</div>
+          <div class="sb-row">${dead ? '<span class="sb-wait">👻 You\'re dead — you can watch, and chat with the other ghosts.</span>' : `<button type="button" class="lg-b" data-sb="vote" data-u="skip" ${SB.voted || talk ? 'disabled' : ''}>⏭️ Skip vote</button>`}<span class="sb-wait">${alive.filter(u => votes[u]).length}/${alive.length} voted</span></div>`; }
+    }
+    // splash
+    const sp = h.querySelector('.sb-splash');
+    if(SB.splash && pn - SB.splash.at < SB.splash.ms){ sp.hidden = false; sp.style.setProperty('--c', SB.splash.c); sp.querySelector('b').textContent = SB.splash.t; sp.querySelector('span').textContent = SB.splash.s || ''; } else sp.hidden = true;
+  }
+
+  // ----- portals: you vanish into another dimension, hover a portal to peek out of it, click to come out there -----
+  function sbPortalIn(){
+    const i = sbNearPortal(); if(i < 0 || !sbBad()) return;
+    SB.inPortal = i; LG.me.hv = -1; lgWrite({ hv: -1 }); lgSfx('teleport');
+    const el = sbHudEl().querySelector('.sb-portal'); el.hidden = false;
+    el.innerHTML = `<div class="sb-pdim"></div><div class="sb-pbox"><b>🌀 In the portal dimension</b><span>Hover a portal to peek out · click to come out there</span>
+      <div class="sb-prow">${SB_PORTALS[i].to.map(j => `<button type="button" class="lg-b" data-sb="pgo" data-i="${j}">${escapeHtml(lgRoomById(SB_PORTALS[j].room).name.replace(/^.*· /, ''))}</button>`).join('')}<button type="button" class="lg-b" data-sb="pout">↩️ Back out here</button></div></div>`;
+  }
+  function sbPortalPeek(j){
+    if(SB.inPortal == null) return;
+    if(j == null){ SB.camAt = null; SB.peek = null; LG.me.hv = -1; lgWrite({ hv: -1 }); return; }
+    const q = SB_PORTALS[j]; SB.camAt = { x: q.x, y: q.y }; SB.peek = j; LG.me.hv = j; lgWrite({ hv: j });
+  }
+  function sbPortalGo(j){ const q = SB_PORTALS[j]; SB.inPortal = null; SB.camAt = null; SB.peek = null; LG.me.hv = null; sbTeleport(q.x, q.y); lgWrite({ hv: null }); lgSfx('teleport'); sbHudEl().querySelector('.sb-portal').hidden = true; }
+  function sbPortalOut(silent){
+    if(SB.inPortal == null) return; const q = SB_PORTALS[SB.inPortal];
+    SB.inPortal = null; SB.camAt = null; SB.peek = null; LG.me.hv = null;
+    if(!silent) sbTeleport(q.x, q.y); lgWrite({ hv: null });
+    const el = SB.hud && SB.hud.querySelector('.sb-portal'); if(el) el.hidden = true;
+  }
+
+  // ----- tasks: little minigames -----
+  function sbMg(t){
+    const el = sbHudEl().querySelector('.sb-mg'); SB.mg = t; el.hidden = false;
+    const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; lgSfx('reveal'); await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(sbMgClose, 700); };
+    const shell = (inner) => `<div class="sb-mgbox"><button type="button" class="sb-x sb-mgx" aria-label="Close">✕</button><b>${t.em} ${escapeHtml(t.n)}</b>${inner}</div>`;
+    const R = (n) => Math.floor(Math.random() * n);
+    if(t.mg === 'hold'){
+      el.innerHTML = shell(`<p>Hold the button until the bar is full.</p><div class="sb-bar"><i></i></div><button type="button" class="lg-b sb-hold">Hold me</button>`);
+      let v = 0, tm = 0; const bar = el.querySelector('.sb-bar i'), b = el.querySelector('.sb-hold');
+      const down = () => { clearInterval(tm); tm = setInterval(() => { v = Math.min(100, v + 4); bar.style.width = v + '%'; if(v >= 100){ clearInterval(tm); done(); } }, 80); };
+      const up = () => { clearInterval(tm); tm = setInterval(() => { v = Math.max(0, v - 6); bar.style.width = v + '%'; if(!v) clearInterval(tm); }, 80); };
+      b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up);
+    } else if(t.mg === 'wires'){
+      const cols = ['#ff4d6d', '#57e1ff', '#ffd166', '#8b4dff'], right = cols.slice().sort(() => Math.random() - .5); let pick = null, n = 0;
+      el.innerHTML = shell(`<p>Click a wire on the left, then the same colour on the right.</p><div class="sb-wires"><div>${cols.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="l" style="--c:${c}"></button>`).join('')}</div><div>${right.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="r" style="--c:${c}"></button>`).join('')}</div></div>`);
+      el.querySelector('.sb-wires').addEventListener('click', (e) => { const b = e.target.closest('.sb-w'); if(!b || b.classList.contains('ok')) return;
+        if(b.dataset.s === 'l'){ el.querySelectorAll('.sb-w.sel').forEach(x => x.classList.remove('sel')); pick = b; b.classList.add('sel'); return; }
+        if(pick && pick.dataset.c === b.dataset.c){ pick.classList.add('ok'); b.classList.add('ok'); pick.classList.remove('sel'); pick = null; lgSfx('bubble'); if(++n === 4) done(); } else { el.querySelector('.sb-mgbox').classList.add('shake'); setTimeout(() => { const x = el.querySelector('.sb-mgbox'); if(x) x.classList.remove('shake'); }, 300); } });
+    } else if(t.mg === 'simon'){
+      const pads = ['#ff4d6d', '#57e1ff', '#ffd166', '#35d0b8'], seq = Array.from({ length: 4 }, () => R(4)); let at = 0, busy = true;
+      el.innerHTML = shell(`<p>Watch the pattern, then repeat it.</p><div class="sb-simon">${pads.map((c, i) => `<button type="button" data-i="${i}" style="--c:${c}"></button>`).join('')}</div>`);
+      const bs = [...el.querySelectorAll('.sb-simon button')]; const flash = (i) => { bs[i].classList.add('lit'); setTimeout(() => bs[i].classList.remove('lit'), 320); };
+      const play = () => { busy = true; at = 0; seq.forEach((i, k) => setTimeout(() => flash(i), 500 + k * 520)); setTimeout(() => { busy = false; }, 500 + seq.length * 520); };
+      play();
+      el.querySelector('.sb-simon').addEventListener('click', (e) => { const b = e.target.closest('button'); if(!b || busy) return; const i = +b.dataset.i; flash(i);
+        if(i === seq[at]){ if(++at === seq.length) done(); } else { lgSfx('zap'); play(); } });
+    } else if(t.mg === 'timing'){
+      let hits = 0, x = 0, dir = 1, z = 30 + R(40), tm;
+      el.innerHTML = shell(`<p>Click Stop when the marker is in the green zone (3 times).</p><div class="sb-track"><i class="z"></i><i class="m"></i></div><div class="sb-row"><button type="button" class="lg-b sb-stop">Stop</button><span class="sb-wait">0/3</span></div>`);
+      const m = el.querySelector('.m'), zz = el.querySelector('.z'); zz.style.left = z + '%';
+      tm = setInterval(() => { if(!el.isConnected || SB.mg !== t){ clearInterval(tm); return; } x += dir * 2.2; if(x > 100 || x < 0){ dir *= -1; x = Math.max(0, Math.min(100, x)); } m.style.left = x + '%'; }, 30);
+      el.querySelector('.sb-stop').addEventListener('click', () => { if(x >= z && x <= z + 18){ hits++; lgSfx('bubble'); el.querySelector('.sb-wait').textContent = hits + '/3'; z = 10 + R(70); zz.style.left = z + '%'; if(hits >= 3){ clearInterval(tm); done(); } } else lgSfx('zap'); });
+    } else if(t.mg === 'keypad'){
+      const code = String(1000 + R(9000)); let typed = '';
+      el.innerHTML = shell(`<p>Your code is <b class="sb-code">${code}</b></p><div class="sb-screen">····</div><div class="sb-keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'].map(k => `<button type="button" data-k="${k}">${k}</button>`).join('')}</div>`);
+      const scr = el.querySelector('.sb-screen');
+      el.querySelector('.sb-keys').addEventListener('click', (e) => { const b = e.target.closest('button'); if(!b) return; const k = b.dataset.k;
+        if(k === '⌫') typed = typed.slice(0, -1); else if(k === '✓'){ if(typed === code) return done(); typed = ''; lgSfx('zap'); } else if(typed.length < 4) typed += k;
+        scr.textContent = typed.padEnd(4, '·'); });
+    } else if(t.mg === 'slider'){
+      const goal = 15 + R(70);
+      el.innerHTML = shell(`<p>Slide until the two waves line up.</p><canvas class="sb-wave" width="260" height="80"></canvas><input type="range" min="0" max="100" value="${goal > 50 ? 5 : 95}" class="sb-sl"><button type="button" class="lg-b sb-go">Lock it in</button>`);
+      const cv = el.querySelector('.sb-wave'), c = cv.getContext('2d'), sl = el.querySelector('.sb-sl');
+      const draw = () => { c.clearRect(0, 0, 260, 80); for(const [a, col] of [[goal, 'rgba(87,225,255,.9)'], [+sl.value, 'rgba(255,77,109,.9)']]){ c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); for(let x = 0; x <= 260; x += 4){ const y = 40 + Math.sin(x / 20 + a / 12) * (8 + a / 4); x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); } };
+      draw(); sl.addEventListener('input', draw);
+      el.querySelector('.sb-go').addEventListener('click', () => { if(Math.abs(+sl.value - goal) <= 4) done(); else { lgSfx('zap'); } });
+    }
+    el.querySelector('.sb-mgx').addEventListener('click', sbMgClose);
+  }
+  function sbMgClose(){ SB.mg = null; const el = SB.hud && SB.hud.querySelector('.sb-mg'); if(el){ el.hidden = true; el.innerHTML = ''; } }
+
+  // ----- the CCTV monitor (the Studio desk during a game) -----
+  function sbCctv(on){
+    SB.cctv = !!on; const el = sbHudEl() && sbHudEl().querySelector('.sb-cctv'); if(!el) return;
+    el.hidden = !on; clearInterval(SB.cctvT);
+    if(!on){ el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="sb-cbox"><button type="button" class="sb-x" data-sb="cctvx" aria-label="Close">✕</button><b>📹 CCTV Monitor</b><div class="sb-cgrid">${SB_CAMS.map((c, i) => `<figure><canvas width="320" height="180" data-i="${i}"></canvas><figcaption><i class="rec"></i>${c.n}</figcaption></figure>`).join('')}</div></div>`;
+    const cvs = [...el.querySelectorAll('canvas')];
+    const tick = () => { if(!SB.cctv || !el.isConnected){ clearInterval(SB.cctvT); return; } const now = trdNow(); cvs.forEach((cv, i) => sbCamDraw(cv, SB_CAMS[i], now)); };
+    tick(); SB.cctvT = setInterval(tick, 120);
+  }
+  function sbCamDraw(cv, cam, now){
+    const g2 = cv.getContext('2d'), W = cv.width, H = cv.height, vw = 420, vh = vw * H / W, s = W / vw, x0 = cam.x - vw / 2, y0 = cam.y - vh / 2 - 30, vis = { x0, y0, x1: x0 + vw, y1: y0 + vh };
+    g2.setTransform(1, 0, 0, 1, 0, 0); g2.fillStyle = '#0d0918'; g2.fillRect(0, 0, W, H);
+    const cs = Math.round(s * 100) / 100;
+    for(let cj = Math.floor(y0 / LG_CH); cj <= Math.floor(vis.y1 / LG_CH); cj++) for(let ci = Math.floor(x0 / LG_CH); ci <= Math.floor(vis.x1 / LG_CH); ci++){
+      if(ci < 0 || cj < 0 || ci * LG_CH >= LG_WW || cj * LG_CH >= LG_WH) continue;
+      g2.drawImage(lgChunk(ci, cj, cs), Math.round((ci * LG_CH - x0) * s), Math.round((cj * LG_CH - y0) * s), Math.ceil(LG_CH * s) + 1, Math.ceil(LG_CH * s) + 1);
+    }
+    g2.setTransform(s, 0, 0, s, -x0 * s, -y0 * s);
+    const list = []; try{ lgProps(g2, now, list, vis); }catch(e){}
+    const all = [{ u: sbMe(), d: LG.me, p: lgPos(LG.me, now) }];
+    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(sbHide(o)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); if(p.x > vis.x0 - 60 && p.x < vis.x1 + 60 && p.y > vis.y0 && p.y < vis.y1 + 100) list.push({ y: p.y, d: () => sbDrawP(g2, o, p, now, false) }); }
+    if(SB.inPortal == null){ const mp = all[0].p; mp.face = mp.face || LG.lastFace; list.push({ y: mp.y, d: () => sbDrawP(g2, Object.assign({ n: lgRec().n }, LG.me), mp, now, true) }); }
+    try{ sbDraw(g2, now, list, all, true); }catch(e){}
+    list.sort((a, b) => a.y - b.y).forEach(x => { try{ x.d(); }catch(e){} });
+    g2.setTransform(1, 0, 0, 1, 0, 0);
+    // (a little CCTV look: scanlines, a green tint, the time)
+    g2.fillStyle = 'rgba(40,255,120,.06)'; g2.fillRect(0, 0, W, H); g2.fillStyle = 'rgba(0,0,0,.18)'; for(let y = 0; y < H; y += 3) g2.fillRect(0, y, W, 1);
+    g2.font = "700 10px monospace"; g2.fillStyle = 'rgba(220,255,230,.85)'; g2.fillText(new Date(now).toLocaleTimeString(), 8, H - 8);
+  }
+
+  // ----- the dead's chat -----
+  async function sbGhostSend(text){
+    const G = sbG(); if(!G || !G.id) return false;
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const ok = await sbPatch({ [`sabo/ghost/${G.id}/${id}`]: { n: chatName().slice(0, CHAT_NAME_MAX), m: text, t: sbSv(), u: sbMe() } });
+    if(ok) SB.ghostAt = 0;
+    return ok;
+  }
+  // (the ghosts' messages go into the Sabotrack room's list: for the dead while the game runs, for everyone after)
+  async function sbGhostSync(){
+    if(chatRoom() !== SB_ROOM || !CHAT.ready) return;
+    if(Date.now() - SB.ghostAt < 4000) return; SB.ghostAt = Date.now();
+    const G = sbG(), games = [];
+    if(G && G.id && sbIn(G) && sbDeadU(sbMe(), G)) games.push(G.id);
+    const hist = await sbGet('sabo/hist'); if(hist) games.push(...Object.entries(hist).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 6).map(x => x[0]));
+    let added = 0;
+    for(const gid of [...new Set(games)]){
+      const d = await sbGet(`sabo/ghost/${gid}`); if(!d) continue;
+      for(const [k, m] of Object.entries(d)){ const key = 'gh_' + gid + '_' + k; if(!m || typeof m.m !== 'string' || CHAT.msgs.has(key)) continue; CHAT.msgs.set(key, { n: '👻 ' + String(m.n || 'ghost'), m: m.m, t: m.t || 0, u: m.u, _k: key, gh: 1 }); added++; }
+    }
+    if(added){ chatSort(); CHAT._scrollDown = true; chatRender(); }
+  }
+
+  // ----- every quarter second while the lounge is open -----
+  function sbTick(){
+    if(!LG.on || LG.paused) return;
+    try{
+      if(!lgIsUser()){ sbHud(false); return; }
+      liveOpen('sabo/game').catch(() => {}); sbPoll();
+      sbWatch(); sbBlockUpdate();
+      { const cc = sbPlaying(); if(cc !== !!SB.cctvLbl){ SB.cctvLbl = cc; LG.chunks = new Map(); } }
+      const G = sbG();
+      if(sbIn(G)){
+        sbPlaces();
+        if(trdNow() - SB.fAt > 25000) sbFast();
+        if(G.st === 'meet') sbMeetTick(G);
+      }
+      if(!sbIn(G) && SB.inPortal != null) sbPortalOut(true);
+      sbHud(false);
+      sbGhostSync();
+    }catch(e){ console.warn(e); }
+  }
+  setInterval(sbTick, 250);
+
   // ----- the lights (build 212): a logged-in user flips the switch in Electrical; everyone only sees a flashlight cone -----
   const LG_DARK_MS = 120000;     // (the lights come back on by themselves after 2 minutes)
-  const lgDark = () => !!(LG.lt && LG.lt.off && trdNow() - (LG.lt.t || 0) < LG_DARK_MS);
+  const lgDark = () => !!(LG.lt && LG.lt.off && trdNow() - (LG.lt.t || 0) < LG_DARK_MS) || (() => { try{ return sbDark(); }catch(e){ return false; } })();
   async function lgLights(){
+    if(sbIn()){ if(!(await sbFixLights())) toast('The lights belong to Sabotrack right now.', 2000); return; }
     if(!lgIsUser()){ lgNeedLogin(); return; }
     const why = chatBlock(); if(why){ toast(why, 2400); return; }
     const off = !lgDark(), me = chatUid(), nm = chatName().slice(0, CHAT_NAME_MAX), id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -33786,7 +34458,7 @@
   function lgArrived(){
     const k = LG.pend; LG.pend = null;
     if(k && k.startsWith('g:')){ lgPlay(k.slice(2)); return; }
-    if(k === 'studio'){ dashOpen(); return; }
+    if(k === 'studio'){ if(sbIn()) sbCctv(true); else dashOpen(); return; }
     if(!lgIsUser() && (k === 'vend' || k === 'juke')){ lgNeedLogin(); return; }
     if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); } LG.lastFace = dir; } return; }
     if(k === 'lights'){ lgLights(); return; }
@@ -34092,6 +34764,7 @@
   const LG_SHOT = { fire: { c: '#ff8a3a', c2: '#ffe066', r: 13, v: 820 }, bolt: { c: '#57e1ff', c2: '#ffffff', r: 11, v: 1100 }, arcane: { c: '#b48cff', c2: '#ffd1f4', r: 10, v: 950 }, bullet: { c: '#ffd166', c2: '#ffffff', r: 4, v: 1700 }, book: { c: '#8a5a3a', c2: '#f5ecd8', r: 9, v: 700 }, blood: { c: '#ff2a4a', c2: '#ffb0c0', r: 12, v: 760 } };
   const lgAtkLen = (spr) => { const r = spr.rows.atk; return r ? r[1] * 1000 / 12 : 450; };
   function lgAttack(aa){
+    if(sbIn()) return;
     if(!lgIsUser()){ lgNeedLogin(); return; }
     const now = trdNow(); if(now - (LG.me.at || 0) < 650) return;
     const p = lgPos(LG.me, now), face = typeof aa === 'number' ? (Math.cos(aa) < 0 ? -1 : 1) : (p.face || LG.lastFace || 1);
@@ -34321,7 +34994,7 @@
       c.save(); c.translate(0, 16); lgBev(c, X + 34, 54, 232, 242, '#1e3a5c'); lgStreet(c, 'st_neon', X + 40, 60, 220, 230, .55); lgR(c, X + 148, 60, 4, 230, '#1e3a5c'); lgR(c, X + 40, 172, 220, 4, '#1e3a5c'); c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.strokeRect(X + 33, 53, 234, 244); c.restore();
       c.save(); c.translate(0, 16); lgBev(c, X + 26, 296, 248, 10, '#2a4670'); c.restore();
       lgPool(c, X + 500, 360, 300, 60, '87,225,255', .18);
-      c.font = "800 22px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#9ff3ff'; c.fillText('🎬 SAIDECK STUDIO', X + 500, 108);
+      c.font = "800 22px 'Inter',sans-serif"; c.textAlign = 'center'; c.fillStyle = '#9ff3ff'; c.fillText(typeof SB !== 'undefined' && SB.cctvLbl ? '📹 CCTV MONITOR' : '🎬 SAIDECK STUDIO', X + 500, 108);
       lgBev(c, X + 290, 120, 420, 206, '#0f1830'); c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.strokeRect(X + 296, 126, 408, 194);
       for(let m = 0; m < 3; m++) lgBev(c, X + 306 + m * 132, 136, 128, 88, '#1a2340');
       lgBev(c, X + 316, 232, 368, 88, '#1a2340');
@@ -34978,6 +35651,8 @@
     if(text.length > mx){ toast(`Messages can be up to ${mx} characters.`, 2000); return; }
     if(chatBad(text)){ toast("That message has a word that isn't allowed — please keep it friendly.", 2800); ta.focus(); return; }
     if(chatBadName(chatName())){ toast('Please change your chat name first (the gear button).', 2800); return; }
+    // (Sabotrack: the dead only talk to the dead; everyone in a game talks in the Sabotrack room)
+    try{ if(sbIn()){ if(sbDeadU(sbMe())){ if(await sbGhostSend(text)){ ta.value = ''; grow(); setTimeout(sbGhostSync, 300); } return; } if(chatRoom() !== SB_ROOM){ chatGoRoom(SB_ROOM); toast('🎮 You\'re in a Sabotrack game — your messages go to the Sabotrack room.', 2400); } } }catch(e){}
     // (no slow mode: send as fast as you type — only a double press of Enter within 0.2 s is ignored)
     if(Date.now() - (CHAT.lastSend || 0) < 200) return;
     CHAT.lastSend = Date.now();
@@ -35050,7 +35725,9 @@
     if(!name) return;
     try{
       const tok = await chatAuth(), uid = chatUid();
-      if((!chatVisible() && !presGame()) || chatBadName(name)){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
+      // (SaiDeck left in a background tab for 5+ minutes counts as gone, so nobody keeps a stale idle ring)
+      const gone = document.visibilityState !== 'visible' && PRES.hidAt && Date.now() - PRES.hidAt > 300000;
+      if((!chatVisible() && !presGame()) || chatBadName(name) || gone){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
       const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; const g = presGame(); if(g) body.g = g; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true; if(document.visibilityState !== 'visible' || !document.hasFocus()) body.h = true;
       const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
       if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
@@ -35082,6 +35759,8 @@
   });
   window.addEventListener('blur', () => { setTimeout(() => { if(!document.hasFocus() && !PRES.away){ PRES.away = true; presBeat(); chatRingsUpdate(); } }, 1500); });
   window.addEventListener('focus', presActive);
+  PRES.hidAt = document.visibilityState !== 'visible' ? Date.now() : 0;
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState !== 'visible'){ PRES.hidAt = PRES.hidAt || Date.now(); } else { const was = PRES.hidAt && Date.now() - PRES.hidAt > 300000; PRES.hidAt = 0; if(was) presBeat(); } });
   setInterval(() => {
     if(!PRES.away && Date.now() - PRES.act > 30000){ PRES.away = true; presBeat(); }
     chatRingsUpdate();
