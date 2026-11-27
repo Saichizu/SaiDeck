@@ -410,6 +410,10 @@
   .sb-act[data-sb="kill"]{border-color:#ff4d6d;} .sb-act[data-sb="hide"], .sb-act[data-sb="unhide"]{border-color:#b48cff;} .sb-act[data-sb="report"]{border-color:#ffd166;} .sb-act[data-sb="portal"]{border-color:#9d6bff;}
   .sb-gates{width:100%;display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-radius:10px;background:rgba(16,10,26,.95);} .sb-gates b{width:100%;font-size:12px;}
   .sb-gates button{padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:#24162e;color:#fff;font-size:11.5px;cursor:pointer;} .sb-gates button:hover{background:#3a2048;}
+  .sb-alert{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 18px;border-radius:12px;background:rgba(40,4,10,.9);border:2px solid #ff2a3a;text-align:center;pointer-events:none;max-width:70%;}
+  .sb-alert b{font-size:18px;color:#ff4d6d;letter-spacing:.04em;} .sb-alert span{font-size:12px;opacity:.85;} .sb-alert .sb-held{font-style:normal;font-size:11px;font-weight:800;color:#ffd166;}
+  .sb-alert.melt{animation:sbAlarm 1s ease-in-out infinite;} .sb-alert.lights{background:rgba(10,10,30,.9);border-color:#ffd166;} .sb-alert.lights b{color:#ffd166;}
+  @keyframes sbAlarm{0%,100%{box-shadow:0 0 0 rgba(255,42,58,0);}50%{box-shadow:0 0 28px rgba(255,42,58,.75);}}
   .sb-splash{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 30px;border-radius:16px;background:rgba(8,6,14,.88);border:2px solid var(--c,#fff);text-align:center;pointer-events:none;animation:sbIn .35s ease-out;max-width:80%;}
   .sb-splash b{font-size:28px;color:var(--c,#fff);letter-spacing:.02em;} .sb-splash span{font-size:13.5px;opacity:.85;}
   @keyframes sbIn{from{transform:translate(-50%,-50%) scale(.7);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
@@ -23472,7 +23476,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 229;                 // ← goes up by one with every published version
+  const SD_BUILD = 230;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33812,6 +33816,7 @@
     if(LG.song === 'hype' || LG.song === 'retro'){ g.save(); g.globalCompositeOperation = 'lighter'; for(let i = 0; i < 3; i++){ const a = now / 800 + i * 2.1; g.globalAlpha = .2; g.drawImage(lgGlow(), LG.cam.x + Math.cos(a) * 260 - 80, LG.cam.y + Math.sin(a * 1.3) * 120 - 60, 160, 90); } g.restore(); }
     lgFog(g, vis);
     try{ sbVig(g, W, H, v, mp); }catch(e){}
+    try{ sbSiren(g, W, H); }catch(e){}
     if(lgDark()) lgDrawDark(g, W, H, v, mp, now); else LG.light = null;
     if(LG.scareAt && performance.now() - LG.scareAt < 600){ const k = 1 - (performance.now() - LG.scareAt) / 600; g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(160,0,20,${.45 * k})`; g.fillRect(0, 0, W, H); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -33978,6 +33983,19 @@
     g2.save(); g2.setTransform(1, 0, 0, 1, 0, 0);
     const gr = g2.createRadialGradient(sx, sy, r0, sx, sy, R); gr.addColorStop(0, 'rgba(4,2,10,0)'); gr.addColorStop(1, `rgba(4,2,10,${Math.min(.97, .55 + amt / 220)})`);
     g2.fillStyle = gr; g2.fillRect(0, 0, W, H); g2.restore();
+  }
+  // a meltdown: the screen flashes red like a siren for everyone in the game
+  function sbSiren(g2, W, H){
+    const G = sbG(); if(!sbIn(G) || G.st !== 'play' || !sbCritical(G)) return;
+    const t = performance.now() / 1000, pulse = .5 + .5 * Math.sin(t * 7);
+    g2.save(); g2.setTransform(1, 0, 0, 1, 0, 0);
+    // red edges, pulsing
+    const R0 = Math.min(W, H) * .35, R1 = Math.hypot(W, H) * .62, eg = g2.createRadialGradient(W / 2, H / 2, R0, W / 2, H / 2, R1);
+    eg.addColorStop(0, 'rgba(255,20,40,0)'); eg.addColorStop(1, `rgba(255,20,40,${.22 + .3 * pulse})`); g2.fillStyle = eg; g2.fillRect(0, 0, W, H);
+    // a sweeping siren beam
+    if(g2.createConicGradient){ const cg = g2.createConicGradient(t * 4.2, W / 2, H * .45); cg.addColorStop(0, 'rgba(255,40,60,.26)'); cg.addColorStop(.08, 'rgba(255,40,60,0)'); cg.addColorStop(.5, 'rgba(255,40,60,0)'); cg.addColorStop(.5, 'rgba(255,40,60,.26)'); cg.addColorStop(.58, 'rgba(255,40,60,0)'); cg.addColorStop(1, 'rgba(255,40,60,0)');
+      g2.globalCompositeOperation = 'lighter'; g2.fillStyle = cg; g2.fillRect(0, 0, W, H); }
+    g2.restore();
   }
   async function sbSetBad(d){
     const g = sbG(); if(!g || g.st !== 'lobby' || g.host !== sbMe()) return;
@@ -34229,7 +34247,7 @@
     if(SB.inPortal != null) return;
     const dead = sbDeadU(sbMe(), G);
     if(!dead && sbNearBtn()){ sbMeeting(''); return; }
-    const k = sbNearMelt(); if(k && sbCritical(G) && !sbBad() && !dead){ sbMeltHold(k); toast('Holding… someone else needs to hold the other console!', 1800); return; }
+    const k = sbNearMelt(); if(k && sbCritical(G) && !dead){ sbMeltHold(k); toast('Holding… someone else needs to hold the other console!', 1800); return; }
     const t = sbNearTask(); if(t && !sbBad()){ sbMg(t); return; }
     if(t && sbBad()){ toast('🤫 You\'re a saboteur — you can only pretend to do tasks.', 1800); return; }
     toast('Nothing to use here.', 1200);
@@ -34245,6 +34263,7 @@
       <div class="sb-acts" hidden></div>
       <button type="button" class="sb-lobby-btn" hidden aria-label="Sabotrack"><svg class="sb-logo" viewBox="0 0 260 74" aria-hidden="true">      <defs>        <linearGradient id="sbLg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#ffd0da"/><stop offset="1" stop-color="#ff4d6d"/></linearGradient>        <linearGradient id="sbLg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#57e1ff"/><stop offset=".5" stop-color="#9d6bff"/><stop offset="1" stop-color="#ff4d6d"/></linearGradient>        <clipPath id="sbCutA"><polygon points="0,0 260,0 260,30 0,46"/></clipPath>        <clipPath id="sbCutB"><polygon points="0,46 260,30 260,74 0,74"/></clipPath>      </defs>            <g class="sb-vinyl"><circle cx="36" cy="37" r="22" fill="#0b0610" stroke="#3a2048" stroke-width="2"/><circle cx="36" cy="37" r="15" fill="none" stroke="#2a1838" stroke-width="1.5"/><circle cx="36" cy="37" r="9" fill="none" stroke="#2a1838" stroke-width="1.5"/><circle cx="36" cy="37" r="6" fill="#ff4d6d"/><circle cx="36" cy="37" r="1.8" fill="#14081c"/><path d="M22 24 A20 20 0 0 1 36 17" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none"/></g>      <path d="M18 60 L58 12" stroke="#e8ecf4" stroke-width="3.5" stroke-linecap="round"/><path d="M50 22 L58 12 L54 25 Z" fill="#e8ecf4"/><path d="M15 64 L22 56" stroke="#ff4d6d" stroke-width="5" stroke-linecap="round"/>      <polyline class="sb-wave" points="70,58 78,58 82,52 86,62 90,48 94,60 98,55 104,58 112,58 116,50 120,63 124,45 128,58 134,58 140,58 144,53 148,61 152,47 156,58 162,58 170,58 174,51 178,62 182,49 186,58 192,58 200,58 204,54 208,60 212,52 216,58 224,58 232,58 240,58" fill="none" stroke="url(#sbLg2)" stroke-width="2" stroke-linejoin="round" opacity=".85"/>      <g font-family="'Inter',sans-serif" font-weight="900" font-style="italic" font-size="28">        <text x="69" y="43" fill="#57e1ff" opacity=".7" class="sb-gl1" textLength="176" lengthAdjust="spacingAndGlyphs">SABOTRACK</text>        <text x="71" y="43" fill="#ff2a3a" opacity=".7" class="sb-gl2" textLength="176" lengthAdjust="spacingAndGlyphs">SABOTRACK</text>        <g clip-path="url(#sbCutA)"><text x="70" y="42" fill="url(#sbLg1)" stroke="#14081c" stroke-width="2.2" paint-order="stroke" textLength="176" lengthAdjust="spacingAndGlyphs">SABOTRACK</text></g>        <g clip-path="url(#sbCutB)" transform="translate(3,1)"><text x="70" y="42" fill="url(#sbLg1)" stroke="#14081c" stroke-width="2.2" paint-order="stroke" textLength="176" lengthAdjust="spacingAndGlyphs">SABOTRACK</text></g>      </g>      <path d="M66 47 L254 29" stroke="#ff4d6d" stroke-width="1.6" opacity=".9"/>    </svg><span class="sb-lobby-n" hidden></span></button>
       <div class="sb-panel" hidden></div>
+      <div class="sb-alert" hidden></div>
       <div class="sb-splash" hidden><b></b><span></span></div>
       <div class="sb-meet" hidden></div>
       <div class="sb-mg" hidden></div>
@@ -34321,7 +34340,17 @@
         if(acts.dataset.k !== html){ acts.dataset.k = html; acts.innerHTML = html; }
       }
     }
-    // the meltdown / sabotage banner is drawn on the canvas; meetings are a panel
+    // sabotage alerts for everyone in the game (crew and saboteurs): the meltdown countdown, lights out
+    const al = h.querySelector('.sb-alert'); let ah = '', ak = '';
+    if(mine && G.st === 'play' && G.sab){
+      if(G.sab.k === 'melt'){
+        const left = Math.max(0, Math.ceil((SB_MELT_MS - (now - (G.sab.t || 0))) / 1000)), held = ['a', 'b'].filter(k => G.sab[k] && now - (G.sab[k].t || 0) < 2500).length;
+        ak = 'melt'; ah = `<b>☢️ MELTDOWN · ${left}s</b><span>${sbBad() ? 'Two people must hold both consoles in the 🎛️ Control Room. Keep them busy 😈 — or go "help" to blend in.' : 'Two people must hold BOTH consoles in the 🎛️ Control Room at the same time!'}</span><i class="sb-held">${held}/2 holding</i>`;
+        if(left !== SB.meltBeep){ SB.meltBeep = left; if(left > 0 && left <= 45) try{ sbClick(0, left <= 10); }catch(e){} }
+      } else if(G.sab.k === 'lights' && sbBad()){ ak = 'lights'; ah = `<b>💡 LIGHTS SABOTAGED</b><span>${sbBad() ? 'The crew can only see with flashlights — you see everything.' : 'Fix them at the switch in ⚡ Electrical.'}</span>`; }
+    }
+    al.hidden = !ah; al.className = 'sb-alert' + (ak ? ' ' + ak : ''); if(al.dataset.k !== ah){ al.dataset.k = ah; al.innerHTML = ah; }
+    // meetings are a panel
     const mt = h.querySelector('.sb-meet'); mt.hidden = !(mine && G.st === 'meet' && G.meet);
     if(!mt.hidden){
       const alive = sbAlive(G), dead = sbDeadU(me, G), left = Math.max(0, (G.meet.t || 0) + SB_DISC + SB_VOTE - now), talk = now - (G.meet.t || 0) < SB_DISC;
