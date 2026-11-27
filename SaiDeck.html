@@ -23492,7 +23492,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 233;                 // ← goes up by one with every published version
+  const SD_BUILD = 234;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33867,7 +33867,15 @@
     LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
     lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now); try{ sbDraw(g, now, list, all); }catch(e){ console.warn(e); }
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
-    try{ sbOccDraw(g); }catch(e){}
+    if(SB.occ){ try{ sbOccDraw(g, vis);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      for(let cj = Math.floor(y0 / LG_CH); cj <= Math.floor(vis.y1 / LG_CH); cj++) for(let ci = Math.floor(x0 / LG_CH); ci <= Math.floor(vis.x1 / LG_CH); ci++){
+        if(ci < 0 || cj < 0 || ci * LG_CH >= LG_WW || cj * LG_CH >= LG_WH) continue;
+        g.drawImage(lgRingChunk(ci, cj, cs), Math.round((ci * LG_CH - x0) * sc * dpr), Math.round((cj * LG_CH - y0) * sc * dpr), Math.ceil(LG_CH * sc * dpr) + 1, Math.ceil(LG_CH * sc * dpr) + 1);
+      }
+      g.setTransform(sc * dpr, 0, 0, sc * dpr, -x0 * sc * dpr, -y0 * sc * dpr); }catch(e){ console.warn(e); } }
+    if(SB.gdraw && SB.gdraw.length) try{ SB.gdraw.forEach(o => o.d()); }catch(e){}
+    SB.gdraw = null;
     lgDrawShots(g, all, now); lgDrawTps(g);
     const pn = performance.now();
     LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
@@ -34279,7 +34287,8 @@
     } });
     // closed gates
     const shut = sbClosed(G);
-    if(shut.length) for(const d of sbDoors()) if(shut.includes(d.id)) list.push({ y: d.y + 6, d: () => {
+    if(!cam) SB.gdraw = [];
+    if(shut.length) for(const d of sbDoors()) if(shut.includes(d.id)) (cam ? (o) => list.push(o) : (o) => SB.gdraw.push(o))({ y: d.y + 6, d: () => {
       const nx = -d.u[1], ny = d.u[0], hw = d.w / 2 + 4;
       g2.save(); g2.lineCap = 'round';
       g2.strokeStyle = '#1a1a24'; g2.lineWidth = 14; g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke();
@@ -34511,28 +34520,74 @@
   }
   // what a shut gate hides from me: from inside the room, the corridor beyond it; from that corridor, the room
   const sbDistPoly = (x, y, pts) => { let best = 1e9; for(let i = 1; i < pts.length; i++){ const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy || 1, k = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)); best = Math.min(best, Math.hypot(x - ax - dx * k, y - ay - dy * k)); } return best; };
+  // gate vision (build 234): anything that got further away (or cut off) when the gates shut is "behind" a gate → it all goes dark.
+  // Compared on the walk grid: steps from me with every gate open vs with the shut ones blocked.
+  function sbSteps(start, blocked, rich){
+    const N = LG_GX * LG_GY, D = new Int32Array(N).fill(-1), q = new Int32Array(N); if(start < 0) return D;
+    let h = 0, t = 0; D[start] = 0; q[t++] = start;
+    const ok = (i) => LG_GRID.W[i] && (rich || !lgVipTile(i)) && !(blocked && blocked.has(i));
+    while(h < t){ const c = q[h++], cx = c % LG_GX, cy = (c / LG_GX) | 0, dc = D[c] + 1;
+      if(cx > 0 && D[c - 1] < 0 && ok(c - 1)){ D[c - 1] = dc; q[t++] = c - 1; }
+      if(cx < LG_GX - 1 && D[c + 1] < 0 && ok(c + 1)){ D[c + 1] = dc; q[t++] = c + 1; }
+      if(cy > 0 && D[c - LG_GX] < 0 && ok(c - LG_GX)){ D[c - LG_GX] = dc; q[t++] = c - LG_GX; }
+      if(cy < LG_GY - 1 && D[c + LG_GX] < 0 && ok(c + LG_GX)){ D[c + LG_GX] = dc; q[t++] = c + LG_GX; } }
+    return D;
+  }
   function sbOccUpdate(){
-    SB.occ = null; const G = sbG(); if(!sbIn(G) || G.st !== 'play' || sbDeadU(sbMe(), G)) return;
-    const shut = sbClosed(G); if(!shut.length) return;
-    const mp = lgPos(LG.me, trdNow()), mine = lgRoomAt(mp.x, mp.y), rooms = new Set(), halls = [];
-    for(const d of sbDoors()){ if(!shut.includes(d.id)) continue;
-      if(mine && mine.id === d.room) halls.push(d);
-      else if(!mine && sbDistPoly(mp.x, mp.y, LG_HALLS[d.hall]) < d.w / 2 + 24) rooms.add(d.room); }
-    if(rooms.size || halls.length) SB.occ = { rooms, halls };
+    const G = sbG(); if(!sbIn(G) || G.st !== 'play' || sbDeadU(sbMe(), G) || !SB.blk){ SB.occ = null; SB.occKey = ''; return; }
+    const mp = lgPos(LG.me, trdNow()), rich = lgRich(); let st = lgTile(mp.x, mp.y);
+    if(st < 0 || !LG_GRID.W[st] || SB.blk.has(st)){ const q = lgNearest(mp.x, mp.y, rich); st = lgTile(q[0], q[1]); }
+    const key = SB.blkKey + '|' + st; if(key === SB.occKey) return; SB.occKey = key;
+    const Do = sbSteps(st, null, rich), Dc = sbSteps(st, SB.blk, rich), hid = new Uint8Array(LG_GX * LG_GY); let any = false;
+    for(let i = 0; i < hid.length; i++) if(Do[i] >= 0 && (Dc[i] < 0 || Dc[i] > Do[i] * 1.2 + 4)){ hid[i] = 1; any = true; }
+    if(!any){ SB.occ = null; return; }
+    let sig = 0; for(let i = 0; i < hid.length; i++) if(hid[i]) sig = (sig * 31 + i) | 0;
+    if(SB.occ && SB.occ.sig === sig){ SB.occ.hid = hid; return; }        // (same dark area as before: keep the drawn layer)
+    // a room goes dark as a whole when most of its floor is behind the gate (so the furniture spots go dark too)
+    const rooms = new Set();
+    for(const r of LG_ROOMS){ let n = 0, k = 0; for(let j = Math.floor(r.bb.y0 / LG_C); j <= Math.floor(r.bb.y1 / LG_C); j++) for(let i = Math.floor(r.bb.x0 / LG_C); i <= Math.floor(r.bb.x1 / LG_C); i++){ const c = j * LG_GX + i; if(Do[c] >= 0 && lgInPoly(r.P, (i + .5) * LG_C, (j + .5) * LG_C)){ n++; k += hid[c]; } } if(n && k > n / 2) rooms.add(r.id); }
+    // the dark layer, drawn once (half scale, world space): the hidden corridor tiles + whole hidden rooms, trimmed to the floor
+    const K = .5, cv = SB.occCv || (SB.occCv = document.createElement('canvas')); cv.width = LG_WW * K; cv.height = LG_WH * K;
+    const c = cv.getContext('2d'); c.scale(K, K); c.fillStyle = '#06040e';
+    for(let j = 0; j < LG_GY; j++) for(let i = 0; i < LG_GX; i++){ const t = j * LG_GX + i; if(!hid[t]) continue; const x = (i + .5) * LG_C, y = (j + .5) * LG_C; if(lgRoomAt(x, y)) continue; c.fillRect(i * LG_C - 10, j * LG_C - 10, LG_C + 20, LG_C + 20); }
+    for(const id of rooms){ const r = lgRoomById(id); lgPolyPath(c, r.P); c.fill(); }
+    c.globalCompositeOperation = 'destination-in'; c.strokeStyle = c.fillStyle = '#000'; c.lineJoin = 'round'; c.lineCap = 'round';
+    // (destination-in needs one combined mask: built on a second canvas)
+    const mk = SB.occMk || (SB.occMk = document.createElement('canvas')); mk.width = cv.width; mk.height = cv.height; const m = mk.getContext('2d'); m.scale(K, K); m.fillStyle = m.strokeStyle = '#000'; m.lineJoin = 'round'; m.lineCap = 'round';
+    for(const h of LG_HALLS){ m.lineWidth = h.w + 2; m.beginPath(); h.forEach(([a, b], k) => k ? m.lineTo(a, b) : m.moveTo(a, b)); m.stroke(); }
+    for(const r of LG_ROOMS){ lgPolyPath(m, r.P); m.fill(); }
+    c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mk, 0, 0); c.globalCompositeOperation = 'source-over';
+    SB.occ = { hid, rooms, sig };
   }
   function sbOccHidden(x, y){
     const o = SB.occ; if(!o) return false; const r = lgRoomAt(x, y);
-    if(r && o.rooms.has(r.id)) return true;
-    if(!r) for(const d of o.halls) if(sbDistPoly(x, y, d.beyond) < d.w / 2 + 14) return true;
-    return false;
+    if(r) return o.rooms.has(r.id);
+    const t = lgTile(x, y); return t >= 0 && !!o.hid[t];
   }
-  function sbOccDraw(g2){
-    const o = SB.occ; if(!o) return;
-    g2.save(); g2.fillStyle = 'rgba(6,4,14,.94)'; g2.strokeStyle = 'rgba(6,4,14,.94)';
-    for(const id of o.rooms){ const r = lgRoomById(id); g2.beginPath(); r.P.forEach(([x, y], i) => i ? g2.lineTo(x, y) : g2.moveTo(x, y)); g2.closePath(); g2.fill(); g2.fillRect(r.x - 4, r.y - LG_FACEH - 4, r.w + 8, LG_FACEH + 6); }
-    g2.lineJoin = 'round'; g2.lineCap = 'butt';
-    for(const d of o.halls){ g2.lineWidth = d.w + 30; g2.beginPath(); d.beyond.forEach(([x, y], i) => i ? g2.lineTo(x, y) : g2.moveTo(x, y)); g2.stroke(); }
-    g2.restore();
+  // the dark layer sits on the floors (and anyone on them); the walls' outlines and the gates go back on top of it
+  function sbOccDraw(g2, vis){
+    const o = SB.occ; if(!o || !SB.occCv) return; const K = .5, x0 = Math.max(0, vis.x0), y0 = Math.max(0, vis.y0), x1 = Math.min(LG_WW, vis.x1), y1 = Math.min(LG_WH, vis.y1);
+    if(x1 > x0 && y1 > y0){ g2.save(); g2.globalAlpha = .96; g2.drawImage(SB.occCv, x0 * K, y0 * K, (x1 - x0) * K, (y1 - y0) * K, x0, y0, x1 - x0, y1 - y0); g2.restore(); }
+  }
+  // the walls' outlines on their own (a second set of map tiles, only drawn while a gate is shut)
+  function lgRingChunk(ci, cj, s){
+    if(LG.rchunkS !== s){ LG.rchunks = new Map(); LG.rchunkS = s; }
+    const key = ci + ',' + cj; let cv = LG.rchunks.get(key); if(cv) return cv;
+    cv = document.createElement('canvas'); cv.width = Math.ceil(LG_CH * s); cv.height = Math.ceil(LG_CH * s);
+    const c = cv.getContext('2d'); c.scale(s, s); c.translate(-ci * LG_CH, -cj * LG_CH);
+    const R = { x0: ci * LG_CH, y0: cj * LG_CH, x1: (ci + 1) * LG_CH, y1: (cj + 1) * LG_CH }, hitB = (b, m) => b.x0 < R.x1 + m && b.x1 > R.x0 - m && b.y0 < R.y1 + m && b.y1 > R.y0 - m;
+    const H = LG_FACEH, faces = lgFaces(); c.lineJoin = 'round'; c.lineCap = 'round';
+    for(const [lw, col] of [[44, '#14101f'], [36, '#55507a'], [10, '#3e3a5c']]){
+      c.strokeStyle = col; c.fillStyle = col;
+      for(const h of LG_HALLS){ c.lineWidth = h.w + lw; c.beginPath(); h.forEach(([a, b], k) => k ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); }
+      c.lineWidth = lw; for(const r of LG_ROOMS){ if(!hitB(r.bb, 300)) continue; lgPolyPath(c, r.P); c.stroke(); c.fill(); }
+      for(const f of faces){ if(!hitB(f.r.bb, 300)) continue; lgFacePath(c, f, H); c.stroke(); c.fill(); }
+    }
+    c.globalCompositeOperation = 'destination-out'; c.fillStyle = c.strokeStyle = '#000';
+    for(const h of LG_HALLS){ c.lineWidth = h.w; c.beginPath(); h.forEach(([a, b], k) => k ? c.lineTo(a, b) : c.moveTo(a, b)); c.stroke(); }
+    for(const r of LG_ROOMS){ if(!hitB(r.bb, 300)) continue; lgPolyPath(c, r.P); c.fill(); }
+    for(const f of faces){ if(!hitB(f.r.bb, 300)) continue; lgFacePath(c, f, H); c.fill(); }
+    LG.rchunks.set(key, cv); return cv;
   }
   // ----- portals: you vanish into another dimension, hover a portal to peek out of it, click to come out there -----
   function sbPortalIn(){
