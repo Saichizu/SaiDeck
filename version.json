@@ -1,1 +1,1 @@
-{"build": 247, "version": "V18", "file": "SaiDeck.html", "notes": "Fixed the lounge freezing every so often (everyone, including you, stopping in place). The lounge's shared clock jumped back whenever a slow internet reply gave a bad server-time estimate; now it measures more carefully and eases small corrections in, so time never runs backwards."}
+{"build": 248, "version": "V18", "file": "SaiDeck.html", "notes": "Chat is much lighter: it now loads only the newest 30 messages (it used to load 200). Scroll up to load older ones, 30 at a time."}

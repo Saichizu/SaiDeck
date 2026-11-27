@@ -23503,7 +23503,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 247;                 // ← goes up by one with every published version
+  const SD_BUILD = 248;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24037,6 +24037,7 @@
   const esCount = () => { for(const e of ES_OPEN) if(e.readyState === 2) ES_OPEN.delete(e); return ES_OPEN.size; };
   const CHAT_KEY = 'AIzaSyB70Dgbvg4LNOIIj1Cxszb_qUZLZLJ_XkA';     // (the project's public web key: only identifies the project)
   const CHAT_ROOM = 'saideck-lobby', CHAT_MAX = 50, CHAT_NAME_MAX = 20;
+  const CHAT_LOAD = 30, CHAT_OLDER = 30;          // (how many messages load at first, and per "older" step — kept small so the chat is light)
   // ----- the word guard -----
   // (whole words; and for the strongest ones, anywhere inside a word or across spaced-out letters)
   const BAD_ANY = ['fuck','fuk','fck','cunt','nigg','fagg','bitch','whore','porn','pussy','dildo','blowjob','handjob','hentai','jizz','motherf','kontol','memek','ngentot','jembut','bangsat','bokep','pepek','colmek','lonte','pelacur','jancok','jancuk','masturb','orgasm','onlyfans'];
@@ -24663,7 +24664,7 @@
     const room = chatRoom(), first = CHAT.msgs.get(CHAT.order[0]); if(!first || typeof first.t !== 'number') return;
     CHAT.olderBusy = true; const tip = chatPanel.querySelector('.chat-older'); if(tip) tip.textContent = 'Loading older messages…';
     try{
-      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&endAt=${first.t - 1}&limitToLast=100`, { cache: 'no-store' });
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&endAt=${first.t - 1}&limitToLast=${CHAT_OLDER}`, { cache: 'no-store' });
       const d = r.ok ? await r.json() : null;
       if(room !== chatRoom()) return;
       const got = Object.entries(d || {}).filter(([k, m]) => chatValid(m) && !CHAT.msgs.has(k));
@@ -24672,7 +24673,7 @@
       CHAT._animSeen = CHAT._animSeen || new Set();
       for(const [k, m] of got){ m._k = k; CHAT.msgs.set(k, m); CHAT._animSeen.add(k); }
       CHAT.older = (CHAT.older || 0) + got.length;
-      if(got.length < 100) CHAT.olderDone = true;
+      if(got.length < CHAT_OLDER) CHAT.olderDone = true;
       chatSort(); chatRenderMessages();
       if(body) body.scrollTop = body.scrollHeight - fromBottom;
     }catch(e){}
@@ -25542,7 +25543,7 @@
     CHAT.room = room;
     CHAT.status = 'connecting'; chatRenderStatus();
     const seen = Number(chatLS('seen:' + room)) || 0;
-    const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=200`);      // (newest by time — ids made by SaiDeck itself don't sort by time)
+    const es = new EventSource(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=${CHAT_LOAD}`);      // (newest by time — ids made by SaiDeck itself don't sort by time)
     CHAT.es = es;
     es.addEventListener('open', () => { CHAT.status = 'on'; CHAT.retry = 0; chatRenderStatus(); });
     const apply = (key, m, fresh) => {
@@ -25617,7 +25618,7 @@
     if(!room || CHAT.streamed || CHAT.fbRoom !== room || Date.now() - CHAT.fbStart < 5000 || CHAT.fbBusy || !CHAT.fbFull || document.visibilityState === 'hidden') return;
     CHAT.fbBusy = true;
     try{
-      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=200`, { cache: 'no-store' });
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=${CHAT_LOAD}`, { cache: 'no-store' });
       if(!r.ok || CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
       const txt = await r.text(); if(CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
       if(txt === CHAT.fbLast && CHAT.ready) return; CHAT.fbLast = txt;                           // (nothing new)
