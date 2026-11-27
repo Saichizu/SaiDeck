@@ -407,6 +407,7 @@
   .sb-acts{position:absolute;right:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;max-width:330px;}
   .sb-act{min-width:74px;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:rgba(20,14,32,.88);color:#fff;font:800 13px 'Inter',sans-serif;cursor:pointer;}
   .sb-act:hover{border-color:#fff;} .sb-act.off{opacity:.4;cursor:default;}
+  .sb-acts{align-items:flex-end;} .sb-act[data-sb="use"]{order:99;width:92px;height:92px;min-width:0;padding:0;border-radius:50%;border-width:3px;border-color:#57e1ff;font-size:17px;box-shadow:0 4px 18px rgba(87,225,255,.35);} .sb-act[data-sb="use"]:not(.off){background:radial-gradient(circle at 40% 35%,#1f3a5a,#101a2e);} .sb-act[data-sb="use"]:active:not(.off){transform:scale(.95);}
   .sb-act[data-sb="kill"]{border-color:#ff4d6d;} .sb-act[data-sb="hide"], .sb-act[data-sb="unhide"]{border-color:#b48cff;} .sb-act[data-sb="report"]{border-color:#ffd166;} .sb-act[data-sb="portal"]{border-color:#9d6bff;}
   .sb-gates{width:100%;display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-radius:10px;background:rgba(16,10,26,.95);} .sb-gates b{width:100%;font-size:12px;}
   .sb-gates button{padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:#24162e;color:#fff;font-size:11.5px;cursor:pointer;} .sb-gates button:hover{background:#3a2048;}
@@ -445,6 +446,15 @@
   .sb-meter .m{position:absolute;top:-3px;bottom:-3px;width:6px;margin-left:-3px;left:50%;border-radius:3px;background:#ff4d6d;transition:left .08s;} .sb-meter .m.in{background:#35d0b8;box-shadow:0 0 10px #35d0b8;}
   .sb-nomic{width:100%;display:flex;flex-direction:column;gap:8px;align-items:center;}
   .sb-wave{width:260px;height:80px;border-radius:8px;background:#0a0710;} .sb-sl{width:100%;}
+  .sb-smap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);}
+  .sb-sbox{position:relative;padding:12px 14px;border-radius:14px;background:#120a1c;border:1px solid #ff4d6d;box-sizing:content-box;} .sb-sbox > b{display:block;margin-bottom:8px;font-size:16px;color:#ff8fa3;}
+  .sb-smw{position:relative;} .sb-smw canvas{display:block;border-radius:8px;}
+  .sb-sbt{position:absolute;inset:0;}
+  .sb-sx{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;padding:6px 10px;border-radius:12px;border:2px solid #ffd166;background:rgba(30,16,8,.92);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 0 14px rgba(255,209,102,.45);}
+  .sb-sx i{font:800 10px 'Inter',sans-serif;font-style:normal;} .sb-sx.nuke{border-color:#ff2a3a;box-shadow:0 0 14px rgba(255,42,58,.55);} .sb-sx.off{opacity:.45;cursor:default;box-shadow:none;} .sb-sx:hover:not(.off){transform:translate(-50%,-50%) scale(1.08);}
+  .sb-door{position:absolute;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:4px;border:2px solid #cfd8e6;background:#2a2438;cursor:pointer;padding:0;}
+  .sb-door:hover{border-color:#fff;} .sb-door.sel{background:#ffd166;border-color:#fff;box-shadow:0 0 10px #ffd166;} .sb-door.shut{background:#ff2a3a;border-color:#ffb3bf;}
+  .sb-sfoot{margin-top:10px;justify-content:space-between;}
   .sb-portal{position:absolute;inset:0;pointer-events:none;} .sb-portal .sb-pdim{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(60,10,120,.15),rgba(30,0,60,.75));box-shadow:inset 0 0 120px rgba(157,107,255,.6);animation:sbPortal 3s ease-in-out infinite;}
   @keyframes sbPortal{0%,100%{opacity:.85;}50%{opacity:1;}}
   .sb-pbox{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 16px;border-radius:14px;background:rgba(20,6,40,.92);border:1px solid #9d6bff;pointer-events:auto;text-align:center;}
@@ -23476,7 +23486,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 230;                 // ← goes up by one with every published version
+  const SD_BUILD = 231;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33443,6 +33453,39 @@
   }
   function lgFull(){ return Object.assign(lgRec(), { t: { '.sv': 'timestamp' }, h: { '.sv': 'timestamp' } }); }
   // ----- the lounge on screen (built once; stays for the whole visit) -----
+  // ----- the keyboard: hold WASD or the arrow keys to walk; E use, Q kill, R report (Sabotrack), F / space attack -----
+  const LG_DIRKEYS = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1], a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1] };
+  function lgKeyOk(e){
+    if(!LG.on || LG.paused || !LG.win || !LG.win.isConnected || LG.win.hidden || document.visibilityState !== 'visible') return false;
+    if(e.ctrlKey || e.metaKey || e.altKey) return false;
+    const t = e.target; if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return false;
+    if(document.querySelector('.dash-wrap:not([hidden]), .td-main:not([hidden])') && !LG.win.contains(t)) return false;
+    return true;
+  }
+  function lgKeyDown(e){
+    if(!lgKeyOk(e)) return;
+    const k = e.key.toLowerCase();
+    if(LG_DIRKEYS[k]){ e.preventDefault(); LG.keys = LG.keys || new Set(); LG.keys.add(k); lgKeyWalk(true); return; }
+    if(e.repeat) return;
+    if(sbIn()){ if(k === 'e'){ e.preventDefault(); sbUse(); return; } if(k === 'q'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd) sbMeeting(bd.u); return; } }
+    if(k === 'f' || k === ' '){ e.preventDefault(); lgAttack(); return; }
+  }
+  function lgKeyUp(e){
+    const k = (e.key || '').toLowerCase(); if(!LG.keys || !LG.keys.has(k)) return;
+    LG.keys.delete(k); if(!LG.keys.size){ clearInterval(LG.keyT); LG.keyT = 0; const p = lgPos(LG.me, trdNow()); if(p.moving) lgWalk(Math.round(p.x), Math.round(p.y), null); } else lgKeyWalk(true);
+  }
+  // walk a little ahead in the held direction; re-aim only when the direction changes or we're close to the end (so it doesn't write every frame)
+  function lgKeyWalk(now){
+    if(!LG.keys || !LG.keys.size) return;
+    let dx = 0, dy = 0; for(const k of LG.keys){ const d = LG_DIRKEYS[k]; if(d){ dx += d[0]; dy += d[1]; } }
+    const L = Math.hypot(dx, dy); if(!L) return; dx /= L; dy /= L;
+    const p = lgPos(LG.me, trdNow()), dir = dx.toFixed(2) + ',' + dy.toFixed(2), left = Math.hypot(LG.me.tx - p.x, LG.me.ty - p.y);
+    if(now || dir !== LG.keyDir || left < 70 || !p.moving){ LG.keyDir = dir; lgWalk(Math.round(p.x + dx * 150), Math.round(p.y + dy * 150), null); }
+    if(!LG.keyT) LG.keyT = setInterval(() => { if(!LG.keys || !LG.keys.size || !LG.on){ clearInterval(LG.keyT); LG.keyT = 0; return; } lgKeyWalk(false); }, 120);
+  }
+  window.addEventListener('keydown', lgKeyDown, true);
+  window.addEventListener('keyup', lgKeyUp, true);
+  window.addEventListener('blur', () => { if(LG.keys) LG.keys.clear(); clearInterval(LG.keyT); LG.keyT = 0; });
   function lgOpen(){
     if(LG.on){ lgResume(); return; }
     const look = (() => { try{ return JSON.parse(chatLS('lgLook') || 'null') || {}; }catch(e){ return {}; } })();
@@ -33475,12 +33518,7 @@
     cv.addEventListener('pointerleave', () => { LG.mouseC = null; });
     cv.addEventListener('pointermove', (e) => { const i = lgMmIndex(e); if(i !== LG.mmHover){ LG.mmHover = i; cv.style.cursor = i != null ? 'pointer' : ''; } });
     cv.addEventListener('pointerleave', () => { LG.mmHover = null; cv.style.cursor = ''; });
-    cv.addEventListener('keydown', (e) => {
-      if(sbIn()){ const k = e.key.toLowerCase(); if(k === 'e'){ e.preventDefault(); sbUse(); return; } if(k === 'q'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd) sbMeeting(bd.u); return; } }
-      if(e.key === 'f' || e.key === 'F' || e.key === ' '){ e.preventDefault(); lgAttack(); return; }
-      const d = { ArrowLeft: [-110, 0], ArrowRight: [110, 0], ArrowUp: [0, -110], ArrowDown: [0, 110], a: [-110, 0], d: [110, 0], w: [0, -110], s: [0, 110] }[e.key];
-      if(!d) return; e.preventDefault(); const p = lgPos(LG.me, trdNow()); lgWalk(p.x + d[0], p.y + d[1], null);
-    });
+    // (the keyboard: WASD / arrows to walk while held, plus the action keys — see lgKeyDown)
     w.querySelectorAll('[data-emo]').forEach(b => b.addEventListener('click', () => lgEmote(b.dataset.emo)));
     w.querySelector('[data-act="atk"]').addEventListener('click', (e) => { if(!lgIsUser()){ lgNeedLogin(); return; } LG.atkMode = !LG.atkMode; e.currentTarget.classList.toggle('on', LG.atkMode); e.currentTarget.textContent = LG.atkMode ? '⚔️ Attack: ON' : '⚔️ Attack'; toast(LG.atkMode ? '⚔️ Attack mode on — click someone to attack them.' : 'Attack mode off.', 1800); LG.cv.style.cursor = LG.atkMode ? 'crosshair' : ''; });
     w.querySelector('[data-act="dance"]').addEventListener('click', () => lgAct(LG.me.a === 'dance' ? '' : 'dance'));
@@ -33670,7 +33708,7 @@
     // (a saboteur clicking a hiding spot: walk over and climb in)
     try{ const G = sbG(); if(sbIn(G) && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G)){ sbPlaces(); const i = SB_HIDES.findIndex(h => p.x > h.x - h.w / 2 - 6 && p.x < h.x + h.w / 2 + 6 && p.y > h.y - h.h - 6 && p.y < h.y + 10);
       if(i >= 0){ const h = SB_HIDES[i], me = lgPos(LG.me, now); if(Math.hypot(h.sx - me.x, h.sy - me.y) < 70) sbHideIn(i); else lgWalk(h.sx, h.sy, 'sbhide:' + i); return; } } }catch(err){}
-    const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
+    const mi = lgMmIndex(e); if(mi != null){ try{ const G = sbG(); if(sbIn(G) && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G)){ sbSabMap(true); return; } }catch(err){} if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
     for(const o of lgPeople()){ if(sbHide(o)) continue; const q = lgShown(o, now); if(Math.abs(p.x - q.x) < 20 && p.y > q.y - 70 && p.y < q.y + 6 && lgSeenAt(q.x, q.y)){ if(lgBooTry(o, q, now)) return; if(LG.atkMode && lgIsUser() && !o.o) lgAttackAt(o); else lgPersonPop(o); return; } }
@@ -33800,12 +33838,13 @@
     const list = []; lgProps(g, now, list, vis);
     const people = [];
     const meD = Object.assign({ n: lgRec().n, u: lgUid(), o: !lgIsUser() }, m), all = [{ u: meD.u, d: meD, p: mp }];
-    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x, p.y) || sbHide(o)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 80 && p.x < vis.x1 + 80 && p.y > vis.y0 - 20 && p.y < vis.y1 + 120) list.push({ y: p.y, d: () => sbDrawP(g, o, p, now, false) }); }
+    for(const o of lgPeople()){ const p = lgShow(o, now); all.push({ u: o.u, d: o, p }); if(!lgSeenAt(p.x, p.y) || sbHide(o) || sbOccHidden(p.x, p.y)) continue; if(!p.face) p.face = (o.tx < o.x ? -1 : 1); people.push({ o, p }); if(p.x > vis.x0 - 80 && p.x < vis.x1 + 80 && p.y > vis.y0 - 20 && p.y < vis.y1 + 120) list.push({ y: p.y, d: () => sbDrawP(g, o, p, now, false) }); }
     mp.face = mp.face || LG.lastFace;
     list.push({ y: mp.y + .1, d: () => sbDrawP(g, meD, mp, now, true) });
     LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
     lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now); try{ sbDraw(g, now, list, all); }catch(e){ console.warn(e); }
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
+    try{ sbOccDraw(g); }catch(e){}
     lgDrawShots(g, all, now); lgDrawTps(g);
     const pn = performance.now();
     LG.hearts = LG.hearts.filter(h => pn - h.t < 1400);
@@ -33834,7 +33873,7 @@
   //   sabo/roles/<game>/<uid>  'bad' | 'good'   (you can read your own; saboteurs read each other; everyone after the game)
   //   sabo/ghost/<game>/<id>   the dead's chat (only the dead can read it until the game's over)
   //   sabo/hist/<game>         { t, w }  (finished games, so their ghost chat stays in the Sabotrack room)
-  const SB_ROOM = 'g-sabotrack', SB_MIN = 4, SB_KILL_CD = 25000, SB_KILL_R = 70, SB_SAB_CD = 30000, SB_MELT_MS = 45000, SB_GATE_MS = 10000, SB_GATES = 3,
+  const SB_ROOM = 'g-sabotrack', SB_MIN = 4, SB_KILL_CD = 25000, SB_KILL_R = 70, SB_SAB_CD = 30000, SB_MELT_MS = 45000, SB_GATE_MS = 10000, SB_GATES = 3, SB_GATE_CD = 30000,
     SB_DISC = 20000, SB_VOTE = 40000, SB_EACH = 5, SB_PORTAL_R = 34;
   var SB = { role: '', roleG: '', bad: new Set(), ejRole: {}, allRoles: null, st: '', gid: '', killAt: 0, inPortal: null, peek: null, camAt: null, blk: null, blkKey: '',
     splash: null, ghosts: new Map(), ghostAt: 0, hud: null, mg: null, meetSeen: 0, resSeen: 0, cctv: false, fAt: 0, voted: '' };
@@ -33907,22 +33946,25 @@
   // doors: where each corridor leaves a room (for the saboteurs' gates)
   function sbDoors(){
     if(SB.doors) return SB.doors; const out = [];
-    for(const h of LG_HALLS) for(const end of [0, 1]){
-      const pts = end ? h.slice().reverse() : h, r = LG_ROOMS.find(r => lgInPoly(r.P, pts[0][0], pts[0][1])); if(!r) continue;
+    const n = {};
+    for(const [hi, h] of LG_HALLS.entries()) for(const end of [0, 1]){
+      const pts = end ? h.slice().reverse() : h, r = LG_ROOMS.find(r => lgInPoly(r.P, pts[0][0], pts[0][1])); if(!r || r.vip) continue;
       const a = pts[0], b = pts[1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
       let d = 0; while(d < L && lgInPoly(r.P, a[0] + u[0] * d, a[1] + u[1] * d)) d += 2;
-      out.push({ room: r.id, x: a[0] + u[0] * (d + 8), y: a[1] + u[1] * (d + 8), u, w: h.w || LG_HW });
+      const x = a[0] + u[0] * (d + 8), y = a[1] + u[1] * (d + 8);
+      n[r.id] = (n[r.id] || 0) + 1;
+      out.push({ id: r.id + '-' + n[r.id], room: r.id, hall: hi, x, y, u, w: h.w || LG_HW, beyond: [[x, y]].concat(pts.slice(1)) });
     }
     return SB.doors = out;
   }
-  function sbClosed(g = sbG()){ const now = trdNow(), out = []; if(!sbPlaying(g)) return out; for(const [r, t] of Object.entries(g.gates || {})) if(now - t < SB_GATE_MS) out.push(r); return out; }
+  function sbClosed(g = sbG()){ const now = trdNow(), out = []; if(!sbPlaying(g)) return out; for(const [d, t] of Object.entries(g.gates || {})) if(now - t < SB_GATE_MS) out.push(d); return out; }
   // closed gates block those tiles (my own routes go round them)
   function sbBlockUpdate(){
     const shut = sbClosed(), key = shut.sort().join();
     if(key === SB.blkKey) return; SB.blkKey = key;
     if(!shut.length){ SB.blk = null; return; }
     const s = new Set();
-    for(const d of sbDoors()) if(shut.includes(d.room)){
+    for(const d of sbDoors()) if(shut.includes(d.id)){
       const nx = -d.u[1], ny = d.u[0], hw = d.w / 2 + 10;
       for(let along = -14; along <= 14; along += 4) for(let ac = -hw; ac <= hw; ac += 4){ const i = lgTile(d.x + d.u[0] * along + nx * ac, d.y + d.u[1] * along + ny * ac); if(i >= 0) s.add(i); }
     }
@@ -34060,7 +34102,7 @@
   function sbOnMeeting(g){
     const [x, y] = sbHallSpot(g); sbTeleport(x, y);
     const b = g.meet.b; sbSplash(b ? '📣 DEAD BODY REPORTED' : '🚨 EMERGENCY MEETING', b ? `${sbName(g.meet.by, g)} found ${sbName(b, g)}.` : `${sbName(g.meet.by, g)} pressed the button.`, '#ffd166', 2600);
-    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false);
+    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false); SB.smap && sbSabMap(false);
   }
   function sbOnResult(g){
     const u = g.res.ej;
@@ -34120,11 +34162,12 @@
     await sbPatch({ 'sabo/game/sab': { k, t: sbSv() }, 'sabo/game/sabAt': sbSv() });
     lgSfx('zap');
   }
-  async function sbGate(room){
+  async function sbGatesClose(ids){
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
-    const used = ((g.gu || {})[sbMe()] | 0); if(used >= SB_GATES){ toast('You\'ve used all your gates.', 1600); return; }
-    await sbPatch({ [`sabo/game/gates/${room}`]: sbSv(), [`sabo/game/gu/${sbMe()}`]: used + 1 });
-    lgSfx('zap'); SB.gatePick = false; sbHud(true);
+    ids = [...new Set(ids)].slice(0, SB_GATES); if(!ids.length){ toast('Pick up to 3 gates on the map first.', 1600); return; }
+    const cd = SB_GATE_CD - (trdNow() - ((g.gt || {})[sbMe()] || 0)); if(cd > 0){ toast(`Gates are cooling down (${Math.ceil(cd / 1000)}s).`, 1600); return; }
+    const body = { [`sabo/game/gt/${sbMe()}`]: sbSv() }; for(const id of ids) body[`sabo/game/gates/${id}`] = sbSv();
+    if(await sbPatch(body)){ lgSfx('zap'); SB.gsel = new Set(); sbHud(true); }
   }
   // fixing: the lights (the switch in Electrical), the meltdown (two people holding both consoles in the Control Room)
   async function sbFixLights(){ const g = sbG(); if(!sbIn(g) || !g.sab || g.sab.k !== 'lights') return false; await sbPatch({ 'sabo/game/sab': null, 'sabo/game/sabAt': sbSv() }); lgSfx('reveal'); toast('💡 Lights fixed!', 1800); return true; }
@@ -34216,7 +34259,7 @@
     } });
     // closed gates
     const shut = sbClosed(G);
-    if(shut.length) for(const d of sbDoors()) if(shut.includes(d.room)) list.push({ y: d.y + 6, d: () => {
+    if(shut.length) for(const d of sbDoors()) if(shut.includes(d.id)) list.push({ y: d.y + 6, d: () => {
       const nx = -d.u[1], ny = d.u[0], hw = d.w / 2 + 4;
       g2.save(); g2.lineCap = 'round';
       g2.strokeStyle = '#1a1a24'; g2.lineWidth = 14; g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke();
@@ -34268,7 +34311,8 @@
       <div class="sb-meet" hidden></div>
       <div class="sb-mg" hidden></div>
       <div class="sb-portal" hidden></div>
-      <div class="sb-cctv" hidden></div>`;
+      <div class="sb-cctv" hidden></div>
+      <div class="sb-smap" hidden></div>`;
     st.appendChild(h); SB.hud = h;
     h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; SB.vgPrev = SB.panelOpen ? sbVg() : null; sbHud(true); });
     h.addEventListener('click', (e) => {
@@ -34277,8 +34321,11 @@
       else if(a === 'nb-') sbSetBad(-1); else if(a === 'nb+') sbSetBad(1);
       else if(a === 'join') sbJoin(); else if(a === 'leave') sbLeave(); else if(a === 'start') sbStart(); else if(a === 'close'){ SB.panelOpen = false; sbHud(true); }
       else if(a === 'kill') sbKill(); else if(a === 'use') sbUse(); else if(a === 'report'){ const bd = sbNearBody(); if(bd) sbMeeting(bd.u); }
-      else if(a === 'lights') sbSabotage('lights'); else if(a === 'melt') sbSabotage('melt'); else if(a === 'gates'){ SB.gatePick = !SB.gatePick; sbHud(true); }
-      else if(a === 'gate') sbGate(b.dataset.r); else if(a === 'portal') sbPortalIn(); else if(a === 'vote') sbVote(b.dataset.u);
+      else if(a === 'sabmap') sbSabMap(!SB.smap); else if(a === 'smapx') sbSabMap(false);
+      else if(a === 'sablights'){ sbSabotage('lights'); sbSabMap(false); } else if(a === 'sabmelt'){ sbSabotage('melt'); sbSabMap(false); }
+      else if(a === 'door'){ const id = b.dataset.d; SB.gsel = SB.gsel || new Set(); if(SB.gsel.has(id)) SB.gsel.delete(id); else if(SB.gsel.size < SB_GATES) SB.gsel.add(id); else toast('Up to 3 gates at a time.', 1400); sbSabMapDraw(); }
+      else if(a === 'closegates'){ sbGatesClose([...(SB.gsel || [])]).then(() => sbSabMapDraw()); }
+      else if(a === 'portal') sbPortalIn(); else if(a === 'vote') sbVote(b.dataset.u);
       else if(a === 'hide'){ const i = sbNearHide(); if(i >= 0) sbHideIn(i); } else if(a === 'unhide') sbHideOut();
       else if(a === 'pgo') sbPortalGo(+b.dataset.i); else if(a === 'pout') sbPortalOut(); else if(a === 'cctvx') sbCctv(false);
     });
@@ -34323,20 +34370,17 @@
       const lk = ids.map(u => u + shown(u) + (SB.bad.has(u) ? 'b' : '')).join();
       if(force || list.dataset.k !== lk){ list.dataset.k = lk; list.innerHTML = `<b>Players</b>` + ids.map(u => { const s = shown(u); return `<span class="${s}${SB.bad.has(u) ? ' bad' : ''}">${s === 'alive' ? '🟢' : s === 'ej' ? '👋' : '💀'} ${escapeHtml(sbName(u, G))}${u === me ? ' (you)' : ''}</span>`; }).join(''); }
       if(G.st === 'play'){
-        const dead = sbDeadU(me, G), bad = sbBad(), cd = Math.max(0, SB_KILL_CD - (now - SB.killAt)), sabCd = Math.max(0, SB_SAB_CD - (now - Math.max(SB.sabAt || 0, G.sabAt || 0))), used = ((G.gu || {})[me] | 0);
+        const dead = sbDeadU(me, G), bad = sbBad(), cd = Math.max(0, SB_KILL_CD - (now - SB.killAt)), sabCd = Math.max(0, SB_SAB_CD - (now - Math.max(SB.sabAt || 0, G.sabAt || 0)));
         const nearV = bad && !dead ? sbNearVictim(G) : null, nearB = !dead ? sbNearBody() : null, portal = bad && !dead ? sbNearPortal() : -1;
         const btn = (a, t, on, extra) => `<button type="button" class="sb-act${on ? '' : ' off'}" data-sb="${a}" ${extra || ''}>${t}</button>`;
         let html = (SB.local ? btn('testend', '🛑 End test', true) : '') + btn('use', '✋ Use', !!(sbNearTask() || (!dead && sbNearBtn()) || (sbCritical(G) && sbNearMelt())));
         if(!dead) html += btn('report', '📣 Report', !!nearB);
         if(bad && !dead){
           html += btn('kill', cd > 0 ? `🔪 ${Math.ceil(cd / 1000)}` : '🔪 Kill', cd <= 0 && !!nearV);
-          html += btn('lights', sabCd > 0 || G.sab ? `💡 ${G.sab ? '…' : Math.ceil(sabCd / 1000)}` : '💡 Lights', sabCd <= 0 && !G.sab);
-          html += btn('melt', sabCd > 0 || G.sab ? `☢️ ${G.sab ? '…' : Math.ceil(sabCd / 1000)}` : '☢️ Meltdown', sabCd <= 0 && !G.sab);
-          html += btn('gates', `🚪 Gates ${SB_GATES - used}`, used < SB_GATES);
+          html += btn('sabmap', '🗺️ Sabotage', true);
           if(portal >= 0) html += btn('portal', '🌀 Portal', true);
           if(SB.hideIn != null) html += btn('unhide', '🚪 Come out', true); else { const hi = sbNearHide(); if(hi >= 0) html += btn('hide', `🫥 Hide (${SB_HIDES[hi].n})`, true); }
         }
-        if(SB.gatePick && bad) html = `<div class="sb-gates"><b>Close a room's gates (${SB_GATES - used} left)</b>${LG_ROOMS.filter(r => !r.vip).map(r => `<button type="button" data-sb="gate" data-r="${r.id}">${escapeHtml(r.name.replace(/^.*· /, ''))}</button>`).join('')}</div>` + html;
         if(acts.dataset.k !== html){ acts.dataset.k = html; acts.innerHTML = html; }
       }
     }
@@ -34377,6 +34421,60 @@
   }
   function sbHideOut(silent){
     if(SB.hideIn == null) return; SB.hideIn = null; LG.me.hv = null; lgWrite({ hv: null }); if(!silent) lgSfx('bubble'); sbHud(true);
+  }
+  // ----- the sabotage map (saboteurs): click the minimap, pick the lights or the meltdown, or up to 3 gates to close -----
+  function sbSabMap(on){
+    const G = sbG(); if(on && !(sbIn(G) && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G))) return;
+    SB.smap = !!on; const el = sbHudEl() && sbHudEl().querySelector('.sb-smap'); if(!el) return;
+    el.hidden = !on; if(!on){ el.innerHTML = ''; return; }
+    SB.gsel = SB.gsel || new Set(); sbSabMapDraw(true);
+  }
+  function sbSabMapDraw(full){
+    const el = SB.hud && SB.hud.querySelector('.sb-smap'); if(!el || el.hidden) return;
+    const G = sbG(); if(!sbIn(G) || G.st !== 'play'){ sbSabMap(false); return; }
+    const X0 = 20, Y0 = 20, WW = 3060, WH = 1640, st = el.parentElement.getBoundingClientRect(), s = Math.min((st.width - 60) / WW, (st.height - 140) / WH), W = Math.round(WW * s), H = Math.round(WH * s);
+    const P = (x, y) => `left:${((x - X0) * s).toFixed(1)}px;top:${((y - Y0) * s).toFixed(1)}px`;
+    if(full || !el.querySelector('canvas')){
+      el.innerHTML = `<div class="sb-sbox" style="width:${W}px"><button type="button" class="sb-x" data-sb="smapx" aria-label="Close">✕</button><b>🗺️ Sabotage</b><div class="sb-smw" style="width:${W}px;height:${H}px"><canvas width="${W}" height="${H}"></canvas><div class="sb-sbt"></div></div><div class="sb-row sb-sfoot"></div></div>`;
+      const c = el.querySelector('canvas').getContext('2d'); c.translate(-X0 * s, -Y0 * s); c.scale(s, s);
+      c.lineCap = c.lineJoin = 'round'; for(const h of LG_HALLS){ c.strokeStyle = '#3a3450'; c.lineWidth = (h.w || LG_HW) + 20; c.beginPath(); h.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); }
+      for(const h of LG_HALLS){ c.strokeStyle = '#575070'; c.lineWidth = h.w || LG_HW; c.beginPath(); h.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); }
+      for(const r of LG_ROOMS){ c.fillStyle = r.vip ? '#3a3040' : '#4a4466'; c.strokeStyle = '#8f86b8'; c.lineWidth = 6; c.beginPath(); r.P.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); c.fill(); c.stroke();
+        c.fillStyle = 'rgba(241,236,255,.75)'; c.font = `700 ${Math.round(13 / s)}px Inter, sans-serif`; c.textAlign = 'center'; c.fillText(r.name.replace(/^.*· /, ''), r.x + r.w / 2, r.y + r.h - 24); }
+    }
+    const now = trdNow(), shut = sbClosed(G), sabCd = Math.max(0, SB_SAB_CD - (now - Math.max(SB.sabAt || 0, G.sabAt || 0))), gcd = Math.max(0, SB_GATE_CD - (now - ((G.gt || {})[sbMe()] || 0))), sel = SB.gsel || new Set();
+    const E = lgRoomById('elec'), C = lgRoomById('control'), busy = !!G.sab;
+    let h = `<button type="button" class="sb-sx${busy || sabCd ? ' off' : ''}" data-sb="sablights" style="${P(E.x + E.w / 2, E.y + E.h / 2 - 20)}" title="Cut the lights">⚡<i>${busy ? '…' : sabCd ? Math.ceil(sabCd / 1000) + 's' : 'Lights'}</i></button>`;
+    h += `<button type="button" class="sb-sx nuke${busy || sabCd ? ' off' : ''}" data-sb="sabmelt" style="${P(C.x + C.w / 2, C.y + C.h / 2 - 20)}" title="Start a meltdown">☢️<i>${busy ? '…' : sabCd ? Math.ceil(sabCd / 1000) + 's' : 'Meltdown'}</i></button>`;
+    for(const d of sbDoors()) h += `<button type="button" class="sb-door${shut.includes(d.id) ? ' shut' : sel.has(d.id) ? ' sel' : ''}" data-sb="door" data-d="${d.id}" style="${P(d.x, d.y)}" title="Gate"></button>`;
+    const key = h + gcd + sel.size; const bt = el.querySelector('.sb-sbt'); if(bt.dataset.k !== key){ bt.dataset.k = key; bt.innerHTML = h; }
+    const f = `<span class="sb-wait">Pick up to ${SB_GATES} gates (${sel.size} picked) — they stay shut for ${SB_GATE_MS / 1000}s, and nobody can see through a shut gate.</span><button type="button" class="lg-b sb-go" data-sb="closegates" ${!sel.size || gcd ? 'disabled' : ''}>🚪 Close ${sel.size || ''} gate${sel.size === 1 ? '' : 's'}${gcd ? ` (${Math.ceil(gcd / 1000)}s)` : ''}</button>`;
+    const ft = el.querySelector('.sb-sfoot'); if(ft.dataset.k !== f){ ft.dataset.k = f; ft.innerHTML = f; }
+  }
+  // what a shut gate hides from me: from inside the room, the corridor beyond it; from that corridor, the room
+  const sbDistPoly = (x, y, pts) => { let best = 1e9; for(let i = 1; i < pts.length; i++){ const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy || 1, k = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)); best = Math.min(best, Math.hypot(x - ax - dx * k, y - ay - dy * k)); } return best; };
+  function sbOccUpdate(){
+    SB.occ = null; const G = sbG(); if(!sbIn(G) || G.st !== 'play' || sbDeadU(sbMe(), G)) return;
+    const shut = sbClosed(G); if(!shut.length) return;
+    const mp = lgPos(LG.me, trdNow()), mine = lgRoomAt(mp.x, mp.y), rooms = new Set(), halls = [];
+    for(const d of sbDoors()){ if(!shut.includes(d.id)) continue;
+      if(mine && mine.id === d.room) halls.push(d);
+      else if(!mine && sbDistPoly(mp.x, mp.y, LG_HALLS[d.hall]) < d.w / 2 + 24) rooms.add(d.room); }
+    if(rooms.size || halls.length) SB.occ = { rooms, halls };
+  }
+  function sbOccHidden(x, y){
+    const o = SB.occ; if(!o) return false; const r = lgRoomAt(x, y);
+    if(r && o.rooms.has(r.id)) return true;
+    if(!r) for(const d of o.halls) if(sbDistPoly(x, y, d.beyond) < d.w / 2 + 14) return true;
+    return false;
+  }
+  function sbOccDraw(g2){
+    const o = SB.occ; if(!o) return;
+    g2.save(); g2.fillStyle = 'rgba(6,4,14,.94)'; g2.strokeStyle = 'rgba(6,4,14,.94)';
+    for(const id of o.rooms){ const r = lgRoomById(id); g2.beginPath(); r.P.forEach(([x, y], i) => i ? g2.lineTo(x, y) : g2.moveTo(x, y)); g2.closePath(); g2.fill(); g2.fillRect(r.x - 4, r.y - LG_FACEH - 4, r.w + 8, LG_FACEH + 6); }
+    g2.lineJoin = 'round'; g2.lineCap = 'butt';
+    for(const d of o.halls){ g2.lineWidth = d.w + 30; g2.beginPath(); d.beyond.forEach(([x, y], i) => i ? g2.lineTo(x, y) : g2.moveTo(x, y)); g2.stroke(); }
+    g2.restore();
   }
   // ----- portals: you vanish into another dimension, hover a portal to peek out of it, click to come out there -----
   function sbPortalIn(){
@@ -34694,7 +34792,7 @@
       if(!lgIsUser()){ sbHud(false); return; }
       if(SB.local) sbBotTick();
       liveOpen('sabo/game').catch(() => {}); sbPoll();
-      sbWatch(); sbBlockUpdate();
+      sbWatch(); sbBlockUpdate(); sbOccUpdate(); if(SB.smap) sbSabMapDraw();
       { const cc = sbPlaying(); if(cc !== !!SB.cctvLbl){ SB.cctvLbl = cc; LG.chunks = new Map(); } }
       const G = sbG();
       if(sbIn(G)){
