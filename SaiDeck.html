@@ -438,6 +438,15 @@
   .sb-track{position:relative;width:100%;height:22px;border-radius:6px;background:rgba(255,255,255,.1);} .sb-track .z{position:absolute;top:0;bottom:0;width:18%;background:rgba(53,208,184,.55);border-radius:6px;} .sb-track .m{position:absolute;top:-3px;bottom:-3px;width:4px;margin-left:-2px;background:#ff4d6d;border-radius:2px;}
   .sb-code{font-size:20px;letter-spacing:.2em;color:#ffd166;} .sb-screen{font:800 24px monospace;letter-spacing:.3em;padding:6px 14px;border-radius:8px;background:#0a0710;}
   .sb-keys{display:grid;grid-template-columns:repeat(3,54px);gap:6px;} .sb-keys button{height:42px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#24162e;color:#fff;font:800 16px 'Inter',sans-serif;cursor:pointer;} .sb-keys button:hover{background:#3a2048;}
+  .sb-nsl{position:relative;margin:6px 4px 2px;padding-bottom:22px;width:100%;align-self:stretch;box-sizing:border-box;} .sb-nsl .sb-sl{width:100% !important;max-width:none !important;margin:0 !important;display:block;height:26px;accent-color:#ffe27a;} .sb-nkeys{position:absolute;left:9px;right:9px;bottom:0;height:18px;}
+  .sb-nkeys span{position:absolute;transform:translateX(-50%);font:700 11px 'Inter',sans-serif;opacity:.85;} .sb-nkeys span.bk{font-size:9px;opacity:.55;bottom:-2px;} .sb-ncur{font-weight:800;min-width:120px;}
+  .sb-chalk{background:linear-gradient(#3a5a3e,#2a4430) !important;border:8px solid #7a5230 !important;box-shadow:0 10px 40px rgba(0,0,0,.6),inset 0 0 40px rgba(0,0,0,.35) !important;font-family:'Comic Sans MS','Chalkboard SE',cursive;}
+  .sb-chalk .sb-meter{height:34px !important;background:rgba(0,0,0,.25) !important;border:2px dashed rgba(255,255,255,.5);} .sb-chalk .sb-bar{background:rgba(0,0,0,.3) !important;} .sb-chalk .sb-code{color:#ffe27a;font-size:26px;text-shadow:0 0 10px rgba(255,226,122,.6);}
+  .sb-mg2{width:min(520px,94vw) !important;max-width:94vw;padding:12px 14px !important;}
+  .sb-mg2 .sb-mgh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding-right:28px;} .sb-mg2 .sb-mgh b{font-size:16px;} .sb-mgsub{font-size:13px;opacity:.8;}
+  .sb-hard{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:#ff2a4a;color:#fff;font:900 10px 'Inter',sans-serif;letter-spacing:.08em;vertical-align:middle;box-shadow:0 0 10px rgba(255,42,74,.6);}
+  .sb-mgtip{margin:4px 0 8px;font-size:12px;opacity:.8;} .sb-cv{display:block;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08);touch-action:none;cursor:pointer;background:#000;}
+  .sb-mgf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;} .sb-mgst{flex:1;min-width:120px;font-weight:700;} .sb-mgbtns{display:flex;gap:6px;} .sb-keyh{opacity:.6;font-size:11px;}
   .sb-piano{position:relative;display:flex;width:300px;height:120px;user-select:none;touch-action:none;}
   .sb-piano .w{flex:1;margin:0 1px;border:1px solid #333;border-radius:0 0 6px 6px;background:linear-gradient(#fff,#e6e6ee);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;}
   .sb-piano .w i{font:700 10px 'Inter',sans-serif;color:#555;font-style:normal;}
@@ -23494,7 +23503,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 243;                 // ← goes up by one with every published version
+  const SD_BUILD = 244;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33526,6 +33535,12 @@
   function lgKeyDown(e){
     if(!lgKeyOk(e)) return;
     const k = e.key.toLowerCase();
+    if(typeof SB !== 'undefined' && SB.mg){                                  // (a minigame is open: it gets the keys — no walking, no re-opening)
+      if(k === 'escape'){ e.preventDefault(); sbMgClose(); return; }
+      if(SB.mgKey){ if(e.repeat && k === ' ') { e.preventDefault(); return; } if(SB.mgKey('down', k, e) !== false) e.preventDefault(); }
+      else if(k === ' ') e.preventDefault();
+      return;
+    }
     if(LG_DIRKEYS[k]){ e.preventDefault(); LG.keys = LG.keys || new Set(); LG.keys.add(k); lgKeyWalk(true); return; }
     if(e.repeat) return;
     if(sbIn()){ if(k === ' '){ e.preventDefault(); sbUse(); return; } if(k === 'f'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd && !sbDeadU(sbMe())) sbMeeting(bd.u); return; } }
@@ -33541,7 +33556,8 @@
     if(seat){ lgWalk(seat.x, seat.y, 'sit'); }
   }
   function lgKeyUp(e){
-    const k = (e.key || '').toLowerCase(); if(!LG.keys || !LG.keys.has(k)) return;
+    const k = (e.key || '').toLowerCase();
+    if(typeof SB !== 'undefined' && SB.mg && SB.mgKey){ try{ SB.mgKey('up', k, e); }catch(_){} } if(!LG.keys || !LG.keys.has(k)) return;
     LG.keys.delete(k); if(!LG.keys.size){ clearInterval(LG.keyT); LG.keyT = 0; const p = lgPos(LG.me, trdNow()); if(p.moving) lgWalk(Math.round(p.x), Math.round(p.y), null); } else lgKeyWalk(true);
   }
   // walk a little ahead in the held direction; re-aim only when the direction changes or we're close to the end (so it doesn't write every frame)
@@ -33978,16 +33994,16 @@
 
   // ----- places on the map -----
   const SB_TASKS = [
-    { k: 'mix', room: 'control', dx: 470, dy: 230, n: 'Tune the mix', mg: 'slider', em: '🎚️' },
-    { k: 'wire', room: 'elec', dx: 330, dy: 150, n: 'Patch the audio cables', mg: 'wires', em: '🔌' },
-    { k: 'trash', room: 'cafe', dx: 420, dy: 120, n: 'Empty the trash', mg: 'hold', em: '🗑️' },
-    { k: 'brew', room: 'mclass', dx: 110, dy: 200, n: 'Ring the potion bells', mg: 'ear', em: '🔔' },
-    { k: 'scope', room: 'mobs', dx: 330, dy: 150, n: 'Align the telescope', mg: 'timing', em: '🔭' },
-    { k: 'locker', room: 'lobby', dx: 80, dy: 140, n: 'Drum the locker code', mg: 'rhythm', em: '🥁' },
-    { k: 'organ', room: 'vball', dx: 380, dy: 120, n: 'Play the organ melody', mg: 'piano', em: '🎹' },
-    { k: 'stock', room: 'market', dx: 120, dy: 220, n: 'Check the stocks', mg: 'timing', em: '📈' },
-    { k: 'board', room: 'class', dx: 400, dy: 110, n: 'Vocal warm-up', mg: 'sing', em: '🎤' },
-    { k: 'slots', room: 'arcade', dx: 380, dy: 170, n: 'Reset the slot machine', mg: 'wires', em: '🎰' },
+    { k: 'mix', room: 'control', at: ['studio', -150, 0], n: 'Studio mixing desk', em: '🎚️' },
+    { k: 'wire', room: 'elec', at: ['lights', 140, 0], n: 'Electrical board', em: '🔌' },
+    { k: 'trash', room: 'cafe', at: ['vend', 0, 0], n: 'Snack corner', em: '🥤' },
+    { k: 'brew', room: 'mclass', at: ['cauldron', 0, 0], n: 'Bubbling cauldron', em: '🧪' },
+    { k: 'scope', room: 'mobs', at: ['telescope', 0, 0], n: 'Telescope', em: '🔭' },
+    { k: 'locker', room: 'lobby', at: ['locker', 48, 0], n: 'Lockers', em: '🔐' },
+    { k: 'organ', room: 'vball', at: ['organ', 0, 0], n: 'Pipe organ', em: '🎹' },
+    { k: 'stock', room: 'market', at: ['g:trade', 0, 0], n: 'Trading desk', em: '📈' },
+    { k: 'board', room: 'class', at: ['board', 0, 0], n: 'Blackboard', em: '🎤' },
+    { k: 'slots', room: 'arcade', at: ['g:slots', 0, 0], n: 'Slot machine', em: '🎰' },
   ];
   // portals (saboteurs only): each one links to a few others
   const SB_PORTALS = [
@@ -34011,7 +34027,13 @@
   function sbPlaces(){
     if(SB.placed) return; SB.placed = true;
     const fix = (o) => { const p = lgNearest(o.x, o.y, true); o.x = p[0]; o.y = p[1]; return o; };
-    for(const t of SB_TASKS) Object.assign(t, fix(lgIn(t.room, t.dx, t.dy)));
+    for(const t of SB_TASKS){
+      const [k, ox, oy] = t.at, th = LG_THINGS.find(q => q.k === k); let x, y;
+      if(th){ x = th.go[0] + ox; y = th.go[1] + oy; }
+      else if(k === 'locker'){ const h = SB_HIDES.find(q => q.room === 'lobby'); const p0 = lgIn(h.room, h.dx, h.dy); x = p0.x + ox; y = p0.y + 30 + oy; }
+      else { const r = lgRoomById(t.room); x = r.x + r.w / 2; y = r.y + 34; }                      // (the blackboard: front of the classroom)
+      Object.assign(t, fix({ x, y }));
+    }
     for(const q of SB_PORTALS) Object.assign(q, fix(lgIn(q.room, q.dx, q.dy)));
     for(const h of SB_HIDES){ Object.assign(h, lgIn(h.room, h.dx, h.dy)); const p = lgNearest(h.x, h.y + 16, true); h.sx = p[0]; h.sy = p[1]; }
     SB_SPOTS.btn = lgIn('vhall', 240, 120);
@@ -34949,13 +34971,388 @@
       g2.globalAlpha = 1;
     });
   }
+  // ----- tasks (build 244): every station has a theme and 3 missions; which one you get is random per player per game -----
+  // The minigames are drawn on a canvas (sbStage) and most can be played with the keyboard: Space (stop / tap / hold / lock),
+  // arrows, numbers, piano keys. Keys go to the open minigame first (see lgKeyDown), so Space never re-opens it.
+  const SBA = {
+    rr(c, x, y, w, h, r){ r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); },
+    grad(c, x0, y0, x1, y1, stops){ const g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach((s, i) => g.addColorStop(i / Math.max(1, stops.length - 1), s)); return g; },
+    // a raised panel: gradient body, light top edge, dark bottom edge, soft shadow
+    panel(c, x, y, w, h, r, top, bot, edge){ c.save(); c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 10; c.shadowOffsetY = 4; SBA.rr(c, x, y, w, h, r); c.fillStyle = SBA.grad(c, 0, y, 0, y + h, [top, bot]); c.fill(); c.restore();
+      c.save(); SBA.rr(c, x + .5, y + .5, w - 1, h - 1, r); c.strokeStyle = edge || 'rgba(255,255,255,.18)'; c.lineWidth = 1; c.stroke(); c.restore(); },
+    glow(c, x, y, r, col, a){ c.save(); c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); c.globalAlpha = a == null ? 1 : a; c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); c.restore(); },
+    txt(c, s, x, y, size, col, align, weight, font){ c.font = `${weight || 700} ${size}px ${font || "'Inter',sans-serif"}`; c.textAlign = align || 'center'; c.textBaseline = 'middle'; c.fillStyle = col; c.fillText(s, x, y); },
+    screw(c, x, y){ c.fillStyle = SBA.grad(c, x - 4, y - 4, x + 4, y + 4, ['#d9dde6', '#6a7080']); c.beginPath(); c.arc(x, y, 4, 0, 7); c.fill(); c.strokeStyle = 'rgba(0,0,0,.5)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x - 2.5, y - 1); c.lineTo(x + 2.5, y + 1); c.stroke(); },
+    led(c, x, y, r, col, on){ c.fillStyle = on ? col : 'rgba(40,40,50,.9)'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); if(on) SBA.glow(c, x, y, r * 4, col, .6); c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.arc(x - r * .3, y - r * .3, r * .35, 0, 7); c.fill(); },
+    // a dark glass screen with scanlines and a reflection
+    screen(c, x, y, w, h, tint){ c.save(); SBA.rr(c, x, y, w, h, 8); c.fillStyle = SBA.grad(c, 0, y, 0, y + h, [tint || '#06141c', '#020608']); c.fill(); c.clip();
+      c.globalAlpha = .08; c.fillStyle = '#fff'; for(let k = y; k < y + h; k += 3) c.fillRect(x, k, w, 1); c.globalAlpha = .07; c.beginPath(); c.moveTo(x, y); c.lineTo(x + w * .55, y); c.lineTo(x + w * .25, y + h); c.lineTo(x, y + h); c.fill(); c.restore();
+      c.save(); SBA.rr(c, x, y, w, h, 8); c.strokeStyle = 'rgba(0,0,0,.8)'; c.lineWidth = 3; c.stroke(); c.restore(); },
+    // backgrounds for each theme
+    bg: {
+      studio(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#23202e', '#12101a']); c.fillRect(0, 0, W, H); c.globalAlpha = .06; for(let x = 0; x < W; x += 2){ c.fillStyle = x % 4 ? '#fff' : '#000'; c.fillRect(x, 0, 1, H); } c.globalAlpha = 1; },
+      metal(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, W, H, ['#5a6272', '#3a404c', '#4c5462']); c.fillRect(0, 0, W, H); c.globalAlpha = .05; for(let y = 0; y < H; y += 2){ c.fillStyle = y % 4 ? '#fff' : '#000'; c.fillRect(0, y, W, 1); } c.globalAlpha = 1;
+        c.fillStyle = '#ffd166'; c.fillRect(0, H - 10, W, 10); c.fillStyle = '#1a1a1a'; for(let x = -10; x < W; x += 20){ c.beginPath(); c.moveTo(x, H); c.lineTo(x + 10, H - 10); c.lineTo(x + 20, H - 10); c.lineTo(x + 10, H); c.fill(); } [[10, 10], [W - 10, 10]].forEach(([a, b]) => SBA.screw(c, a, b)); },
+      cafe(c, W, H){ for(let y = 0; y < H; y += 22) for(let x = 0; x < W; x += 22){ c.fillStyle = (x / 22 + y / 22) % 2 ? '#e9e2d4' : '#f6f1e6'; c.fillRect(x, y, 22, 22); } c.fillStyle = 'rgba(0,0,0,.06)'; for(let y = 0; y < H; y += 22) c.fillRect(0, y, W, 1);
+        c.fillStyle = SBA.grad(c, 0, H - 46, 0, H, ['#8a5a36', '#5a3820']); c.fillRect(0, H - 46, W, 46); c.fillStyle = 'rgba(255,255,255,.15)'; c.fillRect(0, H - 46, W, 2); },
+      potion(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#2a1840', '#120a1e']); c.fillRect(0, 0, W, H); for(let y = 0; y < H; y += 26) for(let x = (y / 26 % 2) * 20; x < W; x += 40){ c.strokeStyle = 'rgba(0,0,0,.35)'; c.strokeRect(x + .5, y + .5, 40, 26); c.fillStyle = 'rgba(255,255,255,.025)'; c.fillRect(x + 2, y + 2, 36, 3); } SBA.glow(c, W / 2, H * .75, 220, 'rgba(140,90,255,.5)', .6); },
+      space(c, W, H, T, seed){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#050616', '#0b0a24']); c.fillRect(0, 0, W, H); const R = sbRng(seed || 7); for(let i = 0; i < 90; i++){ const x = R() * W, y = R() * H, s = R() * 1.6 + .3, tw = .5 + .5 * Math.sin(T * 2 + i); c.fillStyle = `rgba(255,255,255,${.25 + tw * .6})`; c.fillRect(x, y, s, s); } SBA.glow(c, W * .7, H * .3, 160, 'rgba(120,80,255,.25)'); SBA.glow(c, W * .2, H * .8, 140, 'rgba(60,180,255,.2)'); },
+      locker(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, W, 0, ['#2a5a9a', '#3a74bf', '#2a5a9a']); c.fillRect(0, 0, W, H); c.fillStyle = 'rgba(0,0,0,.25)'; for(let k = 0; k < 6; k++){ SBA.rr(c, 24, 20 + k * 9, 70, 4, 2); c.fill(); } c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 2; c.strokeRect(8, 8, W - 16, H - 16); c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(8, 8, 3, H - 16); },
+      wood(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#5a2e1a', '#3a1c10']); c.fillRect(0, 0, W, H); c.globalAlpha = .12; c.strokeStyle = '#000'; for(let y = 4; y < H; y += 7){ c.beginPath(); c.moveTo(0, y); for(let x = 0; x <= W; x += 20) c.lineTo(x, y + Math.sin(x * .05 + y) * 1.5); c.stroke(); } c.globalAlpha = 1; },
+      terminal(c, W, H){ c.fillStyle = '#05100d'; c.fillRect(0, 0, W, H); c.strokeStyle = 'rgba(53,208,184,.08)'; for(let x = 0; x < W; x += 24){ c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); } for(let y = 0; y < H; y += 24){ c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); } },
+      chalk(c, W, H){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#3a5a3e', '#2a4430']); c.fillRect(0, 0, W, H); c.globalAlpha = .05; for(let i = 0; i < 40; i++){ c.fillStyle = '#fff'; c.beginPath(); c.ellipse((i * 97) % W, (i * 53) % H, 40, 6, i, 0, 7); c.fill(); } c.globalAlpha = 1; c.strokeStyle = '#7a5230'; c.lineWidth = 10; c.strokeRect(5, 5, W - 10, H - 10); c.fillStyle = '#8a6040'; c.fillRect(30, H - 12, 120, 6); c.fillStyle = '#fff'; c.fillRect(40, H - 16, 14, 4); },
+      casino(c, W, H, T){ c.fillStyle = SBA.grad(c, 0, 0, 0, H, ['#7a0c1c', '#3a0410']); c.fillRect(0, 0, W, H); for(let i = 0; i < 18; i++){ const on = (Math.floor(T * 6) + i) % 3 === 0; SBA.led(c, 14 + i * (W - 28) / 17, 10, 3.5, '#ffd166', on); SBA.led(c, 14 + i * (W - 28) / 17, H - 10, 3.5, '#ffd166', !on); } },
+    },
+  };
+  // a little seeded random (so a station's layout is the same while it's open)
+  function sbRng(seed){ let s = (seed | 0) || 1; return () => { s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) % 100000) / 100000; }; }
+  // the stage: canvas + footer (status, buttons, key hints); runs the loop and routes pointer + keys
+  function sbStage(t, el, o, done){
+    const W = o.W || 460, H = o.H || 280;
+    el.innerHTML = `<div class="sb-mgbox sb-mg2"><button type="button" class="sb-x sb-mgx" aria-label="Close">✕</button>
+      <div class="sb-mgh"><b>${t.em} ${escapeHtml(t.n)}</b><span class="sb-mgsub">${escapeHtml(o.sub || '')}</span>${o.hard ? '<span class="sb-hard">HARD</span>' : ''}</div>
+      <p class="sb-mgtip">${o.tip || ''}</p><canvas class="sb-cv" style="width:${W}px;max-width:100%;aspect-ratio:${W}/${H}"></canvas>
+      <div class="sb-mgf"><span class="sb-mgst"></span><span class="sb-mgbtns">${(o.btns || []).map(b => `<button type="button" class="lg-b" data-b="${b[0]}">${b[1]}</button>`).join('')}</span>${o.keys ? `<span class="sb-keyh">${o.keys}</span>` : ''}</div></div>`;
+    const cv = el.querySelector('.sb-cv'), dpr = Math.min(2, devicePixelRatio || 1); cv.width = W * dpr; cv.height = H * dpr; const c = cv.getContext('2d'); c.scale(dpr, dpr);
+    const box = el.querySelector('.sb-mgbox'), stEl = el.querySelector('.sb-mgst');
+    const S = { t, W, H, c, T: 0, over: false, R: sbRng((Math.random() * 1e9) | 0), shakeT: 0, flash: 0, flashCol: '#35d0b8',
+      st: (s) => { stEl.innerHTML = s; },
+      ok: () => { S.flash = 1; S.flashCol = '#35d0b8'; },
+      shake: () => { S.shakeT = .35; S.flash = 1; S.flashCol = '#ff4d6d'; box.classList.add('shake'); setTimeout(() => box.classList.remove('shake'), 300); lgSfx('zap'); },
+      done: () => { if(S.over) return; S.over = true; S.ok(); setTimeout(done, 450); },
+      btn: (id, on) => { const b = el.querySelector(`[data-b="${id}"]`); if(b) b.disabled = !on; } };
+    const pt = (e) => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; };
+    cv.addEventListener('pointerdown', (e) => { if(S.over) return; e.preventDefault(); cv.setPointerCapture(e.pointerId); S.down = true; o.down && o.down(S, ...pt(e)); });
+    cv.addEventListener('pointermove', (e) => { const p = pt(e); S.mx = p[0]; S.my = p[1]; if(!S.over && o.move) o.move(S, ...p); });
+    const up = (e) => { if(!S.down) return; S.down = false; if(!S.over && o.up) o.up(S, ...pt(e)); };
+    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+    el.querySelector('.sb-mgbtns').addEventListener('click', (e) => { const b = e.target.closest('[data-b]'); if(b && !S.over && o.btn) o.btn(S, b.dataset.b); });
+    SB.mgKey = (type, k, e) => { if(S.over) return true; if(o.key) return o.key(S, type, k, e); return k === ' '; };
+    let last = performance.now(), raf = 0;
+    const loop = (now) => { if(!cv.isConnected || SB.mg !== t){ cancelAnimationFrame(raf); return; } const dt = Math.min(.05, (now - last) / 1000); last = now; S.T += dt;
+      c.save(); if(S.shakeT > 0){ S.shakeT -= dt; c.translate(Math.sin(S.T * 90) * 4 * S.shakeT / .35, 0); }
+      try{ o.draw(S, c, S.T, dt); }catch(err){ console.warn(err); }
+      c.restore();
+      if(S.flash > 0){ S.flash = Math.max(0, S.flash - dt * 2.5); c.save(); c.globalAlpha = S.flash * .35; c.fillStyle = S.flashCol; c.fillRect(0, 0, W, H); c.restore(); }
+      if(S.over){ c.save(); c.fillStyle = 'rgba(8,20,18,.55)'; c.fillRect(0, 0, W, H); SBA.txt(c, '✅ Done!', W / 2, H / 2, 34, '#7dffd8', 'center', 900); c.restore(); }
+      raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop);
+    const prevStop = SB.mgStop; SB.mgStop = () => { cancelAnimationFrame(raf); SB.mgKey = null; if(prevStop) prevStop(); if(o.stop) o.stop(S); };
+    if(o.init) o.init(S);
+    return S;
+  }
+  // a playable one-octave keyboard drawn on the canvas (C4..C5; keyboard keys A W S E D F T G Y H U J K)
+  const SB_PK = [[60, 'a', 0], [61, 'w', 1], [62, 's', 0], [63, 'e', 1], [64, 'd', 0], [65, 'f', 0], [66, 't', 1], [67, 'g', 0], [68, 'y', 1], [69, 'h', 0], [70, 'u', 1], [71, 'j', 0], [72, 'k', 0]];
+  function sbKeysLayout(x, y, w, h){
+    const whites = SB_PK.filter(k => !k[2]), kw = w / whites.length, out = [];
+    whites.forEach((k, i) => out.push({ m: k[0], key: k[1], b: 0, x: x + i * kw, y, w: kw, h }));
+    SB_PK.filter(k => k[2]).forEach(k => { const wi = whites.findIndex(q => q[0] === k[0] - 1); out.push({ m: k[0], key: k[1], b: 1, x: x + (wi + 1) * kw - kw * .32, y, w: kw * .64, h: h * .6 }); });
+    return out;
+  }
+  function sbKeysDraw(c, L, lit, frame){
+    if(frame){ const a = L[0], z = L.filter(k => !k.b).slice(-1)[0]; SBA.panel(c, a.x - 12, a.y - 24, z.x + z.w - a.x + 24, a.h + 36, 10, '#6a3418', '#3a1a0c', 'rgba(255,200,140,.25)'); c.fillStyle = '#8a0c1c'; c.fillRect(a.x - 2, a.y - 6, z.x + z.w - a.x + 4, 5); }
+    for(const k of L.filter(k => !k.b)){ const on = lit[k.m] > 0; c.fillStyle = on ? SBA.grad(c, 0, k.y, 0, k.y + k.h, ['#d8fbff', '#57e1ff']) : SBA.grad(c, 0, k.y, 0, k.y + k.h, ['#ffffff', '#e8e4dc']); SBA.rr(c, k.x + 1, k.y, k.w - 2, k.h, 4); c.fill(); c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 1; c.stroke();
+      c.fillStyle = 'rgba(0,0,0,.08)'; c.fillRect(k.x + 1, k.y + k.h - 6, k.w - 2, 6); SBA.txt(c, SB_NOTES[k.m % 12], k.x + k.w / 2, k.y + k.h - 22, 10, '#666'); SBA.txt(c, k.key.toUpperCase(), k.x + k.w / 2, k.y + k.h - 10, 9, '#aaa', 'center', 600); if(on) SBA.glow(c, k.x + k.w / 2, k.y + k.h * .6, 40, 'rgba(87,225,255,.8)', lit[k.m]); }
+    for(const k of L.filter(k => k.b)){ const on = lit[k.m] > 0; c.fillStyle = on ? SBA.grad(c, 0, k.y, 0, k.y + k.h, ['#57e1ff', '#1a7a90']) : SBA.grad(c, 0, k.y, 0, k.y + k.h, ['#3a3a44', '#0a0a10']); SBA.rr(c, k.x, k.y, k.w, k.h, 3); c.fill(); c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(k.x + 3, k.y + 2, k.w - 6, 3); SBA.txt(c, k.key.toUpperCase(), k.x + k.w / 2, k.y + k.h - 9, 8, '#888', 'center', 600); }
+  }
+  function sbKeysHit(L, x, y){ return L.filter(k => k.b).find(k => x >= k.x && x <= k.x + k.w && y >= k.y && y <= k.y + k.h) || L.filter(k => !k.b).find(k => x >= k.x && x <= k.x + k.w && y >= k.y && y <= k.y + k.h); }
+  // ===== the missions (each returns the stage's options) =====
+  const SBM = {};
+  // --- 🎚️ studio: line up the waves (slider + Space to lock)
+  SBM.waves = () => { let goal, val, lockT = 0; return { sub: 'Line up the waves', tip: 'Drag the knob (or ← →) until your wave sits on the blue one, then lock it.', keys: '← → move · Space lock', btns: [['lock', '🔒 Lock it in']],
+    init(S){ goal = .15 + S.R() * .7; val = goal > .5 ? .05 : .95; S.st('Not lined up yet'); },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.studio(c, W, H); SBA.screen(c, 20, 16, W - 40, 170);
+      const near = Math.abs(val - goal) < .025; for(const [v, col, dash] of [[goal, 'rgba(87,225,255,.9)', [6, 5]], [val, near ? '#7dffd8' : '#ff6b8b', []]]){ c.save(); c.setLineDash(dash); c.strokeStyle = col; c.lineWidth = 2.5; c.shadowColor = col; c.shadowBlur = 8; c.beginPath();
+        for(let x = 0; x <= W - 60; x += 3){ const y = 101 + Math.sin(x * (.02 + v * .07) + T * 3) * (30 + v * 30); x ? c.lineTo(30 + x, y) : c.moveTo(30 + x, y); } c.stroke(); c.restore(); }
+      for(let i = 0; i < 12; i++){ const h = Math.abs(Math.sin(T * 6 + i)) * (near ? 40 : 20); c.fillStyle = SBA.grad(c, 0, 250 - h, 0, 250, ['#ff4d6d', '#ffd166', '#35d0b8']); c.fillRect(W - 140 + i * 10, 250 - h, 7, h); }
+      SBA.panel(c, 30, 220, W - 200, 22, 11, '#0e0c14', '#1e1a28'); const kx = 30 + 11 + val * (W - 222); SBA.panel(c, kx - 14, 212, 28, 38, 6, '#e8e4f4', '#8a86a0'); c.fillStyle = '#ff4d6d'; c.fillRect(kx - 1, 218, 2, 26);
+      if(lockT > 0){ lockT -= .016; } },
+    down(S, x, y){ if(y > 200) S.drag = true, this.move(S, x, y); }, move(S, x){ if(S.drag && S.down) val = Math.max(0, Math.min(1, (x - 41) / (S.W - 222))); }, up(S){ S.drag = false; },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'arrowleft' || k === 'a') val = Math.max(0, val - .012); else if(k === 'arrowright' || k === 'd') val = Math.min(1, val + .012); else if(k === ' ' || k === 'enter') this.btn(S, 'lock'); return true; },
+    btn(S){ if(Math.abs(val - goal) < .025) S.done(); else { S.shake(); S.st(val < goal ? 'A bit more →' : '← A bit less'); } } }; };
+  // --- 🎚️ studio: set the four faders to their marks
+  SBM.faders = () => { const n = 4; let tg, v, sel = 0; return { sub: 'Set the faders', tip: 'Slide each fader onto its glowing mark.', keys: '← → pick · ↑ ↓ slide',
+    init(S){ tg = Array.from({ length: n }, () => .15 + S.R() * .7); v = tg.map(x => x > .5 ? .05 : .95); },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.studio(c, W, H); SBA.panel(c, 30, 14, W - 60, H - 28, 12, '#2e2a3a', '#1a1724');
+      let ok = 0; for(let i = 0; i < n; i++){ const x = 80 + i * ((W - 160) / (n - 1)), y0 = 40, y1 = H - 50, good = Math.abs(v[i] - tg[i]) < .035; if(good) ok++;
+        c.fillStyle = '#07060a'; SBA.rr(c, x - 4, y0, 8, y1 - y0, 4); c.fill(); for(let k = 0; k <= 10; k++){ c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(x + 10, y0 + k * (y1 - y0) / 10, k % 5 ? 5 : 9, 1); }
+        const ty = y1 - tg[i] * (y1 - y0); c.fillStyle = good ? '#7dffd8' : '#ffd166'; c.fillRect(x - 16, ty - 1, 32, 3); SBA.glow(c, x, ty, 26, good ? 'rgba(125,255,216,.7)' : 'rgba(255,209,102,.6)', .5 + .3 * Math.sin(T * 5));
+        const fy = y1 - v[i] * (y1 - y0); SBA.panel(c, x - 16, fy - 10, 32, 20, 4, i === sel ? '#ffffff' : '#d8d4e4', '#7a7690'); c.fillStyle = '#222'; c.fillRect(x - 12, fy - 1, 24, 2); SBA.led(c, x, H - 30, 4, '#35d0b8', good); }
+      S.st(`${ok}/${n} faders set`); if(ok === n && !S.over) S.done(); },
+    down(S, x){ const i = Math.round((x - 80) / ((S.W - 160) / (n - 1))); if(i >= 0 && i < n){ sel = i; S.drag = true; } }, move(S, x, y){ if(S.drag && S.down) v[sel] = Math.max(0, Math.min(1, (S.H - 50 - y) / (S.H - 90))); }, up(S){ S.drag = false; },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'arrowleft') sel = (sel + n - 1) % n; else if(k === 'arrowright') sel = (sel + 1) % n; else if(k === 'arrowup' || k === 'w') v[sel] = Math.min(1, v[sel] + .015); else if(k === 'arrowdown' || k === 's') v[sel] = Math.max(0, v[sel] - .015); return true; } }; };
+  // --- 🎚️ studio (HARD): lock two dials (pitch + phase) and hold it steady
+  SBM.phase = () => { let g1, g2, a = .5, b = .5, sel = 0, hold = 0; return { hard: true, sub: 'Phase lock', tip: 'Match both the pitch AND the phase, then keep it there for a second.', keys: '↑ ↓ pick dial · ← → turn',
+    init(S){ g1 = .1 + S.R() * .8; g2 = .1 + S.R() * .8; a = g1 > .5 ? .05 : .95; b = g2 > .5 ? .05 : .95; },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.studio(c, W, H); SBA.screen(c, 20, 14, W - 40, 150);
+      const e1 = Math.abs(a - g1), e2 = Math.abs(b - g2), ok = e1 < .015 && e2 < .02; hold = ok ? hold + dt : Math.max(0, hold - dt * 2);
+      for(const [f, p, col] of [[g1, g2, 'rgba(87,225,255,.9)'], [a, b, ok ? '#7dffd8' : '#ff6b8b']]){ c.save(); c.strokeStyle = col; c.lineWidth = 2.5; c.shadowColor = col; c.shadowBlur = 10; c.beginPath(); for(let x = 0; x <= W - 60; x += 3){ const y = 89 + Math.sin(x * (.03 + f * .06) + p * 6.283) * 45; x ? c.lineTo(30 + x, y) : c.moveTo(30 + x, y); } c.stroke(); c.restore(); }
+      [['PITCH', a], ['PHASE', b]].forEach(([nm, v], i) => { const x = W / 2 - 90 + i * 180, y = 222; SBA.panel(c, x - 46, y - 46, 92, 92, 46, i === sel ? '#4a4460' : '#2e2a3a', '#14121c', i === sel ? '#ffd166' : null); c.save(); c.translate(x, y); c.rotate(-2.4 + v * 4.8); SBA.panel(c, -26, -26, 52, 52, 26, '#d8d4e4', '#6a6680'); c.fillStyle = '#ff4d6d'; c.fillRect(-2, -24, 4, 14); c.restore(); SBA.txt(c, nm, x, y + 40, 10, '#cfc8e8'); });
+      c.fillStyle = '#0a0910'; SBA.rr(c, 30, 176, W - 60, 6, 3); c.fill(); c.fillStyle = '#7dffd8'; SBA.rr(c, 30, 176, (W - 60) * Math.min(1, hold), 6, 3); c.fill();
+      S.st(ok ? 'Locked… hold it!' : `Pitch ${e1 < .015 ? '✅' : e1 < .06 ? '🟡' : '❌'} · Phase ${e2 < .02 ? '✅' : e2 < .08 ? '🟡' : '❌'}`); if(hold >= 1) S.done(); },
+    down(S, x){ sel = x < S.W / 2 ? 0 : 1; S.px = x; }, move(S, x){ if(!S.down) return; const d = (x - S.px) / 400; S.px = x; if(sel) b = Math.max(0, Math.min(1, b + d)); else a = Math.max(0, Math.min(1, a + d)); },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'arrowup' || k === 'arrowdown') sel = 1 - sel; const d = k === 'arrowleft' ? -.006 : k === 'arrowright' ? .006 : 0; if(d){ if(sel) b = Math.max(0, Math.min(1, b + d)); else a = Math.max(0, Math.min(1, a + d)); } return true; } }; };
+  // --- 🔌 electrical: plug each cable into its colour (HARD: 6 cables, and a wrong plug pulls them all out)
+  SBM.cables = (n, hard) => () => { const COLS = ['#ff4d6d', '#57e1ff', '#ffd166', '#8b4dff', '#35d0b8', '#ff8a3d'].slice(0, n); let right, link = {}, drag = null, sel = 0;
+    const L = (S, i) => [70, 40 + i * (S.H - 80) / (n - 1)], Rt = (S, i) => [S.W - 70, 40 + i * (S.H - 80) / (n - 1)];
+    return { hard, sub: hard ? 'Rewire the whole panel' : 'Patch the cables', tip: hard ? 'Six cables. One wrong plug and they ALL fall out.' : 'Drag each cable to the socket with the same colour.', keys: '1-' + n + ' pick cable · 1-' + n + ' socket',
+    init(S){ right = COLS.map((_, i) => i).sort(() => S.R() - .5); },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.metal(c, W, H); SBA.panel(c, 34, 14, 72, H - 28, 10, '#2a2f38', '#1a1e24'); SBA.panel(c, W - 106, 14, 72, H - 28, 10, '#2a2f38', '#1a1e24');
+      const cable = (a, b, col) => { c.save(); c.lineCap = 'round'; c.strokeStyle = 'rgba(0,0,0,.4)'; c.lineWidth = 11; c.beginPath(); c.moveTo(a[0], a[1] + 3); c.bezierCurveTo(a[0] + 120, a[1] + 40, b[0] - 120, b[1] + 40, b[0], b[1] + 3); c.stroke(); c.strokeStyle = col; c.lineWidth = 8; c.beginPath(); c.moveTo(a[0], a[1]); c.bezierCurveTo(a[0] + 120, a[1] + 34, b[0] - 120, b[1] + 34, b[0], b[1]); c.stroke(); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.stroke(); c.restore(); };
+      COLS.forEach((col, i) => { const a = L(S, i); if(link[i] != null) cable(a, Rt(S, link[i]), col); });
+      if(drag != null && S.mx != null) cable(L(S, drag), [S.mx, S.my], COLS[drag]);
+      COLS.forEach((col, i) => { const a = L(S, i); SBA.panel(c, a[0] - 26, a[1] - 12, 30, 24, 5, col, 'rgba(0,0,0,.6)'); c.fillStyle = '#c8ccd4'; c.fillRect(a[0] + 4, a[1] - 5, 12, 10); SBA.txt(c, String(i + 1), a[0] - 11, a[1], 11, '#111', 'center', 800); if(sel === i && drag == null && !hard) SBA.glow(c, a[0], a[1], 30, 'rgba(255,255,255,.5)', .5);
+        const rj = right.indexOf(i), b = Rt(S, rj); c.fillStyle = '#0a0c10'; c.beginPath(); c.arc(b[0], b[1], 11, 0, 7); c.fill(); c.strokeStyle = col; c.lineWidth = 4; c.beginPath(); c.arc(b[0], b[1], 13, 0, 7); c.stroke(); SBA.led(c, b[0] + 26, b[1], 4, col, Object.values(link).includes(rj)); SBA.txt(c, String(rj + 1), b[0] + 40, b[1], 10, 'rgba(255,255,255,.6)'); });
+      S.st(`${Object.keys(link).length}/${n} plugged`); },
+    tryLink(S, i, j){ if(right[j] === i){ link[i] = j; lgSfx('bubble'); S.ok(); if(Object.keys(link).length === n) S.done(); } else { S.shake(); if(hard){ link = {}; S.st('⚡ Zap! Everything fell out.'); } } },
+    down(S, x, y){ for(let i = 0; i < n; i++){ const a = L(S, i); if(Math.hypot(x - a[0] + 10, y - a[1]) < 24 && link[i] == null){ drag = i; S.mx = x; S.my = y; return; } } },
+    up(S, x, y){ if(drag == null) return; for(let j = 0; j < n; j++){ const b = Rt(S, j); if(Math.hypot(x - b[0], y - b[1]) < 26){ this.tryLink(S, drag, j); break; } } drag = null; },
+    key(S, ty, k){ if(ty !== 'down') return true; const d = +k; if(d >= 1 && d <= n){ if(S.pick == null){ if(link[d - 1] == null){ S.pick = d - 1; sel = d - 1; } } else { this.tryLink(S, S.pick, d - 1); S.pick = null; } } return true; } }; };
+  // --- 🔌 electrical: keep the power needle in the green (hold Space)
+  SBM.surge = () => { let v = .2, fill = 0, gust = 0, holding = false; return { sub: 'Steady the power', tip: 'Hold Space (or press and hold) to push the needle up. Keep it in the green until the bar fills.', keys: 'hold Space',
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.metal(c, W, H); if(S.R() < dt * .8) gust = (S.R() - .5) * 1.2; gust *= Math.pow(.2, dt);
+      v += ((holding || S.down ? .55 : -.5) + gust) * dt; v = Math.max(0, Math.min(1, v)); const inZ = v > .55 && v < .75; fill = Math.max(0, fill + (inZ ? dt : -dt * .5));
+      const cx = W / 2, cy = 190, R0 = 130; SBA.panel(c, cx - R0 - 16, cy - R0 - 16, R0 * 2 + 32, R0 + 46, 14, '#f3eedc', '#c9c2a8', 'rgba(0,0,0,.3)');
+      for(const [a0, a1, col] of [[0, .55, '#e8e2cc'], [.55, .75, '#35d0b8'], [.75, 1, '#ff4d6d']]){ c.strokeStyle = col; c.lineWidth = 16; c.beginPath(); c.arc(cx, cy, R0 - 10, Math.PI + a0 * Math.PI, Math.PI + a1 * Math.PI); c.stroke(); }
+      for(let k = 0; k <= 20; k++){ const a = Math.PI + k / 20 * Math.PI; c.strokeStyle = '#333'; c.lineWidth = k % 5 ? 1 : 2; c.beginPath(); c.moveTo(cx + Math.cos(a) * (R0 - 22), cy + Math.sin(a) * (R0 - 22)); c.lineTo(cx + Math.cos(a) * (R0 - (k % 5 ? 30 : 36)), cy + Math.sin(a) * (R0 - (k % 5 ? 30 : 36))); c.stroke(); }
+      const a = Math.PI + v * Math.PI; c.strokeStyle = '#b01020'; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * (R0 - 18), cy + Math.sin(a) * (R0 - 18)); c.stroke(); SBA.panel(c, cx - 10, cy - 10, 20, 20, 10, '#555', '#111');
+      SBA.txt(c, 'kV', cx, cy - 40, 14, '#555', 'center', 800); c.fillStyle = '#111'; SBA.rr(c, 40, H - 40, W - 80, 12, 6); c.fill(); c.fillStyle = SBA.grad(c, 40, 0, W - 40, 0, ['#35d0b8', '#7dffd8']); SBA.rr(c, 40, H - 40, (W - 80) * Math.min(1, fill / 3), 12, 6); c.fill();
+      if(inZ) SBA.glow(c, cx, cy - 60, 120, 'rgba(53,208,184,.6)', .4); if(v >= .99) SBA.glow(c, cx, cy - 60, 150, 'rgba(255,77,109,.8)', .5 + .5 * Math.sin(T * 30));
+      S.st(inZ ? '⚡ Stable…' : v > .75 ? 'Too much!' : 'More power'); if(fill >= 3) S.done(); },
+    key(S, ty, k){ if(k === ' '){ holding = ty === 'down'; } return true; }, stop(){ holding = false; } }; };
+  // --- 🥤 snack corner: take out the trash (hold)
+  SBM.trash = () => { let v = 0, holding = false, bits = []; return { sub: 'Take out the trash', tip: 'Hold the lever (or hold Space) until the bin is empty.', keys: 'hold Space',
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.cafe(c, W, H); const on = holding || S.down; v = Math.max(0, Math.min(1, v + (on ? .45 : -.3) * dt));
+      if(on && S.R() < dt * 14) bits.push({ x: 200 + S.R() * 60, y: 70 + (1 - v) * 40, vy: 0, r: S.R() * 6, col: ['#6a8a3a', '#c9a24a', '#8a8f9a', '#d85a3a'][Math.floor(S.R() * 4)] });
+      SBA.panel(c, 160, 50, 140, 180, 12, '#6a7a88', '#3a4652'); c.fillStyle = '#2a323a'; c.fillRect(170, 60, 120, 14); SBA.txt(c, '♻️', 230, 150, 40, '#fff');
+      c.save(); SBA.rr(c, 178, 82, 104, 140, 8); c.clip(); const lv = 82 + 140 * v; c.fillStyle = SBA.grad(c, 0, lv, 0, 222, ['#5a4a2a', '#3a2a18']); c.fillRect(178, lv, 104, 222 - lv); for(let i = 0; i < 9; i++){ c.fillStyle = ['#6a8a3a', '#c9a24a', '#8a8f9a'][i % 3]; c.fillRect(186 + (i * 37) % 88, lv + 6 + (i * 13) % 30, 12, 8); } c.restore();
+      for(const b of bits){ b.vy += 600 * dt; b.y += b.vy * dt; c.fillStyle = b.col; c.save(); c.translate(b.x, b.y); c.rotate(b.r + b.y * .05); c.fillRect(-5, -4, 10, 8); c.restore(); } bits = bits.filter(b => b.y < H);
+      const lx = 340, ang = on ? .9 : 0; SBA.panel(c, lx - 10, 120, 20, 70, 6, '#3a3a44', '#1a1a20'); c.save(); c.translate(lx, 140); c.rotate(ang); c.fillStyle = '#9aa0ac'; c.fillRect(-4, -60, 8, 60); SBA.panel(c, -14, -78, 28, 22, 11, '#ff4d6d', '#a01030'); c.restore();
+      c.fillStyle = '#111'; SBA.rr(c, 60, H - 32, W - 120, 10, 5); c.fill(); c.fillStyle = '#35d0b8'; SBA.rr(c, 60, H - 32, (W - 120) * v, 10, 5); c.fill(); S.st(Math.round(v * 100) + '% emptied'); if(v >= 1) S.done(); },
+    key(S, ty, k){ if(k === ' ') holding = ty === 'down'; return true; }, stop(){ holding = false; } }; };
+  // --- 🥤 snack corner: pour coffee into the band (HARD: three cups, narrow band, spill = start over)
+  SBM.pour = (cups, band, hard) => () => { let i = 0, lv = 0, pouring = false, hi, lo, drip = 0, spill = 0; const newCup = (S) => { lv = 0; lo = .55 + S.R() * .25; hi = lo + band; };
+    return { hard, sub: hard ? 'Three perfect cups' : 'Pour the coffee', tip: hard ? `Fill ${cups} cups between the lines. Overflow and you start again.` : 'Hold Space (or hold the cup) to pour. Stop between the two lines.', keys: 'hold Space',
+    init(S){ newCup(S); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.cafe(c, W, H); const on = pouring || S.down;
+      if(on){ lv += (.32 + lv * .12) * dt; drip = .25; } else if(drip > 0){ lv += .05 * dt; drip -= dt; if(drip <= 0 && lv > 0) this.check(S); }
+      SBA.panel(c, 150, 10, 160, 70, 10, '#2a2a30', '#141418'); SBA.led(c, 290, 30, 4, '#35d0b8', on); SBA.txt(c, '☕ BREW', 220, 45, 13, '#e8e4dc', 'center', 800); SBA.panel(c, 215, 78, 30, 14, 4, '#888', '#333');
+      if(on){ c.fillStyle = SBA.grad(c, 0, 92, 0, 200, ['#6a3a1a', '#3a1c0a']); c.fillRect(226, 92, 8, 200 - 92 - (1 - lv) * 0); }
+      const cx = 230, top = 120, bot = 230, cw = 90; c.save(); c.beginPath(); c.moveTo(cx - cw / 2, top); c.lineTo(cx + cw / 2, top); c.lineTo(cx + cw / 2 - 10, bot); c.lineTo(cx - cw / 2 + 10, bot); c.closePath(); c.fillStyle = 'rgba(255,255,255,.35)'; c.fill(); c.clip();
+      const y = bot - (bot - top) * Math.min(1.08, lv); c.fillStyle = SBA.grad(c, 0, y, 0, bot, ['#c98a4a', '#5a2e10']); c.fillRect(cx - cw, y, cw * 2, bot - y); c.fillStyle = 'rgba(255,240,220,.6)'; c.fillRect(cx - cw, y, cw * 2, 4); c.restore();
+      c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - cw / 2, top); c.lineTo(cx - cw / 2 + 10, bot); c.lineTo(cx + cw / 2 - 10, bot); c.lineTo(cx + cw / 2, top); c.stroke(); c.beginPath(); c.arc(cx + cw / 2 + 6, (top + bot) / 2, 18, -1.2, 1.2); c.stroke();
+      for(const v of [lo, hi]){ const yy = bot - (bot - top) * v; c.setLineDash([4, 4]); c.strokeStyle = '#35d0b8'; c.beginPath(); c.moveTo(cx - cw / 2 - 18, yy); c.lineTo(cx + cw / 2 + 18, yy); c.stroke(); c.setLineDash([]); }
+      if(lv > 1){ spill += dt; c.fillStyle = '#5a2e10'; c.beginPath(); c.ellipse(cx, bot + 10, 60 + spill * 40, 6, 0, 0, 7); c.fill(); }
+      for(let k = 0; k < cups; k++) SBA.txt(c, k < i ? '☕' : '◻️', W - 40 - (cups - 1 - k) * 26, 30, 18, '#fff');
+      S.st(cups > 1 ? `Cup ${Math.min(i + 1, cups)}/${cups}` : lv > 0 ? Math.round(lv * 100) + '%' : 'Ready'); },
+    check(S){ if(lv >= lo && lv <= hi){ i++; lgSfx('bubble'); S.ok(); if(i >= cups) return S.done(); setTimeout(() => newCup(S), 500); } else { S.shake(); S.st(lv > hi ? 'Too much!' : 'Not enough'); if(hard) i = 0; spill = 0; setTimeout(() => newCup(S), 600); } },
+    up(S){ }, key(S, ty, k){ if(k === ' ') pouring = ty === 'down'; return true; }, stop(){ pouring = false; } }; };
+  // --- 🧪 cauldron: ring the bells — find the note (n right; HARD: black keys too, a mistake resets)
+  SBM.ear = (need, hard) => () => { let L, note, got = 0, lit = {}, ringT = 0; const pool = hard ? SB_PK.map(k => k[0]).slice(0, 12) : [60, 62, 64, 65, 67, 69, 71];
+    const ring = () => { sbNote(note, 1.1, 'sine'); ringT = 1; };
+    return { hard, sub: hard ? 'Perfect pitch' : 'Ring the potion bells', tip: hard ? `Find ${need} bells in a row — sharps and flats too. One miss and you start over.` : `Listen to the bell, then find that note. Get ${need} right.`, keys: 'A W S E D F T G Y H U J K · R ring again', btns: [['again', '🔔 Ring again']],
+    init(S){ sbHush(true); L = sbKeysLayout(50, 150, S.W - 100, 110); note = pool[Math.floor(S.R() * pool.length)]; setTimeout(ring, 300); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.potion(c, W, H); for(const k in lit) lit[k] = Math.max(0, lit[k] - dt * 2.5); ringT = Math.max(0, ringT - dt);
+      const sw = Math.sin(T * 18) * ringT * .5; c.save(); c.translate(W / 2, 20); c.rotate(sw); c.fillStyle = SBA.grad(c, -40, 0, 40, 0, ['#8a6a1a', '#ffd166', '#b08a2a']); c.beginPath(); c.moveTo(-14, 10); c.quadraticCurveTo(-18, 70, -46, 92); c.lineTo(46, 92); c.quadraticCurveTo(18, 70, 14, 10); c.closePath(); c.fill(); c.fillStyle = '#5a4210'; c.beginPath(); c.arc(0, 94, 9, 0, 7); c.fill(); c.restore();
+      if(ringT > 0) for(let r = 0; r < 3; r++){ c.strokeStyle = `rgba(255,209,102,${ringT * (1 - r * .3)})`; c.lineWidth = 2; c.beginPath(); c.arc(W / 2, 80, 60 + r * 18 + (1 - ringT) * 30, -2.6, -.5); c.stroke(); }
+      for(let k = 0; k < need; k++) SBA.led(c, 40 + k * 16, 20, 5, '#35d0b8', k < got);
+      sbKeysDraw(c, L, lit, true); },
+    press(S, m){ lit[m] = 1; sbNote(m, .45); if(m % 12 === note % 12){ got++; S.ok(); if(got >= need) return S.done(); let n2; do{ n2 = pool[Math.floor(S.R() * pool.length)]; }while(n2 === note); note = n2; setTimeout(ring, 650); } else { S.shake(); if(hard) got = 0; setTimeout(ring, 650); } S.st(`${got}/${need}`); },
+    down(S, x, y){ const k = sbKeysHit(L, x, y); if(k) this.press(S, k.m); },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'r') ring(); const q = SB_PK.find(p => p[1] === k); if(q && (hard || !q[2])) this.press(S, q[0]); return true; },
+    btn(S, b){ if(b === 'again') ring(); } }; };
+  // --- 🧪 cauldron: drop the ingredients in the order you saw
+  SBM.brew = () => { const ING = [['🍄', '#ff6b8b'], ['🌿', '#35d0b8'], ['🪶', '#ffd166'], ['💎', '#57e1ff'], ['🦴', '#e8e4dc']]; let seq, at = 0, busy = true, show = -1, splash = 0, splashC = '#fff', bubbles = [];
+    const play = (S) => { busy = true; at = 0; seq.forEach((v, k) => setTimeout(() => { show = v; splash = 1; splashC = ING[v][1]; sbNote(60 + v * 3, .3, 'triangle'); setTimeout(() => { show = -1; }, 420); }, 500 + k * 650)); setTimeout(() => { busy = false; S.st('Your turn!'); }, 500 + seq.length * 650); S.st('Watch…'); };
+    return { sub: 'Brew the potion', tip: 'Watch which ingredients go in, then drop them in the same order.', keys: '1-5 drop · R watch again', btns: [['again', '👀 Watch again']],
+    init(S){ seq = Array.from({ length: 4 }, () => Math.floor(S.R() * 5)); play(S); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.potion(c, W, H); splash = Math.max(0, splash - dt * 1.5);
+      const cx = W / 2, cy = 190; c.fillStyle = '#1a1420'; c.beginPath(); c.ellipse(cx, cy + 40, 110, 20, 0, 0, 7); c.fill(); for(let k = -1; k <= 1; k += 2){ c.fillStyle = '#2a2430'; c.fillRect(cx + k * 70 - 5, cy + 30, 10, 40); }
+      c.fillStyle = SBA.grad(c, cx - 100, 0, cx + 100, 0, ['#1a1a22', '#4a4a58', '#1a1a22']); c.beginPath(); c.ellipse(cx, cy, 100, 60, 0, 0, Math.PI); c.lineTo(cx - 100, cy); c.fill(); c.fillStyle = '#2a2a34'; c.beginPath(); c.ellipse(cx, cy - 4, 104, 18, 0, 0, 7); c.fill();
+      c.fillStyle = splash > 0 ? splashC : '#7a3aff'; c.beginPath(); c.ellipse(cx, cy - 4, 92, 13, 0, 0, 7); c.fill(); SBA.glow(c, cx, cy - 10, 140, splash > 0 ? splashC : 'rgba(140,80,255,.9)', .45 + splash * .4);
+      if(S.R() < dt * 8) bubbles.push({ x: cx + (S.R() - .5) * 160, y: cy - 6, r: 2 + S.R() * 5, v: 20 + S.R() * 40 }); for(const b of bubbles){ b.y -= b.v * dt; c.strokeStyle = 'rgba(220,200,255,.6)'; c.beginPath(); c.arc(b.x, b.y, b.r, 0, 7); c.stroke(); } bubbles = bubbles.filter(b => b.y > cy - 80);
+      if(show >= 0) SBA.txt(c, ING[show][0], cx, cy - 60 + (1 - splash) * 40, 40, '#fff');
+      ING.forEach(([em, col], i) => { const x = 50 + i * (W - 100) / 4, y = 50; SBA.panel(c, x - 26, y - 34, 52, 64, 10, 'rgba(255,255,255,.14)', 'rgba(255,255,255,.04)', col); SBA.txt(c, em, x, y - 4, 26, '#fff'); SBA.txt(c, String(i + 1), x, y + 22, 10, 'rgba(255,255,255,.6)'); });
+      for(let k = 0; k < seq.length; k++) SBA.led(c, W - 80 + k * 16, H - 16, 5, '#35d0b8', k < at); },
+    pick(S, i){ if(busy) return; splash = 1; splashC = ING[i][1]; sbNote(60 + i * 3, .3, 'triangle'); if(seq[at] === i){ if(++at === seq.length) S.done(); } else { S.shake(); setTimeout(() => play(S), 600); } },
+    down(S, x, y){ if(y > 90) return; const i = Math.round((x - 50) / ((S.W - 100) / 4)); if(i >= 0 && i < 5) this.pick(S, i); },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'r') play(S); const d = +k; if(d >= 1 && d <= 5) this.pick(S, d - 1); return true; }, btn(S){ play(S); } }; };
+  // --- 🔭 telescope: catch the comet in the crosshair (HARD: a satellite that wobbles, smaller ring, 5 catches)
+  SBM.comet = (need, hard) => () => { let x, y, vx, vy, got = 0, cool = 0, trail = [];
+    const spawn = (S) => { const side = S.R() < .5 ? -1 : 1; x = S.W / 2 - side * 260; y = S.H / 2 + (S.R() - .5) * 150; vx = side * (hard ? 230 + S.R() * 80 : 140 + S.R() * 60); vy = (S.R() - .5) * 60; trail = []; };
+    return { hard, sub: hard ? 'Track the satellite' : 'Catch the comet', tip: hard ? `It wobbles. Press Space when it's inside the small ring — ${need} times.` : `Press Space (or click) when the comet is inside the ring — ${need} times.`, keys: 'Space snap',
+    init(S){ spawn(S); },
+    draw(S, c, T, dt){ const { W, H } = S; const cx = W / 2, cy = H / 2, ring = hard ? 18 : 30; SBA.bg.space(c, W, H, T, 11); cool = Math.max(0, cool - dt);
+      x += vx * dt; y += vy * dt + (hard ? Math.sin(T * 7) * 140 * dt : 0); if(Math.abs(x - cx) > 300 || y < -40 || y > H + 40) spawn(S); trail.push([x, y]); if(trail.length > 18) trail.shift();
+      trail.forEach(([a, b], i) => { c.fillStyle = hard ? `rgba(200,220,255,${i / 18 * .5})` : `rgba(120,220,255,${i / 18 * .6})`; c.beginPath(); c.arc(a, b, 1 + i / 4, 0, 7); c.fill(); });
+      if(hard){ c.fillStyle = '#c8ccd8'; c.fillRect(x - 4, y - 4, 8, 8); c.fillStyle = '#3a74bf'; c.fillRect(x - 16, y - 2, 10, 4); c.fillRect(x + 6, y - 2, 10, 4); SBA.led(c, x, y - 6, 2, '#ff4d6d', Math.floor(T * 4) % 2); }
+      else { SBA.glow(c, x, y, 26, 'rgba(180,240,255,1)', .9); c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, 4, 0, 7); c.fill(); }
+      const inR = Math.hypot(x - cx, y - cy) < ring; c.strokeStyle = inR ? '#7dffd8' : 'rgba(255,255,255,.7)'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, ring, 0, 7); c.stroke(); c.beginPath(); c.moveTo(cx - ring - 30, cy); c.lineTo(cx - ring - 6, cy); c.moveTo(cx + ring + 6, cy); c.lineTo(cx + ring + 30, cy); c.moveTo(cx, cy - ring - 30); c.lineTo(cx, cy - ring - 6); c.moveTo(cx, cy + ring + 6); c.lineTo(cx, cy + ring + 30); c.stroke();
+      c.save(); c.globalCompositeOperation = 'destination-over'; c.restore(); const g = c.createRadialGradient(cx, cy, H * .35, cx, cy, H * .62); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,1)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+      for(let k = 0; k < need; k++) SBA.led(c, 20 + k * 16, 20, 5, '#7dffd8', k < got); S.st(`${got}/${need} caught`); },
+    snap(S){ if(cool > 0) return; cool = .35; const ring = this.hard ? 18 : 30; if(Math.hypot(x - S.W / 2, y - S.H / 2) < ring){ got++; S.ok(); sbSfx('task'); if(got >= need) return S.done(); spawn(S); } else { S.shake(); cool = 1; got = Math.max(0, got - 1); } },
+    down(S){ this.snap(S); }, key(S, ty, k){ if(ty === 'down' && k === ' ') this.snap(S); return true; } }; };
+  // --- 🔭 telescope: join the stars 1 → 7
+  SBM.stars = () => { let P = [], at = 0; return { sub: 'Draw the constellation', tip: 'Click the stars in order, 1 to 7.', keys: '1-7 also work',
+    init(S){ const R = S.R; while(P.length < 7){ const p = [40 + R() * (S.W - 80), 40 + R() * (S.H - 80)]; if(P.every(q => Math.hypot(q[0] - p[0], q[1] - p[1]) > 60)) P.push(p); } },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.space(c, W, H, T, 23); c.strokeStyle = 'rgba(125,255,216,.8)'; c.lineWidth = 2; c.shadowColor = '#7dffd8'; c.shadowBlur = 8; c.beginPath(); for(let i = 0; i < at; i++) i ? c.lineTo(...P[i]) : c.moveTo(...P[i]); c.stroke(); c.shadowBlur = 0;
+      P.forEach(([x, y], i) => { const done = i < at, next = i === at; SBA.glow(c, x, y, next ? 26 + Math.sin(T * 6) * 4 : 18, done ? 'rgba(125,255,216,.9)' : 'rgba(255,255,255,.8)', .8); c.fillStyle = '#fff'; c.beginPath(); for(let k = 0; k < 10; k++){ const r = k % 2 ? 3 : 7, a = k / 10 * 6.283 - 1.57; c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } c.fill(); SBA.txt(c, String(i + 1), x + 13, y - 12, 12, done ? '#7dffd8' : '#ffd166', 'center', 800); });
+      S.st(`${at}/7`); },
+    pick(S, i){ if(i === at){ at++; sbNote(64 + at * 2, .25, 'sine'); if(at === 7) S.done(); } else { S.shake(); at = 0; } },
+    down(S, x, y){ const i = P.findIndex(p => Math.hypot(p[0] - x, p[1] - y) < 20); if(i >= 0) this.pick(S, i); },
+    key(S, ty, k){ if(ty === 'down'){ const d = +k; if(d >= 1 && d <= 7) this.pick(S, d - 1); } return true; } }; };
+  // --- 🔐 lockers: tap the knock code (Space)
+  SBM.knock = () => { const pats = [[0, 400, 800, 1000, 1200], [0, 200, 400, 800, 1200], [0, 400, 600, 800, 1200], [0, 300, 600, 900, 1050]]; let pat, taps = [], busy = true, hit = 0, demo = [];
+    const play = (S) => { busy = true; taps = []; demo = []; pat.forEach((ms, k) => { sbClick(.4 + ms / 1000, k === 0); setTimeout(() => { demo.push(k); hit = 1; }, 400 + ms); }); setTimeout(() => { busy = false; S.st('Your turn — tap it back'); }, 700 + pat[pat.length - 1]); S.st('Listen…'); };
+    return { sub: 'Knock the secret code', tip: 'Listen to the knock, then tap it back with Space (or click the door).', keys: 'Space knock · R listen again', btns: [['again', '🔁 Listen again']],
+    init(S){ sbHush(true); pat = pats[Math.floor(S.R() * pats.length)]; play(S); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.locker(c, W, H); hit = Math.max(0, hit - dt * 4); c.save(); c.translate(hit * (Math.random() - .5) * 6, 0); SBA.panel(c, W / 2 - 60, 60, 120, 150, 10, '#4a84cf', '#2a5a9a'); SBA.panel(c, W / 2 + 30, 120, 18, 40, 5, '#c8ccd4', '#7a808c'); for(let k = 0; k < 5; k++){ c.fillStyle = 'rgba(0,0,0,.3)'; SBA.rr(c, W / 2 - 40, 75 + k * 8, 60, 4, 2); c.fill(); } c.restore();
+      if(hit > 0) SBA.txt(c, '💥', W / 2 - 80, 140, 26 * hit + 10, '#fff');
+      pat.forEach((ms, k) => { const x = 60 + ms / 1200 * (W - 120), y = H - 30; const st = demo.includes(k) && busy ? 'demo' : taps[k] != null ? 'on' : ''; SBA.led(c, x, y, 7, st === 'on' ? '#7dffd8' : '#ffd166', !!st); }); },
+    tap(S){ if(busy) return; hit = 1; const now = performance.now(); taps.push(now); sbClick(0, taps.length === 1);
+      if(taps.length === pat.length){ const ok = pat.every((ms, i) => Math.abs((taps[i] - taps[0]) - ms) < 140); if(ok) S.done(); else { S.shake(); S.st('Wrong beat — listen again'); setTimeout(() => play(S), 800); } } },
+    down(S){ this.tap(S); }, key(S, ty, k){ if(ty === 'down' && k === ' ') this.tap(S); if(ty === 'down' && k === 'r') play(S); return true; }, btn(S){ play(S); } }; };
+  // --- 🔐 lockers: the combination dial (← → turn, Space set)
+  SBM.dial = () => { let code, at = 0, ang = 0, spin = 0; const N = 40; return { sub: 'Open the combination lock', tip: 'Turn the dial to each number, press Space to set it.', keys: '← → turn (hold Shift: fast) · Space set', btns: [['set', '✔️ Set']],
+    init(S){ code = Array.from({ length: 3 }, () => Math.floor(S.R() * N)); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.locker(c, W, H); ang += spin * dt; const cx = W / 2 + 60, cy = H / 2 + 6, R0 = 100, cur = ((Math.round(ang) % N) + N) % N;
+      SBA.panel(c, cx - R0 - 10, cy - R0 - 10, R0 * 2 + 20, R0 * 2 + 20, R0 + 10, '#2a2a30', '#0a0a10'); c.save(); c.translate(cx, cy); c.rotate(-ang / N * 6.283);
+      c.fillStyle = SBA.grad(c, -R0, -R0, R0, R0, ['#e8eaf0', '#8a90a0']); c.beginPath(); c.arc(0, 0, R0, 0, 7); c.fill();
+      for(let k = 0; k < N; k++){ const a = k / N * 6.283 - 1.5708; c.strokeStyle = '#222'; c.lineWidth = k % 5 ? 1 : 2.5; c.beginPath(); c.moveTo(Math.cos(a) * (R0 - 4), Math.sin(a) * (R0 - 4)); c.lineTo(Math.cos(a) * (R0 - (k % 5 ? 12 : 18)), Math.sin(a) * (R0 - (k % 5 ? 12 : 18))); c.stroke(); if(k % 5 === 0) SBA.txt(c, String(k), Math.cos(a) * (R0 - 30), Math.sin(a) * (R0 - 30), 12, '#222', 'center', 800); }
+      SBA.panel(c, -26, -26, 52, 52, 26, '#cfd3dc', '#6a7080'); c.restore(); c.fillStyle = '#ff4d6d'; c.beginPath(); c.moveTo(cx, cy - R0 - 4); c.lineTo(cx - 8, cy - R0 - 18); c.lineTo(cx + 8, cy - R0 - 18); c.fill();
+      SBA.panel(c, 30, 40, 120, 190, 10, 'rgba(0,0,0,.35)', 'rgba(0,0,0,.2)'); SBA.txt(c, 'CODE', 90, 60, 12, '#cfe2ff', 'center', 800); code.forEach((n2, i) => { SBA.txt(c, String(n2).padStart(2, '0'), 90, 95 + i * 40, 26, i < at ? '#7dffd8' : i === at ? '#ffd166' : 'rgba(255,255,255,.5)', 'center', 900, 'monospace'); });
+      SBA.txt(c, String(cur).padStart(2, '0'), cx, cy, 20, '#222', 'center', 900, 'monospace'); S.st(`Number ${Math.min(at + 1, 3)}/3`); },
+    set(S){ const cur = ((Math.round(ang) % N) + N) % N; if(cur === code[at]){ at++; sbClick(0, true); S.ok(); if(at === 3) S.done(); } else { S.shake(); at = 0; } },
+    down(S, x, y){ S.a0 = Math.atan2(y - S.H / 2, x - S.W / 2 - 60); }, move(S, x, y){ if(!S.down || S.a0 == null) return; const a = Math.atan2(y - S.H / 2, x - S.W / 2 - 60); let d = a - S.a0; if(d > Math.PI) d -= 6.283; if(d < -Math.PI) d += 6.283; ang -= d / 6.283 * N; S.a0 = a; }, up(S){ S.a0 = null; ang = Math.round(ang); sbClick(0, false); },
+    key(S, ty, k, e){ if(k === 'arrowleft' || k === 'arrowright'){ if(ty === 'down'){ if(e && e.shiftKey) spin = (k === 'arrowleft' ? -1 : 1) * 25; else { spin = 0; ang = Math.round(ang) + (k === 'arrowleft' ? -1 : 1); sbClick(0, false); } } else { spin = 0; ang = Math.round(ang); } } else if(ty === 'down' && (k === ' ' || k === 'enter')) this.set(S); return true; },
+    btn(S){ this.set(S); } }; };
+  // --- 🔐 lockers (HARD): remember the 6-digit code (it only shows for 2.5 s)
+  SBM.memcode = () => { let code, typed = '', showUntil = 0; const KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'];
+    return { hard: true, sub: 'Remember the code', tip: 'The code flashes for a moment. Type it from memory.', keys: '0-9 · Backspace · Enter', btns: [['peek', '👀 Show again (resets)']],
+    init(S){ code = Array.from({ length: 6 }, () => Math.floor(S.R() * 10)).join(''); showUntil = 2.5; },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.locker(c, W, H); SBA.screen(c, 30, 30, 180, 60, '#0a1a10'); const show = T < showUntil;
+      SBA.txt(c, show ? code : typed.padEnd(6, '·'), 120, 60, 30, show ? '#ffd166' : '#7dffd8', 'center', 900, 'monospace'); if(show){ c.fillStyle = '#ffd166'; c.fillRect(30, 96, 180 * (1 - T / showUntil), 4); }
+      KEYS.forEach((k, i) => { const x = 250 + (i % 3) * 62, y = 24 + Math.floor(i / 3) * 60; SBA.panel(c, x, y, 54, 52, 10, '#e8eaf0', '#9aa0ac'); SBA.txt(c, String(k), x + 27, y + 26, 20, '#222', 'center', 800); });
+      S.st(show ? 'Memorise it!' : `${typed.length}/6`); },
+    press(S, k){ if(S.T < showUntil) return; if(k === '⌫') typed = typed.slice(0, -1); else if(k === '✓'){ if(typed === code) S.done(); else { S.shake(); typed = ''; } } else if(typed.length < 6){ typed += k; sbClick(0, false); if(typed.length === 6){ if(typed === code) S.done(); else { S.shake(); typed = ''; } } } },
+    down(S, x, y){ const i = Math.floor((x - 250) / 62), j = Math.floor((y - 24) / 60); if(i >= 0 && i < 3 && j >= 0 && j < 4) this.press(S, String(KEYS[j * 3 + i])); },
+    key(S, ty, k){ if(ty !== 'down') return true; if(/^[0-9]$/.test(k)) this.press(S, k); else if(k === 'backspace') this.press(S, '⌫'); else if(k === 'enter') this.press(S, '✓'); return true; },
+    btn(S){ code = Array.from({ length: 6 }, () => Math.floor(S.R() * 10)).join(''); typed = ''; showUntil = S.T + 2.5; } }; };
+  // --- 🎹 organ: play back the melody (HARD: 6 notes with sharps)
+  SBM.melody = (len, hard) => () => { let L, mel, at = 0, busy = true, lit = {}, pipes = 0;
+    const play = (S) => { busy = true; at = 0; mel.forEach((m, k) => { sbNote(m, .5, 'triangle', .4 + k * .55); setTimeout(() => { lit[m] = 1; pipes = 1; }, 400 + k * 550); }); setTimeout(() => { busy = false; S.st('Your turn'); }, 400 + mel.length * 550); S.st('Listen…'); };
+    return { hard, sub: hard ? 'The long hymn' : 'Play the organ melody', tip: hard ? `A ${len}-note tune with sharps. Listen, then play it back.` : `Listen to the ${len} notes, then play them back.`, keys: 'A W S E D F T G Y H U J K · R listen again', btns: [['again', '🔁 Listen again']],
+    init(S){ sbHush(true); L = sbKeysLayout(50, 150, S.W - 100, 110); const pool = hard ? SB_PK.map(k => k[0]) : SB_PK.filter(k => !k[2]).map(k => k[0]); mel = Array.from({ length: len }, () => pool[Math.floor(S.R() * pool.length)]); play(S); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.wood(c, W, H); for(const k in lit) lit[k] = Math.max(0, lit[k] - dt * 2.5); pipes = Math.max(0, pipes - dt * 2);
+      for(let i = 0; i < 15; i++){ const x = 40 + i * (W - 80) / 14, h = 60 + Math.abs(7 - i) * -5 + 40; c.fillStyle = SBA.grad(c, x - 9, 0, x + 9, 0, ['#8a6a1a', '#ffe08a', '#b08a2a']); SBA.rr(c, x - 9, 120 - h, 18, h, 4); c.fill(); c.fillStyle = '#3a2a08'; c.beginPath(); c.ellipse(x, 120 - h + 22, 6, 3, 0, 0, 7); c.fill(); }
+      if(pipes > 0) SBA.glow(c, W / 2, 60, 220, 'rgba(255,220,120,.7)', pipes * .6);
+      for(let k = 0; k < mel.length; k++) SBA.led(c, W - 30 - (mel.length - 1 - k) * 14, 136, 4, '#7dffd8', k < at);
+      sbKeysDraw(c, L, lit, false); },
+    press(S, m){ if(busy) return; lit[m] = 1; sbNote(m, .5); if(m === mel[at]){ at++; S.st(`${at}/${mel.length}`); if(at === mel.length) setTimeout(() => S.done(), 300); } else { S.shake(); setTimeout(() => play(S), 700); } },
+    down(S, x, y){ const k = sbKeysHit(L, x, y); if(k) this.press(S, k.m); },
+    key(S, ty, k){ if(ty !== 'down') return true; if(k === 'r') play(S); const q = SB_PK.find(p => p[1] === k); if(q) this.press(S, q[0]); return true; }, btn(S){ play(S); } }; };
+  // --- 🎹 organ: hit the keys as they light up
+  SBM.lights = () => { let L, target = null, tLeft = 0, hits = 0, miss = 0, lit = {}; const need = 12;
+    const next = (S) => { const pool = L.filter(k => !k.b); let k; do{ k = pool[Math.floor(S.R() * pool.length)]; }while(target && k.m === target.m); target = k; tLeft = 1.1; };
+    return { sub: 'Light up the pipes', tip: `Hit each glowing key before it fades. ${need} hits — 3 misses and it resets.`, keys: 'A S D F G H J K',
+    init(S){ sbHush(true); L = sbKeysLayout(50, 150, S.W - 100, 110); next(S); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.wood(c, W, H); for(const k in lit) lit[k] = Math.max(0, lit[k] - dt * 3); tLeft -= dt; if(tLeft <= 0){ miss++; lgSfx('zap'); if(miss >= 3){ hits = 0; miss = 0; S.shake(); } next(S); }
+      const tk = target; for(let i = 0; i < 8; i++){ const k = L.filter(q => !q.b)[i], on = tk && k.m === tk.m; c.fillStyle = SBA.grad(c, k.x, 0, k.x + k.w, 0, ['#8a6a1a', on ? '#fff6c8' : '#e8c86a', '#b08a2a']); SBA.rr(c, k.x + k.w / 2 - 12, 20, 24, 110, 5); c.fill(); if(on){ SBA.glow(c, k.x + k.w / 2, 70, 70, 'rgba(255,230,140,1)', tLeft); } }
+      const lit2 = Object.assign({}, lit); if(tk) lit2[tk.m] = Math.max(lit2[tk.m] || 0, .35 + .3 * Math.sin(T * 12)); sbKeysDraw(c, L, lit2, false);
+      c.fillStyle = '#111'; SBA.rr(c, 40, 136, W - 80, 6, 3); c.fill(); c.fillStyle = '#ffd166'; SBA.rr(c, 40, 136, (W - 80) * hits / need, 6, 3); c.fill(); S.st(`${hits}/${need} · misses ${miss}/3`); },
+    press(S, m){ lit[m] = 1; sbNote(m, .3); if(target && m === target.m){ hits++; if(hits >= need) return S.done(); next(S); } else { miss++; S.shake(); if(miss >= 3){ hits = 0; miss = 0; } } },
+    down(S, x, y){ const k = sbKeysHit(L, x, y); if(k) this.press(S, k.m); },
+    key(S, ty, k){ if(ty !== 'down') return true; const q = SB_PK.find(p => p[1] === k && !p[2]); if(q) this.press(S, q[0]); return true; } }; };
+  // --- 📈 trading desk: sell when the price is in the green band (Space), 3 times
+  SBM.sell = () => { let pts = [], p = .5, v = 0, hits = 0, cool = 0; const band = [.72, .86];
+    return { sub: 'Sell at the top', tip: 'Press Space (or SELL) when the price is inside the green band. 3 good sells.', keys: 'Space sell', btns: [['sell', '💰 SELL']],
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.terminal(c, W, H); cool = Math.max(0, cool - dt); v += (S.R() - .5) * 4 * dt + (.5 - p) * .8 * dt; v *= .985; p = Math.max(.05, Math.min(.95, p + v * dt * 2.4 + Math.sin(T * 1.3) * .25 * dt)); pts.push(p); if(pts.length > 160) pts.shift();
+      const y = (q) => H - 20 - q * (H - 40); c.fillStyle = 'rgba(53,208,184,.12)'; c.fillRect(0, y(band[1]), W, y(band[0]) - y(band[1])); c.strokeStyle = 'rgba(53,208,184,.6)'; c.setLineDash([5, 4]); [band[0], band[1]].forEach(b => { c.beginPath(); c.moveTo(0, y(b)); c.lineTo(W, y(b)); c.stroke(); }); c.setLineDash([]);
+      const inB = p >= band[0] && p <= band[1]; c.strokeStyle = inB ? '#7dffd8' : '#ff6b8b'; c.lineWidth = 2.5; c.shadowColor = c.strokeStyle; c.shadowBlur = 8; c.beginPath(); pts.forEach((q, i) => { const x = W - 60 - (pts.length - 1 - i) * 2.4; i ? c.lineTo(x, y(q)) : c.moveTo(x, y(q)); }); c.stroke(); c.shadowBlur = 0;
+      SBA.glow(c, W - 60, y(p), 20, inB ? 'rgba(125,255,216,1)' : 'rgba(255,107,139,1)'); SBA.panel(c, W - 54, y(p) - 11, 50, 22, 5, inB ? '#35d0b8' : '#ff4d6d', '#111'); SBA.txt(c, '$' + Math.round(80 + p * 120), W - 29, y(p), 11, '#04140e', 'center', 900, 'monospace');
+      SBA.txt(c, 'SAIDX', 50, 20, 13, '#7dffd8', 'center', 900, 'monospace'); for(let k = 0; k < 3; k++) SBA.led(c, 100 + k * 16, 20, 5, '#ffd166', k < hits); S.st(inB ? '🟢 SELL NOW' : 'Waiting for the top…'); },
+    sell(S){ if(cool > 0) return; cool = .4; if(p >= band[0] && p <= band[1]){ hits++; sbSfx('task'); S.ok(); p = .25; v = 0; if(hits >= 3) S.done(); } else S.shake(); },
+    key(S, ty, k){ if(ty === 'down' && k === ' ') this.sell(S); return true; }, btn(S){ this.sell(S); }, down(S){ this.sell(S); } }; };
+  // --- 📈 trading desk: remember the tickers (went up or down?)
+  SBM.ticker = () => { const NM = ['NOVA', 'BLAZE', 'KITE', 'ORBIT', 'MOSS', 'ECHO', 'VOLT', 'PIXL']; let list, q = 0, phase = 0, t0 = 0, asks; const need = 3;
+    return { sub: 'Read the ticker', tip: 'Watch the prices tick past, then say if each one went UP or DOWN.', keys: '← down · → up', btns: [['dn', '📉 Down'], ['up', '📈 Up']],
+    init(S){ list = NM.slice().sort(() => S.R() - .5).slice(0, 5).map(n => ({ n, up: S.R() < .5, d: (1 + S.R() * 9).toFixed(1) })); asks = list.slice().sort(() => S.R() - .5).slice(0, need); },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.terminal(c, W, H);
+      if(phase === 0){ const x0 = W - (T - t0) * 150; list.forEach((s, i) => { const x = x0 + i * 170; SBA.panel(c, x, 100, 150, 70, 8, '#0a2a22', '#061a14', s.up ? '#35d0b8' : '#ff4d6d'); SBA.txt(c, s.n, x + 75, 122, 18, '#e8fff8', 'center', 900, 'monospace'); SBA.txt(c, `${s.up ? '▲ +' : '▼ −'}${s.d}%`, x + 75, 150, 16, s.up ? '#7dffd8' : '#ff6b8b', 'center', 800, 'monospace'); });
+        if(x0 + list.length * 170 < 0){ phase = 1; S.st('So… which way did it go?'); } else S.st('Watch closely…'); }
+      else { const a = asks[q]; SBA.screen(c, W / 2 - 130, 70, 260, 100); SBA.txt(c, a ? a.n : '', W / 2, 105, 30, '#ffd166', 'center', 900, 'monospace'); SBA.txt(c, 'went…?', W / 2, 145, 14, '#cfe', 'center'); for(let k = 0; k < need; k++) SBA.led(c, W / 2 - 16 + k * 16, 200, 5, '#7dffd8', k < q); } },
+    ans(S, up){ if(phase !== 1) return; if(asks[q].up === up){ q++; S.ok(); if(q >= need) S.done(); } else { S.shake(); phase = 0; t0 = S.T; q = 0; this.init(S); } },
+    key(S, ty, k){ if(ty === 'down'){ if(k === 'arrowup' || k === 'arrowright') this.ans(S, true); else if(k === 'arrowdown' || k === 'arrowleft') this.ans(S, false); } return true; }, btn(S, b){ this.ans(S, b === 'up'); } }; };
+  // --- 📈 trading desk (HARD): buy low, sell high (+15% in one trade) before time's up
+  SBM.trade = () => { let pts = [], p = .4, v = 0, buy = null, left = 25, best = 0;
+    return { hard: true, sub: 'Buy low, sell high', tip: 'Space to BUY, Space again to SELL. Make +15% on one trade within 25 seconds.', keys: 'Space buy / sell', btns: [['go', '💱 Buy / Sell']],
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.terminal(c, W, H); left -= dt; if(left <= 0){ S.shake(); left = 25; buy = null; S.st('Time! Try again.'); }
+      v += (S.R() - .5) * 6 * dt + (.5 - p) * .6 * dt; v *= .98; p = Math.max(.08, Math.min(.95, p + v * dt * 2.2)); pts.push(p); if(pts.length > 170) pts.shift();
+      const y = (q) => H - 30 - q * (H - 60), price = (q) => 50 + q * 100; if(buy != null){ c.strokeStyle = '#ffd166'; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(0, y(buy)); c.lineTo(W, y(buy)); c.stroke(); const tg = (price(buy) * 1.15 - 50) / 100; c.strokeStyle = '#35d0b8'; c.beginPath(); c.moveTo(0, y(tg)); c.lineTo(W, y(tg)); c.stroke(); c.setLineDash([]); }
+      c.strokeStyle = '#57e1ff'; c.lineWidth = 2; c.shadowColor = '#57e1ff'; c.shadowBlur = 6; c.beginPath(); pts.forEach((q, i) => { const x = W - 70 - (pts.length - 1 - i) * 2.3; i ? c.lineTo(x, y(q)) : c.moveTo(x, y(q)); }); c.stroke(); c.shadowBlur = 0;
+      const gain = buy != null ? (price(p) / price(buy) - 1) * 100 : 0; SBA.panel(c, W - 66, y(p) - 11, 62, 22, 5, '#0a3a5a', '#061a28'); SBA.txt(c, '$' + price(p).toFixed(1), W - 35, y(p), 11, '#cfefff', 'center', 900, 'monospace');
+      SBA.txt(c, `⏱ ${Math.ceil(left)}s`, 50, 20, 14, left < 6 ? '#ff6b8b' : '#cfefff', 'center', 800, 'monospace'); S.st(buy == null ? 'Waiting to buy…' : `Holding: ${gain >= 0 ? '+' : ''}${gain.toFixed(1)}% (need +15%)`); },
+    go(S){ const price = (q) => 50 + q * 100; if(buy == null){ buy = p; sbClick(0, true); } else { const g = (price(p) / price(buy) - 1) * 100; buy = null; if(g >= 15) S.done(); else { S.shake(); S.st(`Only ${g.toFixed(1)}%`); } } },
+    key(S, ty, k){ if(ty === 'down' && k === ' ') this.go(S); return true; }, btn(S){ this.go(S); }, down(S){ this.go(S); } }; };
+  // --- 🎰 slot machine: stop the reels on 7 (Space) (HARD: 4 fast reels)
+  SBM.reels = (n, speed, hard) => () => { const SYM = ['🍒', '🍋', '🔔', '⭐', '7️⃣', '💎']; let pos, stopped, at = 0, wait = 0;
+    return { hard, sub: hard ? 'Jackpot!' : 'Line up the sevens', tip: `Press Space (or click) to stop each reel on 7️⃣.${hard ? ' Fast reels.' : ''}`, keys: 'Space stop',
+    init(S){ pos = Array.from({ length: n }, () => S.R() * SYM.length); stopped = Array(n).fill(false); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.casino(c, W, H, T); if(wait > 0){ wait -= dt; if(wait <= 0){ stopped.fill(false); at = 0; } }
+      const rw = Math.min(90, (W - 80) / n - 10), x0 = W / 2 - (n * (rw + 10) - 10) / 2, y0 = 60, rh = 150; SBA.panel(c, x0 - 16, y0 - 16, n * (rw + 10) + 22, rh + 32, 14, '#ffd166', '#a07010', '#fff2c0');
+      for(let i = 0; i < n; i++){ if(!stopped[i]) pos[i] = (pos[i] + speed * (1 + i * .15) * dt) % SYM.length; const x = x0 + i * (rw + 10); c.save(); SBA.rr(c, x, y0, rw, rh, 8); c.fillStyle = SBA.grad(c, 0, y0, 0, y0 + rh, ['#bbb', '#fff', '#bbb']); c.fill(); c.clip();
+        for(let k = -2; k <= 2; k++){ const idx = ((Math.floor(pos[i]) + k) % SYM.length + SYM.length) % SYM.length, fy = y0 + rh / 2 + (k - (pos[i] % 1)) * 56; SBA.txt(c, SYM[idx], x + rw / 2, fy, 40, '#000'); } c.fillStyle = SBA.grad(c, 0, y0, 0, y0 + rh, ['rgba(0,0,0,.45)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,.45)']); c.fillRect(x, y0, rw, rh); c.restore(); }
+      c.strokeStyle = '#ff2a3a'; c.lineWidth = 3; c.beginPath(); c.moveTo(x0 - 10, y0 + rh / 2); c.lineTo(x0 + n * (rw + 10), y0 + rh / 2); c.stroke(); S.st(`Reel ${Math.min(at + 1, n)}/${n}`); },
+    stop(S){ if(wait > 0 || at >= n) return; const SEV = 4; pos[at] = Math.round(pos[at]) % SYM.length; const ok = Math.abs(((pos[at] - SEV) % SYM.length + SYM.length) % SYM.length) < .01; stopped[at] = true; sbClick(0, ok); at++;
+      if(!ok){ S.shake(); wait = .8; return; } if(at === n){ sbSfx('win'); S.done(); } },
+    down(S){ this.stop(S); }, key(S, ty, k){ if(ty === 'down' && k === ' ') this.stop(S); return true; } }; };
+  // --- 🎰 slot machine: match the pairs
+  SBM.pairs = () => { const SYM = ['🍒', '🍋', '🔔', '💎', '⭐', '🍀']; let cards, open = [], got = 0, lock = 0;
+    return { sub: 'Match the pairs', tip: 'Flip two cards at a time and find all the pairs.', keys: 'click',
+    init(S){ cards = SYM.concat(SYM).sort(() => S.R() - .5).map(s => ({ s, up: false, done: false, f: 0 })); },
+    draw(S, c, T, dt){ const { W, H } = S; SBA.bg.casino(c, W, H, T); if(lock > 0){ lock -= dt; if(lock <= 0){ open.forEach(i => cards[i].up = false); open = []; } }
+      cards.forEach((cd, i) => { cd.f += ((cd.up || cd.done ? 1 : 0) - cd.f) * Math.min(1, dt * 12); const x = 50 + (i % 6) * 62, y = 40 + Math.floor(i / 6) * 100, w = 54, h = 86, sx = Math.abs(Math.cos(cd.f * Math.PI)); c.save(); c.translate(x + w / 2, y + h / 2); c.scale(Math.max(.05, sx), 1);
+        if(cd.f > .5){ SBA.panel(c, -w / 2, -h / 2, w, h, 8, cd.done ? '#d8fff2' : '#ffffff', '#e8e4dc'); SBA.txt(c, cd.s, 0, 0, 30, '#000'); } else { SBA.panel(c, -w / 2, -h / 2, w, h, 8, '#c81e3a', '#7a0c1c', '#ffd166'); c.strokeStyle = 'rgba(255,209,102,.6)'; c.strokeRect(-w / 2 + 6, -h / 2 + 6, w - 12, h - 12); SBA.txt(c, '★', 0, 0, 22, '#ffd166'); } c.restore(); });
+      S.st(`${got}/6 pairs`); },
+    down(S, x, y){ if(lock > 0) return; const i = Math.floor((x - 50) / 62) + Math.floor((y - 40) / 100) * 6; const cd = cards[i]; if(!cd || cd.up || cd.done || Math.floor((x - 50) / 62) > 5 || x < 50) return; cd.up = true; open.push(i); sbClick(0, false);
+      if(open.length === 2){ const [a, b] = open; if(cards[a].s === cards[b].s){ cards[a].done = cards[b].done = true; open = []; got++; S.ok(); if(got === 6) S.done(); } else lock = .8; } } }; };
+  // --- 🎤 blackboard: sing / tune by ear (uses the mic code from before for 'sing'; this one is the slider version)
+  SBM.tune = () => { let tgt, val, last = 0; return { sub: 'Tune by ear', tip: 'Slide until your tone sounds the same as the tuning fork, then lock it.', keys: '← → tune · F fork · Space lock', btns: [['fork', '🎵 Fork'], ['lock', '🔒 Lock']],
+    init(S){ sbHush(true); tgt = [60, 62, 64, 65, 67, 69][Math.floor(S.R() * 6)]; val = S.R() < .5 ? -2.4 : 2.4; setTimeout(() => sbNote(tgt, 1.2, 'sine'), 300); },
+    draw(S, c, T){ const { W, H } = S; SBA.bg.chalk(c, W, H); c.save(); c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(80, 60); c.lineTo(80, 150); c.moveTo(68, 60); c.lineTo(68, 120); c.quadraticCurveTo(74, 140, 80, 140); c.quadraticCurveTo(86, 140, 92, 120); c.lineTo(92, 60); c.stroke(); c.restore();
+      SBA.txt(c, 'Tune me', W / 2 + 30, 50, 22, 'rgba(255,255,255,.85)', 'center', 700, "'Comic Sans MS','Chalkboard SE',cursive");
+      c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 2; c.beginPath(); for(let x = 0; x <= W - 220; x += 4){ const yy = 130 + Math.sin(x * (.05 + (val + 3) * .01) + T * 4) * 22; x ? c.lineTo(160 + x, yy) : c.moveTo(160 + x, yy); } c.stroke();
+      const sx = 60 + (val + 3) / 6 * (W - 120); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 3; c.beginPath(); c.moveTo(60, 220); c.lineTo(W - 60, 220); c.stroke(); c.fillStyle = '#ffd166'; c.beginPath(); c.arc(sx, 220, 11, 0, 7); c.fill();
+      if(performance.now() - last > 180 && (S.down || S.keyHeld)){ last = performance.now(); sbNote(tgt + val, .22, 'sine'); } },
+    down(S, x){ this.move(S, x); }, move(S, x){ if(S.down){ val = Math.max(-3, Math.min(3, (x - 60) / (S.W - 120) * 6 - 3)); } },
+    key(S, ty, k){ if(ty !== 'down'){ S.keyHeld = false; return true; } if(k === 'arrowleft'){ val = Math.max(-3, val - .1); S.keyHeld = true; } else if(k === 'arrowright'){ val = Math.min(3, val + .1); S.keyHeld = true; } else if(k === 'f') sbNote(tgt, 1, 'sine'); else if(k === ' ' || k === 'enter') this.btn(S, 'lock'); return true; },
+    btn(S, b){ if(b === 'fork') sbNote(tgt, 1, 'sine'); else if(Math.abs(val) <= .3) S.done(); else { S.shake(); sbNote(tgt, .6, 'sine', .05); } } }; };
+
+  // ===== the stations: a theme each, 3 missions (the 3rd is the hard one) =====
+  const SB_STATIONS = {
+    mix: { v: [SBM.waves, SBM.faders, SBM.phase] },
+    wire: { v: [SBM.cables(4, false), SBM.surge, SBM.cables(6, true)] },
+    trash: { v: [SBM.trash, SBM.pour(1, .12, false), SBM.pour(3, .07, true)] },
+    brew: { v: [SBM.ear(3, false), SBM.brew, SBM.ear(5, true)] },
+    scope: { v: [SBM.comet(3, false), SBM.stars, SBM.comet(5, true)] },
+    locker: { v: [SBM.knock, SBM.dial, SBM.memcode] },
+    organ: { v: [SBM.melody(4, false), SBM.lights, SBM.melody(6, true)] },
+    stock: { v: [SBM.sell, SBM.ticker, SBM.trade] },
+    board: { v: ['sing', SBM.tune, 'sing2'] },
+    slots: { v: [SBM.reels(3, 4, false), SBM.pairs, SBM.reels(4, 7, true)] },
+  };
+  // which mission you get at a station: fixed for you for this game, but nobody can tell in advance
+  function sbVariant(t, G = sbG()){ if(SB.forceV != null) return SB.forceV; return lgHash((G && G.id || '') + ':' + sbMe() + ':' + t.k + ':v') % 3; }
   // ----- tasks: little minigames -----
   function sbMg(t){
     const el = sbHudEl().querySelector('.sb-mg'); SB.mg = t; el.hidden = false;
     const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; sbSfx('task'); if(t.fix) await sbFixLights(); else await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(() => { if(SB.mg === t) sbMgClose(); }, 700); };
     const shell = (inner) => `<div class="sb-mgbox"><button type="button" class="sb-x sb-mgx" aria-label="Close">✕</button><b>${t.em} ${escapeHtml(t.n)}</b>${inner}</div>`;
     const R = (n) => Math.floor(Math.random() * n);
-    if(t.mg === 'fuse'){
+    let mg = t.mg, hard = false;
+    const st = !t.fix && SB_STATIONS[t.k];
+    if(st){ const f = st.v[sbVariant(t)]; if(typeof f === 'function'){ sbStage(t, el, f(), done); el.querySelector('.sb-mgx').addEventListener('click', sbMgClose); return; } mg = 'sing'; hard = f === 'sing2'; }
+    if(mg === 'fuse'){
       // pull the blown fuse, put the new one in, flip the lever up
       const bad = R(3); let step = 0;
       el.innerHTML = shell(`<p class="sb-fstep">Pull out the blown fuse.</p><div class="sb-fuse"><div class="sb-fslots">${[0, 1, 2].map(i => `<button type="button" class="sb-fs${i === bad ? ' blown' : ''}" data-i="${i}"><i></i></button>`).join('')}</div><button type="button" class="sb-fnew" disabled><i></i><span>new fuse</span></button><button type="button" class="sb-flever" disabled><i></i></button></div>`);
@@ -34963,19 +35360,19 @@
       el.querySelector('.sb-fslots').addEventListener('click', (e) => { const b = e.target.closest('.sb-fs'); if(!b || step !== 0) return; if(+b.dataset.i !== bad){ const x = el.querySelector('.sb-mgbox'); x.classList.add('shake'); setTimeout(() => x.classList.remove('shake'), 300); return; } b.classList.add('empty'); b.classList.remove('blown'); step = 1; nw.disabled = false; P.textContent = 'Put the new fuse in.'; lgSfx('bubble'); });
       nw.addEventListener('click', () => { if(step !== 1) return; slots[bad].classList.remove('empty'); slots[bad].classList.add('fresh'); nw.classList.add('used'); step = 2; lv.disabled = false; P.textContent = 'Flip the lever back up!'; lgSfx('bubble'); });
       lv.addEventListener('click', () => { if(step !== 2) return; step = 3; lv.classList.add('up'); setTimeout(done, 350); });
-    } else if(t.mg === 'hold'){
+    } else if(mg === 'hold'){
       el.innerHTML = shell(`<p>Hold the button until the bar is full.</p><div class="sb-bar"><i></i></div><button type="button" class="lg-b sb-hold">Hold me</button>`);
       let v = 0, tm = 0; const bar = el.querySelector('.sb-bar i'), b = el.querySelector('.sb-hold');
       const down = () => { clearInterval(tm); tm = setInterval(() => { v = Math.min(100, v + 4); bar.style.width = v + '%'; if(v >= 100){ clearInterval(tm); done(); } }, 80); };
       const up = () => { clearInterval(tm); tm = setInterval(() => { v = Math.max(0, v - 6); bar.style.width = v + '%'; if(!v) clearInterval(tm); }, 80); };
       b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up);
-    } else if(t.mg === 'wires'){
+    } else if(mg === 'wires'){
       const cols = ['#ff4d6d', '#57e1ff', '#ffd166', '#8b4dff'], right = cols.slice().sort(() => Math.random() - .5); let pick = null, n = 0;
       el.innerHTML = shell(`<p>Click a cable on the left, then the jack with the same colour on the right.</p><div class="sb-wires"><div>${cols.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="l" style="--c:${c}"></button>`).join('')}</div><div>${right.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="r" style="--c:${c}"></button>`).join('')}</div></div>`);
       el.querySelector('.sb-wires').addEventListener('click', (e) => { const b = e.target.closest('.sb-w'); if(!b || b.classList.contains('ok')) return;
         if(b.dataset.s === 'l'){ el.querySelectorAll('.sb-w.sel').forEach(x => x.classList.remove('sel')); pick = b; b.classList.add('sel'); return; }
         if(pick && pick.dataset.c === b.dataset.c){ pick.classList.add('ok'); b.classList.add('ok'); pick.classList.remove('sel'); pick = null; lgSfx('bubble'); if(++n === 4) done(); } else { el.querySelector('.sb-mgbox').classList.add('shake'); setTimeout(() => { const x = el.querySelector('.sb-mgbox'); if(x) x.classList.remove('shake'); }, 300); } });
-    } else if(t.mg === 'simon'){
+    } else if(mg === 'simon'){
       const pads = ['#ff4d6d', '#57e1ff', '#ffd166', '#35d0b8'], seq = Array.from({ length: 4 }, () => R(4)); let at = 0, busy = true;
       el.innerHTML = shell(`<p>Watch the pattern, then repeat it.</p><div class="sb-simon">${pads.map((c, i) => `<button type="button" data-i="${i}" style="--c:${c}"></button>`).join('')}</div>`);
       const bs = [...el.querySelectorAll('.sb-simon button')]; const flash = (i) => { bs[i].classList.add('lit'); setTimeout(() => bs[i].classList.remove('lit'), 320); };
@@ -34983,20 +35380,20 @@
       play();
       el.querySelector('.sb-simon').addEventListener('click', (e) => { const b = e.target.closest('button'); if(!b || busy) return; const i = +b.dataset.i; flash(i);
         if(i === seq[at]){ if(++at === seq.length) done(); } else { lgSfx('zap'); play(); } });
-    } else if(t.mg === 'timing'){
+    } else if(mg === 'timing'){
       let hits = 0, x = 0, dir = 1, z = 30 + R(40), tm;
       el.innerHTML = shell(`<p>Click Stop when the marker is in the green zone (3 times).</p><div class="sb-track"><i class="z"></i><i class="m"></i></div><div class="sb-row"><button type="button" class="lg-b sb-stop">Stop</button><span class="sb-wait">0/3</span></div>`);
       const m = el.querySelector('.m'), zz = el.querySelector('.z'); zz.style.left = z + '%';
       tm = setInterval(() => { if(!el.isConnected || SB.mg !== t){ clearInterval(tm); return; } x += dir * 2.2; if(x > 100 || x < 0){ dir *= -1; x = Math.max(0, Math.min(100, x)); } m.style.left = x + '%'; }, 30);
       el.querySelector('.sb-stop').addEventListener('click', () => { if(x >= z && x <= z + 18){ hits++; lgSfx('bubble'); el.querySelector('.sb-wait').textContent = hits + '/3'; z = 10 + R(70); zz.style.left = z + '%'; if(hits >= 3){ clearInterval(tm); done(); } } else lgSfx('zap'); });
-    } else if(t.mg === 'keypad'){
+    } else if(mg === 'keypad'){
       const code = String(1000 + R(9000)); let typed = '';
       el.innerHTML = shell(`<p>Your code is <b class="sb-code">${code}</b></p><div class="sb-screen">····</div><div class="sb-keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'].map(k => `<button type="button" data-k="${k}">${k}</button>`).join('')}</div>`);
       const scr = el.querySelector('.sb-screen');
       el.querySelector('.sb-keys').addEventListener('click', (e) => { const b = e.target.closest('button'); if(!b) return; const k = b.dataset.k;
         if(k === '⌫') typed = typed.slice(0, -1); else if(k === '✓'){ if(typed === code) return done(); typed = ''; lgSfx('zap'); } else if(typed.length < 4) typed += k;
         scr.textContent = typed.padEnd(4, '·'); });
-    } else if(t.mg === 'piano'){
+    } else if(mg === 'piano'){
       // play back a 4-note melody on the organ
       const W = [60, 62, 64, 65, 67, 69, 71, 72], mel = Array.from({ length: 4 }, () => W[R(8)]); let at = 0, busy = true;
       el.innerHTML = shell(`<p>Listen to the melody, then play it back.</p>${sbPianoHtml()}<div class="sb-row"><button type="button" class="lg-b" data-x="again">🔁 Listen again</button><span class="sb-wait">0/4</span></div>`);
@@ -35006,7 +35403,7 @@
       el.querySelector('[data-x="again"]').addEventListener('click', play);
       el.querySelector('.sb-piano').addEventListener('pointerdown', (e) => { const k = e.target.closest('[data-m]'); if(!k || busy) return; const m = +k.dataset.m; sbNote(m, .5); sbKeyFlash(el, m);
         if(m === mel[at]){ at++; el.querySelector('.sb-wait').textContent = at + '/4'; if(at === mel.length) setTimeout(done, 300); } else { const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(play, 500); } });
-    } else if(t.mg === 'ear'){
+    } else if(mg === 'ear'){
       // hear a bell, find it on the keys (3 right)
       const W = [60, 62, 64, 65, 67, 69, 71]; let note = W[R(7)], got = 0;
       el.innerHTML = shell(`<p>Listen to the bell and find that note on the keys. Get 3 right.</p>${sbPianoHtml()}<div class="sb-row"><button type="button" class="lg-b" data-x="again">🔔 Ring it again</button><span class="sb-wait">0/3</span></div>`);
@@ -35016,7 +35413,7 @@
       el.querySelector('.sb-piano').addEventListener('pointerdown', (e) => { const k = e.target.closest('[data-m]'); if(!k) return; const m = +k.dataset.m; sbNote(m, .45); sbKeyFlash(el, m);
         if(m % 12 === note % 12){ got++; el.querySelector('.sb-wait').textContent = got + '/3'; lgSfx('bubble'); if(got >= 3) return setTimeout(done, 300); let n2; do{ n2 = W[R(7)]; }while(n2 === note); note = n2; setTimeout(ring, 650); }
         else { const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(ring, 600); } });
-    } else if(t.mg === 'rhythm'){
+    } else if(mg === 'rhythm'){
       // tap the rhythm back on the drum
       const pats = [[0, 400, 800, 1000, 1200], [0, 200, 400, 800, 1200], [0, 400, 600, 800, 1200], [0, 300, 600, 900, 1050]], pat = pats[R(pats.length)]; let taps = [], busy = true;
       el.innerHTML = shell(`<p>Listen to the beat, then tap it back on the drum.</p><div class="sb-dots">${pat.map(() => '<i></i>').join('')}</div><button type="button" class="sb-drum">🥁</button><div class="sb-row"><button type="button" class="lg-b" data-x="again">🔁 Listen again</button></div>`);
@@ -35026,9 +35423,10 @@
       play(); el.querySelector('[data-x="again"]').addEventListener('click', play);
       el.querySelector('.sb-drum').addEventListener('pointerdown', () => { if(busy) return; const now = performance.now(); taps.push(now); sbClick(0, taps.length === 1); const k = taps.length - 1; if(dots[k]) dots[k].className = 'on';
         if(taps.length === pat.length){ const ok = pat.every((ms, i) => Math.abs((taps[i] - taps[0]) - ms) < 130); if(ok) setTimeout(done, 250); else { dots.forEach(d => d.className = 'bad'); const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(play, 700); } } });
-    } else if(t.mg === 'sing'){
+    } else if(mg === 'sing'){
       // sing (or hum) the note — any octave; with no mic, match it by ear with a slider
-      const tgt = [60, 62, 64, 65, 67, 69][R(6)], name = SB_NOTES[tgt % 12]; let hold = 0, stream = null, iv = 0;
+      const seq = Array.from({ length: hard ? 2 : 1 }, () => [60, 62, 64, 65, 67, 69][R(6)]); if(hard && seq[1] === seq[0]) seq[1] = seq[0] === 69 ? 64 : seq[0] + 2;
+      let step = 0, tgt = seq[0], hold = 0, stream = null, iv = 0; const name = seq.map(m => SB_NOTES[m % 12]).join(' then ');
       el.innerHTML = shell(`<p>Sing or hum <b class="sb-code">${name}</b> (any octave) and hold it in the green zone.</p><div class="sb-meter"><i class="z"></i><i class="m"></i></div><div class="sb-bar"><i></i></div><div class="sb-row"><button type="button" class="lg-b" data-x="ref">🔊 Hear it</button><span class="sb-wait">Allow the microphone to start…</span></div><div class="sb-nomic" hidden></div>`);
       sbHush(true); setTimeout(() => sbNote(tgt, 1.2, 'sine'), 250);
       el.querySelector('[data-x="ref"]').addEventListener('click', () => sbNote(tgt, 1.2, 'sine'));
@@ -35036,12 +35434,21 @@
       const show = (d) => { meter.style.left = (50 + Math.max(-1.5, Math.min(1.5, d)) / 1.5 * 46) + '%'; meter.classList.toggle('in', Math.abs(d) < .35); };
       const stop = () => { clearInterval(iv); if(stream) stream.getTracks().forEach(tr => tr.stop()); stream = null; };
       SB.mgStop = stop;
+      const advance = () => { if(step < seq.length - 1){ step++; tgt = seq[step]; hold = 0; bar.style.width = '0%'; sbSfx('task'); info.textContent = `Now ${SB_NOTES[tgt % 12]}!`; setTimeout(() => sbNote(tgt, 1.2, 'sine'), 300); return false; } return true; };
+      { const bx = el.querySelector('.sb-mgbox'); bx.classList.add('sb-mg2', 'sb-chalk'); const b0 = bx.querySelector('b'); if(b0) b0.insertAdjacentHTML('afterend', `<span class="sb-mgsub">${hard ? 'Sing the two notes' : 'Vocal warm-up'}</span>${hard ? '<span class="sb-hard">HARD</span>' : ''}`); }
+      // no mic: a note slider (C to C) — drag it onto the note (you hear it as you go), then lock it in
       const fallback = (why) => {
         info.textContent = why; const box = el.querySelector('.sb-nomic'); box.hidden = false;
-        box.innerHTML = `<p>No mic? Match it by ear instead: drag until the two tones sound the same, then lock it in.</p><input type="range" min="-300" max="300" value="${R(2) ? 240 : -240}" class="sb-sl"><button type="button" class="lg-b sb-go">Lock it in</button>`;
-        const sl = box.querySelector('.sb-sl'); let last = 0;
-        sl.addEventListener('input', () => { const d = +sl.value / 100; show(d); if(performance.now() - last > 140){ last = performance.now(); sbNote(tgt + d, .25, 'sine'); } });
-        box.querySelector('.sb-go').addEventListener('click', () => { if(Math.abs(+sl.value) <= 30){ stop(); done(); } else { sbNote(tgt, .6, 'sine', .05); lgSfx('zap'); } });
+        const labs = Array.from({ length: 13 }, (_, i) => `<span style="left:${i / 12 * 100}%" class="${[1, 3, 6, 8, 10].includes(i) ? 'bk' : ''}">${SB_NOTES[(60 + i) % 12]}</span>`).join('');
+        box.innerHTML = `<p>🎚️ No mic? Drag the slider onto <b class="sb-code sb-ftg">${SB_NOTES[tgt % 12]}</b> — you'll hear the note as you slide — then lock it in.</p>
+          <div class="sb-nsl"><div class="sb-nkeys">${labs}</div><input type="range" min="0" max="1200" step="5" value="${R(2) ? 1150 : 40}" class="sb-sl" aria-label="Note slider"></div>
+          <div class="sb-row"><span class="sb-ncur">♪ —</span><button type="button" class="lg-b sb-go">🔒 Lock it in</button><span class="sb-keyh">← → slide · Space lock</span></div>`;
+        const sl = box.querySelector('.sb-sl'), cur = box.querySelector('.sb-ncur'); let last = 0;
+        const upd = (snd) => { const m = 60 + +sl.value / 100, near = Math.round(m), off = Math.round((m - near) * 100); cur.textContent = `♪ ${SB_NOTES[((near % 12) + 12) % 12]}${Math.abs(off) > 8 ? (off > 0 ? ' (a bit sharp)' : ' (a bit flat)') : ''}`; show(m - tgt); if(snd && performance.now() - last > 140){ last = performance.now(); sbNote(m, .25, 'sine'); } };
+        const lock = () => { const m = 60 + +sl.value / 100; if(Math.abs(m - tgt) <= .25){ if(advance()){ stop(); done(); } else { sl.value = R(2) ? 1150 : 40; box.querySelector('.sb-ftg').textContent = SB_NOTES[tgt % 12]; upd(false); } } else { const bx = el.querySelector('.sb-mgbox'); bx.classList.add('shake'); setTimeout(() => bx.classList.remove('shake'), 300); sbNote(tgt, .6, 'sine', .05); lgSfx('zap'); } };
+        sl.addEventListener('input', () => upd(true)); box.querySelector('.sb-go').addEventListener('click', lock); upd(false);
+        SB.mgKey = (ty, k) => { if(ty !== 'down') return true; if(k === 'arrowleft' || k === 'arrowright'){ sl.value = Math.max(0, Math.min(1200, +sl.value + (k === 'arrowleft' ? -10 : 10))); upd(true); } else if(k === ' ' || k === 'enter') lock(); return true; };
+        const st0 = SB.mgStop; SB.mgStop = () => { SB.mgKey = null; if(st0) st0(); };
       };
       if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) fallback('This browser can\'t use a microphone here.');
       else navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } }).then((st) => {
@@ -35056,10 +35463,10 @@
           show(d); info.textContent = `You: ${SB_NOTES[((near % 12) + 12) % 12]} ${d > .05 ? '(a bit high)' : d < -.05 ? '(a bit low)' : ''}`;
           if(Math.abs(d) < .35) hold += 60; else hold = Math.max(0, hold - 30);
           bar.style.width = Math.min(100, hold / 1200 * 100) + '%';
-          if(hold >= 1200){ stop(); done(); }
+          if(hold >= 1200 && advance()){ stop(); done(); }
         }, 60);
       }).catch(() => fallback('No microphone (or it was blocked).'));
-    } else if(t.mg === 'slider'){
+    } else if(mg === 'slider'){
       const goal = 15 + R(70);
       el.innerHTML = shell(`<p>Slide until the two waves line up.</p><canvas class="sb-wave" width="260" height="80"></canvas><input type="range" min="0" max="100" value="${goal > 50 ? 5 : 95}" class="sb-sl"><button type="button" class="lg-b sb-go">Lock it in</button>`);
       const cv = el.querySelector('.sb-wave'), c = cv.getContext('2d'), sl = el.querySelector('.sb-sl');
