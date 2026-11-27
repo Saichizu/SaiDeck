@@ -378,7 +378,7 @@
   .sb-hud{position:absolute;inset:0;pointer-events:none;z-index:5;font-family:'Inter',sans-serif;color:#f1ecff;}
   .sb-hud > *{pointer-events:auto;}
   .sb-hud [hidden]{display:none !important;}
-  .sb-lobby-btn{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);padding:0;border:0;background:none;cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8)) drop-shadow(0 6px 18px rgba(255,77,109,.35));animation:sbPulse 2.2s ease-in-out infinite;transition:transform .15s;}
+  .sb-lobby-btn{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);padding:0;border:0;background:none;cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8)) drop-shadow(0 6px 18px rgba(255,77,109,.35));;transition:transform .15s;}
   .sb-lobby-btn:hover{transform:translateX(-50%) scale(1.06);} .sb-lobby-btn:active{transform:translateX(-50%) scale(.97);}
   .sb-logo{display:block;width:240px;height:auto;}
   .sb-logo .sb-vinyl{transform-origin:36px 37px;animation:sbSpin 3s linear infinite;}
@@ -23503,7 +23503,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 245;                 // ← goes up by one with every published version
+  const SD_BUILD = 246;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24073,7 +24073,8 @@
     return false;
   }
   // ("SaiDeck" is kept for the admin's official messages)
-  function chatBadName(name){ return chatBad(name, true) || /^\s*sai\s*deck/i.test(String(name || '')); }
+  const CHAT_BADN = new Map();
+  function chatBadName(name){ const k = String(name || ''); let v = CHAT_BADN.get(k); if(v === undefined){ v = !!(chatBad(k, true) || /^\s*sai\s*deck/i.test(k)); if(CHAT_BADN.size > 2000) CHAT_BADN.clear(); CHAT_BADN.set(k, v); } return v; }
   // messages that somehow got through still show with the word hidden
   function chatMask(text){
     return String(text || '').replace(/[^\s]+/g, (tok) => chatBad(tok) ? '•'.repeat(Math.min(6, tok.length)) : tok);
@@ -24144,7 +24145,8 @@
     chatBtn.classList.toggle('open', CHAT.open);
     chatBtn.title = CHAT.unread ? `${CHAT.unread} new message${CHAT.unread === 1 ? '' : 's'} — open the chat` : 'Chat with everyone who uses SaiDeck';
   }
-  function chatFmtTime(t){ const d = new Date(t); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+  let CHAT_TF = null;
+  function chatFmtTime(t){ try{ CHAT_TF = CHAT_TF || new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit' }); return CHAT_TF.format(new Date(t)); }catch(e){ return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } }
   function chatFmtDay(t){ const d = new Date(t), now = new Date(); const same = (a, b) => a.toDateString() === b.toDateString(); const y = new Date(now); y.setDate(now.getDate() - 1); return same(d, now) ? 'Today' : same(d, y) ? 'Yesterday' : d.toLocaleDateString([], { day: 'numeric', month: 'short', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' }); }
   // ----- profile pictures (profiles/<chat id> = a small square JPEG) -----
   // (pictures are kept for 6 hours and remembered between visits — re-downloading everyone's every 5 minutes added up)
@@ -24682,8 +24684,11 @@
     if(t.replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0F\u20E3\s]/gu, '') !== '') return false;
     return (t.match(/\p{Extended_Pictographic}|[\u{1F1E6}-\u{1F1FF}]{2}/gu) || []).length <= 8;
   }
-  function chatRenderMessages(){
+  function chatRenderMessages(force){
     const body = chatPanel.querySelector('.chat-body'); if(!body) return;
+    // (rebuilding ~200 messages is the heaviest thing the chat does — skip it when nothing it shows has changed)
+    let sig = ''; try{ sig = [chatRoom(), CHAT.ready, CHAT.order.length, CHAT.prof ? [...CHAT.prof.values()].filter(c => c && c.p && !c.loading).length + ':' + CHAT.prof.size : 0, Math.floor(Date.now() / 30000), JSON.stringify(CHAT._rx || null), CHAT.trickSeen ? (CHAT.trickSeen.size != null ? CHAT.trickSeen.size : JSON.stringify(CHAT.trickSeen)) : 0, JSON.stringify(CHAT.order.slice(-220).map(k => CHAT.msgs.get(k))), JSON.stringify(CHAT.inbox || {}), JSON.stringify(CHAT.cfg || {}), CHAT.banned ? JSON.stringify(CHAT.banned) : ''].join('|'); }catch(e){ sig = Math.random() + ''; }
+    if(!force && !CHAT._scrollDown && sig === CHAT._rsig && body.childElementCount) return; CHAT._rsig = sig;
     const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
     body.innerHTML = '';
     // (which messages are new since the last time: only those animate in)
@@ -25614,8 +25619,9 @@
     try{
       const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=200`, { cache: 'no-store' });
       if(!r.ok || CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
-      const data = await r.json(), fresh = []; if(CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
-      CHAT.fbFull(data, fresh); chatSort(); for(const m of fresh) chatIncoming(m); chatUpdateBadge();
+      const txt = await r.text(); if(CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
+      if(txt === CHAT.fbLast && CHAT.ready) return; CHAT.fbLast = txt;                           // (nothing new)
+      const data = JSON.parse(txt), fresh = []; CHAT.fbFull(data, fresh); chatSort(); for(const m of fresh) chatIncoming(m); chatUpdateBadge();
       if(CHAT.status !== 'on'){ CHAT.status = 'on'; chatRenderStatus(); }
       if(CHAT.open) chatRender();
     }catch(_){}
@@ -33451,20 +33457,31 @@
   const LG_TINTS = [0, 150, 260, 60, 205, 315, 100, 30];
   function lgTintIm(spr, v){
     if(!v || !spr.im.complete || !spr.im.naturalWidth) return spr.im;
-    spr.tint = spr.tint || {}; if(spr.tint[v]) return spr.tint[v];
-    const c = document.createElement('canvas'); c.width = spr.im.naturalWidth; c.height = spr.im.naturalHeight; const x = c.getContext('2d'); x.drawImage(spr.im, 0, 0);
-    try{
-      const id = x.getImageData(0, 0, c.width, c.height), a = id.data, sh = LG_TINTS[v % LG_TINTS.length] / 360;
-      for(let i = 0; i < a.length; i += 4){ if(!a[i + 3]) continue;
-        let r = a[i] / 255, gg = a[i + 1] / 255, b = a[i + 2] / 255; const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 2, dd = mx - mn; if(dd < .06) continue;   // (greys and skin-dark pixels stay)
-        const sa = l > .5 ? dd / (2 - mx - mn) : dd / (mx + mn); let h = mx === r ? (gg - b) / dd + (gg < b ? 6 : 0) : mx === gg ? (b - r) / dd + 2 : (r - gg) / dd + 4; h /= 6;
-        if(h > .02 && h < .13 && l > .45 && sa > .2) continue;          // (skin keeps its colour)
-        h = (h + sh) % 1;
-        const q = l < .5 ? l * (1 + sa) : l + sa - l * sa, p = 2 * l - q, f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
-        a[i] = f(h + 1 / 3) * 255; a[i + 1] = f(h) * 255; a[i + 2] = f(h - 1 / 3) * 255; }
-      x.putImageData(id, 0, 0);
-    }catch(e){}
-    return (spr.tint[v] = c);
+    spr.tint = spr.tint || {}; const job = spr.tint[v];
+    if(job && job.ready) return job.c;
+    if(!job){ const c = document.createElement('canvas'); c.width = spr.im.naturalWidth; c.height = spr.im.naturalHeight; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(spr.im, 0, 0);
+      let id = null; try{ id = x.getImageData(0, 0, c.width, c.height); }catch(e){ spr.tint[v] = { ready: true, c: spr.im }; return spr.im; }
+      spr.tint[v] = { c, x, id, row: 0, ready: false, sh: LG_TINTS[v % LG_TINTS.length] / 360 }; LG_TINTQ.push(spr.tint[v]); lgTintWork(); }
+    return spr.im;                                                        // (the plain colours until the recoloured copy is ready)
+  }
+  const LG_TINTQ = [];
+  function lgTintWork(){
+    if(LG_TINTQ._busy) return; LG_TINTQ._busy = true;
+    const step = () => {
+      const t0 = performance.now();
+      while(LG_TINTQ.length && performance.now() - t0 < 4){
+        const j = LG_TINTQ[0], a = j.id.data, w = j.c.width, h = j.c.height, sh = j.sh, rows = Math.min(h, j.row + 24);
+        for(let i = j.row * w * 4, end = rows * w * 4; i < end; i += 4){ if(!a[i + 3]) continue;
+          const r = a[i] / 255, gg = a[i + 1] / 255, b = a[i + 2] / 255, mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 2, dd = mx - mn; if(dd < .06) continue;
+          const sa = l > .5 ? dd / (2 - mx - mn) : dd / (mx + mn); let hh = mx === r ? (gg - b) / dd + (gg < b ? 6 : 0) : mx === gg ? (b - r) / dd + 2 : (r - gg) / dd + 4; hh /= 6;
+          if(hh > .02 && hh < .13 && l > .45 && sa > .2) continue;                 // (skin keeps its colour)
+          hh = (hh + sh) % 1; const q = l < .5 ? l * (1 + sa) : l + sa - l * sa, p = 2 * l - q, f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+          a[i] = f(hh + 1 / 3) * 255; a[i + 1] = f(hh) * 255; a[i + 2] = f(hh - 1 / 3) * 255; }
+        j.row = rows; if(j.row >= h){ j.x.putImageData(j.id, 0, 0); j.id = null; j.x = null; j.ready = true; LG_TINTQ.shift(); }
+      }
+      if(LG_TINTQ.length) setTimeout(step, 16); else LG_TINTQ._busy = false;
+    };
+    setTimeout(step, 0);
   }
   // who gets which colour: everyone with the same character, in order of their id (so it's the same on every screen)
   function lgTintAssign(all){
@@ -33785,13 +33802,13 @@
   // where am I: a room (or null in a hallway)
   const lgRoomAt = (x, y) => LG_ROOMS.find(r => (y >= r.y - 40 && y < r.y + 4 && x >= r.x && x < r.x + r.w) || (x >= r.bb.x0 && x <= r.bb.x1 && y >= r.bb.y0 && y <= r.bb.y1 && lgInPoly(r.P, x, y))) || null;
   function lgSeenAt(x, y){ const r = lgRoomAt(x, y); return !r || LG.seen.has(r.id); }
-  function lgView(){
-    const r = LG.cv.getBoundingClientRect(), sc = r.height / LG_VIEW, vw = r.width / sc, vh = LG_VIEW;
+  function lgView(fresh){
+    const r = (!fresh && LG.cvRect) || LG.cv.getBoundingClientRect(), sc = r.height / LG_VIEW, vw = r.width / sc, vh = LG_VIEW;
     const c = LG.cam || { x: LG.me.x, y: LG.me.y };
     const cx = Math.max(vw / 2 - 100, Math.min(LG_WW - vw / 2 + 100, c.x)), cy = Math.max(vh / 2 - 40, Math.min(LG_WH - vh / 2 + 40, c.y - 80));
     return { x0: cx - vw / 2, y0: cy - vh / 2, sc, r, vw, vh };
   }
-  function lgPt(e){ const v = lgView(); return { x: v.x0 + (e.clientX - v.r.left) / v.sc, y: v.y0 + (e.clientY - v.r.top) / v.sc }; }
+  function lgPt(e){ const v = lgView(true); return { x: v.x0 + (e.clientX - v.r.left) / v.sc, y: v.y0 + (e.clientY - v.r.top) / v.sc }; }
   function lgCatPos(now){
     const L = lgRoomById('lobby'), seg = Math.floor(now / 7000), k = (now % 7000) / 3500;
     const wp = (s) => { const h = lgHash('mochi' + s); return { x: L.x + 110 + (h % 300), y: L.y + 40 + ((h >>> 10) % 170) }; };
@@ -33917,8 +33934,12 @@
     cancelAnimationFrame(LG.raf); if(!LG.on || LG.paused) return;
     LG.raf = requestAnimationFrame(lgLoop);
     const cv = LG.cv; if(!cv || document.visibilityState !== 'visible') return;
-    const r = cv.getBoundingClientRect(); if(r.width < 10 || r.height < 10) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+    if(LG.roCv !== cv){ LG.roCv = cv; LG.cvRect = null; try{ LG.ro && LG.ro.disconnect(); LG.ro = new ResizeObserver(() => { LG.cvRect = null; }); LG.ro.observe(cv); }catch(e){} }
+    const r = LG.cvRect || (LG.cvRect = (() => { const b = cv.getBoundingClientRect(); return { width: b.width, height: b.height, left: b.left, top: b.top }; })()); if(r.width < 10 || r.height < 10){ LG.cvRect = null; return; }
+    // auto quality: if frames keep coming slower than ~30 fps, draw fewer pixels; come back up when it's smooth again
+    { const pn = performance.now(), dt = LG.lastF ? pn - LG.lastF : 16; LG.lastF = pn; if(dt < 250){ LG.fAvg = LG.fAvg == null ? dt : LG.fAvg * .95 + dt * .05; }
+      LG.q = LG.q || 1; if(pn - (LG.qAt || 0) > 2500){ if(LG.fAvg > 34 && LG.q > .55){ LG.q = Math.max(.55, LG.q - .15); LG.qAt = pn; } } }
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * (LG.q || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
     const g = cv.getContext('2d'), now = trdNow(), sc = r.height / LG_VIEW; LG.vw = r.width / sc;
     const m = LG.me, mp = lgPos(m, now);
