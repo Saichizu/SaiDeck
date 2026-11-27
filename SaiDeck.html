@@ -23494,7 +23494,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 241;                 // ← goes up by one with every published version
+  const SD_BUILD = 242;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -25519,7 +25519,7 @@
   });
   chatGrip.addEventListener('dblclick', () => { chatLS('width', null); document.documentElement.style.removeProperty('--chat-w'); });
   // ----- live connection -----
-  function chatDisconnect(){ CHAT.older = 0; CHAT.olderDone = false; CHAT.olderBusy = false; if(CHAT.es){ CHAT.es.close(); CHAT.es = null; } clearTimeout(CHAT.retryT); CHAT.msgs.clear(); CHAT.order = []; CHAT.ready = false; CHAT.status = 'off'; CHAT.unread = 0; chatUpdateBadge(); }
+  function chatDisconnect(){ CHAT.older = 0; CHAT.olderDone = false; CHAT.olderBusy = false; if(CHAT.es){ CHAT.es.close(); CHAT.es = null; } clearTimeout(CHAT.retryT); CHAT.streamed = false; CHAT.msgs.clear(); CHAT.order = []; CHAT.ready = false; CHAT.status = 'off'; CHAT.unread = 0; chatUpdateBadge(); }
   function chatSort(){ CHAT.order = [...CHAT.msgs.keys()].sort((a, b) => (CHAT.msgs.get(a).t - CHAT.msgs.get(b).t) || (a < b ? -1 : 1)); const cap = 200 + (CHAT.older || 0); if(CHAT.order.length > cap){ for(const k of CHAT.order.slice(0, CHAT.order.length - cap)) CHAT.msgs.delete(k); CHAT.order = CHAT.order.slice(-cap); } }
   function chatValid(m){ return m && typeof m.n === 'string' && typeof m.m === 'string' && typeof m.t === 'number'; }
   function chatConnect(){
@@ -25551,16 +25551,27 @@
       x[e] = Object.assign({}, x[e]); if(v) x[e][parts[3]] = true; else delete x[e][parts[3]];
       if(!Object.keys(x[e]).length) delete x[e];
     };
+    // the whole recent history (on connect / reconnect / after the room was cleared)
+    const full = (data, fresh) => {
+      const had = CHAT.ready, keep = new Set(Object.keys(data || {}));
+      for(const k of [...CHAT.msgs.keys()]) if(!keep.has(k)) CHAT.msgs.delete(k);
+      if(data) for(const [k, m] of Object.entries(data)){ if(k.includes('/')) applyDeep(k.split('/').filter(Boolean), m); else apply(k, m, had ? fresh : null); }
+      if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && !m.e && !chatIsMe(m.u) && !chatBanned(m.u)).length; }
+      CHAT.ready = true;
+    };
+    // Back-up: browsers only allow 6 live lines to the database (for ALL SaiDeck tabs together). With the lounge, a game and
+    // another tab open, the chat's line can wait in a queue forever ("Loading messages…"), or keep failing. So if a room
+    // got nothing live for 5 s (counted across reconnects), its messages are read with plain requests (separate
+    // connections) every 4 s until the live line gets through.
+    if(CHAT.fbRoom !== room){ CHAT.fbRoom = room; CHAT.fbStart = Date.now(); }
+    CHAT.fbFull = full;
+    if(!CHAT.fbI) CHAT.fbI = setInterval(chatBackupRead, 4000);
     es.addEventListener('put', (e) => {
       let d; try{ d = JSON.parse(e.data); }catch(_){ return; }
       const fresh = [];
       if(d.path === '/'){
-        // the whole recent history (on connect / reconnect / after the room was cleared)
-        const had = CHAT.ready, keep = new Set(Object.keys(d.data || {}));
-        for(const k of [...CHAT.msgs.keys()]) if(!keep.has(k)) CHAT.msgs.delete(k);
-        if(d.data) for(const [k, m] of Object.entries(d.data)){ if(k.includes('/')) applyDeep(k.split('/').filter(Boolean), m); else apply(k, m, had ? fresh : null); }
-        if(!had && !CHAT.open){ CHAT.unread = [...CHAT.msgs.values()].filter(m => m.t > seen && !m.e && !chatIsMe(m.u) && !chatBanned(m.u)).length; }
-        CHAT.ready = true;
+        CHAT.streamed = true;          // (the live line works: no need for the back-up reads)
+        full(d.data, fresh);
       } else {
         const parts = d.path.replace(/^\//, '').split('/'), k = parts[0];
         if(k && parts.length === 1) apply(k, d.data, fresh);
@@ -25586,6 +25597,20 @@
         CHAT.retryT = setTimeout(() => { if(CHAT.es === es) chatConnect(); }, 2000 * CHAT.retry);
       }
     });
+  }
+  async function chatBackupRead(){
+    const room = CHAT.room, es = CHAT.es;
+    if(!room || CHAT.streamed || CHAT.fbRoom !== room || Date.now() - CHAT.fbStart < 5000 || CHAT.fbBusy || !CHAT.fbFull || document.visibilityState === 'hidden') return;
+    CHAT.fbBusy = true;
+    try{
+      const r = await fetch(`${CHAT_DB}/rooms/${encodeURIComponent(room)}/messages.json?orderBy=%22t%22&limitToLast=200`, { cache: 'no-store' });
+      if(!r.ok || CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
+      const data = await r.json(), fresh = []; if(CHAT.room !== room || CHAT.es !== es || CHAT.streamed) return;
+      CHAT.fbFull(data, fresh); chatSort(); for(const m of fresh) chatIncoming(m); chatUpdateBadge();
+      if(CHAT.status !== 'on'){ CHAT.status = 'on'; chatRenderStatus(); }
+      if(CHAT.open) chatRender();
+    }catch(_){}
+    finally{ CHAT.fbBusy = false; }
   }
   // the admin's settings, pinned announcement and ban list: checked every
   // 30 s (and when SaiDeck comes back to the front / the chat opens) with a
