@@ -23492,7 +23492,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 236;                 // ← goes up by one with every published version
+  const SD_BUILD = 237;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33473,7 +33473,7 @@
     const k = e.key.toLowerCase();
     if(LG_DIRKEYS[k]){ e.preventDefault(); LG.keys = LG.keys || new Set(); LG.keys.add(k); lgKeyWalk(true); return; }
     if(e.repeat) return;
-    if(sbIn()){ if(k === ' '){ e.preventDefault(); sbUse(); return; } if(k === 'e'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd && !sbDeadU(sbMe())) sbMeeting(bd.u); return; } }
+    if(sbIn()){ if(k === ' '){ e.preventDefault(); sbUse(); return; } if(k === 'f'){ e.preventDefault(); sbKill(); return; } if(k === 'r'){ e.preventDefault(); const bd = sbNearBody(); if(bd && !sbDeadU(sbMe())) sbMeeting(bd.u); return; } }
     if(k === ' '){ e.preventDefault(); lgInteract(); return; }
     if(k === 'f'){ e.preventDefault(); lgAttack(); return; }
   }
@@ -33638,7 +33638,7 @@
   const LG_MMIC = { control: '🎛️', lobby: '🏫', class: '📚', cafe: '🥤', arcade: '🎰', market: '📈', vhall: '🦇', vball: '🎹', mclass: '🧪', mobs: '🔭', vip: '💎', elec: '⚡' };
   function lgMinimap(g, W, now, people){
     const sab = (() => { try{ return sbSabMM(); }catch(e){ return false; } })();
-    const mw = sab ? Math.max(220, Math.min(340, W * .32)) : Math.max(150, Math.min(240, W * .22)), s = mw / LG_WW, mh = LG_WH * s, x0 = W - mw - 14, y0 = 14;
+    const mw = sab ? Math.max(300, Math.min(560, W * .46)) : Math.max(150, Math.min(240, W * .22)), s = mw / LG_WW, mh = LG_WH * s, x0 = W - mw - 14, y0 = 14;
     LG.mm = { x0, y0, w: mw, h: mh, s };
     g.fillStyle = 'rgba(10,8,20,.8)'; roundRectPath(g, x0 - 8, y0 - 8, mw + 16, mh + 16, 10); g.fill();
     g.save(); g.translate(x0, y0); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineCap = g.lineJoin = 'round'; for(const h of LG_HALLS){ g.lineWidth = h.w * s; g.beginPath(); h.forEach(([a, b], i) => i ? g.lineTo(a * s, b * s) : g.moveTo(a * s, b * s)); g.stroke(); } g.restore();
@@ -33865,7 +33865,7 @@
     mp.face = mp.face || LG.lastFace;
     list.push({ y: mp.y + .1, d: () => sbDrawP(g, meD, mp, now, true) });
     LG.rpsAll = new Map(all.map(a => [a.u, a.d])); if(performance.now() - (LG.rpsUiAt || 0) > 250){ LG.rpsUiAt = performance.now(); lgRpsUI(); if(LG.disp && LG.disp.size > all.length + 20) for(const k of LG.disp.keys()) if(!LG.rpsAll.has(k)) LG.disp.delete(k); }
-    lgHits(all, now); lgGuard(g, all, list, now); lgBooCheck(all, mp, now); try{ sbDraw(g, now, list, all); }catch(e){ console.warn(e); }
+    lgHits(all, now); try{ sbStrikeCheck(all, now); }catch(e){} lgGuard(g, all, list, now); lgBooCheck(all, mp, now); try{ sbDraw(g, now, list, all); }catch(e){ console.warn(e); }
     list.sort((a, b) => a.y - b.y).forEach(x => x.d());
     if(SB.occ){ try{ sbOccDraw(g, vis);
       g.setTransform(1, 0, 0, 1, 0, 0);
@@ -34103,7 +34103,7 @@
     if(g.res && g.res.n && g.res.n !== SB.resSeen && mine && g.st !== 'meet'){ SB.resSeen = g.res.n; sbOnResult(g); }
     for(const u of Object.keys(g.ej || {})) if(!SB.ejRole[u] && !SB.ejBusy){ SB.ejBusy = true; const r = await sbGet(`sabo/roles/${g.id}/${u}`); SB.ejBusy = false; if(r) SB.ejRole[u] = r; }
     if(g.st === 'over' && was !== 'over' && was){ sbOnOver(g); }
-    const deadNow = mine && sbPlaying(g) && sbDeadU(me, g); if(deadNow !== !!SB.wasDead){ SB.wasDead = deadNow; if(deadNow && g.dead && g.dead[me]){ const d = g.dead[me], now2 = trdNow(); let kc = 0, kd = 1e9; for(const o of lgPeople()){ if(!g.pl[o.u] || o.u === me) continue; const q = lgPos(o, now2), dd = Math.hypot(q.x - d.x, q.y - d.y); if(dd < kd){ kd = dd; kc = o.c | 0; } } if(now2 - (d.t || 0) < 8000) sbKillAnim(kc, LG.me.c | 0); else lgSfx('scare'); setTimeout(() => sbSplash('💀 You got sabotaged', 'You\'re a ghost now: you can still do tasks, and chat with the other ghosts.', '#ff4d6d', 4000), 2600); SB.mg && sbMgClose(); } SB.ghostAt = 0; try{ chatRender(); }catch(e){} }
+    const deadNow = mine && sbPlaying(g) && sbDeadU(me, g); if(deadNow !== !!SB.wasDead){ SB.wasDead = deadNow; if(deadNow && g.dead && g.dead[me]){ const d = g.dead[me], now2 = trdNow(); let kc = 0, kd = 1e9; for(const o of lgPeople()){ if(!g.pl[o.u] || o.u === me) continue; const q = lgPos(o, now2), dd = Math.hypot(q.x - d.x, q.y - d.y) - (o.ak === 1 && now2 - (o.at || 0) < 4000 ? 1e6 : 0); if(dd < kd){ kd = dd; kc = o.c | 0; } } if(now2 - (d.t || 0) < 8000) sbKillAnim(kc, LG.me.c | 0); else lgSfx('scare'); setTimeout(() => sbSplash('💀 You got sabotaged', 'You\'re a ghost now: you can still do tasks, and chat with the other ghosts.', '#ff4d6d', 4000), 2600); SB.mg && sbMgClose(); } SB.ghostAt = 0; try{ chatRender(); }catch(e){} }
     if(mine && sbPlaying(g)) sbWinCheck(g);
   }
   // line everyone up in the Great Hall: 1 2 3 4 / 5 6 7 8 …
@@ -34172,15 +34172,33 @@
     for(const o of lgPeople()){ if(!g.pl[o.u] || sbDeadU(o.u, g) || SB.bad.has(o.u) || o.hv != null) continue; const q = lgShown(o, now), d = Math.hypot(q.x - me.x, q.y - me.y); if(d < bd){ bd = d; best = { u: o.u, x: q.x, y: q.y }; } }
     return best;
   }
-  async function sbKill(){
+  // the kill (build 237): F fires your attack where the mouse points — anyone can see it fly. Hit someone and they're dead
+  // (then the cooldown starts); miss and you can fire again.
+  function sbKill(){
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play' || sbDeadU(sbMe(), g) || SB.inPortal != null) return;
-    if(trdNow() - SB.killAt < SB_KILL_CD) return;
-    const v = sbNearVictim(g); if(!v){ toast('Get closer to someone first.', 1600); return; }
+    const now = trdNow(); if(now - SB.killAt < SB_KILL_CD){ toast(`🔪 Kill is cooling down (${Math.ceil((SB_KILL_CD - (now - SB.killAt)) / 1000)}s).`, 1400); return; }
+    if(now - (LG.me.at || 0) < 650) return;
     if(SB.hideIn != null) sbHideOut(true);      // (jumping out of a hiding spot)
+    const p = lgPos(LG.me, now); let aa = LG.dirA;
+    if(typeof aa !== 'number'){ const v = sbNearVictim(g); aa = v ? Math.atan2(v.y - p.y, v.x - p.x) : ((p.face || LG.lastFace || 1) < 0 ? Math.PI : 0); }
+    aa = Math.round(Math.atan2(Math.sin(aa), Math.cos(aa)) * 100) / 100; const face = Math.cos(aa) < 0 ? -1 : 1;
+    if(LG.me.a === 'sit' || LG.me.a === 'play') LG.me.a = '';
+    Object.assign(LG.me, { at: now, af: face, ak: 1, aa }); LG.lastFace = face; SB.strike = now;
+    lgWrite({ at: { '.sv': 'timestamp' }, af: face, ak: 1, aa, a: LG.me.a || null }, null, true);
+    sbSfx('slash');
+  }
+  // my shot in flight: did it reach anyone (crew, alive, not hidden)?
+  function sbStrikeCheck(all, now){
+    if(!SB.strike) return; if(now - SB.strike > 1600){ SB.strike = null; return; }
+    const g = sbG(); if(!sbIn(g) || g.st !== 'play' || sbDeadU(sbMe(), g)){ SB.strike = null; return; }
+    const s = lgShotAt(LG.me, now); if(!s) return;
+    for(const a of all){ const o = a.d; if(!o || o.u === sbMe() || !g.pl[o.u] || sbDeadU(o.u, g) || SB.bad.has(o.u) || o.hv != null || sbOccHidden(a.p.x, a.p.y)) continue;
+      if(Math.hypot(a.p.x - s.x, a.p.y - s.gy) < 28){ SB.strike = null; sbKillU({ u: o.u, x: a.p.x, y: a.p.y }); return; } }
+  }
+  async function sbKillU(v){
     SB.killAt = trdNow();
-    LG.me.at = trdNow(); LG.me.af = v.x < LG.me.x ? -1 : 1;
     const ok = await sbPatch({ [`sabo/game/dead/${v.u}`]: { t: sbSv(), x: Math.round(v.x), y: Math.round(v.y) } });
-    if(ok){ sbSfx('slash'); const p = lgNearest(v.x, v.y, true); sbTeleport(p[0], p[1]); } else SB.killAt = 0;
+    if(ok){ sbSfx('slash'); try{ lgSfx('hit'); }catch(e){} } else SB.killAt = 0;
   }
   async function sbSabotage(k){
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
@@ -34415,7 +34433,7 @@
         const ua = sbUseAction(G); let html = (SB.local ? btn('testend', '🛑 End test', true) : '') + btn('use', `${ua ? ua.em + ' ' + ua.t : '✋ Use'}<small>[Space]</small>`, !!ua);
         if(!dead) html += btn('report', '📣 Report <small>[R]</small>', !!nearB);
         if(bad && !dead){
-          html += btn('kill', (cd > 0 ? `🔪 ${Math.ceil(cd / 1000)}s` : '🔪 Kill') + ' <small>[E]</small>', cd <= 0 && !!nearV);
+          html += btn('kill', (cd > 0 ? `🔪 ${Math.ceil(cd / 1000)}s` : '🔪 Kill') + ' <small>[F]</small>', cd <= 0);
         }
         if(acts.dataset.k !== html){ acts.dataset.k = html; acts.innerHTML = html; }
       }
@@ -35394,7 +35412,7 @@
   // ----- drawing the school -----
   // ----- attacks: melee swings, and spells / shots that fly (purely for fun — nobody loses anything) -----
   const LG_RANGED = { 'Fire vizard': 'fire', 'Lightning Mage': 'bolt', 'Wanderer Magican': 'arcane', 'Gangsters_1': 'bullet', 'Gangsters_3': 'bullet', 'Girl_1': 'book', 'Countess_Vampire': 'blood' };
-  const LG_SHOT = { fire: { c: '#ff8a3a', c2: '#ffe066', r: 13, v: 820 }, bolt: { c: '#57e1ff', c2: '#ffffff', r: 11, v: 1100 }, arcane: { c: '#b48cff', c2: '#ffd1f4', r: 10, v: 950 }, bullet: { c: '#ffd166', c2: '#ffffff', r: 4, v: 1700 }, book: { c: '#8a5a3a', c2: '#f5ecd8', r: 9, v: 700 }, blood: { c: '#ff2a4a', c2: '#ffb0c0', r: 12, v: 760 } };
+  const LG_SHOT = { slash: { c: '#ff3a5a', c2: '#ffe0e6', r: 12, v: 1000 }, fire: { c: '#ff8a3a', c2: '#ffe066', r: 13, v: 820 }, bolt: { c: '#57e1ff', c2: '#ffffff', r: 11, v: 1100 }, arcane: { c: '#b48cff', c2: '#ffd1f4', r: 10, v: 950 }, bullet: { c: '#ffd166', c2: '#ffffff', r: 4, v: 1700 }, book: { c: '#8a5a3a', c2: '#f5ecd8', r: 9, v: 700 }, blood: { c: '#ff2a4a', c2: '#ffb0c0', r: 12, v: 760 } };
   const lgAtkLen = (spr) => { const r = spr.rows.atk; return r ? r[1] * 1000 / 12 : 450; };
   function lgAttack(aa){
     if(sbIn()) return;
@@ -35410,7 +35428,7 @@
   }
   // the flying part of a ranged attack: where it is now (or null when it's gone)
   function lgShotAt(d, now){
-    const spr = lgChar(d.c), kind = LG_RANGED[spr.k]; if(!kind || !d.at) return null;
+    const spr = lgChar(d.c), kind = LG_RANGED[spr.k] || (d.ak === 1 ? 'slash' : null); if(!kind || !d.at) return null;
     const rel = d.at + lgAtkLen(spr) * 0.45, t = (now - rel) / 1000; if(t < 0 || t > 0.9) return null;
     const S = LG_SHOT[kind], o = lgPos(d, d.at), dist = t * S.v * .55; if(dist > 420) return null;
     const aim = typeof d.aa === 'number', ux = aim ? Math.cos(d.aa) : (d.af || 1), uy = aim ? Math.sin(d.aa) : 0, gy = o.y + uy * (22 + dist);
@@ -35421,17 +35439,28 @@
     LG.hurt = LG.hurt || new Map();
     for(const a of all){
       const d = a.d; if(!d.at || now - d.at > 1600) continue;
-      const spr = lgChar(d.c), kind = LG_RANGED[spr.k], key = a.u + ':' + d.at;
+      const spr = lgChar(d.c), kind = LG_RANGED[spr.k] || (d.ak === 1 ? 'slash' : null), key = a.u + ':' + d.at;
       if(kind){
         const s = lgShotAt(d, now); if(!s) continue;
-        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.hypot(b.p.x - s.x, b.p.y - s.gy) < 24 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
+        for(const b of all){ if(b.u === a.u || b.d.o) continue; if(Math.hypot(b.p.x - s.x, b.p.y - s.gy) < 24 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); if(d.ak !== 1) lgKnock(b, s.ux, s.uy); } }
       } else {
         const rel = d.at + lgAtkLen(spr) * 0.5; if(now < rel || now > rel + 250) continue;
         const o = lgPos(d, d.at), f = d.af || 1;
-        for(const b of all){ if(b.u === a.u || b.d.o) continue; const dx = (b.p.x - o.x) * f; if(dx > 0 && dx < 62 && Math.abs(b.p.y - o.y) < 28 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); } }
+        for(const b of all){ if(b.u === a.u || b.d.o) continue; const dx = (b.p.x - o.x) * f; if(dx > 0 && dx < 62 && Math.abs(b.p.y - o.y) < 28 && !LG.hurt.has(key + '>' + b.u)){ LG.hurt.set(key + '>' + b.u, now); LG.hurt.set('u:' + b.u, now); lgKnock(b, f, 0); } }
       }
     }
     if(LG.hurt.size > 300) for(const [k, t] of LG.hurt) if(now - t > 5000) LG.hurt.delete(k);
+  }
+  // knockback: only my own screen moves me (everyone else then sees me slide back)
+  function lgKnock(b, ux, uy){
+    try{ if(b.u !== lgUid() || sbIn()) return; }catch(e){ return; }
+    const now = trdNow(), p = lgPos(LG.me, now), L = Math.hypot(ux, uy) || 1, rich = lgRich(); ux /= L; uy /= L;
+    let d = 0; for(let t = 6; t <= 70; t += 6){ if(!lgOk(lgTile(p.x + ux * t, p.y + uy * t), rich)) break; d = t; }
+    if(d < 6) return;
+    const tx = Math.round(p.x + ux * d), ty = Math.round(p.y + uy * d), fz = Math.max(LG.me.f || 0, now + 350);
+    if(LG.me.a === 'sit' || LG.me.a === 'play') LG.me.a = '';
+    Object.assign(LG.me, { x: Math.round(p.x), y: Math.round(p.y), tx, ty, p: Math.round(p.x) + ',' + Math.round(p.y) + ';' + tx + ',' + ty, t: now, f: fz, gm: '' }); LG.pend = null;
+    lgWrite(lgFull());
   }
   function lgDrawShots(g, all, now){
     g.save(); g.globalCompositeOperation = 'lighter';
