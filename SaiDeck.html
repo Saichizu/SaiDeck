@@ -415,10 +415,11 @@
   .sb-alert b{font-size:18px;color:#ff4d6d;letter-spacing:.04em;} .sb-alert span{font-size:12px;opacity:.85;} .sb-alert .sb-held{font-style:normal;font-size:11px;font-weight:800;color:#ffd166;}
   .sb-alert.melt{animation:sbAlarm 1s ease-in-out infinite;} .sb-alert.lights{background:rgba(10,10,30,.9);border-color:#ffd166;} .sb-alert.lights b{color:#ffd166;}
   @keyframes sbAlarm{0%,100%{box-shadow:0 0 0 rgba(255,42,58,0);}50%{box-shadow:0 0 28px rgba(255,42,58,.75);}}
-  .sb-splash{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 30px;border-radius:16px;background:rgba(8,6,14,.88);border:2px solid var(--c,#fff);text-align:center;pointer-events:none;animation:sbIn .35s ease-out;max-width:80%;}
-  .sb-splash b{font-size:28px;color:var(--c,#fff);letter-spacing:.02em;} .sb-splash span{font-size:13.5px;opacity:.85;}
-  @keyframes sbIn{from{transform:translate(-50%,-50%) scale(.7);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
-  .sb-meet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94%);padding:16px 18px;border-radius:16px;background:rgba(24,12,20,.97);border:2px solid #ffd166;box-shadow:0 16px 50px rgba(0,0,0,.6);}
+  .sb-splash{position:absolute;left:50%;top:64px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 30px;border-radius:16px;background:rgba(8,6,14,.88);border:2px solid var(--c,#fff);text-align:center;pointer-events:none;animation:sbIn .35s ease-out;max-width:80%;}
+  .sb-splash b{font-size:24px;color:var(--c,#fff);letter-spacing:.02em;} .sb-splash span{font-size:13.5px;opacity:.85;}
+  @keyframes sbIn{from{transform:translateX(-50%) scale(.7);opacity:0;}to{transform:translateX(-50%) scale(1);opacity:1;}}
+  .sb-cut{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none;}
+  .sb-meet{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:min(560px,94%);padding:16px 18px;border-radius:16px;background:rgba(24,12,20,.97);border:2px solid #ffd166;box-shadow:0 16px 50px rgba(0,0,0,.6);}
   .sb-meet h4{margin:0 0 12px;font-size:18px;} .sb-meet small{font-size:12px;opacity:.75;font-weight:600;margin-left:6px;}
   .sb-vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-bottom:12px;}
   .sb-v{padding:9px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#2a1a24;color:#fff;font:700 13px 'Inter',sans-serif;text-align:left;cursor:pointer;}
@@ -23491,7 +23492,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 232;                 // ← goes up by one with every published version
+  const SD_BUILD = 233;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -24105,7 +24106,7 @@
   const chatColor = (name) => { let h = 0; for(const ch of String(name || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `hsl(${h % 360} 70% 70%)`; };
   const chatName = () => (chatLS('name') || '').trim();
   // ----- rooms: "Everyone", or a group chat "g-<code>" -----
-  const chatRoom = () => { const r = chatLS('room'); return r && /^g-[a-z0-9-]{3,24}$/.test(r) && CHAT.cfg.rooms !== false ? r : CHAT_ROOM; };
+  const chatRoom = () => { const r = chatLS('room'); return r && /^g-[a-z0-9-]{3,24}$/.test(r) && (CHAT.cfg.rooms !== false || r === 'g-sabotrack') ? r : CHAT_ROOM; };   // (the Sabotrack room stays on even with group chats off)
   const chatRoomLabel = (r) => r === CHAT_ROOM ? 'Everyone' : r === 'g-sabotrack' ? '🎮 Sabotrack' : '#' + r.slice(2);
   function chatGroups(){ try{ const a = JSON.parse(chatLS('groups') || '[]'); return Array.isArray(a) ? a.filter(x => /^g-[a-z0-9-]{3,24}$/.test(x)) : []; }catch(e){ return []; } }
   function chatCodeClean(s){ return String(s || '').trim().toLowerCase().replace(/^#/, '').replace(/[\s_]+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 24); }
@@ -24596,7 +24597,7 @@
       <p class="chat-side-p">Type any code (3–24 letters, numbers or dashes). If nobody has used it yet, it's your new group — tell your friends the code so they can join. Anyone with the code can read it.</p>`
       : `<p class="chat-side-p">Group chats are turned off by the admin right now.</p>`}`;
     const list = side.querySelector('.chat-rlist');
-    const rooms = [CHAT_ROOM].concat(groupsOn ? ['g-sabotrack'].concat(chatGroups().filter(r => r !== 'g-sabotrack')) : []);
+    const rooms = [CHAT_ROOM, 'g-sabotrack'].concat(groupsOn ? chatGroups().filter(r => r !== 'g-sabotrack') : []);
     for(const r of rooms){
       const row = document.createElement('div'); row.className = 'chat-rrow' + (r === cur ? ' cur' : '');
       const b = document.createElement('button'); b.type = 'button'; b.className = 'chat-rgo';
@@ -33493,8 +33494,13 @@
     if(!LG.keys || !LG.keys.size) return;
     let dx = 0, dy = 0; for(const k of LG.keys){ const d = LG_DIRKEYS[k]; if(d){ dx += d[0]; dy += d[1]; } }
     const L = Math.hypot(dx, dy); if(!L) return; dx /= L; dy /= L;
-    const p = lgPos(LG.me, trdNow()), dir = dx.toFixed(2) + ',' + dy.toFixed(2), left = Math.hypot(LG.me.tx - p.x, LG.me.ty - p.y);
-    if(now || dir !== LG.keyDir || left < 70 || !p.moving){ LG.keyDir = dir; lgWalk(Math.round(p.x + dx * 150), Math.round(p.y + dy * 150), null); }
+    const p = lgPos(LG.me, trdNow()), rich = lgRich();
+    const reach = (ux, uy) => { let d = 0; for(let t = 8; t <= 150; t += 8){ if(!lgOk(lgTile(p.x + ux * t, p.y + uy * t), rich)) break; d = t; } return d; };
+    let d = reach(dx, dy), ux = dx, uy = dy;
+    if(d < 24 && dx && dy){ const ax = reach(Math.sign(dx), 0), ay = reach(0, Math.sign(dy)); if(ax >= ay && ax >= 16){ ux = Math.sign(dx); uy = 0; d = ax; } else if(ay >= 16){ ux = 0; uy = Math.sign(dy); d = ay; } }
+    if(d < 8) return;                                                     // (a wall right there)
+    const dir = ux.toFixed(2) + ',' + uy.toFixed(2), left = Math.hypot(LG.me.tx - p.x, LG.me.ty - p.y);
+    if(now || dir !== LG.keyDir || left < 40 || !p.moving){ LG.keyDir = dir; lgWalk(Math.round(p.x + ux * d), Math.round(p.y + uy * d), null); }
     if(!LG.keyT) LG.keyT = setInterval(() => { if(!LG.keys || !LG.keys.size || !LG.on){ clearInterval(LG.keyT); LG.keyT = 0; return; } lgKeyWalk(false); }, 120);
   }
   window.addEventListener('keydown', lgKeyDown, true);
@@ -34089,7 +34095,7 @@
     if(g.res && g.res.n && g.res.n !== SB.resSeen && mine && g.st !== 'meet'){ SB.resSeen = g.res.n; sbOnResult(g); }
     for(const u of Object.keys(g.ej || {})) if(!SB.ejRole[u] && !SB.ejBusy){ SB.ejBusy = true; const r = await sbGet(`sabo/roles/${g.id}/${u}`); SB.ejBusy = false; if(r) SB.ejRole[u] = r; }
     if(g.st === 'over' && was !== 'over' && was){ sbOnOver(g); }
-    const deadNow = mine && sbPlaying(g) && sbDeadU(me, g); if(deadNow !== !!SB.wasDead){ SB.wasDead = deadNow; if(deadNow && g.dead && g.dead[me]){ sbSplash('💀 You got sabotaged', 'You\'re a ghost now: you can still do tasks, and chat with the other ghosts.', '#ff4d6d', 4000); lgSfx('scare'); SB.mg && sbMgClose(); } SB.ghostAt = 0; try{ chatRender(); }catch(e){} }
+    const deadNow = mine && sbPlaying(g) && sbDeadU(me, g); if(deadNow !== !!SB.wasDead){ SB.wasDead = deadNow; if(deadNow && g.dead && g.dead[me]){ const d = g.dead[me], now2 = trdNow(); let kc = 0, kd = 1e9; for(const o of lgPeople()){ if(!g.pl[o.u] || o.u === me) continue; const q = lgPos(o, now2), dd = Math.hypot(q.x - d.x, q.y - d.y); if(dd < kd){ kd = dd; kc = o.c | 0; } } if(now2 - (d.t || 0) < 8000) sbKillAnim(kc, LG.me.c | 0); else lgSfx('scare'); setTimeout(() => sbSplash('💀 You got sabotaged', 'You\'re a ghost now: you can still do tasks, and chat with the other ghosts.', '#ff4d6d', 4000), 2600); SB.mg && sbMgClose(); } SB.ghostAt = 0; try{ chatRender(); }catch(e){} }
     if(mine && sbPlaying(g)) sbWinCheck(g);
   }
   // line everyone up in the Great Hall: 1 2 3 4 / 5 6 7 8 …
@@ -34111,23 +34117,20 @@
     sbPlaces();
     const [x, y] = sbHallSpot(g); sbTeleport(x, y); sbFast();
     SB.killAt = trdNow() - SB_KILL_CD + 15000; SB.sabAt = trdNow() - SB_SAB_CD + 20000;
-    try{ if(!SB.local && chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){}
+    try{ if(chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){}
     const bad = sbBad(), mates = [...SB.bad].filter(u => u !== sbMe()).map(u => sbName(u, g));
     sbSplash((bad ? '🔪 You are a SABOTEUR' : '🎧 You are CREW') + (SB.local ? ' (test)' : ''), bad ? (mates.length ? 'Your partner' + (mates.length > 1 ? 's: ' : ': ') + mates.join(', ') + '. ' : '') + 'Kill the crew, sabotage the lounge, don\'t get caught.' : `Finish your tasks around the lounge and find the ${g.nb > 1 ? g.nb + ' saboteurs' : 'saboteur'}.`, bad ? '#ff4d6d' : '#57e1ff', 4500);
-    lgSfx(bad ? 'zap' : 'reveal');
+    sbSfx(bad ? 'start_bad' : 'start_good');
   }
   function sbOnMeeting(g){
     const [x, y] = sbHallSpot(g); sbTeleport(x, y);
     const b = g.meet.b; sbSplash(b ? '📣 DEAD BODY REPORTED' : '🚨 EMERGENCY MEETING', b ? `${sbName(g.meet.by, g)} found ${sbName(b, g)}.` : `${sbName(g.meet.by, g)} pressed the button.`, '#ffd166', 2600);
-    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false); SB.smap && sbSabMap(false);
+    sbSfx(b ? 'body' : 'alarm'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false); SB.smap && sbSabMap(false);
   }
   function sbOnResult(g){
     const u = g.res.ej;
     if(!u){ sbSplash('🤷 Nobody was ejected', g.res.tie ? 'It was a tie.' : 'Skipped.', '#cfd8e6', 3000); }
-    else {
-      const show = () => { const r = SB.ejRole[u]; sbSplash(`👋 ${sbName(u, g)} was ejected`, r ? (r === 'bad' ? `${sbName(u, g)} was a Saboteur. 🔪` : `${sbName(u, g)} was not a Saboteur.`) : '', r === 'bad' ? '#ff4d6d' : '#57e1ff', 3500); };
-      if(SB.ejRole[u]) show(); else sbGet(`sabo/roles/${g.id}/${u}`).then(r => { if(r) SB.ejRole[u] = r; show(); });
-    }
+    else { if(!SB.ejRole[u]) sbGet(`sabo/roles/${g.id}/${u}`).then(r => { if(r) SB.ejRole[u] = r; }); sbEjectAnim(u, g); }
     SB.killAt = trdNow();
   }
   async function sbOnOver(g){
@@ -34135,7 +34138,7 @@
     const bad = Object.keys(all || {}).filter(u => all[u] === 'bad').map(u => sbName(u, g));
     const mineWon = g.pl && g.pl[sbMe()] ? ((g.win === 'bad') === (SB.role === 'bad')) : null;
     sbSplash(g.win === 'bad' ? '🔪 SABOTEURS WIN' : '🎧 CREW WINS', (g.why ? g.why + ' ' : '') + (bad.length ? `Saboteur${bad.length > 1 ? 's' : ''}: ${bad.join(', ')}.` : ''), g.win === 'bad' ? '#ff4d6d' : '#57e1ff', 6000);
-    if(mineWon != null){ lgSfx(mineWon ? 'reveal' : 'zap'); lgEmote(mineWon ? '🎉' : '😭'); }
+    if(mineWon != null){ sbSfx(mineWon ? 'win' : 'lose'); lgEmote(mineWon ? '🎉' : '😭'); }
     if(g.pl && g.pl[sbMe()]){ LG.me.f = 0; lgWrite({ f: 0 }); }
     sbPortalOut(true); sbHideOut(true); SB.mg && sbMgClose(); SB.cctv && sbCctv(false); SB.ghostAt = 0;
   }
@@ -34169,7 +34172,7 @@
     SB.killAt = trdNow();
     LG.me.at = trdNow(); LG.me.af = v.x < LG.me.x ? -1 : 1;
     const ok = await sbPatch({ [`sabo/game/dead/${v.u}`]: { t: sbSv(), x: Math.round(v.x), y: Math.round(v.y) } });
-    if(ok){ lgSfx('hit'); const p = lgNearest(v.x, v.y, true); sbTeleport(p[0], p[1]); } else SB.killAt = 0;
+    if(ok){ sbSfx('slash'); const p = lgNearest(v.x, v.y, true); sbTeleport(p[0], p[1]); } else SB.killAt = 0;
   }
   async function sbSabotage(k){
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
@@ -34177,7 +34180,7 @@
     if(trdNow() - Math.max(SB.sabAt || 0, g.sabAt || 0) < SB_SAB_CD){ toast('Sabotage is cooling down.', 1600); return; }
     SB.sabAt = trdNow();
     await sbPatch({ 'sabo/game/sab': { k, t: sbSv() }, 'sabo/game/sabAt': sbSv() });
-    lgSfx('zap');
+    sbSfx(k === 'lights' ? 'lightsoff' : 'alarm');
   }
   async function sbGatesClose(ids){
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play') return;
@@ -34209,7 +34212,7 @@
   async function sbVote(target){
     const g = sbG(); if(!sbIn(g) || g.st !== 'meet' || sbDeadU(sbMe(), g) || SB.voted) return;
     if(trdNow() - (g.meet.t || 0) < SB_DISC && !SB.local){ toast('Talk first — voting opens in a moment.', 1600); return; }
-    SB.voted = target; await sbPatch({ [`sabo/game/votes/${sbMe()}`]: target }); lgSfx('bubble'); sbHud(true);
+    SB.voted = target; await sbPatch({ [`sabo/game/votes/${sbMe()}`]: target }); sbSfx('vote'); sbHud(true);
   }
   function sbMeetTick(g){
     if(g.st !== 'meet' || !g.meet || SB.resBusy) return;
@@ -34440,11 +34443,11 @@
     const G = sbG(); if(!sbIn(G) || !sbBad() || G.st !== 'play' || sbDeadU(sbMe(), G) || SB.inPortal != null) return;
     const h = SB_HIDES[i]; if(!h) return;
     const now = trdNow(); Object.assign(LG.me, { x: h.sx, y: h.sy, tx: h.sx, ty: h.sy, p: '', t: now }); LG.pend = null;
-    SB.hideIn = i; LG.me.hv = -1; lgWrite(Object.assign(lgFull(), { hv: -1 })); lgSfx('bubble');
+    SB.hideIn = i; LG.me.hv = -1; lgWrite(Object.assign(lgFull(), { hv: -1 })); sbSfx('creak');
     sbHud(true);
   }
   function sbHideOut(silent){
-    if(SB.hideIn == null) return; SB.hideIn = null; LG.me.hv = null; lgWrite({ hv: null }); if(!silent) lgSfx('bubble'); sbHud(true);
+    if(SB.hideIn == null) return; SB.hideIn = null; LG.me.hv = null; lgWrite({ hv: null }); if(!silent) sbSfx('creak'); sbHud(true);
   }
   // ----- the saboteur's minimap: ⚡ (lights), ☢️ (meltdown) and every gate are buttons — one tap does it, no confirm -----
   const sbSabMM = () => { const G = sbG(); return sbIn(G) && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G); };
@@ -34475,7 +34478,7 @@
     const cd = SB_GATE_CD - (trdNow() - ((g.gt || {})[sbMe()] || 0)); if(cd > 0){ toast(`Gates are cooling down (${Math.ceil(cd / 1000)}s).`, 1400); return; }
     const used = (SB.gUsed | 0) + 1, body = { [`sabo/game/gates/${id}`]: sbSv() };
     if(used >= SB_GATES){ body[`sabo/game/gt/${sbMe()}`] = sbSv(); SB.gUsed = 0; } else SB.gUsed = used;
-    if(await sbPatch(body)) lgSfx('zap');
+    if(await sbPatch(body)) sbSfx('clang');
   }
   // ----- the sabotage map (saboteurs): click the minimap, pick the lights or the meltdown, or up to 3 gates to close -----
   function sbSabMap(on){
@@ -34534,7 +34537,7 @@
   // ----- portals: you vanish into another dimension, hover a portal to peek out of it, click to come out there -----
   function sbPortalIn(){
     const i = sbNearPortal(); if(i < 0 || !sbBad()) return;
-    SB.inPortal = i; LG.me.hv = -1; lgWrite({ hv: -1 }); lgSfx('teleport');
+    SB.inPortal = i; LG.me.hv = -1; lgWrite({ hv: -1 }); sbSfx('whoosh');
     const el = sbHudEl().querySelector('.sb-portal'); el.hidden = false;
     el.innerHTML = `<div class="sb-pdim"></div><div class="sb-pbox"><b>🌀 In the portal dimension</b><span>Hover a portal to peek out · click to come out there</span>
       <div class="sb-prow">${SB_PORTALS[i].to.map(j => `<button type="button" class="lg-b" data-sb="pgo" data-i="${j}">${escapeHtml(lgRoomById(SB_PORTALS[j].room).name.replace(/^.*· /, ''))}</button>`).join('')}<button type="button" class="lg-b" data-sb="pout">↩️ Back out here</button></div></div>`;
@@ -34544,7 +34547,7 @@
     if(j == null){ SB.camAt = null; SB.peek = null; LG.me.hv = -1; lgWrite({ hv: -1 }); return; }
     const q = SB_PORTALS[j]; SB.camAt = { x: q.x, y: q.y }; SB.peek = j; LG.me.hv = j; lgWrite({ hv: j });
   }
-  function sbPortalGo(j){ const q = SB_PORTALS[j]; SB.inPortal = null; SB.camAt = null; SB.peek = null; LG.me.hv = null; sbTeleport(q.x, q.y); lgWrite({ hv: null }); lgSfx('teleport'); sbHudEl().querySelector('.sb-portal').hidden = true; }
+  function sbPortalGo(j){ const q = SB_PORTALS[j]; SB.inPortal = null; SB.camAt = null; SB.peek = null; LG.me.hv = null; sbTeleport(q.x, q.y); lgWrite({ hv: null }); sbSfx('whoosh'); sbHudEl().querySelector('.sb-portal').hidden = true; }
   function sbPortalOut(silent){
     if(SB.inPortal == null) return; const q = SB_PORTALS[SB.inPortal];
     SB.inPortal = null; SB.camAt = null; SB.peek = null; LG.me.hv = null;
@@ -34581,10 +34584,107 @@
   }
   // the lights fix (not a task: it's how anyone clears a lights sabotage)
   const SB_FUSE = { k: 'fuse', n: 'Change the blown fuse', em: '⚡', mg: 'fuse', fix: true };
+  // ----- Sabotrack sound effects (a little synth; quiet when the lounge sound is muted) -----
+  function sbSfx(k){
+    try{
+      if(LG.vol <= 0) return; const ac = sbAc(); if(!ac) return; const t0 = ac.currentTime + .01;
+      const tone = (type, f, at, dur, vol, f2) => { const o = ac.createOscillator(), g = ac.createGain(), t = t0 + at; o.type = type; o.frequency.setValueAtTime(f, t); if(f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(SB.out); o.start(t); o.stop(t + dur + .05); };
+      const noise = (at, dur, vol, hp) => { if(!SB.nb){ const b = ac.createBuffer(1, ac.sampleRate * .6, ac.sampleRate), d = b.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; SB.nb = b; } const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(), t = t0 + at; s.buffer = SB.nb; f.type = 'highpass'; f.frequency.value = hp || 2000; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.connect(f); f.connect(g); g.connect(SB.out); s.start(t); s.stop(t + dur + .05); };
+      switch(k){
+        case 'start_bad': tone('sawtooth', 110, 0, .9, .3, 55); tone('square', 220, 0, .5, .12, 110); noise(0, .35, .2, 600); tone('sawtooth', 82, .45, 1.1, .25, 41); break;
+        case 'start_good': [523, 659, 784, 1047].forEach((f, i) => tone('triangle', f, i * .09, .7, .22)); break;
+        case 'alarm': for(let i = 0; i < 6; i++) tone('square', i % 2 ? 660 : 880, i * .18, .16, .18); break;
+        case 'body': tone('sawtooth', 196, 0, 1, .32, 98); tone('sawtooth', 207, 0, 1, .2, 104); noise(0, .5, .25, 900); break;
+        case 'vote': tone('triangle', 660, 0, .09, .3); tone('triangle', 990, .05, .09, .2); break;
+        case 'slash': noise(0, .2, .45, 2500); tone('sawtooth', 1200, 0, .18, .2, 180); break;
+        case 'task': tone('triangle', 784, 0, .14, .3); tone('triangle', 1047, .11, .22, .3); break;
+        case 'lightsoff': tone('sawtooth', 440, 0, .9, .3, 40); noise(.05, .25, .2, 3000); break;
+        case 'clang': tone('square', 180, 0, .3, .32, 110); tone('square', 270, 0, .2, .15, 160); noise(0, .18, .3, 1500); break;
+        case 'whoosh': tone('sine', 180, 0, .45, .3, 900); noise(0, .4, .2, 700); break;
+        case 'creak': tone('sawtooth', 90, 0, .4, .14, 150); tone('sawtooth', 120, .15, .3, .1, 80); break;
+        case 'win': [523, 659, 784, 1047, 1319].forEach((f, i) => tone('triangle', f, i * .11, .5, .25)); break;
+        case 'lose': [392, 370, 349, 294].forEach((f, i) => tone('triangle', f, i * .3, i === 3 ? .9 : .32, .28)); break;
+        case 'bats': for(let i = 0; i < 14; i++) noise(i * .09 + Math.random() * .04, .07, .18, 2500 + Math.random() * 2000); tone('sine', 1800, .2, .5, .05, 2600); break;
+        case 'eject': tone('sine', 90, 0, 1.6, .35, 40); tone('triangle', 180, .3, 1.2, .12, 90); break;
+      }
+    }catch(e){}
+  }
+  // ----- the kill (Among Us style): on the victim's screen, the killer's attack plays over everything -----
+  function sbSpr(g2, c, row, fi, x, y, sc, face, alpha){
+    const spr = lgChar(c); if(!spr || !spr.im.complete || !spr.im.naturalWidth) return;
+    const [ri, n] = spr.rows[row] || spr.rows.idle; g2.save(); g2.imageSmoothingEnabled = false; g2.globalAlpha = alpha == null ? 1 : alpha; g2.translate(x, y); if(face < 0) g2.scale(-1, 1);
+    g2.drawImage(spr.im, (Math.max(0, Math.min(n - 1, fi | 0))) * spr.w, ri * spr.h, spr.w, spr.h, -spr.ax * sc, -spr.h * sc, spr.w * sc, spr.h * sc); g2.restore();
+  }
+  function sbCutscene(cls, ms, draw, after){
+    const st = LG.win && LG.win.querySelector('.lg-stage'); if(!st) return;
+    const old = st.querySelector('.' + cls); if(old) old.remove();
+    const cv = document.createElement('canvas'); cv.className = 'sb-cut ' + cls; st.appendChild(cv);
+    const t0 = performance.now(), tick = () => { if(!cv.isConnected) return; const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); if(cv.width !== Math.round(r.width * dpr)){ cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+      const g2 = cv.getContext('2d'), t = (performance.now() - t0) / 1000; g2.setTransform(dpr, 0, 0, dpr, 0, 0); g2.clearRect(0, 0, r.width, r.height);
+      try{ draw(g2, r.width, r.height, t); }catch(e){ console.warn(e); }
+      if(t * 1000 < ms) requestAnimationFrame(tick); else { cv.remove(); if(after) after(); } };
+    requestAnimationFrame(tick);
+  }
+  function sbKillAnim(killerC, meC){
+    sbSfx('slash'); setTimeout(() => { try{ lgSfx('scare'); }catch(e){} }, 380);
+    const ksp = lgChar(killerC), vsp = lgChar(meC), atkN = (ksp.rows.atk || ksp.rows.idle)[1], hurtN = (vsp.rows.hurt || vsp.rows.idle)[1];
+    sbCutscene('sb-killcut', 2700, (g2, W, H, t) => {
+      const fade = t < .15 ? t / .15 : t > 2.3 ? Math.max(0, (2.7 - t) / .4) : 1;
+      g2.globalAlpha = fade; const bg = g2.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, Math.max(W, H) * .7); bg.addColorStop(0, '#3a0610'); bg.addColorStop(1, '#050005'); g2.fillStyle = bg; g2.fillRect(0, 0, W, H);
+      const sc = Math.min(H * .5 / Math.max(ksp.h, vsp.h), 6), base = H * .72;
+      // the killer lunges and attacks
+      const kx = W * .36 + Math.min(1, Math.max(0, (t - .15) / .25)) * W * .05, kfi = t < .3 ? 0 : Math.floor((t - .3) / .55 * atkN);
+      sbSpr(g2, killerC, ksp.rows.atk && t > .3 && t < .85 ? 'atk' : 'idle', ksp.rows.atk && t > .3 && t < .85 ? kfi : Math.floor(t * 8) % ksp.rows.idle[1], kx, base, sc, 1, fade);
+      // the victim gets hit, then falls
+      const hit = t - .55, fall = Math.max(0, Math.min(1, (t - 1) / .45)); g2.save(); g2.translate(W * .64, base); g2.rotate(fall * Math.PI / 2 * .95); g2.translate(fall * 30, fall * 10);
+      if(hit > 0 && hit < .25){ g2.translate(Math.sin(hit * 80) * 8, 0); }
+      sbSpr(g2, meC, vsp.rows.hurt && hit > 0 ? 'hurt' : 'idle', hit > 0 ? Math.min(hurtN - 1, Math.floor(hit / .45 * hurtN)) : Math.floor(t * 8) % vsp.rows.idle[1], 0, 0, sc, -1, fade); g2.restore();
+      if(hit > 0){ g2.globalAlpha = fade * Math.min(1, hit * 3) * .8; g2.fillStyle = '#8a0012'; g2.beginPath(); g2.ellipse(W * .66 + 40, base + 6, 30 + Math.min(1, hit) * 90, 10 + Math.min(1, hit) * 18, 0, 0, 7); g2.fill(); }
+      // the slash flash
+      if(hit > 0 && hit < .18){ g2.globalAlpha = (1 - hit / .18) * .9; g2.fillStyle = '#ffeef0'; g2.fillRect(0, 0, W, H); g2.globalAlpha = 1; g2.strokeStyle = '#ff2a3a'; g2.lineWidth = 8; g2.beginPath(); g2.moveTo(W * .5, H * .2); g2.lineTo(W * .75, H * .7); g2.stroke(); }
+      if(t > 1.2){ g2.globalAlpha = fade * Math.min(1, (t - 1.2) / .3); g2.font = `900 ${Math.round(Math.min(46, W / 16))}px 'Inter',sans-serif`; g2.textAlign = 'center'; g2.fillStyle = '#ff4d6d'; g2.fillText('💀 YOU GOT SABOTAGED', W / 2, H * .88); }
+      g2.globalAlpha = 1;
+    });
+  }
+  // ----- the ejection: the voted-out player gets swarmed by bats; then who they really were -----
+  function sbEjectAnim(u, G){
+    const c = ((G.pl || {})[u] || {}).c | 0, name = sbName(u, G), spr = lgChar(c);
+    sbSfx('eject'); setTimeout(() => sbSfx('bats'), 700); setTimeout(() => sbSfx('bats'), 1500);
+    const bats = Array.from({ length: 34 }, (_, i) => ({ a: i / 34 * Math.PI * 2 + Math.random() * .3, r0: 1.1 + Math.random() * .5, sp: .8 + Math.random() * .8, sz: .7 + Math.random() * .6, ph: Math.random() * 6 }));
+    const stars = Array.from({ length: 60 }, () => [Math.random(), Math.random() * .7, Math.random()]);
+    sbCutscene('sb-ejectcut', 6200, (g2, W, H, t) => {
+      const fade = t < .3 ? t / .3 : t > 5.7 ? Math.max(0, (6.2 - t) / .5) : 1; g2.globalAlpha = fade;
+      const bg = g2.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0a0418'); bg.addColorStop(1, '#2a0a2e'); g2.fillStyle = bg; g2.fillRect(0, 0, W, H);
+      for(const [sx, sy, tw] of stars){ g2.fillStyle = `rgba(255,255,255,${.35 + .35 * Math.sin(t * 3 + tw * 9)})`; g2.fillRect(sx * W, sy * H, 2, 2); }
+      g2.fillStyle = '#f4ecd0'; g2.beginPath(); g2.arc(W * .8, H * .2, Math.min(W, H) * .08, 0, 7); g2.fill(); g2.fillStyle = '#0a0418'; g2.beginPath(); g2.arc(W * .8 + Math.min(W, H) * .035, H * .2 - Math.min(W, H) * .02, Math.min(W, H) * .07, 0, 7); g2.fill();
+      const cx = W / 2, cy = H * .55, sc = Math.min(H * .32 / spr.h, 5);
+      const glow = g2.createRadialGradient(cx, cy, 10, cx, cy, Math.min(W, H) * .42); glow.addColorStop(0, 'rgba(150,90,200,.55)'); glow.addColorStop(1, 'rgba(150,90,200,0)'); g2.fillStyle = glow; g2.fillRect(0, 0, W, H);
+      // the player: struggles, then is gone
+      const gone = Math.max(0, Math.min(1, (t - 2.2) / .9)); g2.save(); g2.translate(cx, cy); g2.scale(1 - gone * .6, 1 - gone * .6); g2.translate(Math.sin(t * 30) * (t > 1.4 && t < 3 ? 4 : 0), 0);
+      sbSpr(g2, c, spr.rows.hurt && t > 1.4 ? 'hurt' : 'idle', t > 1.4 && spr.rows.hurt ? Math.floor(t * 10) % spr.rows.hurt[1] : Math.floor(t * 7) % spr.rows.idle[1], 0, spr.h * sc / 2, sc, 1, fade * (1 - gone)); g2.restore();
+      // the bats: fly in, swirl round them, then scatter into the night
+      for(const b of bats){
+        const R = Math.min(W, H); let rad, ang = b.a + t * b.sp * 2.2, yo = 0;
+        if(t < 1.4) rad = R * (b.r0 - (b.r0 - .16) * (t / 1.4)); else if(t < 3.2) rad = R * (.16 - .1 * Math.min(1, (t - 1.4) / 1.2)); else { rad = R * (.06 + (t - 3.2) * .6); yo = -(t - 3.2) * R * .35; }
+        const x = cx + Math.cos(ang) * rad, y = cy + Math.sin(ang) * rad * .7 + yo, s = 17 * b.sz * (R / 600), fl = Math.sin(t * 28 + b.ph);
+        g2.fillStyle = '#1a0d22'; g2.strokeStyle = 'rgba(210,170,255,.55)'; g2.lineWidth = 1.2; g2.beginPath(); g2.ellipse(x, y, s * .45, s * .6, 0, 0, 7); g2.fill();
+        g2.beginPath(); g2.moveTo(x, y); g2.lineTo(x - s * 1.8, y - s * fl); g2.lineTo(x - s * 1.1, y + s * .2); g2.lineTo(x - s * .6, y - s * .1 * fl); g2.closePath(); g2.fill(); g2.stroke();
+        g2.beginPath(); g2.moveTo(x, y); g2.lineTo(x + s * 1.8, y - s * fl); g2.lineTo(x + s * 1.1, y + s * .2); g2.lineTo(x + s * .6, y - s * .1 * fl); g2.closePath(); g2.fill(); g2.stroke();
+        g2.fillStyle = '#ff2a3a'; g2.fillRect(x - s * .25, y - s * .3, 2.5, 2.5); g2.fillRect(x + s * .1, y - s * .3, 2.5, 2.5);
+      }
+      // the words
+      if(t > 3.3){
+        const role = SB.ejRole[u], line = role ? `${name} was ${role === 'bad' ? '' : 'not '}a Saboteur.` : `${name} was…`, n = Math.min(line.length, Math.floor((t - 3.3) * 26));
+        g2.globalAlpha = fade; g2.font = `800 ${Math.round(Math.min(34, W / 22))}px 'Inter',sans-serif`; g2.textAlign = 'center'; g2.fillStyle = role === 'bad' ? '#ff4d6d' : '#f1ecff'; g2.fillText(line.slice(0, n), W / 2, H * .86);
+        if(role && n >= line.length){ const G2 = sbG(), left = Math.max(0, ((G2 && G2.nb) | 0) - Object.keys((G2 && G2.ej) || {}).filter(x => SB.ejRole[x] === 'bad').length); g2.font = `600 ${Math.round(Math.min(18, W / 40))}px 'Inter',sans-serif`; g2.fillStyle = 'rgba(241,236,255,.75)'; g2.fillText(`${left} Saboteur${left === 1 ? '' : 's'} remain${left === 1 ? 's' : ''}.`, W / 2, H * .86 + 30); }
+      }
+      g2.globalAlpha = 1;
+    });
+  }
   // ----- tasks: little minigames -----
   function sbMg(t){
     const el = sbHudEl().querySelector('.sb-mg'); SB.mg = t; el.hidden = false;
-    const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; lgSfx('reveal'); if(t.fix) await sbFixLights(); else await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(() => { if(SB.mg === t) sbMgClose(); }, 700); };
+    const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; sbSfx('task'); if(t.fix) await sbFixLights(); else await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(() => { if(SB.mg === t) sbMgClose(); }, 700); };
     const shell = (inner) => `<div class="sb-mgbox"><button type="button" class="sb-x sb-mgx" aria-label="Close">✕</button><b>${t.em} ${escapeHtml(t.n)}</b>${inner}</div>`;
     const R = (n) => Math.floor(Math.random() * n);
     if(t.mg === 'fuse'){
@@ -34792,7 +34892,7 @@
     const R = lgRoomById('vhall');
     SB.bots = SB_BOTN.map((n, i) => { const [x, y] = lgNearest(Math.round(R.x + R.w / 2 + (i - 1) * 52), Math.round(R.y + 60), true); return { u: 'sbbot' + i, n: '🤖 ' + n, c: pl['sbbot' + i].c, x, y, tx: x, ty: y, p: '', t: now, h: now, f: now + 9e9, next: now + 3000 + i * 900, killAt: now }; });
     SB.panelOpen = false; sbHud(true);
-    toast(`🧪 Test play: you're ${role === 'bad' ? 'the saboteur' : 'crew'} vs 4 bots. Nothing is saved.`, 3000);
+    toast(`🧪 Test play: you're ${role === 'bad' ? 'the saboteur' : 'crew'} vs 4 bots. Nothing is saved.`, 3000);    try{ if(chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){}
   }
   function sbTestEnd(){
     if(!SB.local) return; SB.local = null; SB.bots = null; SB.lroles = null; SB.gid = ''; SB.st = ''; SB.role = ''; SB.roleG = '';
