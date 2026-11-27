@@ -418,6 +418,16 @@
   .sb-track{position:relative;width:100%;height:22px;border-radius:6px;background:rgba(255,255,255,.1);} .sb-track .z{position:absolute;top:0;bottom:0;width:18%;background:rgba(53,208,184,.55);border-radius:6px;} .sb-track .m{position:absolute;top:-3px;bottom:-3px;width:4px;margin-left:-2px;background:#ff4d6d;border-radius:2px;}
   .sb-code{font-size:20px;letter-spacing:.2em;color:#ffd166;} .sb-screen{font:800 24px monospace;letter-spacing:.3em;padding:6px 14px;border-radius:8px;background:#0a0710;}
   .sb-keys{display:grid;grid-template-columns:repeat(3,54px);gap:6px;} .sb-keys button{height:42px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#24162e;color:#fff;font:800 16px 'Inter',sans-serif;cursor:pointer;} .sb-keys button:hover{background:#3a2048;}
+  .sb-piano{position:relative;display:flex;width:300px;height:120px;user-select:none;touch-action:none;}
+  .sb-piano .w{flex:1;margin:0 1px;border:1px solid #333;border-radius:0 0 6px 6px;background:linear-gradient(#fff,#e6e6ee);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;}
+  .sb-piano .w i{font:700 10px 'Inter',sans-serif;color:#555;font-style:normal;}
+  .sb-piano .b{position:absolute;top:0;width:7.5%;height:62%;border:0;border-radius:0 0 4px 4px;background:linear-gradient(#333,#111);cursor:pointer;z-index:2;}
+  .sb-piano .w.lit{background:linear-gradient(#bff6ff,#57e1ff);} .sb-piano .b.lit{background:linear-gradient(#57e1ff,#1a8aa0);}
+  .sb-dots{display:flex;gap:10px;} .sb-dots i{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.15);} .sb-dots i.demo{background:#ffd166;} .sb-dots i.on{background:#35d0b8;} .sb-dots i.bad{background:#ff4d6d;}
+  .sb-drum{width:110px;height:110px;border-radius:50%;border:4px solid #c9a24a;background:radial-gradient(circle at 40% 35%,#fff4dc,#d9c49a);font-size:40px;cursor:pointer;user-select:none;touch-action:none;} .sb-drum:active{transform:scale(.95);}
+  .sb-meter{position:relative;width:100%;height:26px;border-radius:13px;background:rgba(255,255,255,.1);} .sb-meter .z{position:absolute;left:calc(50% - 11%);width:22%;top:0;bottom:0;border-radius:13px;background:rgba(53,208,184,.45);}
+  .sb-meter .m{position:absolute;top:-3px;bottom:-3px;width:6px;margin-left:-3px;left:50%;border-radius:3px;background:#ff4d6d;transition:left .08s;} .sb-meter .m.in{background:#35d0b8;box-shadow:0 0 10px #35d0b8;}
+  .sb-nomic{width:100%;display:flex;flex-direction:column;gap:8px;align-items:center;}
   .sb-wave{width:260px;height:80px;border-radius:8px;background:#0a0710;} .sb-sl{width:100%;}
   .sb-portal{position:absolute;inset:0;pointer-events:none;} .sb-portal .sb-pdim{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(60,10,120,.15),rgba(30,0,60,.75));box-shadow:inset 0 0 120px rgba(157,107,255,.6);animation:sbPortal 3s ease-in-out infinite;}
   @keyframes sbPortal{0%,100%{opacity:.85;}50%{opacity:1;}}
@@ -23450,7 +23460,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 222;                 // ← goes up by one with every published version
+  const SD_BUILD = 223;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33820,14 +33830,14 @@
   // ----- places on the map -----
   const SB_TASKS = [
     { k: 'mix', room: 'control', dx: 470, dy: 230, n: 'Tune the mix', mg: 'slider', em: '🎚️' },
-    { k: 'wire', room: 'elec', dx: 330, dy: 150, n: 'Fix the wiring', mg: 'wires', em: '🔌' },
+    { k: 'wire', room: 'elec', dx: 330, dy: 150, n: 'Patch the audio cables', mg: 'wires', em: '🔌' },
     { k: 'trash', room: 'cafe', dx: 420, dy: 120, n: 'Empty the trash', mg: 'hold', em: '🗑️' },
-    { k: 'brew', room: 'mclass', dx: 110, dy: 200, n: 'Brew the potion', mg: 'simon', em: '🧪' },
+    { k: 'brew', room: 'mclass', dx: 110, dy: 200, n: 'Ring the potion bells', mg: 'ear', em: '🔔' },
     { k: 'scope', room: 'mobs', dx: 330, dy: 150, n: 'Align the telescope', mg: 'timing', em: '🔭' },
-    { k: 'locker', room: 'lobby', dx: 80, dy: 140, n: 'Open your locker', mg: 'keypad', em: '🔐' },
-    { k: 'organ', room: 'vball', dx: 380, dy: 120, n: 'Play the organ', mg: 'simon', em: '🎹' },
+    { k: 'locker', room: 'lobby', dx: 80, dy: 140, n: 'Drum the locker code', mg: 'rhythm', em: '🥁' },
+    { k: 'organ', room: 'vball', dx: 380, dy: 120, n: 'Play the organ melody', mg: 'piano', em: '🎹' },
     { k: 'stock', room: 'market', dx: 120, dy: 220, n: 'Check the stocks', mg: 'timing', em: '📈' },
-    { k: 'board', room: 'class', dx: 400, dy: 110, n: 'Clean the board', mg: 'hold', em: '🧽' },
+    { k: 'board', room: 'class', dx: 400, dy: 110, n: 'Vocal warm-up', mg: 'sing', em: '🎤' },
     { k: 'slots', room: 'arcade', dx: 380, dy: 170, n: 'Reset the slot machine', mg: 'wires', em: '🎰' },
   ];
   // portals (saboteurs only): each one links to a few others
@@ -34279,10 +34289,37 @@
     const el = SB.hud && SB.hud.querySelector('.sb-portal'); if(el) el.hidden = true;
   }
 
+  // ----- music for the minigames: a little synth, a one-octave piano, and pitch detection for singing -----
+  const SB_NOTES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+  const sbHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  function sbAc(){ if(!SB.ac){ try{ SB.ac = new (window.AudioContext || window.webkitAudioContext)(); SB.out = SB.ac.createGain(); SB.out.gain.value = .35; SB.out.connect(SB.ac.destination); }catch(e){ return null; } } if(SB.ac.state === 'suspended') SB.ac.resume().catch(() => {}); return SB.ac; }
+  function sbNote(m, dur, type, at){ const ac = sbAc(); if(!ac) return; const t = ac.currentTime + .02 + (at || 0), o = ac.createOscillator(), g = ac.createGain(); dur = dur || .45; o.type = type || 'triangle'; o.frequency.value = sbHz(m); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.5, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(SB.out); o.start(t); o.stop(t + dur + .05); }
+  function sbClick(at, hi){ const ac = sbAc(); if(!ac) return; const t = ac.currentTime + .02 + (at || 0), o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = hi ? 1600 : 900; g.gain.setValueAtTime(.3, t); g.gain.exponentialRampToValueAtTime(.0001, t + .06); o.connect(g); g.connect(SB.out); o.start(t); o.stop(t + .08); }
+  // (the lounge music goes quiet while a music minigame is open)
+  function sbHush(on){ try{ if(LG.gain) LG.gain.gain.value = on ? 0 : LG.vol; }catch(e){} }
+  function sbPianoHtml(){
+    const W = [60, 62, 64, 65, 67, 69, 71, 72], B = [[61, 0], [63, 1], [66, 3], [68, 4], [70, 5]];
+    return `<div class="sb-piano">${W.map(m => `<button type="button" class="w" data-m="${m}"><i>${SB_NOTES[m % 12]}</i></button>`).join('')}${B.map(([m, i]) => `<button type="button" class="b" data-m="${m}" style="left:${(i + 1) * 12.5 - 3.75}%"></button>`).join('')}</div>`;
+  }
+  function sbKeyFlash(el, m){ const k = el.querySelector(`.sb-piano [data-m="${m}"]`); if(k){ k.classList.add('lit'); setTimeout(() => k.classList.remove('lit'), 320); } }
+  // pitch of a short slice of sound (autocorrelation); -1 if it's too quiet or not a clear note
+  function sbPitch(buf, sr){
+    let rms = 0; for(let i = 0; i < buf.length; i++) rms += buf[i] * buf[i]; rms = Math.sqrt(rms / buf.length); if(rms < 0.012) return -1;
+    let r1 = 0, r2 = buf.length - 1; const th = 0.2;
+    for(let i = 0; i < buf.length / 2; i++) if(Math.abs(buf[i]) < th){ r1 = i; break; }
+    for(let i = 1; i < buf.length / 2; i++) if(Math.abs(buf[buf.length - i]) < th){ r2 = buf.length - i; break; }
+    const b = buf.subarray(r1, r2), n = b.length; if(n < 64) return -1; const c = new Float32Array(n);
+    for(let i = 0; i < n; i++){ let s2 = 0; for(let j = 0; j < n - i; j++) s2 += b[j] * b[j + i]; c[i] = s2; }
+    let d = 0; while(d < n - 1 && c[d] > c[d + 1]) d++;
+    let mx = -1, mp = -1; for(let i = d; i < n; i++) if(c[i] > mx){ mx = c[i]; mp = i; }
+    if(mp <= 0 || mp >= n - 1) return -1;
+    let T0 = mp; const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1], a = (x1 + x3 - 2 * x2) / 2, bb = (x3 - x1) / 2; if(a) T0 -= bb / (2 * a);
+    const f = sr / T0; return f > 70 && f < 1100 ? f : -1;
+  }
   // ----- tasks: little minigames -----
   function sbMg(t){
     const el = sbHudEl().querySelector('.sb-mg'); SB.mg = t; el.hidden = false;
-    const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; lgSfx('reveal'); await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(sbMgClose, 700); };
+    const done = async () => { el.innerHTML = '<div class="sb-mgbox"><b>✅ Done!</b></div>'; lgSfx('reveal'); await sbPatch({ [`sabo/game/tasks/${sbMe()}/${t.k}`]: true }); setTimeout(() => { if(SB.mg === t) sbMgClose(); }, 700); };
     const shell = (inner) => `<div class="sb-mgbox"><button type="button" class="sb-x sb-mgx" aria-label="Close">✕</button><b>${t.em} ${escapeHtml(t.n)}</b>${inner}</div>`;
     const R = (n) => Math.floor(Math.random() * n);
     if(t.mg === 'hold'){
@@ -34293,7 +34330,7 @@
       b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up);
     } else if(t.mg === 'wires'){
       const cols = ['#ff4d6d', '#57e1ff', '#ffd166', '#8b4dff'], right = cols.slice().sort(() => Math.random() - .5); let pick = null, n = 0;
-      el.innerHTML = shell(`<p>Click a wire on the left, then the same colour on the right.</p><div class="sb-wires"><div>${cols.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="l" style="--c:${c}"></button>`).join('')}</div><div>${right.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="r" style="--c:${c}"></button>`).join('')}</div></div>`);
+      el.innerHTML = shell(`<p>Click a cable on the left, then the jack with the same colour on the right.</p><div class="sb-wires"><div>${cols.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="l" style="--c:${c}"></button>`).join('')}</div><div>${right.map(c => `<button type="button" class="sb-w" data-c="${c}" data-s="r" style="--c:${c}"></button>`).join('')}</div></div>`);
       el.querySelector('.sb-wires').addEventListener('click', (e) => { const b = e.target.closest('.sb-w'); if(!b || b.classList.contains('ok')) return;
         if(b.dataset.s === 'l'){ el.querySelectorAll('.sb-w.sel').forEach(x => x.classList.remove('sel')); pick = b; b.classList.add('sel'); return; }
         if(pick && pick.dataset.c === b.dataset.c){ pick.classList.add('ok'); b.classList.add('ok'); pick.classList.remove('sel'); pick = null; lgSfx('bubble'); if(++n === 4) done(); } else { el.querySelector('.sb-mgbox').classList.add('shake'); setTimeout(() => { const x = el.querySelector('.sb-mgbox'); if(x) x.classList.remove('shake'); }, 300); } });
@@ -34318,6 +34355,69 @@
       el.querySelector('.sb-keys').addEventListener('click', (e) => { const b = e.target.closest('button'); if(!b) return; const k = b.dataset.k;
         if(k === '⌫') typed = typed.slice(0, -1); else if(k === '✓'){ if(typed === code) return done(); typed = ''; lgSfx('zap'); } else if(typed.length < 4) typed += k;
         scr.textContent = typed.padEnd(4, '·'); });
+    } else if(t.mg === 'piano'){
+      // play back a 4-note melody on the organ
+      const W = [60, 62, 64, 65, 67, 69, 71, 72], mel = Array.from({ length: 4 }, () => W[R(8)]); let at = 0, busy = true;
+      el.innerHTML = shell(`<p>Listen to the melody, then play it back.</p>${sbPianoHtml()}<div class="sb-row"><button type="button" class="lg-b" data-x="again">🔁 Listen again</button><span class="sb-wait">0/4</span></div>`);
+      sbHush(true);
+      const play = () => { busy = true; at = 0; el.querySelector('.sb-wait').textContent = '0/4'; mel.forEach((m, k) => { sbNote(m, .5, 'triangle', .4 + k * .55); setTimeout(() => sbKeyFlash(el, m), 400 + k * 550); }); setTimeout(() => { busy = false; }, 400 + mel.length * 550); };
+      play();
+      el.querySelector('[data-x="again"]').addEventListener('click', play);
+      el.querySelector('.sb-piano').addEventListener('pointerdown', (e) => { const k = e.target.closest('[data-m]'); if(!k || busy) return; const m = +k.dataset.m; sbNote(m, .5); sbKeyFlash(el, m);
+        if(m === mel[at]){ at++; el.querySelector('.sb-wait').textContent = at + '/4'; if(at === mel.length) setTimeout(done, 300); } else { const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(play, 500); } });
+    } else if(t.mg === 'ear'){
+      // hear a bell, find it on the keys (3 right)
+      const W = [60, 62, 64, 65, 67, 69, 71]; let note = W[R(7)], got = 0;
+      el.innerHTML = shell(`<p>Listen to the bell and find that note on the keys. Get 3 right.</p>${sbPianoHtml()}<div class="sb-row"><button type="button" class="lg-b" data-x="again">🔔 Ring it again</button><span class="sb-wait">0/3</span></div>`);
+      sbHush(true);
+      const ring = () => sbNote(note, 1.1, 'sine'); setTimeout(ring, 300);
+      el.querySelector('[data-x="again"]').addEventListener('click', ring);
+      el.querySelector('.sb-piano').addEventListener('pointerdown', (e) => { const k = e.target.closest('[data-m]'); if(!k) return; const m = +k.dataset.m; sbNote(m, .45); sbKeyFlash(el, m);
+        if(m % 12 === note % 12){ got++; el.querySelector('.sb-wait').textContent = got + '/3'; lgSfx('bubble'); if(got >= 3) return setTimeout(done, 300); let n2; do{ n2 = W[R(7)]; }while(n2 === note); note = n2; setTimeout(ring, 650); }
+        else { const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(ring, 600); } });
+    } else if(t.mg === 'rhythm'){
+      // tap the rhythm back on the drum
+      const pats = [[0, 400, 800, 1000, 1200], [0, 200, 400, 800, 1200], [0, 400, 600, 800, 1200], [0, 300, 600, 900, 1050]], pat = pats[R(pats.length)]; let taps = [], busy = true;
+      el.innerHTML = shell(`<p>Listen to the beat, then tap it back on the drum.</p><div class="sb-dots">${pat.map(() => '<i></i>').join('')}</div><button type="button" class="sb-drum">🥁</button><div class="sb-row"><button type="button" class="lg-b" data-x="again">🔁 Listen again</button></div>`);
+      sbHush(true);
+      const dots = [...el.querySelectorAll('.sb-dots i')];
+      const play = () => { busy = true; taps = []; dots.forEach(d => d.className = ''); pat.forEach((ms, k) => { sbClick(.4 + ms / 1000, k === 0); setTimeout(() => { dots[k].className = 'demo'; setTimeout(() => dots[k].className = '', 150); }, 400 + ms); }); setTimeout(() => { busy = false; }, 600 + pat[pat.length - 1]); };
+      play(); el.querySelector('[data-x="again"]').addEventListener('click', play);
+      el.querySelector('.sb-drum').addEventListener('pointerdown', () => { if(busy) return; const now = performance.now(); taps.push(now); sbClick(0, taps.length === 1); const k = taps.length - 1; if(dots[k]) dots[k].className = 'on';
+        if(taps.length === pat.length){ const ok = pat.every((ms, i) => Math.abs((taps[i] - taps[0]) - ms) < 130); if(ok) setTimeout(done, 250); else { dots.forEach(d => d.className = 'bad'); const b = el.querySelector('.sb-mgbox'); b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); setTimeout(play, 700); } } });
+    } else if(t.mg === 'sing'){
+      // sing (or hum) the note — any octave; with no mic, match it by ear with a slider
+      const tgt = [60, 62, 64, 65, 67, 69][R(6)], name = SB_NOTES[tgt % 12]; let hold = 0, stream = null, iv = 0;
+      el.innerHTML = shell(`<p>Sing or hum <b class="sb-code">${name}</b> (any octave) and hold it in the green zone.</p><div class="sb-meter"><i class="z"></i><i class="m"></i></div><div class="sb-bar"><i></i></div><div class="sb-row"><button type="button" class="lg-b" data-x="ref">🔊 Hear it</button><span class="sb-wait">Allow the microphone to start…</span></div><div class="sb-nomic" hidden></div>`);
+      sbHush(true); setTimeout(() => sbNote(tgt, 1.2, 'sine'), 250);
+      el.querySelector('[data-x="ref"]').addEventListener('click', () => sbNote(tgt, 1.2, 'sine'));
+      const meter = el.querySelector('.sb-meter .m'), bar = el.querySelector('.sb-bar i'), info = el.querySelector('.sb-wait');
+      const show = (d) => { meter.style.left = (50 + Math.max(-1.5, Math.min(1.5, d)) / 1.5 * 46) + '%'; meter.classList.toggle('in', Math.abs(d) < .35); };
+      const stop = () => { clearInterval(iv); if(stream) stream.getTracks().forEach(tr => tr.stop()); stream = null; };
+      SB.mgStop = stop;
+      const fallback = (why) => {
+        info.textContent = why; const box = el.querySelector('.sb-nomic'); box.hidden = false;
+        box.innerHTML = `<p>No mic? Match it by ear instead: drag until the two tones sound the same, then lock it in.</p><input type="range" min="-300" max="300" value="${R(2) ? 240 : -240}" class="sb-sl"><button type="button" class="lg-b sb-go">Lock it in</button>`;
+        const sl = box.querySelector('.sb-sl'); let last = 0;
+        sl.addEventListener('input', () => { const d = +sl.value / 100; show(d); if(performance.now() - last > 140){ last = performance.now(); sbNote(tgt + d, .25, 'sine'); } });
+        box.querySelector('.sb-go').addEventListener('click', () => { if(Math.abs(+sl.value) <= 30){ stop(); done(); } else { sbNote(tgt, .6, 'sine', .05); lgSfx('zap'); } });
+      };
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) fallback('This browser can\'t use a microphone here.');
+      else navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } }).then((st) => {
+        if(SB.mg !== t){ st.getTracks().forEach(tr => tr.stop()); return; }
+        stream = st; const ac = sbAc(), src = ac.createMediaStreamSource(st), an = ac.createAnalyser(); an.fftSize = 2048; src.connect(an);
+        const buf = new Float32Array(an.fftSize); info.textContent = 'Listening… 🎤';
+        iv = setInterval(() => {
+          if(SB.mg !== t || !el.isConnected){ stop(); return; }
+          an.getFloatTimeDomainData(buf); const f = sbPitch(buf, ac.sampleRate);
+          if(f < 0){ hold = Math.max(0, hold - 40); bar.style.width = (hold / 1200 * 100) + '%'; meter.classList.remove('in'); info.textContent = 'Listening… 🎤'; return; }
+          const m = 69 + 12 * Math.log2(f / 440), d = (((m - tgt) % 12) + 18) % 12 - 6, near = Math.round(m);
+          show(d); info.textContent = `You: ${SB_NOTES[((near % 12) + 12) % 12]} ${d > .05 ? '(a bit high)' : d < -.05 ? '(a bit low)' : ''}`;
+          if(Math.abs(d) < .35) hold += 60; else hold = Math.max(0, hold - 30);
+          bar.style.width = Math.min(100, hold / 1200 * 100) + '%';
+          if(hold >= 1200){ stop(); done(); }
+        }, 60);
+      }).catch(() => fallback('No microphone (or it was blocked).'));
     } else if(t.mg === 'slider'){
       const goal = 15 + R(70);
       el.innerHTML = shell(`<p>Slide until the two waves line up.</p><canvas class="sb-wave" width="260" height="80"></canvas><input type="range" min="0" max="100" value="${goal > 50 ? 5 : 95}" class="sb-sl"><button type="button" class="lg-b sb-go">Lock it in</button>`);
@@ -34328,7 +34428,7 @@
     }
     el.querySelector('.sb-mgx').addEventListener('click', sbMgClose);
   }
-  function sbMgClose(){ SB.mg = null; const el = SB.hud && SB.hud.querySelector('.sb-mg'); if(el){ el.hidden = true; el.innerHTML = ''; } }
+  function sbMgClose(){ try{ if(SB.mgStop) SB.mgStop(); }catch(e){} SB.mgStop = null; sbHush(false); SB.mg = null; const el = SB.hud && SB.hud.querySelector('.sb-mg'); if(el){ el.hidden = true; el.innerHTML = ''; } }
 
   // ----- the CCTV monitor (the Studio desk during a game) -----
   function sbCctv(on){
