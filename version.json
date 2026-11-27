@@ -1,1 +1,1 @@
-{"build": 235, "version": "V18", "file": "SaiDeck.html", "notes": "Sabotrack gates: the darkness behind a shut gate now starts exactly at the gate line \u2014 no gap in front of it and no spill past it."}
+{"build": 236, "version": "V18", "file": "SaiDeck.html", "notes": "Sabotrack gates: rooms behind a shut gate now go fully dark \u2014 their walls too, not just the floor. Only the outlines and the gate stay visible."}
