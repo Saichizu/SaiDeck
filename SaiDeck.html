@@ -393,6 +393,7 @@
   .sb-panel h4{margin:0 0 6px;font-size:18px;} .sb-panel p{margin:0 0 10px;font-size:12.5px;line-height:1.45;color:rgba(241,236,255,.78);}
   .sb-pl{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;} .sb-pl span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12.5px;} .sb-pl span.host{background:rgba(255,209,102,.18);} .sb-pl i{font-size:12px;opacity:.7;}
   .sb-nb{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;} .sb-nb b{min-width:18px;text-align:center;font-size:16px;} .sb-nb .lg-b{padding:2px 10px;}
+  .sb-vg{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;} .sb-vg input{flex:1;min-width:120px;accent-color:#ff4d6d;} .sb-vg .sb-wait{width:100%;font-weight:500;}
   .sb-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .sb-wait{font-size:12px;opacity:.75;}
   .sb-go{background:#ff4d6d !important;color:#fff !important;border-color:#ff4d6d !important;} .sb-go[disabled]{opacity:.5;cursor:not-allowed;}
   .sb-x{position:absolute;right:10px;top:8px;background:none;border:0;color:#f1ecff;font-size:16px;cursor:pointer;opacity:.7;} .sb-x:hover{opacity:1;}
@@ -23469,7 +23470,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 227;                 // ← goes up by one with every published version
+  const SD_BUILD = 228;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33806,6 +33807,7 @@
     if(mp.moving){ g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(m.tx, m.ty, 9 + Math.sin(now / 120), 3.5, 0, 0, 7); g.stroke(); }
     if(LG.song === 'hype' || LG.song === 'retro'){ g.save(); g.globalCompositeOperation = 'lighter'; for(let i = 0; i < 3; i++){ const a = now / 800 + i * 2.1; g.globalAlpha = .2; g.drawImage(lgGlow(), LG.cam.x + Math.cos(a) * 260 - 80, LG.cam.y + Math.sin(a * 1.3) * 120 - 60, 160, 90); } g.restore(); }
     lgFog(g, vis);
+    try{ sbVig(g, W, H, v, mp); }catch(e){}
     if(lgDark()) lgDrawDark(g, W, H, v, mp, now); else LG.light = null;
     if(LG.scareAt && performance.now() - LG.scareAt < 600){ const k = 1 - (performance.now() - LG.scareAt) / 600; g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(160,0,20,${.45 * k})`; g.fillRect(0, 0, W, H); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -33954,6 +33956,24 @@
   const SB_MAXP = 24;
   const sbBadMax = (n) => Math.max(1, Math.min(11, Math.floor((n - 2) / 2)));
   const sbBadCount = (n, g) => { const want = g && g.nb ? g.nb | 0 : (n <= 6 ? 1 : n <= 9 ? 2 : 3); return Math.max(1, Math.min(sbBadMax(n), want)); };
+  // how far the crew can see (0 = everything, 100 = a small circle); saboteurs and ghosts always see everything
+  const SB_VG_DEF = 35;
+  const sbVg = (g = sbG()) => g && typeof g.vg === 'number' ? Math.max(0, Math.min(100, g.vg)) : SB_VG_DEF;
+  function sbSetVg(v){
+    v = Math.max(0, Math.min(100, Math.round(+v || 0))); SB.vgPrev = v;
+    clearTimeout(SB.vgT); SB.vgT = setTimeout(() => { const g = sbG(); if(g && g.st === 'lobby' && g.host === sbMe()) sbPatch({ 'sabo/game/vg': v }, true); }, 350);
+  }
+  // the dark edges (screen space): only for crew in a game, or the host previewing the setting in the lobby
+  function sbVig(g2, W, H, v, mp){
+    const G = sbG(); let amt = 0;
+    if(sbIn(G) && G.st === 'play' && !sbBad() && !sbDeadU(sbMe(), G)) amt = sbVg(G);
+    else if(SB.panelOpen && G && G.st === 'lobby' && G.host === sbMe() && SB.vgPrev != null) amt = SB.vgPrev;
+    if(amt <= 0 || lgDark()) return;
+    const k = W / v.vw, sx = (mp.x - v.x0) * k, sy = (mp.y - 24 - v.y0) * k, R = (560 - amt * 4.1) * k, r0 = R * .55;
+    g2.save(); g2.setTransform(1, 0, 0, 1, 0, 0);
+    const gr = g2.createRadialGradient(sx, sy, r0, sx, sy, R); gr.addColorStop(0, 'rgba(4,2,10,0)'); gr.addColorStop(1, `rgba(4,2,10,${Math.min(.97, .55 + amt / 220)})`);
+    g2.fillStyle = gr; g2.fillRect(0, 0, W, H); g2.restore();
+  }
   async function sbSetBad(d){
     const g = sbG(); if(!g || g.st !== 'lobby' || g.host !== sbMe()) return;
     const n = Object.keys(g.pl || {}).length, cur = sbBadCount(Math.max(SB_MIN, n), g), nb = Math.max(1, Math.min(sbBadMax(Math.max(SB_MIN, n)), cur + d));
@@ -34226,7 +34246,7 @@
       <div class="sb-portal" hidden></div>
       <div class="sb-cctv" hidden></div>`;
     st.appendChild(h); SB.hud = h;
-    h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; sbHud(true); });
+    h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; SB.vgPrev = SB.panelOpen ? sbVg() : null; sbHud(true); });
     h.addEventListener('click', (e) => {
       const b = e.target.closest('[data-sb]'); if(!b) return; const a = b.dataset.sb;
       if(a === 'nb-') sbSetBad(-1); else if(a === 'nb+') sbSetBad(1);
@@ -34237,6 +34257,7 @@
       else if(a === 'hide'){ const i = sbNearHide(); if(i >= 0) sbHideIn(i); } else if(a === 'unhide') sbHideOut();
       else if(a === 'pgo') sbPortalGo(+b.dataset.i); else if(a === 'pout') sbPortalOut(); else if(a === 'cctvx') sbCctv(false);
     });
+    h.addEventListener('input', (e) => { const r = e.target.closest('.sb-vgin'); if(!r) return; sbSetVg(r.value); const t = h.querySelector('.sb-vgv'); if(t) t.textContent = +r.value === 0 ? 'full view' : r.value + '% dark'; });
     h.addEventListener('pointerover', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b) sbPortalPeek(+b.dataset.i); });
     h.addEventListener('pointerout', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b && !b.contains(e.relatedTarget)) sbPortalPeek(null); });
     return h;
@@ -34254,12 +34275,13 @@
     pnl.hidden = !SB.panelOpen;
     if(SB.panelOpen){
       const ids = G && G.st === 'lobby' ? Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)) : [];
-      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win, G && G.nb]);
+      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win, G && G.nb, host ? 0 : G && G.vg]);
       if(force || pnl.dataset.k !== key){ pnl.dataset.k = key;
         pnl.innerHTML = `<button type="button" class="sb-x" data-sb="close" aria-label="Close">✕</button><h4>🎮 Sabotrack</h4>
           <p>Crew do tasks around the lounge; hidden saboteurs kill, cut the lights, lock gates and sneak through portals. Report bodies or hit the button in the Great Hall to vote someone out. ${SB_MIN}–${SB_MAXP} players.</p>
           ${ids.length ? (() => { const n = Math.max(SB_MIN, ids.length), nb = sbBadCount(n, G), mx = sbBadMax(n); return `<div class="sb-nb">🔪 Saboteurs: ${host ? `<button type="button" class="lg-b" data-sb="nb-" ${nb <= 1 ? 'disabled' : ''}>−</button>` : ''}<b>${nb}</b>${host ? `<button type="button" class="lg-b" data-sb="nb+" ${nb >= mx ? 'disabled' : ''}>+</button>` : ''}<span class="sb-wait">(up to ${mx} with ${ids.length} player${ids.length === 1 ? '' : 's'}${mx < 11 ? ` · ${(mx + 1) * 2 + 2} players for ${mx + 1}` : ''})</span></div>`; })() : ''}
           ${G && G.st === 'over' && G.win ? `<p class="sb-last">Last game: <b>${G.win === 'bad' ? '🔪 Saboteurs won' : '🎧 Crew won'}</b></p>` : ''}
+          ${ids.length ? (() => { const vg = host && SB.vgPrev != null ? SB.vgPrev : sbVg(G); return `<div class="sb-vg">👁️ Crew vision: ${host ? `<input type="range" min="0" max="100" step="5" value="${vg}" class="sb-vgin" aria-label="How dark the crew's view is">` : ''}<b class="sb-vgv">${vg === 0 ? 'full view' : vg + '% dark'}</b>${host ? '<span class="sb-wait">(you see it on your screen while this is open — saboteurs always see everything)</span>' : '<span class="sb-wait">(saboteurs always see everything)</span>'}</div>`; })() : ''}
           <div class="sb-pl">${ids.map(u => `<span class="${u === G.host ? 'host' : ''}">${u === G.host ? '👑 ' : ''}${escapeHtml(sbName(u, G))}</span>`).join('') || '<i>Nobody yet — be the first!</i>'}</div>
           <div class="sb-row">${inLobby ? `<button type="button" class="lg-b" data-sb="leave">Leave</button>` : `<button type="button" class="lg-b sb-go" data-sb="join">Join</button>`}
           ${host ? `<button type="button" class="lg-b sb-go" data-sb="start" ${ids.length < SB_MIN ? 'disabled' : ''}>Start${ids.length < SB_MIN ? ` (${ids.length}/${SB_MIN})` : ''}</button>` : inLobby ? `<span class="sb-wait">Waiting for ${escapeHtml(sbName(G.host, G))} to start…</span>` : ''}</div>`; }
