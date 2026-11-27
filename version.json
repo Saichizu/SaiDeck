@@ -1,1 +1,1 @@
-{"build": 248, "version": "V18", "file": "SaiDeck.html", "notes": "Chat is much lighter: it now loads only the newest 30 messages (it used to load 200). Scroll up to load older ones, 30 at a time."}
+{"build": 249, "version": "V18", "file": "SaiDeck.html", "notes": "Lounge is lighter again: name tags and speech bubbles are drawn once and reused instead of redrawing the text every frame, and the minimap's map is cached (only the moving dots update)."}
