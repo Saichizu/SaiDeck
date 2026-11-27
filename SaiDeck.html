@@ -23494,7 +23494,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 242;                 // ← goes up by one with every published version
+  const SD_BUILD = 243;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33476,14 +33476,18 @@
     const pts = [[d.x || 0, d.y || 0], [d.tx ?? d.x ?? 0, d.ty ?? d.y ?? 0]];
     return { pts, cum: [0, Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])] };
   }
+  // Sabotrack: everyone in a running game walks at the speed the host picked (×150 a second)
+  function lgGameSpeed(d){
+    try{ const G = sbG(); if(!G || (G.st !== 'play' && G.st !== 'meet') || !G.pl) return 0; const u = d === LG.me ? lgUid() : d.u; return u && G.pl[u] ? Math.round(150 * sbSp(G)) : 0; }catch(e){ return 0; }
+  }
   function lgPos(d, now){
-    const c = lgPathOf(d), fast = (d.f || 0) > now, v = fast ? 280 : 150, len = c.cum[c.cum.length - 1];
+    const c = lgPathOf(d), sv = lgGameSpeed(d), fast = sv ? sv > 200 : (d.f || 0) > now, v = sv || (fast ? 280 : 150), len = c.cum[c.cum.length - 1];
     const s = Math.max(0, (now - (d.t || 0)) / 1000 * v);
     const fix = (p) => { p.y = Math.max(0, Math.min(LG_WH, p.y)); p.x = Math.max(0, Math.min(LG_WW, p.x)); return p; };
-    if(s >= len || c.pts.length < 2){ const l = c.pts[c.pts.length - 1], pr = c.pts[Math.max(0, c.pts.length - 2)]; return fix({ x: l[0], y: l[1], moving: false, face: l[0] < pr[0] - 1 ? -1 : l[0] > pr[0] + 1 ? 1 : 0, fast }); }
+    if(s >= len || c.pts.length < 2){ const l = c.pts[c.pts.length - 1], pr = c.pts[Math.max(0, c.pts.length - 2)]; return fix({ x: l[0], y: l[1], moving: false, face: l[0] < pr[0] - 1 ? -1 : l[0] > pr[0] + 1 ? 1 : 0, fast, v }); }
     let i = 1; while(i < c.cum.length - 1 && c.cum[i] < s) i++;
     const a = c.pts[i - 1], b = c.pts[i], seg = c.cum[i] - c.cum[i - 1], k = seg > 0 ? (s - c.cum[i - 1]) / seg : 1;
-    return fix({ x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k, moving: true, face: b[0] < a[0] - 1 ? -1 : b[0] > a[0] + 1 ? 1 : 0, fast });
+    return fix({ x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k, moving: true, face: b[0] < a[0] - 1 ? -1 : b[0] > a[0] + 1 ? 1 : 0, fast, v });
   }
   async function lgWrite(obj, method, quiet){
     try{
@@ -34093,6 +34097,13 @@
   // how far the crew can see (0 = everything, 100 = a small circle); saboteurs and ghosts always see everything
   const SB_VG_DEF = 35;
   const sbVg = (g = sbG()) => g && typeof g.vg === 'number' ? Math.max(0, Math.min(100, g.vg)) : SB_VG_DEF;
+  const SB_SP_DEF = 1.9;           // (×walking speed; 1.9 ≈ the soda speed games always used)
+  const sbSp = (g = sbG()) => g && typeof g.sp === 'number' ? Math.max(1, Math.min(3, g.sp)) : SB_SP_DEF;
+  function sbSetSp(v){
+    v = Math.max(1, Math.min(3, Math.round((+v || SB_SP_DEF) * 10) / 10)); SB.spPrev = v;
+    clearTimeout(SB.spT); SB.spT = setTimeout(() => { const g = sbG(); if(g && g.st === 'lobby' && g.host === sbMe()) sbPatch({ 'sabo/game/sp': v }, true); }, 350);
+  }
+  const sbSpLabel = (v) => `${(+v).toFixed(1)}×${+v <= 1.05 ? ' (walking)' : Math.abs(v - 1.9) < .05 ? ' (soda)' : +v >= 2.6 ? ' (zoom!)' : ''}`;
   function sbSetVg(v){
     v = Math.max(0, Math.min(100, Math.round(+v || 0))); SB.vgPrev = v;
     clearTimeout(SB.vgT); SB.vgT = setTimeout(() => { const g = sbG(); if(g && g.st === 'lobby' && g.host === sbMe()) sbPatch({ 'sabo/game/vg': v }, true); }, 350);
@@ -34480,7 +34491,7 @@
       <div class="sb-cctv" hidden></div>
       <div class="sb-smap" hidden></div>`;
     st.appendChild(h); SB.hud = h;
-    h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; SB.vgPrev = SB.panelOpen ? sbVg() : null; sbHud(true); });
+    h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; SB.vgPrev = SB.panelOpen ? sbVg() : null; SB.spPrev = SB.panelOpen ? sbSp() : null; sbHud(true); });
     h.addEventListener('click', (e) => {
       const b = e.target.closest('[data-sb]'); if(!b) return; const a = b.dataset.sb;
       if(a === 'test-good') sbTestStart('good'); else if(a === 'test-bad') sbTestStart('bad'); else if(a === 'testend') sbTestEnd();
@@ -34495,7 +34506,7 @@
       else if(a === 'hide'){ const i = sbNearHide(); if(i >= 0) sbHideIn(i); } else if(a === 'unhide') sbHideOut();
       else if(a === 'pgo') sbPortalGo(+b.dataset.i); else if(a === 'pout') sbPortalOut(); else if(a === 'cctvx') sbCctv(false);
     });
-    h.addEventListener('input', (e) => { const r = e.target.closest('.sb-vgin'); if(!r) return; sbSetVg(r.value); const t = h.querySelector('.sb-vgv'); if(t) t.textContent = +r.value === 0 ? 'full view' : r.value + '% dark'; });
+    h.addEventListener('input', (e) => { const q = e.target.closest('.sb-spin'); if(q){ sbSetSp(q.value); const t = h.querySelector('.sb-spv'); if(t) t.textContent = sbSpLabel(+q.value); return; } const r = e.target.closest('.sb-vgin'); if(!r) return; sbSetVg(r.value); const t = h.querySelector('.sb-vgv'); if(t) t.textContent = +r.value === 0 ? 'full view' : r.value + '% dark'; });
     h.addEventListener('pointerover', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b) sbPortalPeek(+b.dataset.i); });
     h.addEventListener('pointerout', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b && !b.contains(e.relatedTarget)) sbPortalPeek(null); });
     return h;
@@ -34513,13 +34524,14 @@
     pnl.hidden = !SB.panelOpen;
     if(SB.panelOpen){
       const ids = G && G.st === 'lobby' ? Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)) : [];
-      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win, G && G.nb, host ? 0 : G && G.vg]);
+      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win, G && G.nb, host ? 0 : G && G.vg, host ? 0 : G && G.sp]);
       if(force || pnl.dataset.k !== key){ pnl.dataset.k = key;
         pnl.innerHTML = `<button type="button" class="sb-x" data-sb="close" aria-label="Close">✕</button><h4>🎮 Sabotrack</h4>
           <p>Crew do tasks around the lounge; hidden saboteurs kill, cut the lights, lock gates and sneak through portals. Report bodies or hit the button in the Great Hall to vote someone out. ${SB_MIN}–${SB_MAXP} players.</p>
           ${ids.length ? (() => { const n = Math.max(SB_MIN, ids.length), nb = sbBadCount(n, G), mx = sbBadMax(n); return `<div class="sb-nb">🔪 Saboteurs: ${host ? `<button type="button" class="lg-b" data-sb="nb-" ${nb <= 1 ? 'disabled' : ''}>−</button>` : ''}<b>${nb}</b>${host ? `<button type="button" class="lg-b" data-sb="nb+" ${nb >= mx ? 'disabled' : ''}>+</button>` : ''}<span class="sb-wait">(up to ${mx} with ${ids.length} player${ids.length === 1 ? '' : 's'}${mx < 11 ? ` · ${(mx + 1) * 2 + 2} players for ${mx + 1}` : ''})</span></div>`; })() : ''}
           ${G && G.st === 'over' && G.win ? `<p class="sb-last">Last game: <b>${G.win === 'bad' ? '🔪 Saboteurs won' : '🎧 Crew won'}</b></p>` : ''}
-          ${ids.length ? (() => { const vg = host && SB.vgPrev != null ? SB.vgPrev : sbVg(G); return `<div class="sb-vg">👁️ Crew vision: ${host ? `<input type="range" min="0" max="100" step="5" value="${vg}" class="sb-vgin" aria-label="How dark the crew's view is">` : ''}<b class="sb-vgv">${vg === 0 ? 'full view' : vg + '% dark'}</b>${host ? '<span class="sb-wait">(you see it on your screen while this is open — saboteurs always see everything)</span>' : '<span class="sb-wait">(saboteurs always see everything)</span>'}</div>`; })() : ''}
+          ${(() => { const host2 = host || !ids.length, vg = host2 && SB.vgPrev != null ? SB.vgPrev : sbVg(G); return `<div class="sb-vg">👁️ Crew vision: ${host2 ? `<input type="range" min="0" max="100" step="5" value="${vg}" class="sb-vgin" aria-label="How dark the crew's view is">` : ''}<b class="sb-vgv">${vg === 0 ? 'full view' : vg + '% dark'}</b>${host ? '<span class="sb-wait">(you see it on your screen while this is open — saboteurs always see everything)</span>' : '<span class="sb-wait">(saboteurs always see everything)</span>'}</div>`; })()}
+          ${(() => { const host2 = host || !ids.length, sp = host2 && SB.spPrev != null ? SB.spPrev : sbSp(G); return `<div class="sb-vg">🏃 Speed: ${host2 ? `<input type="range" min="1" max="3" step="0.1" value="${sp}" class="sb-spin" aria-label="How fast everyone moves in the game">` : ''}<b class="sb-spv">${sbSpLabel(sp)}</b></div>`; })()}
           <div class="sb-pl">${ids.map(u => `<span class="${u === G.host ? 'host' : ''}">${u === G.host ? '👑 ' : ''}${escapeHtml(sbName(u, G))}</span>`).join('') || '<i>Nobody yet — be the first!</i>'}</div>
           ${ids.length <= 1 ? `<div class="sb-test"><b>🧪 Test play</b> <span class="sb-wait">alone? try it against 4 bots (nothing is saved)</span><div class="sb-row"><button type="button" class="lg-b" data-sb="test-good">🎧 as Crew</button><button type="button" class="lg-b" data-sb="test-bad">🔪 as Saboteur</button></div></div>` : ''}
           <div class="sb-row">${inLobby ? `<button type="button" class="lg-b" data-sb="leave">Leave</button>` : `<button type="button" class="lg-b sb-go" data-sb="join">Join</button>`}
@@ -35143,7 +35155,7 @@
     const badBot = role === 'bad' ? -1 : Math.floor(Math.random() * 4);
     SB_BOTN.forEach((n, i) => { const u = 'sbbot' + i; pl[u] = { n: '🤖 ' + n, c: (i * 3 + 2) % LG_SPRITES.length, j: now + i + 1 }; roles[u] = i === badBot ? 'bad' : 'good'; });
     SB.lroles = roles; SB.lghost = [];
-    SB.local = { id: gid, st: 'play', host: me, t: now, mt: now, nb: 1, mn: 0, vg: SB.vgPrev != null ? SB.vgPrev : sbVg(g), pl, test: true };
+    SB.local = { id: gid, st: 'play', host: me, t: now, mt: now, nb: 1, mn: 0, vg: SB.vgPrev != null ? SB.vgPrev : sbVg(g), sp: SB.spPrev != null ? SB.spPrev : sbSp(g), pl, test: true };
     // the bots line up in the Great Hall too
     const R = lgRoomById('vhall');
     SB.bots = SB_BOTN.map((n, i) => { const [x, y] = lgNearest(Math.round(R.x + R.w / 2 + (i - 1) * 52), Math.round(R.y + 60), true); return { u: 'sbbot' + i, n: '🤖 ' + n, c: pl['sbbot' + i].c, x, y, tx: x, ty: y, p: '', t: now, h: now, f: now + 9e9, next: now + 3000 + i * 900, killAt: now }; });
@@ -35341,7 +35353,7 @@
     const dx = t.x - s.x, dy = t.y - s.y, dist = Math.hypot(dx, dy);
     if(dist > 1500){ LG.tps = (LG.tps || []).concat([{ x: s.x, y: s.y, at: pn }, { x: t.x, y: t.y, at: pn + 120 }]); s.x = t.x; s.y = t.y; s.p = t; return t; }   // (a map teleport: beams at both ends)
     if(dist < 3){ s.x = t.x; s.y = t.y; s.p = t; return t; }
-    const base = t.moving ? (t.fast ? 280 : 150) : 0, sp = Math.min(1400, base + Math.max(150, dist * 3)), step = Math.min(dist, sp * dt);
+    const base = t.moving ? (t.v || (t.fast ? 280 : 150)) : 0, sp = Math.min(1400, base + Math.max(150, dist * 3)), step = Math.min(dist, sp * dt);
     s.x += dx / dist * step; s.y += dy / dist * step;
     s.p = { x: s.x, y: s.y, moving: true, fast: sp > 250, face: Math.abs(dx) > 2 ? (dx < 0 ? -1 : 1) : (t.face || 0) };
     return s.p;
