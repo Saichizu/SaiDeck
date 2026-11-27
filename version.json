@@ -1,1 +1,1 @@
-{"build": 249, "version": "V18", "file": "SaiDeck.html", "notes": "Lounge is lighter again: name tags and speech bubbles are drawn once and reused instead of redrawing the text every frame, and the minimap's map is cached (only the moving dots update)."}
+{"build": 250, "version": "V18", "file": "SaiDeck.html", "notes": "Sabotrack: the host can now add bots in the lobby (up to 9) to fill up a game with real people. Bots are always crew \u2014 they walk around doing missions, vote in meetings, and can be killed like anyone. Needs the new database rules (Publish in Firebase)."}
