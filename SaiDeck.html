@@ -23492,7 +23492,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 237;                 // ← goes up by one with every published version
+  const SD_BUILD = 238;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -34088,7 +34088,7 @@
   async function sbWatch(){
     const g = sbG(), me = sbMe();
     if(!g || !g.id){ if(SB.st){ SB.st = ''; sbHud(true); } return; }
-    if(g.id !== SB.gid){ SB.gid = g.id; SB.role = ''; SB.roleG = ''; SB.bad = new Set(); SB.ejRole = {}; SB.allRoles = null; SB.meetSeen = 0; SB.resSeen = 0; SB.killAt = 0; SB.voted = ''; SB.gatesUsed = 0; SB.st = ''; }
+    if(g.id !== SB.gid){ SB.gid = g.id; SB.role = ''; SB.roleG = ''; SB.bad = new Set(); SB.ejRole = {}; SB.allRoles = null; SB.meetSeen = 0; SB.resSeen = 0; SB.killAt = 0; SB.sabAt = 0; SB.gUsed = 0; SB.strike = null; SB.voted = ''; SB.gatesUsed = 0; SB.st = ''; }   // (a new game: every cooldown starts fresh)
     const was = SB.st; SB.st = g.st;
     const mine = !!(g.pl && g.pl[me]);
     if(mine && (g.st === 'play' || g.st === 'meet') && SB.roleG !== g.id && !SB.roleBusy){
@@ -34124,7 +34124,7 @@
   function sbOnStart(g){
     sbPlaces();
     const [x, y] = sbHallSpot(g); sbTeleport(x, y); sbFast();
-    SB.killAt = trdNow() - SB_KILL_CD + 15000; SB.sabAt = trdNow() - SB_SAB_CD + 20000;
+    SB.killAt = 0; SB.sabAt = 0; SB.gUsed = 0; SB.strike = null;          // (nothing carries over from the last round)
     try{ if(chatRoom() !== SB_ROOM) chatGoRoom(SB_ROOM); }catch(e){}
     const bad = sbBad(), mates = [...SB.bad].filter(u => u !== sbMe()).map(u => sbName(u, g));
     sbSplash((bad ? '🔪 You are a SABOTEUR' : '🎧 You are CREW') + (SB.local ? ' (test)' : ''), bad ? (mates.length ? 'Your partner' + (mates.length > 1 ? 's: ' : ': ') + mates.join(', ') + '. ' : '') + 'Kill the crew, sabotage the lounge, don\'t get caught.' : `Finish your tasks around the lounge and find the ${g.nb > 1 ? g.nb + ' saboteurs' : 'saboteur'}.`, bad ? '#ff4d6d' : '#57e1ff', 4500);
