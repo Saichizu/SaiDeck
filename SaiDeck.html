@@ -23492,7 +23492,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 234;                 // ← goes up by one with every published version
+  const SD_BUILD = 235;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -34551,6 +34551,13 @@
     const c = cv.getContext('2d'); c.scale(K, K); c.fillStyle = '#06040e';
     for(let j = 0; j < LG_GY; j++) for(let i = 0; i < LG_GX; i++){ const t = j * LG_GX + i; if(!hid[t]) continue; const x = (i + .5) * LG_C, y = (j + .5) * LG_C; if(lgRoomAt(x, y)) continue; c.fillRect(i * LG_C - 10, j * LG_C - 10, LG_C + 20, LG_C + 20); }
     for(const id of rooms){ const r = lgRoomById(id); lgPolyPath(c, r.P); c.fill(); }
+    // at each shut gate the dark edge is cut exactly on the gate's line: dark up to it on the far side, nothing on my side
+    const hidAt = (x, y) => { const t = lgTile(x, y); if(t < 0) return 0; const r = lgRoomAt(x, y); return r ? (rooms.has(r.id) ? 1 : 0) : hid[t]; };
+    const shut = sbClosed(); for(const d of sbDoors()){ if(!shut.includes(d.id)) continue;
+      const far = hidAt(d.x + d.u[0] * 40, d.y + d.u[1] * 40), near = hidAt(d.x - d.u[0] * 40, d.y - d.u[1] * 40); if(far === near) continue;
+      const sd = far ? 1 : -1, ux = d.u[0] * sd, uy = d.u[1] * sd, nx = -uy, ny = ux, hw = d.w / 2 + 40, L = 64;
+      const quad = (dir) => { c.beginPath(); c.moveTo(d.x + nx * hw, d.y + ny * hw); c.lineTo(d.x - nx * hw, d.y - ny * hw); c.lineTo(d.x - nx * hw + ux * L * dir, d.y - ny * hw + uy * L * dir); c.lineTo(d.x + nx * hw + ux * L * dir, d.y + ny * hw + uy * L * dir); c.closePath(); };
+      c.globalCompositeOperation = 'destination-out'; quad(-1); c.fill(); c.globalCompositeOperation = 'source-over'; quad(1); c.fill(); }
     c.globalCompositeOperation = 'destination-in'; c.strokeStyle = c.fillStyle = '#000'; c.lineJoin = 'round'; c.lineCap = 'round';
     // (destination-in needs one combined mask: built on a second canvas)
     const mk = SB.occMk || (SB.occMk = document.createElement('canvas')); mk.width = cv.width; mk.height = cv.height; const m = mk.getContext('2d'); m.scale(K, K); m.fillStyle = m.strokeStyle = '#000'; m.lineJoin = 'round'; m.lineCap = 'round';
