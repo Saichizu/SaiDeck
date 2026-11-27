@@ -23503,7 +23503,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 244;                 // ← goes up by one with every published version
+  const SD_BUILD = 245;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33486,8 +33486,10 @@
     return { pts, cum: [0, Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1])] };
   }
   // Sabotrack: everyone in a running game walks at the speed the host picked (×150 a second)
+  // a ghost: dead, in a running game (floats through walls at double speed)
+  function sbGhost(){ try{ const G = sbG(); return !!(G && G.st === 'play' && sbIn(G) && sbDeadU(sbMe(), G)); }catch(e){ return false; } }
   function lgGameSpeed(d){
-    try{ const G = sbG(); if(!G || (G.st !== 'play' && G.st !== 'meet') || !G.pl) return 0; const u = d === LG.me ? lgUid() : d.u; return u && G.pl[u] ? Math.round(150 * sbSp(G)) : 0; }catch(e){ return 0; }
+    try{ const G = sbG(); if(!G || (G.st !== 'play' && G.st !== 'meet') || !G.pl) return 0; const u = d === LG.me ? lgUid() : d.u; return u && G.pl[u] ? Math.round(150 * sbSp(G) * (G.st === 'play' && sbDeadU(u, G) ? 2 : 1)) : 0; }catch(e){ return 0; }
   }
   function lgPos(d, now){
     const c = lgPathOf(d), sv = lgGameSpeed(d), fast = sv ? sv > 200 : (d.f || 0) > now, v = sv || (fast ? 280 : 150), len = c.cum[c.cum.length - 1];
@@ -33566,7 +33568,7 @@
     let dx = 0, dy = 0; for(const k of LG.keys){ const d = LG_DIRKEYS[k]; if(d){ dx += d[0]; dy += d[1]; } }
     const L = Math.hypot(dx, dy); if(!L) return; dx /= L; dy /= L;
     const p = lgPos(LG.me, trdNow()), rich = lgRich();
-    const reach = (ux, uy) => { let d = 0; for(let t = 8; t <= 150; t += 8){ if(!lgOk(lgTile(p.x + ux * t, p.y + uy * t), rich)) break; d = t; } return d; };
+    const ghost = sbGhost(), reach = (ux, uy) => { let d = 0; for(let t = 8; t <= 150; t += 8){ if(ghost){ const qx = p.x + ux * t, qy = p.y + uy * t; if(qx < 10 || qy < 10 || qx > LG_WW - 10 || qy > LG_WH - 10) break; } else if(!lgOk(lgTile(p.x + ux * t, p.y + uy * t), rich)) break; d = t; } return d; };
     let d = reach(dx, dy), ux = dx, uy = dy;
     if(d < 24 && dx && dy){ const ax = reach(Math.sign(dx), 0), ay = reach(0, Math.sign(dy)); if(ax >= ay && ax >= 16){ ux = Math.sign(dx); uy = 0; d = ax; } else if(ay >= 16){ ux = 0; uy = Math.sign(dy); d = ay; } }
     if(d < 8) return;                                                     // (a wall right there)
@@ -33721,6 +33723,13 @@
       g.font = `${Math.round(Math.min(rw, rh) * .55)}px sans-serif`; g.textAlign = 'center'; g.globalAlpha = seen ? 1 : .35; g.fillText(seen ? LG_MMIC[r.id] : (r.vip ? '🔒' : '?'), rx + rw / 2, ry + rh / 2 + Math.min(rw, rh) * .2); g.globalAlpha = 1;
     });
     for(const o of people){ g.fillStyle = '#fff'; g.beginPath(); g.arc(x0 + o.p.x * s, y0 + o.p.y * s, 2, 0, 7); g.fill(); }
+    try{ const G = sbG(); if(sbIn(G) && G.st === 'play'){ const done = (G.tasks || {})[sbMe()] || {}, pl = .5 + .5 * Math.sin(now / 250);
+      g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
+      for(const t of sbMyTasks(G)){ if(done[t.k]) continue; const tx = x0 + t.x * s, ty = y0 + t.y * s, r = sab ? 7 : 5.5;
+        g.fillStyle = `rgba(255,209,102,${.25 + pl * .25})`; g.beginPath(); g.arc(tx, ty, r + 3 + pl * 2, 0, 7); g.fill();
+        g.fillStyle = '#ffd166'; g.beginPath(); g.arc(tx, ty, r, 0, 7); g.fill(); g.strokeStyle = '#1a1226'; g.lineWidth = 1.2; g.stroke();
+        g.font = `900 ${sab ? 9 : 8}px 'Inter',sans-serif`; g.fillStyle = '#1a1226'; g.fillText('!', tx, ty + .5); }
+      g.restore(); } }catch(e){}
     const mp = lgPos(LG.me, now); g.fillStyle = '#ff5fd2'; g.beginPath(); g.arc(x0 + mp.x * s, y0 + mp.y * s, 3.4, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 1; g.stroke();
     LG.mmHits = null; if(sab) try{ sbMMDraw(g, x0, y0, s); }catch(e){}
     if(LG.mmHover != null && !sbIn()){ const r = LG_ROOMS[LG.mmHover]; if(r){ const t = LG.seen.has(r.id) ? (LG.room === r.id ? `📍 ${r.name}` : `✨ Teleport to ${r.name}`) : r.vip ? '🔒 Golden Council Room · 1B+ points' : '❓ Not found yet — walk there first'; g.font = "700 12px 'Inter',sans-serif"; const tw = g.measureText(t).width + 16; g.fillStyle = 'rgba(10,8,20,.9)'; roundRectPath(g, Math.min(W - tw - 8, x0 + mw - tw), y0 + mh + 12, tw, 22, 8); g.fill(); g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(t, Math.min(W - tw - 8, x0 + mw - tw) + 8, y0 + mh + 27); } }
@@ -33891,7 +33900,8 @@
     if(SB.hideIn != null) sbHideOut();
     const m = LG.me, now = trdNow(), cur = lgPos(m, now), rich = lgRich();
     if(!rich && x >= LG_VIPIN && y < LG_VIPY){ x = LG_VIPX - 34; y = Math.max(LG_GATEY - 40, Math.min(LG_GATEY + 40, y)); then = 'vipguard'; }
-    const route = lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
+    const ghost = sbGhost(), route = ghost ? [[cur.x, cur.y], [Math.max(10, Math.min(LG_WW - 10, x)), Math.max(10, Math.min(LG_WH - 10, y))]].map(q => q.map(Math.round))   // (a ghost floats straight through walls)
+      : lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
     while(route.length > 2 && route.join(';').length > 580) route.splice(1, 1);
     const end = route[route.length - 1];
     const ps = route.map(q => q.join(',')).join(';');
@@ -34441,9 +34451,10 @@
     } });
     // bodies (until the next meeting)
     for(const b of sbBodies(G)) list.push({ y: b.y, d: () => {
-      g2.fillStyle = 'rgba(150,0,20,.55)'; g2.beginPath(); g2.ellipse(b.x + 6, b.y - 2, 26, 7, 0, 0, 7); g2.fill();
-      g2.save(); g2.translate(b.x - 18, b.y - 6); g2.rotate(-Math.PI / 2); lgDrawChar(g2, { c: b.c, n: '' }, { x: 0, y: 0, face: 1 }, now, false); g2.restore();
-      g2.font = '13px sans-serif'; g2.textAlign = 'center'; g2.fillText('🦴', b.x + 22, b.y - 4); g2.textAlign = 'left';
+      const spr = lgChar(b.c | 0), row = spr.rows.hurt ? 'hurt' : 'idle', fi = (spr.rows.hurt || spr.rows.idle)[1] - 1, sc = LG_CS, bx = sbSprBox(b.c | 0, row, fi) || { cx: 0, cy: -spr.h / 2, len: spr.h, wid: 20 }, L = bx.len * sc;
+      const cy = b.y - 4; g2.fillStyle = 'rgba(120,0,16,.75)'; g2.beginPath(); g2.ellipse(b.x, cy + 2, L * .62, Math.max(7, bx.wid * sc * .55), 0, 0, 7); g2.fill();
+      g2.fillStyle = 'rgba(170,10,30,.6)'; g2.beginPath(); g2.ellipse(b.x + L * .15, cy, L * .38, Math.max(5, bx.wid * sc * .38), 0, 0, 7); g2.fill();
+      g2.save(); g2.translate(b.x - bx.cy * sc, cy + bx.cx * sc); g2.rotate(-Math.PI / 2); sbSpr(g2, b.c | 0, row, fi, 0, 0, sc, 1, 1); g2.restore();
     } });
     // closed gates
     const shut = sbClosed(G);
@@ -34464,7 +34475,22 @@
           if(near && SB.hideIn !== i){ g2.font = "800 10px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#e8dcff'; g2.fillText('🫥 click to hide', h.x, h.y - h.h - 9); g2.textAlign = 'left'; } } }); } }
     // my tasks: a yellow ! over each one not done yet
     const done = (G.tasks || {})[sbMe()] || {};
-    if(G.st === 'play') for(const t of sbMyTasks(G)) if(!done[t.k]){ const b = Math.sin(pn / 250) * 3; g2.font = "900 18px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#000'; g2.fillText('!', t.x + 1, t.y - 31 + b); g2.fillStyle = '#ffd166'; g2.fillText('!', t.x, t.y - 32 + b); g2.font = '13px sans-serif'; g2.fillText(t.em, t.x, t.y - 8); g2.textAlign = 'left'; }
+    if(G.st === 'play' && !cam) for(const t of sbMyTasks(G)) if(!done[t.k]){
+      const ph = pn / 1000, pulse = .5 + .5 * Math.sin(ph * 4);
+      // on the floor (under people)
+      list.push({ y: t.y - 30, d: () => { g2.save(); g2.translate(t.x, t.y); g2.scale(1, .38);
+        g2.fillStyle = `rgba(255,209,102,${.12 + pulse * .12})`; g2.beginPath(); g2.arc(0, 0, 34, 0, 7); g2.fill();
+        g2.strokeStyle = `rgba(255,209,102,${.55 + pulse * .4})`; g2.lineWidth = 3; g2.beginPath(); g2.arc(0, 0, 26 + pulse * 6, 0, 7); g2.stroke();
+        g2.rotate(ph * 1.5); g2.setLineDash([8, 8]); g2.strokeStyle = 'rgba(255,240,190,.8)'; g2.lineWidth = 2; g2.beginPath(); g2.arc(0, 0, 38, 0, 7); g2.stroke(); g2.restore(); } });
+      // the beam + badge (over people)
+      list.push({ y: t.y + 40, d: () => { const by = t.y - 74 + Math.sin(ph * 3) * 4;
+        const gr = g2.createLinearGradient(0, t.y - 90, 0, t.y); gr.addColorStop(0, 'rgba(255,209,102,0)'); gr.addColorStop(1, `rgba(255,209,102,${.18 + pulse * .12})`); g2.fillStyle = gr; g2.beginPath(); g2.moveTo(t.x - 10, t.y - 90); g2.lineTo(t.x + 10, t.y - 90); g2.lineTo(t.x + 26, t.y); g2.lineTo(t.x - 26, t.y); g2.closePath(); g2.fill();
+        g2.save(); g2.shadowColor = 'rgba(255,209,102,.9)'; g2.shadowBlur = 12 + pulse * 8; g2.fillStyle = '#1a1226'; g2.beginPath(); g2.arc(t.x, by, 16, 0, 7); g2.fill(); g2.restore();
+        g2.strokeStyle = '#ffd166'; g2.lineWidth = 2.5; g2.beginPath(); g2.arc(t.x, by, 16, 0, 7); g2.stroke();
+        g2.font = "15px 'Segoe UI Emoji','Apple Color Emoji',sans-serif"; g2.textAlign = 'center'; g2.textBaseline = 'middle'; g2.fillStyle = '#fff'; g2.fillText(t.em, t.x, by + 1);
+        g2.font = "900 13px 'Inter',sans-serif"; g2.fillStyle = '#ffd166'; g2.strokeStyle = '#1a1226'; g2.lineWidth = 3; g2.strokeText('!', t.x + 14, by - 13); g2.fillText('!', t.x + 14, by - 13);
+        g2.textBaseline = 'alphabetic'; g2.textAlign = 'left'; } });
+    }
     // the meltdown consoles
     if(sbCritical(G)) for(const k of ['meltA', 'meltB']){ const s = SB_SPOTS[k], on = Math.floor(pn / 300) % 2; g2.fillStyle = on ? '#ff2a3a' : '#7a0a14'; g2.fillRect(s.x - 14, s.y - 34, 28, 26); g2.fillStyle = '#e8ecf4'; g2.font = "800 9px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillText('HOLD', s.x, s.y - 18); g2.textAlign = 'left'; }
   }
@@ -34925,11 +34951,13 @@
       // the killer lunges and attacks
       const kx = W * .36 + Math.min(1, Math.max(0, (t - .15) / .25)) * W * .05, kfi = t < .3 ? 0 : Math.floor((t - .3) / .55 * atkN);
       sbSpr(g2, killerC, ksp.rows.atk && t > .3 && t < .85 ? 'atk' : 'idle', ksp.rows.atk && t > .3 && t < .85 ? kfi : Math.floor(t * 8) % ksp.rows.idle[1], kx, base, sc, 1, fade);
-      // the victim gets hit, then falls
-      const hit = t - .55, fall = Math.max(0, Math.min(1, (t - 1) / .45)); g2.save(); g2.translate(W * .64, base); g2.rotate(fall * Math.PI / 2 * .95); g2.translate(fall * 30, fall * 10);
+      // the victim gets hit, then falls — onto a pool that spreads under where the body ends up (drawn first, so it's under them)
+      const hit = t - .55, fall = Math.max(0, Math.min(1, (t - 1) / .45)), vrow = vsp.rows.hurt ? 'hurt' : 'idle', vbx = sbSprBox(meC, vrow, hurtN - 1) || { cx: 0, cy: -vsp.h / 2, len: vsp.h, wid: 20 };
+      const vx = W * .64 + fall * 30, vy = base + fall * 10;
+      if(hit > 0){ const k = Math.min(1, hit * 1.2), L = vbx.len * sc; g2.globalAlpha = fade * Math.min(1, hit * 3) * .85; g2.fillStyle = '#8a0012'; g2.beginPath(); g2.ellipse(W * .64 + 30 - vbx.cy * sc, base + 10 - vbx.cx * sc, L * (.3 + k * .32), L * (.08 + k * .07), 0, 0, 7); g2.fill(); g2.globalAlpha = fade; }
+      g2.save(); g2.translate(vx, vy); g2.rotate(fall * Math.PI / 2);
       if(hit > 0 && hit < .25){ g2.translate(Math.sin(hit * 80) * 8, 0); }
       sbSpr(g2, meC, vsp.rows.hurt && hit > 0 ? 'hurt' : 'idle', hit > 0 ? Math.min(hurtN - 1, Math.floor(hit / .45 * hurtN)) : Math.floor(t * 8) % vsp.rows.idle[1], 0, 0, sc, -1, fade); g2.restore();
-      if(hit > 0){ g2.globalAlpha = fade * Math.min(1, hit * 3) * .8; g2.fillStyle = '#8a0012'; g2.beginPath(); g2.ellipse(W * .66 + 40, base + 6, 30 + Math.min(1, hit) * 90, 10 + Math.min(1, hit) * 18, 0, 0, 7); g2.fill(); }
       // the slash flash
       if(hit > 0 && hit < .18){ g2.globalAlpha = (1 - hit / .18) * .9; g2.fillStyle = '#ffeef0'; g2.fillRect(0, 0, W, H); g2.globalAlpha = 1; g2.strokeStyle = '#ff2a3a'; g2.lineWidth = 8; g2.beginPath(); g2.moveTo(W * .5, H * .2); g2.lineTo(W * .75, H * .7); g2.stroke(); }
       if(t > 1.2){ g2.globalAlpha = fade * Math.min(1, (t - 1.2) / .3); g2.font = `900 ${Math.round(Math.min(46, W / 16))}px 'Inter',sans-serif`; g2.textAlign = 'center'; g2.fillStyle = '#ff4d6d'; g2.fillText('💀 YOU GOT SABOTAGED', W / 2, H * .88); }
