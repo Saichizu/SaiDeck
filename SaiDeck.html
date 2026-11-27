@@ -384,6 +384,7 @@
   .sb-panel{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);width:min(420px,92%);padding:16px 18px;border-radius:14px;background:rgba(16,10,26,.96);border:1px solid rgba(255,77,109,.45);box-shadow:0 12px 40px rgba(0,0,0,.5);}
   .sb-panel h4{margin:0 0 6px;font-size:18px;} .sb-panel p{margin:0 0 10px;font-size:12.5px;line-height:1.45;color:rgba(241,236,255,.78);}
   .sb-pl{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;} .sb-pl span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12.5px;} .sb-pl span.host{background:rgba(255,209,102,.18);} .sb-pl i{font-size:12px;opacity:.7;}
+  .sb-nb{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;} .sb-nb b{min-width:18px;text-align:center;font-size:16px;} .sb-nb .lg-b{padding:2px 10px;}
   .sb-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;} .sb-wait{font-size:12px;opacity:.75;}
   .sb-go{background:#ff4d6d !important;color:#fff !important;border-color:#ff4d6d !important;} .sb-go[disabled]{opacity:.5;cursor:not-allowed;}
   .sb-x{position:absolute;right:10px;top:8px;background:none;border:0;color:#f1ecff;font-size:16px;cursor:pointer;opacity:.7;} .sb-x:hover{opacity:1;}
@@ -23460,7 +23461,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 223;                 // ← goes up by one with every published version
+  const SD_BUILD = 224;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33917,7 +33918,7 @@
     if(!g || !g.id || g.st === 'over' || stale){
       await sbPatch({ 'sabo/game': { id: sbNewId(), st: 'lobby', host: me, t: sbSv(), pl: { [me]: mine } } });
     } else if(g.st === 'lobby'){
-      if(Object.keys(g.pl || {}).length >= 15){ toast('Sabotrack is full (15 players).', 2400); return; }
+      if(Object.keys(g.pl || {}).length >= SB_MAXP){ toast(`Sabotrack is full (${SB_MAXP} players).`, 2400); return; }
       await sbPatch({ [`sabo/game/pl/${me}`]: mine });
     } else { toast('A Sabotrack game is already running — wait for it to finish.', 2600); return; }
     lgSfx('reveal'); sbHud(true);
@@ -33929,12 +33930,19 @@
     else await sbPatch(Object.assign({ [`sabo/game/pl/${me}`]: null }, g.host === me ? { 'sabo/game/host': rest[0] } : {}), true);
     sbHud(true);
   }
-  // saboteurs like Among Us: 1 for up to 6 players, 2 for 7–9, 3 for 10+
-  const sbBadCount = (n) => n <= 6 ? 1 : n <= 9 ? 2 : 3;
+  // how many saboteurs: the host picks, up to one more for every 2 players (4–5 players: 1, 6–7: 2, 8–9: 3, 10–11: 4 … 24: 11)
+  const SB_MAXP = 24;
+  const sbBadMax = (n) => Math.max(1, Math.min(11, Math.floor((n - 2) / 2)));
+  const sbBadCount = (n, g) => { const want = g && g.nb ? g.nb | 0 : (n <= 6 ? 1 : n <= 9 ? 2 : 3); return Math.max(1, Math.min(sbBadMax(n), want)); };
+  async function sbSetBad(d){
+    const g = sbG(); if(!g || g.st !== 'lobby' || g.host !== sbMe()) return;
+    const n = Object.keys(g.pl || {}).length, cur = sbBadCount(Math.max(SB_MIN, n), g), nb = Math.max(1, Math.min(sbBadMax(Math.max(SB_MIN, n)), cur + d));
+    if(nb === cur && g.nb) return; await sbPatch({ 'sabo/game/nb': nb }); sbHud(true);
+  }
   async function sbStart(){
     const g = sbG(), me = sbMe(); if(!g || g.st !== 'lobby' || g.host !== me) return;
     const ids = Object.keys(g.pl || {}); if(ids.length < SB_MIN){ toast(`Sabotrack needs at least ${SB_MIN} players.`, 2400); return; }
-    const nb = sbBadCount(ids.length), sh = ids.slice(); for(let i = sh.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [sh[i], sh[j]] = [sh[j], sh[i]]; }
+    const nb = sbBadCount(ids.length, g), sh = ids.slice(); for(let i = sh.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [sh[i], sh[j]] = [sh[j], sh[i]]; }
     const roles = {}; sh.forEach((u, i) => roles[u] = i < nb ? 'bad' : 'good');
     const ok = await sbPatch({ [`sabo/roles/${g.id}`]: roles, 'sabo/game/st': 'play', 'sabo/game/t': sbSv(), 'sabo/game/mt': sbSv(), 'sabo/game/nb': nb, 'sabo/game/mn': 0 });
     if(ok) lgSfx('reveal');
@@ -33965,8 +33973,8 @@
   // line everyone up in the Great Hall: 1 2 3 4 / 5 6 7 8 …
   function sbHallSpot(g){
     const ids = Object.keys(g.pl || {}).sort((a, b) => ((g.pl[a].j || 0) - (g.pl[b].j || 0)) || (a < b ? -1 : 1)), i = Math.max(0, ids.indexOf(sbMe()));
-    const R = lgRoomById('vhall'), cols = 5, r = Math.floor(i / cols), c = i % cols;
-    const x = R.x + R.w / 2 + (c - (cols - 1) / 2) * 60, y = R.y + 70 + r * 50 + (r >= 1 ? 60 : 0);
+    const R = lgRoomById('vhall'), cols = 6, r = Math.floor(i / cols), c = i % cols;
+    const x = R.x + R.w / 2 + (c - (cols - 1) / 2) * 52, y = R.y + 60 + r * 44 + (r >= 1 ? 50 : 0);
     return lgNearest(Math.round(x), Math.round(y), true);
   }
   function sbTeleport(x, y){
@@ -34193,7 +34201,8 @@
     h.querySelector('.sb-lobby-btn').addEventListener('click', () => { SB.panelOpen = !SB.panelOpen; sbHud(true); });
     h.addEventListener('click', (e) => {
       const b = e.target.closest('[data-sb]'); if(!b) return; const a = b.dataset.sb;
-      if(a === 'join') sbJoin(); else if(a === 'leave') sbLeave(); else if(a === 'start') sbStart(); else if(a === 'close'){ SB.panelOpen = false; sbHud(true); }
+      if(a === 'nb-') sbSetBad(-1); else if(a === 'nb+') sbSetBad(1);
+      else if(a === 'join') sbJoin(); else if(a === 'leave') sbLeave(); else if(a === 'start') sbStart(); else if(a === 'close'){ SB.panelOpen = false; sbHud(true); }
       else if(a === 'kill') sbKill(); else if(a === 'use') sbUse(); else if(a === 'report'){ const bd = sbNearBody(); if(bd) sbMeeting(bd.u); }
       else if(a === 'lights') sbSabotage('lights'); else if(a === 'melt') sbSabotage('melt'); else if(a === 'gates'){ SB.gatePick = !SB.gatePick; sbHud(true); }
       else if(a === 'gate') sbGate(b.dataset.r); else if(a === 'portal') sbPortalIn(); else if(a === 'vote') sbVote(b.dataset.u);
@@ -34216,10 +34225,11 @@
     pnl.hidden = !SB.panelOpen;
     if(SB.panelOpen){
       const ids = G && G.st === 'lobby' ? Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)) : [];
-      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win]);
+      const host = G && G.host === me, key = JSON.stringify([ids, inLobby, host, G && G.st, G && G.win, G && G.nb]);
       if(force || pnl.dataset.k !== key){ pnl.dataset.k = key;
         pnl.innerHTML = `<button type="button" class="sb-x" data-sb="close" aria-label="Close">✕</button><h4>🎮 Sabotrack</h4>
-          <p>Crew do tasks around the lounge; ${ids.length ? sbBadCount(Math.max(SB_MIN, ids.length)) : 1} hidden saboteur${ids.length >= 7 ? 's' : ''} kill, cut the lights, lock gates and sneak through portals. Report bodies or hit the button in the Great Hall to vote someone out.</p>
+          <p>Crew do tasks around the lounge; hidden saboteurs kill, cut the lights, lock gates and sneak through portals. Report bodies or hit the button in the Great Hall to vote someone out. ${SB_MIN}–${SB_MAXP} players.</p>
+          ${ids.length ? (() => { const n = Math.max(SB_MIN, ids.length), nb = sbBadCount(n, G), mx = sbBadMax(n); return `<div class="sb-nb">🔪 Saboteurs: ${host ? `<button type="button" class="lg-b" data-sb="nb-" ${nb <= 1 ? 'disabled' : ''}>−</button>` : ''}<b>${nb}</b>${host ? `<button type="button" class="lg-b" data-sb="nb+" ${nb >= mx ? 'disabled' : ''}>+</button>` : ''}<span class="sb-wait">(up to ${mx} with ${ids.length} player${ids.length === 1 ? '' : 's'}${mx < 11 ? ` · ${(mx + 1) * 2 + 2} players for ${mx + 1}` : ''})</span></div>`; })() : ''}
           ${G && G.st === 'over' && G.win ? `<p class="sb-last">Last game: <b>${G.win === 'bad' ? '🔪 Saboteurs won' : '🎧 Crew won'}</b></p>` : ''}
           <div class="sb-pl">${ids.map(u => `<span class="${u === G.host ? 'host' : ''}">${u === G.host ? '👑 ' : ''}${escapeHtml(sbName(u, G))}</span>`).join('') || '<i>Nobody yet — be the first!</i>'}</div>
           <div class="sb-row">${inLobby ? `<button type="button" class="lg-b" data-sb="leave">Leave</button>` : `<button type="button" class="lg-b sb-go" data-sb="join">Join</button>`}
