@@ -404,7 +404,7 @@
   .sb-acts{position:absolute;right:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;max-width:330px;}
   .sb-act{min-width:74px;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:rgba(20,14,32,.88);color:#fff;font:800 13px 'Inter',sans-serif;cursor:pointer;}
   .sb-act:hover{border-color:#fff;} .sb-act.off{opacity:.4;cursor:default;}
-  .sb-act[data-sb="kill"]{border-color:#ff4d6d;} .sb-act[data-sb="report"]{border-color:#ffd166;} .sb-act[data-sb="portal"]{border-color:#9d6bff;}
+  .sb-act[data-sb="kill"]{border-color:#ff4d6d;} .sb-act[data-sb="hide"], .sb-act[data-sb="unhide"]{border-color:#b48cff;} .sb-act[data-sb="report"]{border-color:#ffd166;} .sb-act[data-sb="portal"]{border-color:#9d6bff;}
   .sb-gates{width:100%;display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-radius:10px;background:rgba(16,10,26,.95);} .sb-gates b{width:100%;font-size:12px;}
   .sb-gates button{padding:5px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:#24162e;color:#fff;font-size:11.5px;cursor:pointer;} .sb-gates button:hover{background:#3a2048;}
   .sb-splash{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 30px;border-radius:16px;background:rgba(8,6,14,.88);border:2px solid var(--c,#fff);text-align:center;pointer-events:none;animation:sbIn .35s ease-out;max-width:80%;}
@@ -23469,7 +23469,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 226;                 // ← goes up by one with every published version
+  const SD_BUILD = 227;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -33658,6 +33658,9 @@
     LG.cv.focus({ preventScroll: true }); const p = lgPt(e), now = trdNow();
     const tip = LG.win.querySelector('.lg-tip'); if(tip) tip.classList.add('gone');
     if(SB.inPortal != null) return;
+    // (a saboteur clicking a hiding spot: walk over and climb in)
+    try{ const G = sbG(); if(sbIn(G) && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G)){ sbPlaces(); const i = SB_HIDES.findIndex(h => p.x > h.x - h.w / 2 - 6 && p.x < h.x + h.w / 2 + 6 && p.y > h.y - h.h - 6 && p.y < h.y + 10);
+      if(i >= 0){ const h = SB_HIDES[i], me = lgPos(LG.me, now); if(Math.hypot(h.sx - me.x, h.sy - me.y) < 70) sbHideIn(i); else lgWalk(h.sx, h.sy, 'sbhide:' + i); return; } } }catch(err){}
     const mi = lgMmIndex(e); if(mi != null){ if(mi >= 0) lgTeleport(LG_ROOMS[mi]); return; }
     if(LG.panel) lgPanel('');
     if(LG.ppop){ lgPersonClose(); return; }
@@ -33744,6 +33747,7 @@
   }
   function lgWalk(x, y, then){
     if(SB.inPortal != null) return; { const G = sbG(); if(sbIn(G) && G.st === 'meet') return; }
+    if(SB.hideIn != null) sbHideOut();
     const m = LG.me, now = trdNow(), cur = lgPos(m, now), rich = lgRich();
     if(!rich && x >= LG_VIPIN && y < LG_VIPY){ x = LG_VIPX - 34; y = Math.max(LG_GATEY - 40, Math.min(LG_GATEY + 40, y)); then = 'vipguard'; }
     const route = lgRoute([cur.x, cur.y], [x, y], rich).map(q => q.map(Math.round));
@@ -33856,6 +33860,13 @@
     { room: 'mobs', dx: 40, dy: 220, to: [5, 7] }, { room: 'elec', dx: 400, dy: 200, to: [6, 9] }, { room: 'vball', dx: 420, dy: 220, to: [4, 9, 10] },
     { room: 'market', dx: 420, dy: 210, to: [7, 8] }, { room: 'arcade', dx: 40, dy: 190, to: [0, 8] },
   ];
+  // hiding spots for saboteurs: step in and vanish (only saboteurs see them glow); w × h is the box drawn around it, standing on (x, y)
+  const SB_HIDES = [
+    { n: 'locker', room: 'lobby', dx: 302, dy: 0, w: 17, h: 96 }, { n: 'locker', room: 'lobby', dx: 381, dy: 0, w: 17, h: 96 },
+    { n: 'coffin', room: 'vhall', dx: 130, dy: 204, w: 76, h: 44 }, { n: 'coffin', room: 'vhall', dx: 350, dy: 204, w: 76, h: 44 },
+    { n: 'crate', room: 'elec', dx: 60, dy: 172, w: 44, h: 58 }, { n: 'cupboard', room: 'mclass', dx: 60, dy: 132, w: 58, h: 92 },
+    { n: 'crate', room: 'market', dx: 410, dy: 252, w: 44, h: 58 },
+  ];
   // the emergency button (on a table in the middle of the Great Hall), the meltdown consoles (Control Room), the CCTV cameras
   const SB_SPOTS = {};
   const SB_CAMS = [
@@ -33866,6 +33877,7 @@
     const fix = (o) => { const p = lgNearest(o.x, o.y, true); o.x = p[0]; o.y = p[1]; return o; };
     for(const t of SB_TASKS) Object.assign(t, fix(lgIn(t.room, t.dx, t.dy)));
     for(const q of SB_PORTALS) Object.assign(q, fix(lgIn(q.room, q.dx, q.dy)));
+    for(const h of SB_HIDES){ Object.assign(h, lgIn(h.room, h.dx, h.dy)); const p = lgNearest(h.x, h.y + 16, true); h.sx = p[0]; h.sy = p[1]; }
     SB_SPOTS.btn = lgIn('vhall', 240, 120);
     SB_SPOTS.meltA = fix(lgIn('control', 60, 200)); SB_SPOTS.meltB = fix(lgIn('control', 460, 200));
   }
@@ -34005,7 +34017,7 @@
   function sbOnMeeting(g){
     const [x, y] = sbHallSpot(g); sbTeleport(x, y);
     const b = g.meet.b; sbSplash(b ? '📣 DEAD BODY REPORTED' : '🚨 EMERGENCY MEETING', b ? `${sbName(g.meet.by, g)} found ${sbName(b, g)}.` : `${sbName(g.meet.by, g)} pressed the button.`, '#ffd166', 2600);
-    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); SB.cctv && sbCctv(false);
+    lgSfx('zap'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false);
   }
   function sbOnResult(g){
     const u = g.res.ej;
@@ -34023,7 +34035,7 @@
     sbSplash(g.win === 'bad' ? '🔪 SABOTEURS WIN' : '🎧 CREW WINS', (g.why ? g.why + ' ' : '') + (bad.length ? `Saboteur${bad.length > 1 ? 's' : ''}: ${bad.join(', ')}.` : ''), g.win === 'bad' ? '#ff4d6d' : '#57e1ff', 6000);
     if(mineWon != null){ lgSfx(mineWon ? 'reveal' : 'zap'); lgEmote(mineWon ? '🎉' : '😭'); }
     if(g.pl && g.pl[sbMe()]){ LG.me.f = 0; lgWrite({ f: 0 }); }
-    sbPortalOut(true); SB.mg && sbMgClose(); SB.cctv && sbCctv(false); SB.ghostAt = 0;
+    sbPortalOut(true); sbHideOut(true); SB.mg && sbMgClose(); SB.cctv && sbCctv(false); SB.ghostAt = 0;
   }
   // somebody's won? (anyone in the game can call it; the first one to notice writes it)
   function sbWinCheck(g){
@@ -34051,6 +34063,7 @@
     const g = sbG(); if(!sbIn(g) || !sbBad() || g.st !== 'play' || sbDeadU(sbMe(), g) || SB.inPortal != null) return;
     if(trdNow() - SB.killAt < SB_KILL_CD) return;
     const v = sbNearVictim(g); if(!v){ toast('Get closer to someone first.', 1600); return; }
+    if(SB.hideIn != null) sbHideOut(true);      // (jumping out of a hiding spot)
     SB.killAt = trdNow();
     LG.me.at = trdNow(); LG.me.af = v.x < LG.me.x ? -1 : 1;
     const ok = await sbPatch({ [`sabo/game/dead/${v.u}`]: { t: sbSv(), x: Math.round(v.x), y: Math.round(v.y) } });
@@ -34126,6 +34139,7 @@
   function sbDrawP(g2, o, p, now, me){
     const G = sbG(), ghost = sbIn(G) && sbDeadU(me ? sbMe() : o.u, G);
     if(me && SB.inPortal != null) return;
+    if(me && SB.hideIn != null){ const h = SB_HIDES[SB.hideIn]; if(h){ g2.font = '14px sans-serif'; g2.textAlign = 'center'; g2.fillText('👀', h.x, h.y - h.h / 2 + Math.sin(performance.now() / 300) * 2); g2.textAlign = 'left'; } return; }
     if(ghost){ g2.save(); g2.globalAlpha = .45; lgDrawChar(g2, o, p, now, me); g2.restore(); } else lgDrawChar(g2, o, p, now, me);
   }
   // ----- drawing the game into the lounge -----
@@ -34167,6 +34181,12 @@
       g2.strokeStyle = '#ffd166'; g2.lineWidth = 3; g2.setLineDash([8, 8]); g2.beginPath(); g2.moveTo(d.x - nx * hw, d.y - ny * hw); g2.lineTo(d.x + nx * hw, d.y + ny * hw); g2.stroke(); g2.restore();
     } });
     if(!mine) return;
+    // hiding spots glow for saboteurs (brighter when you're close enough to climb in)
+    if(!cam && sbBad() && G.st === 'play' && !sbDeadU(sbMe(), G)){ const mp = lgPos(LG.me, now);
+      for(const [i, h] of SB_HIDES.entries()){ const d = Math.hypot(h.sx - mp.x, h.sy - mp.y); if(d > 420) continue; const near = d < 70, a = near ? .95 : .5, pulse = 1 + Math.sin(pn / 260 + i) * .5;
+        list.push({ y: h.y + 2, d: () => { g2.save(); g2.globalAlpha = a; g2.shadowColor = '#b48cff'; g2.shadowBlur = 10 + pulse * 6; g2.strokeStyle = '#c9a8ff'; g2.lineWidth = near ? 2.5 : 1.6; g2.setLineDash([6, 4]); g2.lineDashOffset = -pn / 60;
+          roundRectPath(g2, h.x - h.w / 2 - 3, h.y - h.h - 3, h.w + 6, h.h + 6, 6); g2.stroke(); g2.restore();
+          if(near && SB.hideIn !== i){ g2.font = "800 10px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#e8dcff'; g2.fillText('🫥 click to hide', h.x, h.y - h.h - 9); g2.textAlign = 'left'; } } }); } }
     // my tasks: a yellow ! over each one not done yet
     const done = (G.tasks || {})[sbMe()] || {};
     if(G.st === 'play') for(const t of sbMyTasks(G)) if(!done[t.k]){ const b = Math.sin(pn / 250) * 3; g2.font = "900 18px 'Inter',sans-serif"; g2.textAlign = 'center'; g2.fillStyle = '#000'; g2.fillText('!', t.x + 1, t.y - 31 + b); g2.fillStyle = '#ffd166'; g2.fillText('!', t.x, t.y - 32 + b); g2.font = '13px sans-serif'; g2.fillText(t.em, t.x, t.y - 8); g2.textAlign = 'left'; }
@@ -34214,6 +34234,7 @@
       else if(a === 'kill') sbKill(); else if(a === 'use') sbUse(); else if(a === 'report'){ const bd = sbNearBody(); if(bd) sbMeeting(bd.u); }
       else if(a === 'lights') sbSabotage('lights'); else if(a === 'melt') sbSabotage('melt'); else if(a === 'gates'){ SB.gatePick = !SB.gatePick; sbHud(true); }
       else if(a === 'gate') sbGate(b.dataset.r); else if(a === 'portal') sbPortalIn(); else if(a === 'vote') sbVote(b.dataset.u);
+      else if(a === 'hide'){ const i = sbNearHide(); if(i >= 0) sbHideIn(i); } else if(a === 'unhide') sbHideOut();
       else if(a === 'pgo') sbPortalGo(+b.dataset.i); else if(a === 'pout') sbPortalOut(); else if(a === 'cctvx') sbCctv(false);
     });
     h.addEventListener('pointerover', (e) => { const b = e.target.closest('[data-sb="pgo"]'); if(b) sbPortalPeek(+b.dataset.i); });
@@ -34265,6 +34286,7 @@
           html += btn('melt', sabCd > 0 || G.sab ? `☢️ ${G.sab ? '…' : Math.ceil(sabCd / 1000)}` : '☢️ Meltdown', sabCd <= 0 && !G.sab);
           html += btn('gates', `🚪 Gates ${SB_GATES - used}`, used < SB_GATES);
           if(portal >= 0) html += btn('portal', '🌀 Portal', true);
+          if(SB.hideIn != null) html += btn('unhide', '🚪 Come out', true); else { const hi = sbNearHide(); if(hi >= 0) html += btn('hide', `🫥 Hide (${SB_HIDES[hi].n})`, true); }
         }
         if(SB.gatePick && bad) html = `<div class="sb-gates"><b>Close a room's gates (${SB_GATES - used} left)</b>${LG_ROOMS.filter(r => !r.vip).map(r => `<button type="button" data-sb="gate" data-r="${r.id}">${escapeHtml(r.name.replace(/^.*· /, ''))}</button>`).join('')}</div>` + html;
         if(acts.dataset.k !== html){ acts.dataset.k = html; acts.innerHTML = html; }
@@ -34286,6 +34308,18 @@
     if(SB.splash && pn - SB.splash.at < SB.splash.ms){ sp.hidden = false; sp.style.setProperty('--c', SB.splash.c); sp.querySelector('b').textContent = SB.splash.t; sp.querySelector('span').textContent = SB.splash.s || ''; } else sp.hidden = true;
   }
 
+  // ----- hiding (saboteurs): in a locker, a coffin, a crate… nobody sees you; jump out to kill or just walk away -----
+  function sbNearHide(){ const now = trdNow(), me = lgPos(LG.me, now); let best = -1, bd = 70; SB_HIDES.forEach((h, i) => { const d = Math.hypot(h.sx - me.x, h.sy - me.y); if(d < bd){ bd = d; best = i; } }); return best; }
+  function sbHideIn(i){
+    const G = sbG(); if(!sbIn(G) || !sbBad() || G.st !== 'play' || sbDeadU(sbMe(), G) || SB.inPortal != null) return;
+    const h = SB_HIDES[i]; if(!h) return;
+    const now = trdNow(); Object.assign(LG.me, { x: h.sx, y: h.sy, tx: h.sx, ty: h.sy, p: '', t: now }); LG.pend = null;
+    SB.hideIn = i; LG.me.hv = -1; lgWrite(Object.assign(lgFull(), { hv: -1 })); lgSfx('bubble');
+    sbHud(true);
+  }
+  function sbHideOut(silent){
+    if(SB.hideIn == null) return; SB.hideIn = null; LG.me.hv = null; lgWrite({ hv: null }); if(!silent) lgSfx('bubble'); sbHud(true);
+  }
   // ----- portals: you vanish into another dimension, hover a portal to peek out of it, click to come out there -----
   function sbPortalIn(){
     const i = sbNearPortal(); if(i < 0 || !sbBad()) return;
@@ -34517,6 +34551,7 @@
         if(G.st === 'meet') sbMeetTick(G);
       }
       if(!sbIn(G) && SB.inPortal != null) sbPortalOut(true);
+      if(SB.hideIn != null && (!sbIn(G) || G.st !== 'play')) sbHideOut(true);
       sbHud(false);
       sbGhostSync();
     }catch(e){ console.warn(e); }
@@ -34577,6 +34612,7 @@
     const k = LG.pend; LG.pend = null;
     if(k && k.startsWith('g:')){ lgPlay(k.slice(2)); return; }
     if(k === 'studio'){ if(sbIn()) sbCctv(true); else dashOpen(); return; }
+    if(k && k.startsWith('sbhide:')){ sbHideIn(+k.slice(7)); return; }
     if(!lgIsUser() && (k === 'vend' || k === 'juke')){ lgNeedLogin(); return; }
     if(k === 'rpsface'){ const q = (LG.rpsAll || new Map()).get(LG.rpsFace); if(q){ const now = trdNow(), cur = lgPos(LG.me, now), qp = lgShown(q, now), dir = qp.x < cur.x ? -1 : 1; if((cur.face || LG.lastFace) !== dir){ Object.assign(LG.me, { x: Math.round(cur.x), y: Math.round(cur.y), tx: Math.round(cur.x + dir * 3), ty: Math.round(cur.y), p: '', t: now }); lgWrite(lgFull()); } LG.lastFace = dir; } return; }
     if(k === 'lights'){ lgLights(); return; }
