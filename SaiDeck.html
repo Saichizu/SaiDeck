@@ -23494,7 +23494,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 239;                 // ← goes up by one with every published version
+  const SD_BUILD = 240;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -34167,10 +34167,52 @@
     if(g.host !== sbMe() && trdNow() - (g.meet.t || 0) <= SB_HOSTWAIT) return;
     if(await sbPatch({ 'sabo/game/meet/v': sbSv() })) sbSfx('alarm');
   }
+  // the meeting call: a big alarm across the screen, then everyone's pulled into the Great Hall
+  function sbMeetAnim(g){
+    const b = g.meet.b, by = sbName(g.meet.by, g), bc = b ? (((g.pl || {})[b] || {}).c | 0) : 0, vsp = lgChar(bc);
+    sbSfx('meeting'); if(b) setTimeout(() => sbSfx('bodyhit'), 120);
+    SB.meetAnimUntil = performance.now() + 2600;
+    sbCutscene('sb-meetcut', 2600, (g2, W, H, t) => {
+      const fade = t < .12 ? t / .12 : t > 2.25 ? Math.max(0, (2.6 - t) / .35) : 1, pulse = .5 + .5 * Math.sin(t * 16);
+      g2.globalAlpha = fade;
+      const bg = g2.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, Math.max(W, H) * .75); bg.addColorStop(0, `rgba(${150 + pulse * 70},10,25,.96)`); bg.addColorStop(1, 'rgba(20,0,6,.98)'); g2.fillStyle = bg; g2.fillRect(0, 0, W, H);
+      // hazard stripes sliding across the top and bottom
+      const sh = Math.min(46, H * .07); for(const y of [H * .1, H * .9 - sh]){ g2.save(); g2.beginPath(); g2.rect(0, y, W, sh); g2.clip(); g2.fillStyle = '#ffd166'; g2.fillRect(0, y, W, sh); g2.fillStyle = '#1a0a0e'; const off = (t * 220) % (sh * 2);
+        for(let x = -sh * 2 + (y < H / 2 ? off : -off); x < W + sh * 2; x += sh * 2){ g2.beginPath(); g2.moveTo(x, y + sh); g2.lineTo(x + sh, y); g2.lineTo(x + sh * 2, y); g2.lineTo(x + sh, y + sh); g2.closePath(); g2.fill(); } g2.restore(); }
+      // spinning siren light beams
+      g2.save(); g2.translate(W / 2, H * .44); g2.rotate(t * 5); g2.globalCompositeOperation = 'lighter';
+      for(let k = 0; k < 2; k++){ g2.rotate(Math.PI); const gr = g2.createLinearGradient(0, 0, Math.max(W, H), 0); gr.addColorStop(0, 'rgba(255,60,60,.5)'); gr.addColorStop(1, 'rgba(255,60,60,0)'); g2.fillStyle = gr; g2.beginPath(); g2.moveTo(0, 0); g2.lineTo(Math.max(W, H), -H * .25); g2.lineTo(Math.max(W, H), H * .25); g2.closePath(); g2.fill(); }
+      g2.restore(); g2.globalAlpha = fade;
+      const cx = W / 2, cy = H * .44, sc = Math.min(H * .26 / vsp.h, 5);
+      if(b){
+        // the body, lying in a pool
+        const row = vsp.rows.hurt ? 'hurt' : 'idle', fi = (vsp.rows.hurt || vsp.rows.idle)[1] - 1, bx = sbSprBox(bc, row, fi) || { cx: 0, cy: -vsp.h / 2, len: vsp.h, wid: 20 };
+        const pool = Math.min(1, t / .5), L = bx.len * sc; g2.fillStyle = '#5a0010'; g2.beginPath(); g2.ellipse(cx, cy + bx.wid * sc * .3, L * (.35 + pool * .35), L * (.1 + pool * .1), 0, 0, 7); g2.fill();
+        // (lying on its side: rotated a quarter turn, with the middle of the body on the middle of the pool)
+        g2.save(); g2.translate(cx - bx.cy * sc, cy + bx.cx * sc); g2.rotate(-Math.PI / 2); sbSpr(g2, bc, row, fi, 0, 0, sc, 1, fade); g2.restore();
+      } else {
+        // the big red button, being slammed
+        const press = Math.max(0, Math.sin(t * 9)) * 10, R0 = Math.min(W, H) * .13;
+        g2.fillStyle = '#3a2a2a'; g2.beginPath(); g2.ellipse(cx, cy + 22, R0 * 1.25, R0 * .45, 0, 0, 7); g2.fill();
+        g2.fillStyle = '#7a0a14'; g2.beginPath(); g2.ellipse(cx, cy + 8 + press, R0, R0 * .38, 0, 0, 7); g2.fill(); g2.fillRect(cx - R0, cy - 6 + press, R0 * 2, 14 - press * .6);
+        g2.fillStyle = `rgb(${220 + pulse * 35},30,40)`; g2.beginPath(); g2.ellipse(cx, cy - 6 + press, R0, R0 * .38, 0, 0, 7); g2.fill();
+        g2.fillStyle = 'rgba(255,255,255,.35)'; g2.beginPath(); g2.ellipse(cx - R0 * .3, cy - 12 + press, R0 * .35, R0 * .1, 0, 0, 7); g2.fill();
+      }
+      // the words slam in
+      const k = Math.min(1, t / .28), zoom = 1 + (1 - k) * 1.6, shake = t < .6 ? Math.sin(t * 90) * (1 - t / .6) * 8 : 0, fs = Math.round(Math.min(64, W / 11));
+      g2.save(); g2.translate(W / 2 + shake, H * .72); g2.scale(zoom, zoom); g2.globalAlpha = fade * k;
+      g2.font = `900 ${fs}px 'Inter',sans-serif`; g2.textAlign = 'center'; g2.lineWidth = 8; g2.strokeStyle = '#1a0006'; const word = b ? 'DEAD BODY REPORTED' : 'EMERGENCY MEETING';
+      g2.strokeText(word, 0, 0); g2.fillStyle = b ? '#ff4d6d' : '#ffd166'; g2.fillText(word, 0, 0); g2.restore();
+      if(t > .4){ g2.globalAlpha = fade * Math.min(1, (t - .4) / .3); g2.font = `700 ${Math.round(Math.min(22, W / 34))}px 'Inter',sans-serif`; g2.textAlign = 'center'; g2.fillStyle = '#fff';
+        g2.fillText(b ? `${by} found ${sbName(b, g)}` : `${by} called a meeting`, W / 2, H * .72 + fs * .75); }
+      g2.globalAlpha = 1;
+    });
+  }
   function sbOnMeeting(g){
-    const [x, y] = sbHallSpot(g); sbTeleport(x, y);
+    sbMeetAnim(g); const n = g.meet.n;
+    setTimeout(() => { const G = sbG(); if(G && G.st === 'meet' && G.meet && G.meet.n === n){ const [x, y] = sbHallSpot(G); sbTeleport(x, y); } }, 2300);
     const b = g.meet.b; SB.voted = '';
-    sbSfx(b ? 'body' : 'alarm'); SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false); SB.smap && sbSabMap(false);
+    SB.mg && sbMgClose(); sbPortalOut(true); sbHideOut(true); SB.cctv && sbCctv(false); SB.smap && sbSabMap(false);
   }
   function sbOnResult(g){
     const u = g.res.ej;
@@ -34493,7 +34535,7 @@
     al.hidden = !ah; al.className = 'sb-alert' + (ak ? ' ' + ak : ''); if(al.dataset.k !== ah){ al.dataset.k = ah; al.innerHTML = ah; }
     // meetings are a panel
     // meetings: a panel at the top (the hall stays in view). Talk as long as you like → the host opens the vote (40s) → everyone sees who voted who
-    const mt = h.querySelector('.sb-meet'); mt.hidden = !(mine && G.st === 'meet' && G.meet);
+    const mt = h.querySelector('.sb-meet'); mt.hidden = !(mine && G.st === 'meet' && G.meet) || pn < (SB.meetAnimUntil || 0);
     if(!mt.hidden){
       const alive = sbAlive(G), dead = sbDeadU(me, G), vAt = G.meet.v || 0, rAt = G.meet.r || 0, voting = !!vAt && !rAt, left = vAt ? Math.max(0, vAt + SB_VOTE - now) : 0;
       const ids = Object.keys(G.pl || {}).sort((a, b) => (G.pl[a].j || 0) - (G.pl[b].j || 0)), votes = G.votes || {};
@@ -34726,6 +34768,8 @@
         case 'start_bad': tone('sawtooth', 110, 0, .9, .3, 55); tone('square', 220, 0, .5, .12, 110); noise(0, .35, .2, 600); tone('sawtooth', 82, .45, 1.1, .25, 41); break;
         case 'start_good': [523, 659, 784, 1047].forEach((f, i) => tone('triangle', f, i * .09, .7, .22)); break;
         case 'alarm': for(let i = 0; i < 6; i++) tone('square', i % 2 ? 660 : 880, i * .18, .16, .18); break;
+        case 'meeting': for(let i = 0; i < 4; i++){ tone('sawtooth', 520, i * .55, .5, .42, 1150); tone('square', 260, i * .55, .5, .2, 575); } noise(0, .25, .35, 400); tone('sine', 70, 0, .6, .5, 40); break;
+        case 'bodyhit': tone('sawtooth', 98, 0, 1.4, .45, 49); tone('sawtooth', 104, 0, 1.4, .3, 52); noise(0, .6, .45, 300); tone('square', 1400, .05, .5, .12, 300); break;
         case 'body': tone('sawtooth', 196, 0, 1, .32, 98); tone('sawtooth', 207, 0, 1, .2, 104); noise(0, .5, .25, 900); break;
         case 'vote': tone('triangle', 660, 0, .09, .3); tone('triangle', 990, .05, .09, .2); break;
         case 'slash': noise(0, .2, .45, 2500); tone('sawtooth', 1200, 0, .18, .2, 180); break;
@@ -34746,6 +34790,16 @@
     const spr = lgChar(c); if(!spr || !spr.im.complete || !spr.im.naturalWidth) return;
     const [ri, n] = spr.rows[row] || spr.rows.idle; g2.save(); g2.imageSmoothingEnabled = false; g2.globalAlpha = alpha == null ? 1 : alpha; g2.translate(x, y); if(face < 0) g2.scale(-1, 1);
     g2.drawImage(spr.im, (Math.max(0, Math.min(n - 1, fi | 0))) * spr.w, ri * spr.h, spr.w, spr.h, -spr.ax * sc, -spr.h * sc, spr.w * sc, spr.h * sc); g2.restore();
+  }
+  // the visible part of one sprite frame (sprite pixels, relative to the feet anchor) — so a lying body can be centred on its pool
+  function sbSprBox(c, row, fi){
+    const spr = lgChar(c); if(!spr || !spr.im.complete || !spr.im.naturalWidth) return null;
+    const [ri, n] = spr.rows[row] || spr.rows.idle; fi = Math.max(0, Math.min(n - 1, fi | 0));
+    const key = row + ':' + fi; spr.box = spr.box || {}; if(spr.box[key]) return spr.box[key];
+    const cv = document.createElement('canvas'); cv.width = spr.w; cv.height = spr.h; const x = cv.getContext('2d'); x.drawImage(spr.im, fi * spr.w, ri * spr.h, spr.w, spr.h, 0, 0, spr.w, spr.h);
+    let x0 = spr.w, y0 = spr.h, x1 = 0, y1 = 0; try{ const d = x.getImageData(0, 0, spr.w, spr.h).data; for(let j = 0; j < spr.h; j++) for(let i = 0; i < spr.w; i++) if(d[(j * spr.w + i) * 4 + 3] > 40){ if(i < x0) x0 = i; if(i > x1) x1 = i; if(j < y0) y0 = j; if(j > y1) y1 = j; } }catch(e){ return null; }
+    if(x1 < x0) return null;
+    return (spr.box[key] = { cx: (x0 + x1) / 2 - spr.ax, cy: (y0 + y1) / 2 - spr.h, len: y1 - y0, wid: x1 - x0 });
   }
   function sbCutscene(cls, ms, draw, after){
     const st = LG.win && LG.win.querySelector('.lg-stage'); if(!st) return;
