@@ -23503,7 +23503,7 @@
   // is in: the project folder if that's where it is, otherwise you pick it
   // once and it's remembered.
   // =====================================================================
-  const SD_BUILD = 246;                 // ← goes up by one with every published version
+  const SD_BUILD = 247;                 // ← goes up by one with every published version
   const SD_VERSION_NAME = 'V18';
   const SD_REPO = 'Saichizu/SaiDeck';
   const SD_RAW = `https://raw.githubusercontent.com/${SD_REPO}/main/`;
@@ -28203,7 +28203,17 @@
   // trade/p/<uid> = positions (c = what all your shares cost, g = what you got back — all-time). -----
   const TRD = { on: false, win: null, r: null, h: {}, p: {}, f: {}, live: {}, poll: 0, busy: false, hbAt: 0, drawKey: '', lastP: 0, noteAt: 0, woke: false };
   const TRD_ID = 'M1', TRD_SYM = '$CRDA', TRD_CO = 'Cardiastra Inc.', TRD_WIN = 480, TRD_TICK = 2000, TRD_OFF = 60000;      // (TRD_OFF: while nobody has the market open it still moves, a tick a minute — rules 33)      // (a tick every 2 s; the chart keeps the last 16 min)
-  const trdNow = () => Date.now() + ((typeof PRES !== 'undefined' && PRES.offset) || 0);
+  // The shared clock everyone's movement is worked out from. It used to jump straight to every new server-time estimate,
+  // and on a jittery connection those estimates swing by a second or more — when the clock jumped BACK, every character
+  // stood frozen until it caught up. Now small corrections are eased in (the clock runs at most 10% fast/slow while it
+  // adjusts), so lounge time never goes backwards; only a big real difference (> 5 s) is applied at once.
+  let TRD_O = null, TRD_LR = 0, TRD_LAST = 0;
+  const trdNow = () => {
+    const r = Date.now(), tgt = (typeof PRES !== 'undefined' && PRES.offset) || 0;
+    if(TRD_O === null || Math.abs(tgt - TRD_O) > 5000) TRD_O = tgt;
+    else if(tgt !== TRD_O){ const dt = Math.max(0, Math.min(1000, r - TRD_LR)), step = dt * .1, d = tgt - TRD_O; TRD_O += Math.abs(d) <= step ? d : Math.sign(d) * step; }
+    TRD_LR = r; let t = r + TRD_O; if(t < TRD_LAST && TRD_LAST - t < 5000) t = TRD_LAST; TRD_LAST = t; return t;
+  };
   const trdK = (v) => { v = Math.round(v); const a = Math.abs(v); return a >= 1e12 ? (v / 1e12).toFixed(1) + 'T' : a >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : a >= 1e4 ? (v / 1e3).toFixed(1) + 'K' : v.toLocaleString(); };
   const trdSg = (v) => (v >= 0 ? '+' : '−') + trdK(Math.abs(v));
   // the next price (the same sums as the rules — whole numbers only)
@@ -37025,6 +37035,15 @@
   function presGame(){ try{ return TDG.on ? 'td' : TRD.on ? 'trd' : CF.on ? 'cf' : BJ.on ? 'bj' : CAS.on ? 'slots' : ''; }catch(e){ return ''; } }
   let presGameWas = '';
   setInterval(() => { const g = presGame(); if(g !== presGameWas){ presGameWas = g; if(chatName()) presBeat(); } }, 1500);
+  // server time: the server stamped somewhere between sending and receiving, so use the middle of the round trip — and
+  // trust the quickest round trips most (a slow reply's middle is a poor guess)
+  function presClock(srv, t0, t1){
+    const rtt = Math.max(0, t1 - t0), est = srv - (t0 + t1) / 2, P = PRES, now = Date.now();
+    if(P.clkRtt == null || rtt <= P.clkRtt * 1.5 + 40 || now - (P.clkAt || 0) > 300000){
+      if(P.clkRtt == null || rtt < P.clkRtt || now - (P.clkAt || 0) > 300000){ P.clkRtt = rtt; P.clkAt = now; }
+      P.offset = P.offset == null || P.clkN == null ? est : Math.round(P.offset * .6 + est * .4); P.clkN = (P.clkN || 0) + 1;
+    }
+  }
   async function presBeat(){
     const name = chatName();
     if(!name) return;
@@ -37034,8 +37053,8 @@
       const gone = document.visibilityState !== 'visible' && PRES.hidAt && Date.now() - PRES.hidAt > 300000;
       if((!chatVisible() && !presGame()) || chatBadName(name) || gone){ await fetch(presUrl(uid, tok), { method: 'DELETE' }); return; }
       const body = { n: name.slice(0, CHAT_NAME_MAX), t: { '.sv': 'timestamp' } }; const g = presGame(); if(g) body.g = g; if(!chatFxOn()) body.x = false; if(!chatInfOn()) body.i = false; if(PRES.away) body.w = true; if(document.visibilityState !== 'visible' || !document.hasFocus()) body.h = true;
-      const r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
-      if(r.ok){ const d = await r.json().catch(() => null); if(d && typeof d.t === 'number') PRES.offset = d.t - Date.now(); }
+      const t0 = Date.now(), r = await fetch(presUrl(uid, tok), { method: 'PUT', body: JSON.stringify(body) });
+      if(r.ok){ const d = await r.json().catch(() => null), t1 = Date.now(); if(d && typeof d.t === 'number') presClock(d.t, t0, t1); }
       if(CHAT_AUTH.uid && CHAT._setupAv) CHAT._setupAv();
     }catch(e){}
   }
